@@ -17,3 +17,62 @@ Based on the dishes pre-ordered on foodprint, food and beverage establishments w
 
 foodprint will also implement a loyalty system, where customers who regularly attend their foodprint reservations without fail will be able to net additional discounts throughout the platform. In addition to the payment deposit system, this helps to mitigate the risk of customers who may end up being no-shows.
 
+# Getting Started
+
+## Installing Maven
+
+Maven can be installed by running the following commands while in the directory of the project.
+
+Windows
+```
+.\mvnw.cmd install
+```
+
+macOS
+```
+chmod +x mvnw
+./mvnw install
+```
+
+## Running the Project
+
+Project can be executed by using VSC or by running the following commands while in the directory of the project.
+
+Windows
+```
+.\mvnw.cmd spring-boot:run
+```
+
+macOS
+```
+./mvnw spring-boot:run
+```
+
+## Reference Documentation
+For further reference, please consider the following sections:
+
+* [Official Apache Maven documentation](https://maven.apache.org/guides/index.html)
+* [Spring Boot Maven Plugin Reference Guide](https://docs.spring.io/spring-boot/docs/2.5.4/maven-plugin/reference/html/)
+* [Create an OCI image](https://docs.spring.io/spring-boot/docs/2.5.4/maven-plugin/reference/html/#build-image)
+* [Spring Web](https://docs.spring.io/spring-boot/docs/2.5.4/reference/htmlsingle/#boot-features-developing-web-applications)
+* [Spring Boot DevTools](https://docs.spring.io/spring-boot/docs/2.5.4/reference/htmlsingle/#using-boot-devtools)
+* [Spring Security](https://docs.spring.io/spring-boot/docs/2.5.4/reference/htmlsingle/#boot-features-security)
+* [Spring Data JPA](https://docs.spring.io/spring-boot/docs/2.5.4/reference/htmlsingle/#boot-features-jpa-and-spring-data)
+* [Spring Boot Actuator](https://docs.spring.io/spring-boot/docs/2.5.4/reference/htmlsingle/#production-ready)
+* [Java Mail Sender](https://docs.spring.io/spring-boot/docs/2.5.4/reference/htmlsingle/#boot-features-email)
+
+## Guides
+The following guides illustrate how to use some features concretely:
+
+* [Building a RESTful Web Service](https://spring.io/guides/gs/rest-service/)
+* [Serving Web Content with Spring MVC](https://spring.io/guides/gs/serving-web-content/)
+* [Building REST services with Spring](https://spring.io/guides/tutorials/bookmarks/)
+* [Securing a Web Application](https://spring.io/guides/gs/securing-web/)
+* [Spring Boot and OAuth2](https://spring.io/guides/tutorials/spring-boot-oauth2/)
+* [Authenticating a User with LDAP](https://spring.io/guides/gs/authenticating-ldap/)
+* [Accessing Data with JPA](https://spring.io/guides/gs/accessing-data-jpa/)
+* [Building a RESTful Web Service with Spring Boot Actuator](https://spring.io/guides/gs/actuator-service/)
+* [Accessing data with MySQL](https://spring.io/guides/gs/accessing-data-mysql/)
+
+
+
