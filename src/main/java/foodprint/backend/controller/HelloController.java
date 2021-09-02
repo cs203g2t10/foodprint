@@ -1,17 +1,31 @@
 package foodprint.backend.controller;
 
-import org.springframework.ui.Model;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
+
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import foodprint.backend.model.User;
+
+// REST OpenAPI Swagger - http://localhost:8080/foodprint-swagger.html
 
 @RestController
 public class HelloController {
 
-	// DEMO Below
-	// This mapping can be accessed from your browser at http://localhost:8080/hello
     @GetMapping({"/hello"})
-	public String hello(Model model) {
-		return "hello world!"; 
+	public Map<String, String> hello(@RequestParam Optional<String> echoString) {
+		if (echoString.isPresent()) {
+			return Collections.singletonMap("response", "Hello " + echoString.get());
+		}
+		return Collections.singletonMap("response", "Hello World!"); 
+	}
+
+	@GetMapping({"/helloUser"})
+	public User helloUser() {
+		return new User("abc@def.com", "123123123", "Bob");
 	}
 
 }
