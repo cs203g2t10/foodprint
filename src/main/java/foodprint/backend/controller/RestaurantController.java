@@ -2,6 +2,7 @@ package foodprint.backend.controller;
 
 import java.util.Optional;
 import java.util.List;
+import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,7 +14,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.RestaurantRepo;
@@ -70,7 +75,7 @@ public class RestaurantController {
         currentRestaurant.setRestaurantName(updatedRestaurant.getRestaurantName());
         currentRestaurant.setRestaurantLocation(updatedRestaurant.getRestaurantLocation());
         currentRestaurant.setPicturesPath(updatedRestaurant.getPicturesPath());
-        currentRestaurant = repo.save(currentRestaurant);
+        currentRestaurant = repo.saveAndFlush(currentRestaurant);
         return new ResponseEntity<>(currentRestaurant, HttpStatus.OK);
     }
 
@@ -92,5 +97,25 @@ public class RestaurantController {
         
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @GetMapping(value = "search", produces = "application/json")
+	public List<Restaurant> search(@RequestParam("q") String query) {
+		
+		List<Restaurant> searchResult = repo.findByRestaurantNameContains(query);
+
+		List<Restaurant> results = new ArrayList<Restaurant>();
+
+		for (Restaurant restaurant : searchResult) {
+			if (restaurant.getRestaurantName().toLowerCase().contains(query.toLowerCase())) {
+				results.add(new Restaurant( restaurant.getRestaurantId(), restaurant.getRestaurantName(), restaurant.getRestaurantLocation()));
+			}
+		}
+
+        // Pagination 
+        Sort sorting = Sort.by(Sort.Direction.ASC, "restaurantName");
+        Page<Restaurant> page = repo.findAll(PageRequest.of(0, 1, Sort.by(Sort.Direction.ASC, "restaurantName")));
+        return results;
+    }
+
 
 }

@@ -1,6 +1,9 @@
 package foodprint.backend.model;
 
 
+import java.util.Arrays;
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -63,11 +66,14 @@ public class Restaurant {
         this.restaurantDesc = restaurantDesc;
     }
 
-    public String getPicturesPath() {
-        return this.picturesPath;
+    public List<String> getPicturesPath() {
+        String[] arr = picturesPath.split(",");
+        List<String> list = Arrays.asList(arr);
+        return list;
     }
 
-    public void setPicturesPath(String picturesPath) {
+    public void setPicturesPath(List<String> list) {
+        String picturesPath = String.join(",", list);
         this.picturesPath = picturesPath;
     }
 
