@@ -1,6 +1,5 @@
 package foodprint.backend.model;
 
-import java.util.Collection;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,8 +9,6 @@ import javax.persistence.Id;
 
 import javax.persistence.Table;
 
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 
@@ -21,6 +18,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 public class Restaurant {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "restaurantId")
     private Integer restaurantId;
 
@@ -36,6 +34,7 @@ public class Restaurant {
     @Column (name = "restaurantLocation")
     private String restaurantLocation;
 
+    protected Restaurant () { }
 
     public Restaurant (Integer restaurantId, String restaurantName, String restaurantLocation) {
         this.restaurantId = restaurantId;
@@ -44,12 +43,40 @@ public class Restaurant {
     }
 
     // Mutators and Accessors
-    public void setDesc (String desc) {
-        this.restaurantDesc = desc;
+    public Integer getRestaurantId() {
+        return this.restaurantId;
     }
 
-    public void setPicturePaths(String path) {
-        this.picturesPath = path;
+    public String getRestaurantName() {
+        return this.restaurantName;
+    }
+
+    public void setRestaurantName(String restaurantName) {
+        this.restaurantName = restaurantName;
+    }
+
+    public String getRestaurantDesc() {
+        return this.restaurantDesc;
+    }
+
+    public void setRestaurantDesc(String restaurantDesc) {
+        this.restaurantDesc = restaurantDesc;
+    }
+
+    public String getPicturesPath() {
+        return this.picturesPath;
+    }
+
+    public void setPicturesPath(String picturesPath) {
+        this.picturesPath = picturesPath;
+    }
+
+    public String getRestaurantLocation() {
+        return this.restaurantLocation;
+    }
+
+    public void setRestaurantLocation(String restaurantLocation) {
+        this.restaurantLocation = restaurantLocation;
     }
 
 }

@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -13,6 +14,7 @@ import foodprint.backend.model.User;
 // REST OpenAPI Swagger - http://localhost:8080/foodprint-swagger.html
 
 @RestController
+@RequestMapping("/api/v1/hello")
 public class HelloController {
 
     @GetMapping({"/hello"})
