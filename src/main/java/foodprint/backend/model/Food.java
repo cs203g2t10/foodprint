@@ -42,11 +42,11 @@ public class Food {
     private Double foodPrice;
 
     @Column(name = "foodDiscount")
-    private Integer foodDiscount;
+    private Double foodDiscount;
 
     public Food() {}
 
-    public Food(Integer foodId, String foodName, Double foodPrice, Integer foodDiscount) {
+    public Food(Integer foodId, String foodName, Double foodPrice, Double foodDiscount) {
         this.foodId = foodId;
         this.foodName = foodName;
         this.foodPrice = foodPrice;
@@ -104,11 +104,11 @@ public class Food {
         this.foodPrice = foodPrice;
     }
 
-    public Integer getFoodDiscount() {
+    public Double getFoodDiscount() {
         return this.foodDiscount;
     }
 
-    public void setFoodDiscount(Integer foodDiscount) {
+    public void setFoodDiscount(Double foodDiscount) {
         this.foodDiscount = foodDiscount;
     }
 
