@@ -57,10 +57,6 @@ public class Food {
         return this.foodId;
     }
 
-    public void setFoodId(Integer foodId) {
-        this.foodId = foodId;
-    }
-
     public String getFoodName() {
         return this.foodName;
     }
