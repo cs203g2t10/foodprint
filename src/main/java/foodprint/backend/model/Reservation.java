@@ -3,11 +3,15 @@ package foodprint.backend.model;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -24,7 +28,8 @@ public class Reservation {
     @Column(name = "reservationId")
     private Integer reservationId;
 
-    @Column(name = "user")
+    @ManyToOne(cascade=CascadeType.MERGE)
+    @JoinColumn(name = "user")
     private User user;
 
     @Column(name = "date")
@@ -45,13 +50,14 @@ public class Reservation {
     @Column(name = "status")
     private Status status;
 
-    @Column(name = "order")
-    private List<Food> order;
+    @OneToMany(cascade=CascadeType.MERGE)
+    @Column(name="lineItems")
+    private List<LineItem> lineItems;
 
     //Constructors
     public Reservation() {}
 
-    public Reservation(Integer reservationId, User user, Date date, Integer pax, Boolean isVaccinated, Date reservedOn, Status status, List<Food> order) {
+    public Reservation(Integer reservationId, User user, Date date, Integer pax, Boolean isVaccinated, Date reservedOn, Status status, List<LineItem> lineItems) {
         this.reservationId = reservationId;
         this.user = user;
         this.date = date;
@@ -59,7 +65,7 @@ public class Reservation {
         this.isVaccinated = isVaccinated;
         this.reservedOn = reservedOn;
         this.status = status;
-        this.order = order;
+        this.lineItems = lineItems;
     }
 
 
@@ -94,7 +100,7 @@ public class Reservation {
     public void setPax(Integer pax) {
         this.pax = pax;
     }
-    
+
     public Boolean getIsVaccinated() {
         return this.isVaccinated;
     }
@@ -119,12 +125,12 @@ public class Reservation {
         this.status = status;
     }
 
-    public List<Food> getOrder() {
-        return this.order;
+    public List<LineItem> getLineItems() {
+        return this.lineItems;
     }
 
-    public void setOrder(List<Food> order) {
-        this.order = order;
+    public void setLineItems(List<LineItem> lineItems) {
+        this.lineItems = lineItems;
     }
 
 }
