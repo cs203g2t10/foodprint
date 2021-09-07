@@ -74,6 +74,7 @@ public class RestaurantController {
         currentRestaurant.setRestaurantName(updatedRestaurant.getRestaurantName());
         currentRestaurant.setRestaurantLocation(updatedRestaurant.getRestaurantLocation());
         currentRestaurant.setPicturesPath(updatedRestaurant.getPicturesPath());
+        currentRestaurant.setMaxReservationSlots(updatedRestaurant.getMaxReservationSlots());
         currentRestaurant = repo.saveAndFlush(currentRestaurant);
         return new ResponseEntity<>(currentRestaurant, HttpStatus.OK);
     }

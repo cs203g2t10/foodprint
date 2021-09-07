@@ -54,10 +54,14 @@ public class Reservation {
     @Column(name="lineItems")
     private List<LineItem> lineItems;
 
+    @ManyToOne(cascade=CascadeType.MERGE)
+    @JoinColumn(name="restaurantId")
+    private Restaurant restaurant;
+
     //Constructors
     public Reservation() {}
 
-    public Reservation(Integer reservationId, User user, Date date, Integer pax, Boolean isVaccinated, Date reservedOn, Status status, List<LineItem> lineItems) {
+    public Reservation(Integer reservationId, User user, Date date, Integer pax, Boolean isVaccinated, Date reservedOn, Status status, List<LineItem> lineItems, Restaurant restaurant) {
         this.reservationId = reservationId;
         this.user = user;
         this.date = date;
@@ -66,6 +70,7 @@ public class Reservation {
         this.reservedOn = reservedOn;
         this.status = status;
         this.lineItems = lineItems;
+        this.restaurant = restaurant;
     }
 
 
@@ -131,6 +136,14 @@ public class Reservation {
 
     public void setLineItems(List<LineItem> lineItems) {
         this.lineItems = lineItems;
+    }
+
+    public Restaurant getRestaurant() {
+        return this.restaurant;
+    }
+
+    public void setRestaurant(Restaurant restaurant) {
+        this.restaurant = restaurant;
     }
 
 }

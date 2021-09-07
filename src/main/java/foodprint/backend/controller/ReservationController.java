@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import foodprint.backend.model.Reservation;
 import foodprint.backend.model.ReservationRepo;
+import foodprint.backend.model.Restaurant;
 
 @RestController
 @RequestMapping("/api/v1/reservation")
@@ -32,7 +33,7 @@ public class ReservationController {
 
     //get reservation by id
     @GetMapping({"/id/{reservationId}"})
-    public ResponseEntity<Reservation> getReservation(@PathVariable("resrvationId") Integer id) {
+    public ResponseEntity<Reservation> getReservation(@PathVariable("reservationId") Integer id) {
         Optional<Reservation> reservation = reservationRepo.findById(id);
         if (reservation.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -53,8 +54,9 @@ public class ReservationController {
     public ResponseEntity<Reservation> createReservation(@RequestBody Reservation reservation) {
         Date date = reservation.getDate();
         List<Reservation> reservationList = reservationRepo.findByDate(date);
+        Restaurant restaurantReservation = reservation.getRestaurant();
         //TODO find by timing and allow change of maximum capacity
-        if (reservationList.size() < 15) { 
+        if (reservationList.size() < restaurantReservation.getMaxReservationSlots()) { 
             var savedReservation = reservationRepo.saveAndFlush(reservation);
             return new ResponseEntity<>(savedReservation, HttpStatus.CREATED);
         } else {
@@ -84,7 +86,7 @@ public class ReservationController {
 
    //delete reservation
    @DeleteMapping({"/id/{reservationId}"})
-    public ResponseEntity<Reservation> deleteFood(@PathVariable("reservationId") Integer id) {
+    public ResponseEntity<Reservation> deleteReservation(@PathVariable("reservationId") Integer id) {
         var reservation = reservationRepo.findById(id);
         
         if (reservation.isPresent()) {

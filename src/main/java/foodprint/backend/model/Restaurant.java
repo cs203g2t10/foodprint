@@ -37,6 +37,9 @@ public class Restaurant {
     @Column (name = "restaurantLocation")
     private String restaurantLocation;
 
+    @Column (name = "maxReservationSlots")
+    private Integer maxReservationSlots;
+
     protected Restaurant () { }
 
     public Restaurant (Integer restaurantId, String restaurantName, String restaurantLocation) {
@@ -91,4 +94,11 @@ public class Restaurant {
         this.restaurantLocation = restaurantLocation;
     }
 
+    public Integer getMaxReservationSlots() {
+        return this.maxReservationSlots;
+    }
+
+    public void setMaxReservationSlots(Integer maxReservationSlots) {
+        this.maxReservationSlots = maxReservationSlots;
+    }
 }
