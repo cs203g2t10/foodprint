@@ -2,7 +2,6 @@ package foodprint.backend.controller;
 
 import java.util.Optional;
 import java.util.List;
-import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 
 import foodprint.backend.model.Food;
@@ -98,21 +97,12 @@ public class FoodController {
     }
 
     @GetMapping(value = "search", produces = "application/json")
-	public List<Food> searchFood(@RequestParam("q") String query) {
-		
-		List<Food> searchResult = repo.findByFoodNameContains(query);
+    public Page<Food> searchFood(@RequestParam("q") String query, @RequestParam(defaultValue = "1") int pageNum) {
+        Pageable pages = PageRequest.of(pageNum - 1, 5); 
 
-		List<Food> results = new ArrayList<Food>();
+        //Pagination
+        Page<Food> searchResult = repo.findByFoodNameContains(pages, query);
 
-		for (Food food : searchResult) {
-			if (food.getFoodName().toLowerCase().contains(query.toLowerCase())) {
-				results.add(new Food( food.getFoodId(), food.getFoodName(), food.getFoodPrice(), food.getFoodDiscount()));
-			}
-		}
-
-        // Pagination 
-        Sort sorting = Sort.by(Sort.Direction.ASC, "foodName");
-        Page<Food> page = repo.findAll(PageRequest.of(0, 1, Sort.by(Sort.Direction.ASC, "foodName")));
-        return results;
+        return searchResult;
     }
 }

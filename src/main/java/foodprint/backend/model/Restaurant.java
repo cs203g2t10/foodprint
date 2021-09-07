@@ -67,14 +67,20 @@ public class Restaurant {
     }
 
     public List<String> getPicturesPath() {
+        if (picturesPath == null) {
+            return null;
+        }
+
         String[] arr = picturesPath.split(",");
         List<String> list = Arrays.asList(arr);
         return list;
     }
 
     public void setPicturesPath(List<String> list) {
-        String picturesPath = String.join(",", list);
-        this.picturesPath = picturesPath;
+        if (!list.isEmpty()) {
+            String picturesPath = String.join(",", list);
+            this.picturesPath = picturesPath;
+        }
     }
 
     public String getRestaurantLocation() {

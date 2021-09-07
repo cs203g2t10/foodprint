@@ -2,7 +2,6 @@ package foodprint.backend.controller;
 
 import java.util.Optional;
 import java.util.List;
-import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 
 import foodprint.backend.model.Restaurant;
@@ -99,22 +98,13 @@ public class RestaurantController {
     }
 
     @GetMapping(value = "search", produces = "application/json")
-	public List<Restaurant> search(@RequestParam("q") String query) {
-		
-		List<Restaurant> searchResult = repo.findByRestaurantNameContains(query);
-
-		List<Restaurant> results = new ArrayList<Restaurant>();
-
-		for (Restaurant restaurant : searchResult) {
-			if (restaurant.getRestaurantName().toLowerCase().contains(query.toLowerCase())) {
-				results.add(new Restaurant( restaurant.getRestaurantId(), restaurant.getRestaurantName(), restaurant.getRestaurantLocation()));
-			}
-		}
+	public Page<Restaurant> search(@RequestParam("q") String query, @RequestParam(defaultValue = "1") int pageNum) {
+		Pageable pages = PageRequest.of(pageNum - 1, 5); 
 
         // Pagination 
-        Sort sorting = Sort.by(Sort.Direction.ASC, "restaurantName");
-        Page<Restaurant> page = repo.findAll(PageRequest.of(0, 1, Sort.by(Sort.Direction.ASC, "restaurantName")));
-        return results;
+		Page<Restaurant> searchResult = repo.findByRestaurantNameContains(pages, query);
+        
+        return searchResult;
     }
 
 
