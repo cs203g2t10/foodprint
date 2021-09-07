@@ -23,18 +23,23 @@ public class UserController {
 
     private UserRepo repo;
 
-    private PasswordEncoder passwordEncoder;
+    // private PasswordEncoder passwordEncoder;
     
     @Autowired
     UserController(UserRepo repo, PasswordEncoder passwordEncoder) {
         this.repo = repo;
+        // this.passwordEncoder = passwordEncoder;
     }
 
     // POST: Create the user
     @PostMapping
     @ResponseStatus(code = HttpStatus.CREATED)
     public ResponseEntity<User> createUser(@RequestBody User user) {
-        System.out.println(user);
+        Optional<User> existingUser = repo.findByEmail(user.getEmail());
+        if (existingUser.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+        
         var savedUser = repo.saveAndFlush(user);
         return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
     }
