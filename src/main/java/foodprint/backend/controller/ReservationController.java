@@ -75,7 +75,7 @@ public class ReservationController {
        var currentReservation = currentReservationOpt.get();
        currentReservation.setDate(updatedReservation.getDate());
        currentReservation.setIsVaccinated(updatedReservation.getIsVaccinated());
-       currentReservation.setOrder(updatedReservation.getOrder());
+       currentReservation.setLineItems(updatedReservation.getLineItems());
        currentReservation.setPax(updatedReservation.getPax());
        currentReservation.setStatus(updatedReservation.getStatus());
        currentReservation = reservationRepo.saveAndFlush(currentReservation);
