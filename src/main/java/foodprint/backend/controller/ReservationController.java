@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import foodprint.backend.model.LineItem;
 import foodprint.backend.model.Reservation;
 import foodprint.backend.model.ReservationRepo;
 import foodprint.backend.model.Restaurant;
@@ -31,7 +32,7 @@ public class ReservationController {
         this.reservationRepo = reservationRepo;
     }
 
-    //get reservation by id
+    // Get reservation by id
     @GetMapping({"/id/{reservationId}"})
     public ResponseEntity<Reservation> getReservation(@PathVariable("reservationId") Integer id) {
         Optional<Reservation> reservation = reservationRepo.findById(id);
@@ -42,14 +43,14 @@ public class ReservationController {
         }
     }
 
-    //get all reservations
+    // Get all reservations
     @GetMapping({"/all"})
     public ResponseEntity<List<Reservation>> getAllReservation() {
         List<Reservation> reservationList = reservationRepo.findAll();
         return new ResponseEntity<>(reservationList, HttpStatus.OK);
     }
 
-    //create a new reservation
+    // Create a new reservation
     @PostMapping
     public ResponseEntity<Reservation> createReservation(@RequestBody Reservation reservation) {
         Date date = reservation.getDate();
@@ -64,7 +65,7 @@ public class ReservationController {
         }
     }
 
-   //update reservation
+   // Update reservation
    @PutMapping({"/id/{reservationId}"})
    public ResponseEntity<Reservation> updateReservation(
        @PathVariable("reservationId") Integer id,
@@ -77,14 +78,14 @@ public class ReservationController {
        var currentReservation = currentReservationOpt.get();
        currentReservation.setDate(updatedReservation.getDate());
        currentReservation.setIsVaccinated(updatedReservation.getIsVaccinated());
-       currentReservation.setLineItems(updatedReservation.getLineItems());
+       currentReservation.setOrder(updatedReservation.getOrder());
        currentReservation.setPax(updatedReservation.getPax());
        currentReservation.setStatus(updatedReservation.getStatus());
        currentReservation = reservationRepo.saveAndFlush(currentReservation);
        return new ResponseEntity<>(currentReservation, HttpStatus.OK);
    }
 
-   //delete reservation
+   // Delete reservation
    @DeleteMapping({"/id/{reservationId}"})
     public ResponseEntity<Reservation> deleteReservation(@PathVariable("reservationId") Integer id) {
         var reservation = reservationRepo.findById(id);
@@ -103,5 +104,19 @@ public class ReservationController {
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-   
+    // Get order by id
+    @GetMapping({"/order/{reservationId}"})
+    public ResponseEntity<List<LineItem>> getOrder(@PathVariable("reservationId") Integer id) {
+        Optional<Reservation> reservation = reservationRepo.findById(id);
+        if (reservation.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            List<LineItem> order = reservation.get().getOrder();
+            if (order == null) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            } else {
+                return new ResponseEntity<List<LineItem>>(order, HttpStatus.OK);
+            }
+        }
+    }
 }
