@@ -51,13 +51,13 @@ public class Reservation {
     private Status status;
 
     @OneToMany(cascade=CascadeType.MERGE)
-    @Column(name="lineItems")
-    private List<LineItem> lineItems;
+    @JoinColumn(name="lineItemId")
+    private List<LineItem> order;
 
     //Constructors
     public Reservation() {}
 
-    public Reservation(Integer reservationId, User user, Date date, Integer pax, Boolean isVaccinated, Date reservedOn, Status status, List<LineItem> lineItems) {
+    public Reservation(Integer reservationId, User user, Date date, Integer pax, Boolean isVaccinated, Date reservedOn, Status status) {
         this.reservationId = reservationId;
         this.user = user;
         this.date = date;
@@ -65,7 +65,17 @@ public class Reservation {
         this.isVaccinated = isVaccinated;
         this.reservedOn = reservedOn;
         this.status = status;
-        this.lineItems = lineItems;
+    }
+
+    public Reservation(Integer reservationId, User user, Date date, Integer pax, Boolean isVaccinated, Date reservedOn, Status status, List<LineItem> order) {
+        this.reservationId = reservationId;
+        this.user = user;
+        this.date = date;
+        this.pax = pax;
+        this.isVaccinated = isVaccinated;
+        this.reservedOn = reservedOn;
+        this.status = status;
+        this.order = order;
     }
 
 
@@ -125,12 +135,12 @@ public class Reservation {
         this.status = status;
     }
 
-    public List<LineItem> getLineItems() {
-        return this.lineItems;
+    public List<LineItem> getOrder() {
+        return this.order;
     }
 
-    public void setLineItems(List<LineItem> lineItems) {
-        this.lineItems = lineItems;
+    public void setOrder(List<LineItem> order) {
+        this.order = order;
     }
 
 }
