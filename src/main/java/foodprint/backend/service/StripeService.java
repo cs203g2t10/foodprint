@@ -24,19 +24,19 @@ import foodprint.backend.dto.ChargeRequest;
 
 @Service
 // @RequestMapping("/api/v1/restaurant")
-@PropertySources({
-    @PropertySource(ignoreResourceNotFound = false, value = "file:secrets.properties")
-})
+// @PropertySources({
+//     @PropertySource(value = "file:secrets.properties")
+// })
 public class StripeService {
 
-    @Value("${STRIPE_SECRET_KEY}")
-    private String secretKey;
+    // @Value("${STRIPE_SECRET_KEY}")
+    // private String secretKey;
     
-    @PostConstruct
-    public void init() {
-        Stripe.apiKey = secretKey;
-
-    }
+    // @PostConstruct
+    // public void init() {
+    //     Stripe.apiKey = secretKey;
+    // }
+    
     public Charge charge(ChargeRequest chargeRequest) 
       throws AuthenticationException, InvalidRequestException,
         ApiConnectionException, CardException, ApiException, StripeException {
