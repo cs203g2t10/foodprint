@@ -34,3 +34,5 @@ build/
 data/demo.mv.db
 data/demo.trace.db
 mvnw
+
+secrets.properties
