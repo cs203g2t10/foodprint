@@ -1,13 +1,14 @@
 package foodprint.backend.dto;
 
-import java.util.Currency;
+// import java.util.Currency;
+import foodprint.backend.dto.ChargeRequest.Currency;
 
 public class CheckoutDTO {
 
     private String stripePublicKey;
     private Integer orderId;
     private Double amount;
-    private Currency currency;
+    private ChargeRequest.Currency currency;
 
     public CheckoutDTO(String stripePublicKey, Integer orderId, Double amount, Currency currency) {
         this.stripePublicKey = stripePublicKey;
