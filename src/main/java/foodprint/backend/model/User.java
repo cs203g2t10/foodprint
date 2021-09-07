@@ -10,14 +10,23 @@ import javax.persistence.Id;
 
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Entity
 @Table
 @EnableTransactionManagement
-public class User implements UserDetails {
+public class User implements UserDetails{
 
     // Properties
     @Id
@@ -25,20 +34,25 @@ public class User implements UserDetails {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "email", nullable = false, unique = true)
+    @Column(name = "email", nullable=false, unique=true)
+    @Schema(defaultValue="bobbytan@gmail.com")
     private String email;
 
     @Column(name = "fName", nullable = false)
+    @Schema(defaultValue="Bobby")
     private String firstName;
 
     @Column(name = "lName", nullable = true)
+    @Schema(defaultValue="Tan")
     private String lastName;
 
     @Column(name = "password", nullable = false)
+    @Schema(defaultValue="SuperSecurePassw0rd")
     private String password;
 
     @Column(name = "role", nullable = false)
-    private String role;
+    @Schema(defaultValue="FP_USER")
+    private String roles;
 
     // Constructors
     protected User() {}
@@ -47,16 +61,12 @@ public class User implements UserDetails {
         this.email = email;
         this.password = password;
         this.firstName = name;
-        this.role = "FP_USER";
+        this.roles = "FP_USER";
     }
 
     // Mutators and Accessors
     public Long getId() {
         return this.id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getEmail() {
@@ -83,49 +93,65 @@ public class User implements UserDetails {
         this.lastName = lastName;
     }
 
-    @Override
-    public String getPassword() {
-        return this.password;
+    public void setRoles(String roles) {
+        this.roles = roles;
     }
 
+    public String getRoles() {
+        return this.roles;
+    }
+    
     public void setPassword(String password) {
         this.password = password;
     }
 
     @Override
+    public String getPassword() {
+        return this.password;
+    }
+
+    @Override
+    @Schema(hidden=true)
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // TODO Auto-generated method stub
+        // return Arrays.asList(this.roles.split(","));
         return null;
     }
 
     @Override
+    @Schema(hidden=true)
     public String getUsername() {
-        // TODO Auto-generated method stub
-        return null;
+        return this.getEmail();
     }
 
     @Override
+    @Schema(hidden=true)
     public boolean isAccountNonExpired() {
-        // TODO Auto-generated method stub
-        return false;
+        return true;
     }
 
     @Override
+    @Schema(hidden=true)
     public boolean isAccountNonLocked() {
-        // TODO Auto-generated method stub
-        return false;
+        return true;
     }
 
     @Override
+    @Schema(hidden=true)
     public boolean isCredentialsNonExpired() {
-        // TODO Auto-generated method stub
-        return false;
+        return true;
     }
 
     @Override
+    @Schema(hidden=true)
     public boolean isEnabled() {
-        // TODO Auto-generated method stub
-        return false;
+        return true;
     }
 
+    @Override
+    public String toString() {
+        return "User [email=" + email + ", firstName=" + firstName + ", id=" + id + ", lastName=" + lastName
+                + ", password=" + password + ", roles=" + roles + "]";
+    }
+
+    
 }

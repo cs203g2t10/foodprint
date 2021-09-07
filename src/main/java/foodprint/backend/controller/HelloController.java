@@ -4,9 +4,11 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import foodprint.backend.model.User;
@@ -18,11 +20,12 @@ import foodprint.backend.model.User;
 public class HelloController {
 
     @GetMapping({"/hello"})
+	@ResponseStatus(code = HttpStatus.OK)
 	public Map<String, String> hello(@RequestParam Optional<String> echoString) {
 		if (echoString.isPresent()) {
 			return Collections.singletonMap("response", "Hello " + echoString.get());
 		}
-		return Collections.singletonMap("response", "Hello World!"); 
+		return Collections.singletonMap("response", "Hello World!");
 	}
 
 	@GetMapping({"/helloUser"})

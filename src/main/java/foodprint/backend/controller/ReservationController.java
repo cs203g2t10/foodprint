@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import foodprint.backend.model.LineItem;
@@ -34,6 +35,7 @@ public class ReservationController {
 
     // Get reservation by id
     @GetMapping({"/id/{reservationId}"})
+    @ResponseStatus(code = HttpStatus.OK)
     public ResponseEntity<Reservation> getReservation(@PathVariable("reservationId") Integer id) {
         Optional<Reservation> reservation = reservationRepo.findById(id);
         if (reservation.isEmpty()) {
@@ -45,6 +47,7 @@ public class ReservationController {
 
     // Get all reservations
     @GetMapping({"/all"})
+    @ResponseStatus(code = HttpStatus.OK)
     public ResponseEntity<List<Reservation>> getAllReservation() {
         List<Reservation> reservationList = reservationRepo.findAll();
         return new ResponseEntity<>(reservationList, HttpStatus.OK);
@@ -52,6 +55,7 @@ public class ReservationController {
 
     // Create a new reservation
     @PostMapping
+    @ResponseStatus(code = HttpStatus.CREATED)
     public ResponseEntity<Reservation> createReservation(@RequestBody Reservation reservation) {
         Date date = reservation.getDate();
         List<Reservation> reservationList = reservationRepo.findByDate(date);
@@ -67,6 +71,7 @@ public class ReservationController {
 
    // Update reservation
    @PutMapping({"/id/{reservationId}"})
+   @ResponseStatus(code = HttpStatus.OK)
    public ResponseEntity<Reservation> updateReservation(
        @PathVariable("reservationId") Integer id,
        @RequestBody Reservation updatedReservation

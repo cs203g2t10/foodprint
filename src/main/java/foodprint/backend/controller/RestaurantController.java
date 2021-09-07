@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,6 +38,7 @@ public class RestaurantController {
 
     // GET: Get the restaurant
     @GetMapping({"/id/{restaurantId}"})
+    @ResponseStatus(code = HttpStatus.OK)
     public ResponseEntity<Restaurant> getRestaurant(@PathVariable("restaurantId") Integer id) {
         Optional<Restaurant> restaurant = repo.findById(id);
         if (restaurant.isEmpty()) {
@@ -47,6 +49,7 @@ public class RestaurantController {
 
     // GET (ALL): Get all the restaurants
     @GetMapping({"/all"})
+    @ResponseStatus(code = HttpStatus.OK)
     public ResponseEntity<List<Restaurant>> getAllRestaurants() {
         List<Restaurant> restaurants = repo.findAll();
         return new ResponseEntity<>(restaurants, HttpStatus.OK);
@@ -54,6 +57,7 @@ public class RestaurantController {
 
     // POST: Create new restaurant
     @PostMapping
+    @ResponseStatus(code = HttpStatus.CREATED)
     public ResponseEntity<Restaurant> createRestaurant(@RequestBody Restaurant restaurant) {
         var savedRestaurant = repo.saveAndFlush(restaurant);
         return new ResponseEntity<>(savedRestaurant, HttpStatus.CREATED);
@@ -61,6 +65,7 @@ public class RestaurantController {
 
     // PUT: Update the restaurant
     @PutMapping({"/id/{restaurantId}"})
+    @ResponseStatus(code = HttpStatus.OK)
     public ResponseEntity<Restaurant> updateRestaurant(
         @PathVariable("restaurantId") Integer id,
         @RequestBody Restaurant updatedRestaurant
@@ -81,6 +86,7 @@ public class RestaurantController {
 
     // DELETE: Delete the restaurant
     @DeleteMapping({"/id/{restaurantId}"})
+    @ResponseStatus(code = HttpStatus.OK)
     public ResponseEntity<Restaurant> deleteRestaurant(@PathVariable("restaurantId") Integer id) {
         var savedRestaurant = repo.findById(id);
         

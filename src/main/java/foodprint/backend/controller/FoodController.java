@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +36,7 @@ public class FoodController {
 
     //GET: Get the food
     @GetMapping({"/id/{foodId}"})
+    @ResponseStatus(code = HttpStatus.OK)
     public ResponseEntity<Food> getFood(@PathVariable("foodId") Integer id) {
         Optional<Food> food = repo.findById(id);
         if (food.isEmpty()) {
@@ -45,6 +47,7 @@ public class FoodController {
 
     //GET: Get ALL the food
     @GetMapping({"/all"})
+    @ResponseStatus(code = HttpStatus.OK)
     public ResponseEntity<List<Food>> getAllFood() {
         List<Food> food = repo.findAll();
         return new ResponseEntity<>(food, HttpStatus.OK);
@@ -52,6 +55,7 @@ public class FoodController {
 
     //POST: Create new Food
     @PostMapping
+    @ResponseStatus(code = HttpStatus.CREATED)
     public ResponseEntity<Food> createFood(@RequestBody Food food) {
         var savedFood = repo.saveAndFlush(food);
         return new ResponseEntity<>(savedFood, HttpStatus.CREATED);
@@ -59,6 +63,7 @@ public class FoodController {
 
     //PUT: Update Food
     @PutMapping({"/id/{foodId}"})
+    @ResponseStatus(code = HttpStatus.OK)
     public ResponseEntity<Food> updateFood(
         @PathVariable("foodId") Integer id,
         @RequestBody Food updatedFood
@@ -79,6 +84,7 @@ public class FoodController {
 
     // DELETE: Delete the food
     @DeleteMapping({"/id/{foodId}"})
+    @ResponseStatus(code = HttpStatus.OK)
     public ResponseEntity<Food> deleteFood(@PathVariable("foodId") Integer id) {
         var savedFood = repo.findById(id);
         
