@@ -36,7 +36,7 @@ public class BackendApplication {
 			String[] beanNames = ctx.getBeanDefinitionNames();
 			Arrays.sort(beanNames);
 			logger.info("There are " + beanNames.length + " beans in total");
-			logger.info("Site should be up at (ctrl-click): http://{}:{}/", 
+			logger.info("Site should be up at (ctrl-click): http://{}:{}/swagger", 
 				InetAddress.getLocalHost().getHostAddress(), 
 				localServerPort
 			);

@@ -8,6 +8,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,6 +27,8 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     private final JwtTokenUtil jwtTokenUtil;
     private final UserRepo userRepo;
 
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
     @Autowired
     public JwtTokenFilter(JwtTokenUtil jwtTokenUtil, UserRepo userRepo) {
         this.jwtTokenUtil = jwtTokenUtil;
@@ -37,23 +41,25 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                                     FilterChain chain)
             throws ServletException, IOException {
         // Get authorization header and validate
-        final String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+        final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-        // TEMPORARY BYPASS CODE
-        if (header == null) {
+        if (authHeader == null) {
+            logger.warn("Authorization header missing");
             chain.doFilter(request, response);
             return;
         }
-        // END TEMPORARY BYPASS CODE
 
-        if (header.isEmpty() || !header.startsWith("Bearer ")) {
+        logger.info(authHeader);
+
+        if (authHeader.isEmpty() || !authHeader.startsWith("Bearer ")) {
             chain.doFilter(request, response);
             return;
         }
 
         // Get jwt token and validate
-        final String token = header.split(" ")[1].trim();
+        final String token = authHeader.split(" ")[1].trim();
         if (!jwtTokenUtil.validate(token)) {
+            logger.warn("JWT VALIDATION FAILED");
             chain.doFilter(request, response);
             return;
         }
@@ -63,17 +69,16 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             .findByEmail(jwtTokenUtil.getUsername(token))
             .orElse(null);
 
-        UsernamePasswordAuthenticationToken
-            authentication = new UsernamePasswordAuthenticationToken(
-                userDetails, null,
-                userDetails == null ?
-                    List.of() : userDetails.getAuthorities()
-            );
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+            userDetails, null,
+            userDetails == null ? List.of() : userDetails.getAuthorities()
+        );
 
         authentication.setDetails(
             new WebAuthenticationDetailsSource().buildDetails(request)
         );
 
+        logger.info("Auth OK");
         SecurityContextHolder.getContext().setAuthentication(authentication);
         chain.doFilter(request, response);
     }
