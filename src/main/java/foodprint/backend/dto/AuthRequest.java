@@ -1,9 +1,13 @@
 package foodprint.backend.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 public class AuthRequest {
     
+    @Schema(defaultValue="bobbytan@gmail.com")
     private String email;
 
+    @Schema(defaultValue="SuperSecurePassw0rd")
     private String password;
 
     public String getEmail() {

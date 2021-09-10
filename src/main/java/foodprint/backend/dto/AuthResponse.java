@@ -1,10 +1,10 @@
 package foodprint.backend.dto;
 
 public class AuthResponse {
-    
-    private String status;
 
     private String token;
+    
+    private String status;
 
     public String getStatus() {
         return status;

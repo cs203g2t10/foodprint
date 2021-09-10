@@ -26,7 +26,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Bean
     public PasswordEncoder encoder() {
-        return new BCryptPasswordEncoder(20);
+        return new BCryptPasswordEncoder(13);
     }
     
     @Autowired
@@ -71,6 +71,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         http.authorizeRequests()
             // Our public endpoints
             .antMatchers("/api/v1/login").permitAll()
+            .antMatchers("/api/v1/user").permitAll()
             .antMatchers("/swagger/**").permitAll()
             .antMatchers("/swagger-ui/**").permitAll()
             .antMatchers("/swagger-ui/index.html").permitAll()
