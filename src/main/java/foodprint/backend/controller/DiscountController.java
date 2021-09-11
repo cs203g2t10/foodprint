@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import foodprint.backend.model.Discount;
 import foodprint.backend.model.DiscountRepo;
+import io.swagger.v3.oas.annotations.Operation;
 
 @RestController
 @RequestMapping("/api/v1/restaurant/discount")
@@ -33,6 +34,7 @@ public class DiscountController {
     //GET: Get the discounts
     @GetMapping({"/id/{discountId}"})
     @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Gets a restaurant's discount")
     public ResponseEntity<Discount> getDiscount(@PathVariable("discountId") Integer id) {
         Optional<Discount> discount = repo.findById(id);
         if (discount.isEmpty()) {
@@ -44,6 +46,7 @@ public class DiscountController {
     //GET: Get ALL the discounts 
     @GetMapping({"/all"})
     @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Gets all discounts of a restaurant")
     public ResponseEntity<List<Discount>> getAllDiscouont() {
         List<Discount> discount = repo.findAll();
         return new ResponseEntity<>(discount, HttpStatus.OK);
@@ -52,6 +55,7 @@ public class DiscountController {
     //POST: Create new Discount
     @PostMapping
     @ResponseStatus(code = HttpStatus.CREATED)
+    @Operation(summary = "Creates a new discount")
     public ResponseEntity<Discount> createDiscount(@RequestBody Discount discount) {
         var savedDiscount = repo.saveAndFlush(discount);
         return new ResponseEntity<>(savedDiscount, HttpStatus.CREATED);
@@ -60,6 +64,7 @@ public class DiscountController {
     //PUT: Update Discount
     @PutMapping({"/id/{discountId}"})
     @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Updates an existing discount")
     public ResponseEntity<Discount> updateDiscount(
         @PathVariable("discountId") Integer id,
         @RequestBody Discount updatedDiscount
@@ -78,6 +83,7 @@ public class DiscountController {
     //DELETE: Delete the Discount
     @DeleteMapping({"/id/{discountId}"})
     @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Deletes an existing discount")
     public ResponseEntity<Discount> deleteDiscount(@PathVariable("discountId") Integer id) {
         var savedDiscount = repo.findById(id);
         

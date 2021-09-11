@@ -22,6 +22,7 @@ import org.springframework.data.domain.PageRequest;
 
 import foodprint.backend.model.Food;
 import foodprint.backend.model.FoodRepo;
+import io.swagger.v3.oas.annotations.Operation;
 
 @RestController
 @RequestMapping("/api/v1/restaurant/food")
@@ -37,6 +38,7 @@ public class FoodController {
     //GET: Get the food
     @GetMapping({"/id/{foodId}"})
     @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Gets a food item of a restaurant")
     public ResponseEntity<Food> getFood(@PathVariable("foodId") Integer id) {
         Optional<Food> food = repo.findById(id);
         if (food.isEmpty()) {
@@ -48,6 +50,7 @@ public class FoodController {
     //GET: Get ALL the food
     @GetMapping({"/all"})
     @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Gets all food items from a restaurant")
     public ResponseEntity<List<Food>> getAllFood() {
         List<Food> food = repo.findAll();
         return new ResponseEntity<>(food, HttpStatus.OK);
@@ -56,6 +59,7 @@ public class FoodController {
     //POST: Create new Food
     @PostMapping
     @ResponseStatus(code = HttpStatus.CREATED)
+    @Operation(summary = "Creates a new food item")
     public ResponseEntity<Food> createFood(@RequestBody Food food) {
         var savedFood = repo.saveAndFlush(food);
         return new ResponseEntity<>(savedFood, HttpStatus.CREATED);
@@ -64,6 +68,7 @@ public class FoodController {
     //PUT: Update Food
     @PutMapping({"/id/{foodId}"})
     @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Updates an existing food item")
     public ResponseEntity<Food> updateFood(
         @PathVariable("foodId") Integer id,
         @RequestBody Food updatedFood
@@ -85,6 +90,7 @@ public class FoodController {
     // DELETE: Delete the food
     @DeleteMapping({"/id/{foodId}"})
     @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Deletes an existing food item")
     public ResponseEntity<Food> deleteFood(@PathVariable("foodId") Integer id) {
         var savedFood = repo.findById(id);
         
@@ -103,6 +109,7 @@ public class FoodController {
     }
 
     @GetMapping(value = "search", produces = "application/json")
+    @Operation(summary = "Search for a food item")
     public Page<Food> searchFood(@RequestParam("q") String query, @RequestParam(defaultValue = "1") int pageNum) {
         Pageable pages = PageRequest.of(pageNum - 1, 5); 
 
