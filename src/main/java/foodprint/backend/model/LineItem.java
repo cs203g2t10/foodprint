@@ -19,11 +19,11 @@ public class LineItem {
     private Integer lineItemId;
 
     @OneToOne(cascade=CascadeType.MERGE)
-    @JoinColumn(name = "food")
+    @JoinColumn(name = "foodId")
     private Food food;
 
     @ManyToOne(cascade=CascadeType.MERGE)
-    @JoinColumn(name = "reservation")
+    @JoinColumn(name = "reservationId")
     private Reservation reservation;
 
     @Column(name = "quantity")

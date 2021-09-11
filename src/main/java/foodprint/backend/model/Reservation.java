@@ -29,7 +29,7 @@ public class Reservation {
     private Integer reservationId;
 
     @ManyToOne(cascade=CascadeType.MERGE)
-    @JoinColumn(name = "user")
+    @JoinColumn(name = "userId")
     private User user;
 
     @Column(name = "date")
@@ -50,9 +50,8 @@ public class Reservation {
     @Column(name = "status")
     private Status status;
 
-    @OneToMany(cascade=CascadeType.MERGE)
-    @JoinColumn(name="lineItemId")
-    private List<LineItem> order;
+    @OneToMany(mappedBy = "reservation", cascade=CascadeType.MERGE)
+    private List<LineItem> lineItems;
 
     @ManyToOne(cascade=CascadeType.MERGE)
     @JoinColumn(name="restaurantId")
@@ -61,7 +60,7 @@ public class Reservation {
     //Constructors
     public Reservation() {}
 
-    public Reservation(Integer reservationId, User user, Date date, Integer pax, Boolean isVaccinated, Date reservedOn, Status status, List<LineItem> order, Restaurant restaurant) {
+    public Reservation(Integer reservationId, User user, Date date, Integer pax, Boolean isVaccinated, Date reservedOn, Status status, List<LineItem> lineItems, Restaurant restaurant) {
         this.reservationId = reservationId;
         this.user = user;
         this.date = date;
@@ -69,7 +68,7 @@ public class Reservation {
         this.isVaccinated = isVaccinated;
         this.reservedOn = reservedOn;
         this.status = status;
-        this.order = order;
+        this.lineItems = lineItems;
         this.restaurant = restaurant;
     }
 
@@ -130,12 +129,12 @@ public class Reservation {
         this.status = status;
     }
 
-    public List<LineItem> getOrder() {
-        return this.order;
+    public List<LineItem> getLineItems() {
+        return this.lineItems;
     }
 
-    public void setOrder(List<LineItem> order) {
-        this.order = order;
+    public void setLineItems(List<LineItem> lineItems) {
+        this.lineItems = lineItems;
     }
 
     public Restaurant getRestaurant() {

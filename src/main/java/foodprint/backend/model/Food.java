@@ -1,7 +1,9 @@
 package foodprint.backend.model;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -10,7 +12,10 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -43,6 +48,15 @@ public class Food {
 
     @Column(name = "foodDiscount")
     private Double foodDiscount;
+
+    @ManyToMany
+    @JoinTable(name = "food_ingredients",
+        joinColumns = @JoinColumn(name = "foodId"),
+        inverseJoinColumns = @JoinColumn(name = "ingredientId"))
+    private Set<Ingredient> ingredients = new HashSet<>();
+
+    @OneToOne(mappedBy = "food", cascade = CascadeType.MERGE)
+    private LineItem lineItem;
 
     public Food() {}
 

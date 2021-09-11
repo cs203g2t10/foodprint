@@ -83,7 +83,7 @@ public class ReservationController {
        var currentReservation = currentReservationOpt.get();
        currentReservation.setDate(updatedReservation.getDate());
        currentReservation.setIsVaccinated(updatedReservation.getIsVaccinated());
-       currentReservation.setOrder(updatedReservation.getOrder());
+       currentReservation.setLineItems(updatedReservation.getLineItems());
        currentReservation.setPax(updatedReservation.getPax());
        currentReservation.setStatus(updatedReservation.getStatus());
        currentReservation = reservationRepo.saveAndFlush(currentReservation);
@@ -109,18 +109,18 @@ public class ReservationController {
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    // Get order by id
-    @GetMapping({"/order/{reservationId}"})
-    public ResponseEntity<List<LineItem>> getOrder(@PathVariable("reservationId") Integer id) {
+    // Get lineItems by id
+    @GetMapping({"/lineItems/{reservationId}"})
+    public ResponseEntity<List<LineItem>> getLineItems(@PathVariable("reservationId") Integer id) {
         Optional<Reservation> reservation = reservationRepo.findById(id);
         if (reservation.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
-            List<LineItem> order = reservation.get().getOrder();
-            if (order == null) {
+            List<LineItem> lineItems = reservation.get().getLineItems();
+            if (lineItems == null) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             } else {
-                return new ResponseEntity<List<LineItem>>(order, HttpStatus.OK);
+                return new ResponseEntity<List<LineItem>>(lineItems, HttpStatus.OK);
             }
         }
     }

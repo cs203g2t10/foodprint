@@ -4,12 +4,13 @@ package foodprint.backend.model;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -39,6 +40,12 @@ public class Restaurant {
 
     @Column (name = "maxReservationSlots")
     private Integer maxReservationSlots;
+
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.MERGE)
+    private List<Food> food;
+
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.MERGE)
+    private List<RestaurantManager> restaurantManagers;
 
     protected Restaurant () { }
 
