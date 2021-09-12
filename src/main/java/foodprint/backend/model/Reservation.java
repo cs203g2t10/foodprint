@@ -72,6 +72,16 @@ public class Reservation {
         this.restaurant = restaurant;
     }
 
+    public Reservation(Integer reservationId, User user, Date date, Integer pax, Boolean isVaccinated, Date reservedOn, Status status, Restaurant restaurant) {
+        this.reservationId = reservationId;
+        this.user = user;
+        this.date = date;
+        this.pax = pax;
+        this.isVaccinated = isVaccinated;
+        this.reservedOn = reservedOn;
+        this.status = status;
+        this.restaurant = restaurant;
+    }
 
     public Integer getReservationId() {
         return this.reservationId;

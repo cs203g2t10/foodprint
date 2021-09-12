@@ -21,6 +21,7 @@ import foodprint.backend.model.LineItem;
 import foodprint.backend.model.Reservation;
 import foodprint.backend.model.ReservationRepo;
 import foodprint.backend.model.Restaurant;
+import io.swagger.v3.oas.annotations.Operation;
 
 @RestController
 @RequestMapping("/api/v1/reservation")
@@ -33,7 +34,7 @@ public class ReservationController {
         this.reservationRepo = reservationRepo;
     }
 
-    // Get reservation by id
+    // GET: Get reservation by id
     @GetMapping({"/id/{reservationId}"})
     @ResponseStatus(code = HttpStatus.OK)
     public ResponseEntity<Reservation> getReservation(@PathVariable("reservationId") Integer id) {
@@ -45,7 +46,7 @@ public class ReservationController {
         }
     }
 
-    // Get all reservations
+    // GET: Get all reservations
     @GetMapping({"/all"})
     @ResponseStatus(code = HttpStatus.OK)
     public ResponseEntity<List<Reservation>> getAllReservation() {
@@ -53,7 +54,7 @@ public class ReservationController {
         return new ResponseEntity<>(reservationList, HttpStatus.OK);
     }
 
-    // Create a new reservation
+    // POST: Create a new reservation
     @PostMapping
     @ResponseStatus(code = HttpStatus.CREATED)
     public ResponseEntity<Reservation> createReservation(@RequestBody Reservation reservation) {
@@ -69,7 +70,7 @@ public class ReservationController {
         }
     }
 
-   // Update reservation
+   // PUT: Update reservation
    @PutMapping({"/id/{reservationId}"})
    @ResponseStatus(code = HttpStatus.OK)
    public ResponseEntity<Reservation> updateReservation(
@@ -90,7 +91,7 @@ public class ReservationController {
        return new ResponseEntity<>(currentReservation, HttpStatus.OK);
    }
 
-   // Delete reservation
+   // DELETE: Delete reservation
    @DeleteMapping({"/id/{reservationId}"})
     public ResponseEntity<Reservation> deleteReservation(@PathVariable("reservationId") Integer id) {
         var reservation = reservationRepo.findById(id);
@@ -109,19 +110,82 @@ public class ReservationController {
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    // Get lineItems by id
-    @GetMapping({"/lineItems/{reservationId}"})
+    // TODO: API TESTING
+    // POST: Create new lineItems by reservationId
+    public ResponseEntity<List<LineItem>> createLineItems(
+        @PathVariable("reservationId") Integer id,
+        @RequestBody List<LineItem> lineItems
+    ) {
+        Optional<Reservation> currentReservationOpt = reservationRepo.findById(id);
+        if (currentReservationOpt.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        
+        var currentReservation = currentReservationOpt.get();
+        if (currentReservation.getLineItems() != null) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        } else {
+            currentReservation.setLineItems(lineItems);
+            currentReservation = reservationRepo.saveAndFlush(currentReservation);
+            return new ResponseEntity<>(currentReservation.getLineItems(), HttpStatus.OK);
+        }
+    }
+
+    // GET: Get lineItems by reservationId
+    @GetMapping({"/id/{reservationId}/lineItems"})
+    @Operation(summary = "Get the list of lineItems under a reservationId")
     public ResponseEntity<List<LineItem>> getLineItems(@PathVariable("reservationId") Integer id) {
+        Optional<Reservation> currentReservationOpt = reservationRepo.findById(id);
+        if (currentReservationOpt.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        List<LineItem> lineItems = currentReservationOpt.get().getLineItems();
+        if (lineItems == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            return new ResponseEntity<List<LineItem>>(lineItems, HttpStatus.OK);
+        }
+    }
+
+    // PUT: Update lineItems by reservationId
+    @PutMapping({"/id/{reservationId}/lineItems"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Update the list of lineItems under a reservationId")
+    public ResponseEntity<List<LineItem>> updateLineItems(
+        @PathVariable("reservationId") Integer id,
+        @RequestBody List<LineItem> updatedLineItems
+    ) {
+        Optional<Reservation> currentReservationOpt = reservationRepo.findById(id);
+        if (currentReservationOpt.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        
+        var currentReservation = currentReservationOpt.get();
+        List<LineItem> lineItems = currentReservation.getLineItems();
+        if (lineItems == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            currentReservation.setLineItems(updatedLineItems);
+            currentReservation = reservationRepo.saveAndFlush(currentReservation);
+            return new ResponseEntity<>(currentReservation.getLineItems(), HttpStatus.OK);
+        }
+    }
+
+    // DELETE: Delete lineItems by reservationId
+    @DeleteMapping({"/id/{reservationId}/lineItems"})
+    public ResponseEntity<List<LineItem>> deleteLineItems(@PathVariable("reservationId") Integer id) {
         Optional<Reservation> reservation = reservationRepo.findById(id);
         if (reservation.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
-            List<LineItem> lineItems = reservation.get().getLineItems();
-            if (lineItems == null) {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            } else {
-                return new ResponseEntity<List<LineItem>>(lineItems, HttpStatus.OK);
-            }
+            reservation.get().setLineItems(null);
         }
+
+        reservation = reservationRepo.findById(id);
+        if (reservation.isPresent() && reservation.get().getLineItems() == null) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
