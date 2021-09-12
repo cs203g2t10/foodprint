@@ -47,6 +47,9 @@ public class Restaurant {
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.MERGE)
     private List<RestaurantManager> restaurantManagers;
 
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.MERGE)
+    private List<Discount> discount;
+
     protected Restaurant () { }
 
     public Restaurant (Integer restaurantId, String restaurantName, String restaurantLocation) {

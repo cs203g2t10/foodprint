@@ -20,6 +20,8 @@ import javax.persistence.Table;
 
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @Entity
 @Table
 @EnableTransactionManagement
@@ -31,6 +33,7 @@ public class Food {
     private Integer foodId;
 
     @Column(name = "foodName")
+    @Schema(defaultValue="somefood")
     private String foodName;
 
     @ManyToOne(cascade=CascadeType.MERGE)
