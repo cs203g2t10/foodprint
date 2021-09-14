@@ -41,8 +41,23 @@ public class Restaurant {
     @Column (name = "restaurantLocation")
     private String restaurantLocation;
 
-    @Column (name = "maxReservationSlots")
-    private Integer maxReservationSlots;
+    @Column (name = "restaurantTableCapacity")
+    private Integer restaurantTableCapacity = 15;
+
+    //what time the restaurant is open for reservation
+    @Column (name = "restaurantWeekdayOpening")
+    private String restaurantWeekdayOpening;
+
+    //what time reservation slots close
+    @Column (name = "restaurantWeekdayClosing")
+    private String restaurantWeekdayClosing;
+
+    @Column (name = "restaurantWeekendOpening")
+    private String restaurantWeekendOpening;
+
+    @Column (name = "restaurantWeekendClosing")
+    private String restaurantWeekendClosing;
+
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.MERGE)
     private List<Food> food;
@@ -114,11 +129,12 @@ public class Restaurant {
         this.restaurantLocation = restaurantLocation;
     }
 
-    public Integer getMaxReservationSlots() {
-        return this.maxReservationSlots;
+    public Integer getRestaurantTableCapacity() {
+        return this.restaurantTableCapacity;
     }
 
-    public void setMaxReservationSlots(Integer maxReservationSlots) {
-        this.maxReservationSlots = maxReservationSlots;
+    public void setRestaurantTableCapacity(Integer restaurantTableCapacity) {
+        this.restaurantTableCapacity = restaurantTableCapacity;
     }
+    
 }

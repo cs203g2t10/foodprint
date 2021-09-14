@@ -13,6 +13,10 @@ import org.springframework.stereotype.Component;
 
 import foodprint.backend.model.User;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 @Component
@@ -31,7 +35,7 @@ public class JwtTokenUtil {
                 .setHeaderParam("userId", user.getId())
                 .setHeaderParam("userFname", user.getFirstName())
                 .setHeaderParam("userLname", user.getLastName())
-                .setExpiration(new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000)) // 7 days
+                .setExpiration(Date.from(LocalDateTime.now().plus(7, ChronoUnit.DAYS).toInstant(ZoneOffset.UTC)))
                 .signWith(SignatureAlgorithm.HS512, jwtSecret)
                 .compact();
     }
@@ -54,13 +58,13 @@ public class JwtTokenUtil {
         return claims.getSubject();
     }
 
-    public Date getExpirationDate(String token) {
+    public LocalDateTime getExpirationDate(String token) {
         Claims claims = Jwts.parser()
                 .setSigningKey(jwtSecret)
                 .parseClaimsJws(token)
                 .getBody();
 
-        return claims.getExpiration();
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(claims.getExpiration().getTime()), ZoneOffset.UTC);
     }
 
     public boolean validate(String token) {

@@ -35,4 +35,8 @@ public class AuthenticationService {
 
         throw new BadCredentialsException("Incorrect credentials provided");
     }
+
+    public String encodePassword(String password) {
+        return passwordEncoder.encode(password);
+    }
 }
