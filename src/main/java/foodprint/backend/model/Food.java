@@ -18,12 +18,15 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Entity
 @Table
+@JsonIgnoreProperties("restaurant")
 @EnableTransactionManagement
 public class Food {
 
@@ -63,8 +66,7 @@ public class Food {
 
     public Food() {}
 
-    public Food(Integer foodId, String foodName, Double foodPrice, Double foodDiscount) {
-        this.foodId = foodId;
+    public Food(String foodName, Double foodPrice, Double foodDiscount) {
         this.foodName = foodName;
         this.foodPrice = foodPrice;
         this.foodDiscount = foodDiscount;
@@ -82,6 +84,7 @@ public class Food {
         this.foodName = foodName;
     }
 
+    
     public Restaurant getRestaurant() {
         return this.restaurant;
     }

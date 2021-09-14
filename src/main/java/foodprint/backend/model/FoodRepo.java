@@ -16,4 +16,5 @@ public interface FoodRepo extends JpaRepository<Food, Integer> {
     List<Food> findByFoodNameContainsIgnoreCase(String name);
 
     Page<Food> findByFoodNameContains(Pageable page, String name);
+
 }

@@ -21,7 +21,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 
 import foodprint.backend.model.Restaurant;
+import foodprint.backend.model.Food;
 import foodprint.backend.model.RestaurantRepo;
+import foodprint.backend.model.FoodRepo;
 
 // REST OpenAPI Swagger - http://localhost:8080/foodprint-swagger.html
 
@@ -32,9 +34,13 @@ public class RestaurantController {
     private RestaurantRepo repo;
 
     @Autowired
+    private FoodRepo foodRepo;
+
+    @Autowired
     RestaurantController(RestaurantRepo repo) {
         this.repo = repo;
     }
+
 
     // GET: Get the restaurant
     @GetMapping({"/id/{restaurantId}"})
@@ -114,5 +120,22 @@ public class RestaurantController {
         return searchResult;
     }
 
+    @PostMapping({"/id/{restaurantId}/food"})
+    @ResponseStatus(code = HttpStatus.CREATED)
+    public ResponseEntity<Food> addRestaurantFood(@PathVariable("restaurantId") Integer restaurantId, @RequestBody Food food) {
+        Restaurant restaurant = repo.findByRestaurantId(restaurantId);
+        food.setRestaurant(restaurant);
+        var savedFood = foodRepo.saveAndFlush(food);
+        restaurant.getAllFood().add(food);
+        return new ResponseEntity<>(savedFood, HttpStatus.CREATED);
+    }
+
+    @GetMapping({"/id/{restaurantId}/allFood"})
+    @ResponseStatus(code = HttpStatus.OK)
+    public ResponseEntity<List<Food>> getAllRestaurantFood(@PathVariable("restaurantId") Integer restaurantId) {
+        Restaurant restaurant = repo.findByRestaurantId(restaurantId);
+        List<Food> allFood = restaurant.getAllFood();
+        return new ResponseEntity<>(allFood, HttpStatus.OK);
+    }
 
 }

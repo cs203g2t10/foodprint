@@ -11,6 +11,8 @@ public interface RestaurantRepo extends JpaRepository<Restaurant, Integer> {
 
     Restaurant findByRestaurantName(String restaurantName);
 
+    Restaurant findByRestaurantId(Integer restaurantId);
+
     List<Restaurant> findByRestaurantNameContains(String restaurantName);
 
     List<Restaurant> findByRestaurantNameContainsIgnoreCase(String name);

@@ -13,12 +13,15 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 
 @Entity
 @Table
 @EnableTransactionManagement
+@JsonIgnoreProperties("food")
 
 public class Restaurant {
     @Id
@@ -52,8 +55,7 @@ public class Restaurant {
 
     protected Restaurant () { }
 
-    public Restaurant (Integer restaurantId, String restaurantName, String restaurantLocation) {
-        this.restaurantId = restaurantId;
+    public Restaurant (String restaurantName, String restaurantLocation) {
         this.restaurantName = restaurantName;
         this.restaurantLocation = restaurantLocation;
     }
@@ -69,6 +71,14 @@ public class Restaurant {
 
     public void setRestaurantName(String restaurantName) {
         this.restaurantName = restaurantName;
+    }
+
+    public List<Food> getAllFood() {
+        return food;
+    }
+
+    public void setAllFood(List<Food> food) {
+        this.food = food;
     }
 
     public String getRestaurantDesc() {
