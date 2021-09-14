@@ -2,6 +2,8 @@ package foodprint.backend.controller;
 
 import java.util.Optional;
 import java.util.List;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,8 @@ import foodprint.backend.model.LineItem;
 import foodprint.backend.model.Reservation;
 import foodprint.backend.model.ReservationRepo;
 import foodprint.backend.model.Restaurant;
+import foodprint.backend.model.RestaurantRepo;
+import foodprint.backend.model.UserRepo;
 import io.swagger.v3.oas.annotations.Operation;
 
 @RestController
@@ -28,15 +32,21 @@ import io.swagger.v3.oas.annotations.Operation;
 public class ReservationController {
     
     private ReservationRepo reservationRepo;
+    private RestaurantRepo restaurantRepo;
+    private UserRepo userRepo;
 
     @Autowired
-    ReservationController(ReservationRepo reservationRepo) {
+    ReservationController(ReservationRepo reservationRepo, UserRepo userRepo, RestaurantRepo restaurantRepo) {
         this.reservationRepo = reservationRepo;
+        this.restaurantRepo = restaurantRepo;
+        this.userRepo = userRepo;
     }
+
 
     // GET: Get reservation by id
     @GetMapping({"/id/{reservationId}"})
     @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Gets a reservation slot of a user")
     public ResponseEntity<Reservation> getReservation(@PathVariable("reservationId") Integer id) {
         Optional<Reservation> reservation = reservationRepo.findById(id);
         if (reservation.isEmpty()) {
@@ -49,6 +59,7 @@ public class ReservationController {
     // GET: Get all reservations
     @GetMapping({"/all"})
     @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Gets all reservation slots")
     public ResponseEntity<List<Reservation>> getAllReservation() {
         List<Reservation> reservationList = reservationRepo.findAll();
         return new ResponseEntity<>(reservationList, HttpStatus.OK);
@@ -57,12 +68,13 @@ public class ReservationController {
     // POST: Create a new reservation
     @PostMapping
     @ResponseStatus(code = HttpStatus.CREATED)
+    @Operation(summary = "Creates a new reservation slot")
     public ResponseEntity<Reservation> createReservation(@RequestBody Reservation reservation) {
-        Date date = reservation.getDate();
-        List<Reservation> reservationList = reservationRepo.findByDate(date);
+        LocalDateTime dateOfReservation = reservation.getDate();
+        
+        List<Reservation> reservationList = reservationRepo.findByDate(dateOfReservation);
         Restaurant restaurantReservation = reservation.getRestaurant();
-        //TODO find by timing and allow change of maximum capacity
-        if (reservationList.size() < restaurantReservation.getMaxReservationSlots()) { 
+        if (reservationList.size() < restaurantReservation.getRestaurantTableCapacity()) { 
             var savedReservation = reservationRepo.saveAndFlush(reservation);
             return new ResponseEntity<>(savedReservation, HttpStatus.CREATED);
         } else {
@@ -73,6 +85,7 @@ public class ReservationController {
    // PUT: Update reservation
    @PutMapping({"/id/{reservationId}"})
    @ResponseStatus(code = HttpStatus.OK)
+   @Operation(summary = "Update a reservation slot")
    public ResponseEntity<Reservation> updateReservation(
        @PathVariable("reservationId") Integer id,
        @RequestBody Reservation updatedReservation
@@ -93,6 +106,8 @@ public class ReservationController {
 
    // DELETE: Delete reservation
    @DeleteMapping({"/id/{reservationId}"})
+   @ResponseStatus(code = HttpStatus.OK)
+   @Operation(summary = "Delete an existing reservation slot")
     public ResponseEntity<Reservation> deleteReservation(@PathVariable("reservationId") Integer id) {
         var reservation = reservationRepo.findById(id);
         
@@ -188,4 +203,32 @@ public class ReservationController {
         }
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    //Get all reservations by a restaurant
+    @GetMapping({"/all/{restaurantId}"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Gets all reservation slots by restaurant")
+    public ResponseEntity<List<Reservation>> getAllReservationByRestaurant(@PathVariable("restaurantId") Integer id) {
+        Optional<Restaurant> restaurant = restaurantRepo.findById(id);
+        if (restaurant.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            List<Reservation> reservationList = reservationRepo.findByRestaurant(restaurant.get());
+            return new ResponseEntity<>(reservationList, HttpStatus.OK);
+        }
+        
+    }
+
+    //Get all available reservation slots by date (should return a list of date objects (with the same date but different hour slots))
+    @GetMapping({"/slots/{restaurantId}/{date}"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Gets all available reservation slots by date")
+    public ResponseEntity<List<Date>> getAllAvailableSlotsByDateAndRestaurant(@PathVariable("restaurantId") Integer id, @PathVariable("date") String date) {
+        //Assume string date is in ISO format - 2021-19-14
+        LocalDate localDate = LocalDate.parse(date);
+        System.out.println("LocalDate" + localDate.toString());
+        return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+    }
+
+
 }

@@ -1,7 +1,7 @@
 package foodprint.backend.model;
 
-import java.util.Date;
 import java.util.List;
+import java.time.LocalDateTime;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -33,7 +33,7 @@ public class Reservation {
     private User user;
 
     @Column(name = "date")
-    private Date date;
+    private LocalDateTime date;
 
     @Column(name = "pax")
     private Integer pax;
@@ -42,7 +42,7 @@ public class Reservation {
     private Boolean isVaccinated;
 
     @Column(name = "reservedOn")
-    private Date reservedOn;
+    private LocalDateTime reservedOn;
 
     public enum Status {
         ONGOING, CANCELLED
@@ -60,7 +60,7 @@ public class Reservation {
     //Constructors
     public Reservation() {}
 
-    public Reservation(Integer reservationId, User user, Date date, Integer pax, Boolean isVaccinated, Date reservedOn, Status status, List<LineItem> lineItems, Restaurant restaurant) {
+    public Reservation(Integer reservationId, User user, LocalDateTime date, Integer pax, Boolean isVaccinated, LocalDateTime reservedOn, Status status, List<LineItem> lineItems, Restaurant restaurant) {
         this.reservationId = reservationId;
         this.user = user;
         this.date = date;
@@ -72,7 +72,7 @@ public class Reservation {
         this.restaurant = restaurant;
     }
 
-    public Reservation(Integer reservationId, User user, Date date, Integer pax, Boolean isVaccinated, Date reservedOn, Status status, Restaurant restaurant) {
+    public Reservation(Integer reservationId, User user, LocalDateTime date, Integer pax, Boolean isVaccinated, LocalDateTime reservedOn, Status status, Restaurant restaurant) {
         this.reservationId = reservationId;
         this.user = user;
         this.date = date;
@@ -99,11 +99,11 @@ public class Reservation {
         this.user = user;
     }
 
-    public Date getDate() {
+    public LocalDateTime getDate() {
         return this.date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDateTime date) {
         this.date = date;
     }
 
@@ -123,11 +123,11 @@ public class Reservation {
         this.isVaccinated = isVaccinated;
     }
 
-    public Date getReservedOn() {
+    public LocalDateTime getReservedOn() {
         return this.reservedOn;
     }
 
-    public void setReservedOn(Date reservedOn) {
+    public void setReservedOn(LocalDateTime reservedOn) {
         this.reservedOn = reservedOn;
     }
 

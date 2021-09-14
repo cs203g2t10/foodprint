@@ -2,13 +2,15 @@ package foodprint.backend.model;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -53,6 +55,9 @@ public class User implements UserDetails{
 
     @Column(name = "registeredOn", nullable = false)
     private LocalDateTime registeredOn;
+    
+    @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE)
+    private List<Reservation> reservations;
 
     // Constructors
     public User() {}
@@ -120,6 +125,15 @@ public class User implements UserDetails{
     public void setRegisteredOn(LocalDateTime registeredOn) {
         this.registeredOn = registeredOn;
     }
+
+    public List<Reservation> getReservations() {
+        return this.reservations;
+    }
+
+    public void setReservations(List<Reservation> reservations) {
+        this.reservations = reservations;
+    }
+
 
     @Override
     public String getPassword() {
