@@ -11,5 +11,6 @@ import java.util.List;
 public interface ReservationRepo extends JpaRepository<Reservation, Integer> {
     List<Reservation> findByDate(LocalDateTime dateOfReservation);
     List<Reservation> findByRestaurant(Restaurant restaurant);
+    List<Reservation> findByRestaurantAndDateBetween(Restaurant restaurant, LocalDateTime after, LocalDateTime before);
 
 }

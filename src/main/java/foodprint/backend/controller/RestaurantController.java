@@ -86,6 +86,10 @@ public class RestaurantController {
         currentRestaurant.setRestaurantLocation(updatedRestaurant.getRestaurantLocation());
         currentRestaurant.setPicturesPath(updatedRestaurant.getPicturesPath());
         currentRestaurant.setRestaurantTableCapacity(updatedRestaurant.getRestaurantTableCapacity());
+        currentRestaurant.setRestaurantWeekdayClosing(updatedRestaurant.getRestaurantWeekdayClosing());
+        currentRestaurant.setRestaurantWeekdayOpening(updatedRestaurant.getRestaurantWeekdayOpening());
+        currentRestaurant.setRestaurantWeekendClosing(updatedRestaurant.getRestaurantWeekendClosing());
+        currentRestaurant.setRestaurantWeekendOpening(updatedRestaurant.getRestaurantWeekendOpening());
         currentRestaurant = repo.saveAndFlush(currentRestaurant);
         return new ResponseEntity<>(currentRestaurant, HttpStatus.OK);
     }

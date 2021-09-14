@@ -44,19 +44,19 @@ public class Restaurant {
     @Column (name = "restaurantTableCapacity")
     private Integer restaurantTableCapacity = 15;
 
-    //what time the restaurant is open for reservation
+    //what time the restaurant is open for reservation - assume 24 hour clock e.g "13:00" for 1pm
     @Column (name = "restaurantWeekdayOpening")
-    private String restaurantWeekdayOpening;
+    private Integer restaurantWeekdayOpening;
 
     //what time reservation slots close
     @Column (name = "restaurantWeekdayClosing")
-    private String restaurantWeekdayClosing;
+    private Integer restaurantWeekdayClosing;
 
     @Column (name = "restaurantWeekendOpening")
-    private String restaurantWeekendOpening;
+    private Integer restaurantWeekendOpening;
 
     @Column (name = "restaurantWeekendClosing")
-    private String restaurantWeekendClosing;
+    private Integer restaurantWeekendClosing;
 
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.MERGE)
@@ -135,6 +135,38 @@ public class Restaurant {
 
     public void setRestaurantTableCapacity(Integer restaurantTableCapacity) {
         this.restaurantTableCapacity = restaurantTableCapacity;
+    }
+
+    public Integer getRestaurantWeekdayOpening() {
+        return this.restaurantWeekdayOpening;
+    }
+
+    public void setRestaurantWeekdayOpening(Integer restaurantWeekdayOpening) {
+        this.restaurantWeekdayOpening = restaurantWeekdayOpening;
+    }
+
+    public Integer getRestaurantWeekdayClosing() {
+        return this.restaurantWeekdayClosing;
+    }
+
+    public void setRestaurantWeekdayClosing(Integer restaurantWeekdayClosing) {
+        this.restaurantWeekdayClosing = restaurantWeekdayClosing;
+    }
+
+    public Integer getRestaurantWeekendOpening() {
+        return this.restaurantWeekendOpening;
+    }
+
+    public void setRestaurantWeekendOpening(Integer restaurantWeekendOpening) {
+        this.restaurantWeekendOpening = restaurantWeekendOpening;
+    }
+
+    public Integer getRestaurantWeekendClosing() {
+        return this.restaurantWeekendClosing;
+    }
+
+    public void setRestaurantWeekendClosing(Integer restaurantWeekendClosing) {
+        this.restaurantWeekendClosing = restaurantWeekendClosing;
     }
     
 }

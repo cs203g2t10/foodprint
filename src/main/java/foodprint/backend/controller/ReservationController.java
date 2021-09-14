@@ -2,8 +2,12 @@ package foodprint.backend.controller;
 
 import java.util.Optional;
 import java.util.List;
+import java.util.ArrayList;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +29,7 @@ import foodprint.backend.model.ReservationRepo;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.RestaurantRepo;
 import foodprint.backend.model.UserRepo;
+import foodprint.backend.service.ReservationService;
 import io.swagger.v3.oas.annotations.Operation;
 
 @RestController
@@ -32,14 +37,19 @@ import io.swagger.v3.oas.annotations.Operation;
 public class ReservationController {
     
     private ReservationRepo reservationRepo;
+
     private RestaurantRepo restaurantRepo;
+
     private UserRepo userRepo;
 
+    private ReservationService reservationService;
+
     @Autowired
-    ReservationController(ReservationRepo reservationRepo, UserRepo userRepo, RestaurantRepo restaurantRepo) {
+    ReservationController(ReservationRepo reservationRepo, UserRepo userRepo, RestaurantRepo restaurantRepo, ReservationService reservationService) {
         this.reservationRepo = reservationRepo;
         this.restaurantRepo = restaurantRepo;
         this.userRepo = userRepo;
+        this.reservationService = reservationService;
     }
 
 
@@ -70,11 +80,11 @@ public class ReservationController {
     @ResponseStatus(code = HttpStatus.CREATED)
     @Operation(summary = "Creates a new reservation slot")
     public ResponseEntity<Reservation> createReservation(@RequestBody Reservation reservation) {
+        Restaurant restaurant = reservation.getRestaurant();
         LocalDateTime dateOfReservation = reservation.getDate();
-        
-        List<Reservation> reservationList = reservationRepo.findByDate(dateOfReservation);
-        Restaurant restaurantReservation = reservation.getRestaurant();
-        if (reservationList.size() < restaurantReservation.getRestaurantTableCapacity()) { 
+        LocalDateTime startTime = dateOfReservation.truncatedTo(ChronoUnit.HOURS);
+
+        if (reservationService.slotAvailable(restaurant, startTime)) {
             var savedReservation = reservationRepo.saveAndFlush(reservation);
             return new ResponseEntity<>(savedReservation, HttpStatus.CREATED);
         } else {
@@ -223,12 +233,34 @@ public class ReservationController {
     @GetMapping({"/slots/{restaurantId}/{date}"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Gets all available reservation slots by date")
-    public ResponseEntity<List<Date>> getAllAvailableSlotsByDateAndRestaurant(@PathVariable("restaurantId") Integer id, @PathVariable("date") String date) {
+    public ResponseEntity<List<LocalDateTime>> getAllAvailableSlotsByDateAndRestaurant(@PathVariable("restaurantId") Integer id, @PathVariable("date") String date) {
         //Assume string date is in ISO format - 2021-19-14
+        List<LocalDateTime> availableSlots = new ArrayList<LocalDateTime>();
+        Optional<Restaurant> restaurant = restaurantRepo.findById(id);
+        if (restaurant.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } 
+
+        Restaurant restaurantReserved = restaurant.get();
         LocalDate localDate = LocalDate.parse(date);
-        System.out.println("LocalDate" + localDate.toString());
-        return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
-    }
+        LocalDateTime startTime;
+        LocalDateTime endTime;
+        if (localDate.getDayOfWeek() == DayOfWeek.SATURDAY || localDate.getDayOfWeek() == DayOfWeek.SUNDAY) {
+            startTime = localDate.atTime(restaurantReserved.getRestaurantWeekendOpening(), 0);
+            endTime = localDate.atTime(restaurantReserved.getRestaurantWeekendClosing(), 0);
+        } else {
+            startTime = localDate.atTime(restaurantReserved.getRestaurantWeekdayOpening(), 0);
+            endTime = localDate.atTime(restaurantReserved.getRestaurantWeekdayClosing(), 0);
+        }
+
+        while (!startTime.equals(endTime)) {
+            if (reservationService.slotAvailable(restaurantReserved, startTime)) {
+                availableSlots.add(startTime);
+            }
+            startTime = startTime.plusHours(1); //iterate for every 1 hour
+        }
+        return new ResponseEntity<>(availableSlots, HttpStatus.OK);
+        }
 
 
 }
