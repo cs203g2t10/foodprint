@@ -21,8 +21,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 
 import foodprint.backend.model.Restaurant;
+import foodprint.backend.dto.RestaurantDTO;
 import foodprint.backend.model.Food;
 import foodprint.backend.model.RestaurantRepo;
+import io.swagger.v3.oas.annotations.Operation;
 import foodprint.backend.model.FoodRepo;
 
 // REST OpenAPI Swagger - http://localhost:8080/foodprint-swagger.html
@@ -63,8 +65,10 @@ public class RestaurantController {
 
     // POST: Create new restaurant
     @PostMapping
+    @Operation(summary = "create a new restaurant")
     @ResponseStatus(code = HttpStatus.CREATED)
-    public ResponseEntity<Restaurant> createRestaurant(@RequestBody Restaurant restaurant) {
+    public ResponseEntity<Restaurant> createRestaurant(@RequestBody RestaurantDTO restaurantDTO) {
+        Restaurant restaurant = new Restaurant(restaurantDTO.getRestaurantName(), restaurantDTO.getRestaurantLocation());
         var savedRestaurant = repo.saveAndFlush(restaurant);
         return new ResponseEntity<>(savedRestaurant, HttpStatus.CREATED);
     }
