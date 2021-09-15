@@ -23,7 +23,7 @@ public class Discount {
     @JoinColumn(name = "restaurant")
     private Restaurant restaurant;
 
-    @Column(name = "discountDesciption")
+    @Column(name = "discountDescription")
     @Schema(defaultValue="1for1")
     private String discountDescription;
 
@@ -66,6 +66,21 @@ public class Discount {
 
     public void setDiscountPercentage(Integer discountPercentage) {
         this.discountPercentage = discountPercentage;
+    }
+
+    public Discount restaurant(Restaurant restaurant) {
+        setRestaurant(restaurant);
+        return this;
+    }
+
+    public Discount discountDescription(String discountDescription) {
+        setDiscountDescription(discountDescription);
+        return this;
+    }
+
+    public Discount discountPercentage(Integer discountPercentage) {
+        setDiscountPercentage(discountPercentage);
+        return this;
     }
     
 }
