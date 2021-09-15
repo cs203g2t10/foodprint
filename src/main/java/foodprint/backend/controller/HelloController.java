@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +20,8 @@ import foodprint.backend.model.User;
 @RestController
 @RequestMapping("/api/v1/hello")
 public class HelloController {
+
+	Logger logger = LoggerFactory.getLogger(HelloController.class);
 
     @GetMapping({"/hello"})
 	@ResponseStatus(code = HttpStatus.OK)
