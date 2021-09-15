@@ -56,7 +56,8 @@ public class FoodController {
         return new ResponseEntity<>(food, HttpStatus.OK);
     }
 
-    //POST: Create new Food
+    // POST: Create new Food
+    // TODO: Convert to DTO
     @PostMapping
     @ResponseStatus(code = HttpStatus.CREATED)
     @Operation(summary = "Creates a new food item")
@@ -65,7 +66,7 @@ public class FoodController {
         return new ResponseEntity<>(savedFood, HttpStatus.CREATED);
     }
 
-    //PUT: Update Food
+    // PUT: Update Food
     @PutMapping({"/id/{foodId}"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Updates an existing food item")

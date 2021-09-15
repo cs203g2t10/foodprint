@@ -10,14 +10,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import foodprint.backend.config.JwtTokenUtil;
 import foodprint.backend.dto.AuthRequest;
 import foodprint.backend.dto.AuthResponse;
+import foodprint.backend.dto.CurrentUserDetailsDTO;
 import foodprint.backend.dto.RegRequest;
 import foodprint.backend.dto.RegResponse;
 import foodprint.backend.model.User;
@@ -101,5 +105,15 @@ public class AuthController {
         return new ResponseEntity<>(resp, HttpStatus.OK);
     }
 
-    
+    @GetMapping({"/whoami"})
+	@ResponseStatus(code = HttpStatus.OK)
+	public ResponseEntity<CurrentUserDetailsDTO> currentUserDetails() {
+		User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		CurrentUserDetailsDTO currentUserDetails = new CurrentUserDetailsDTO();
+        currentUserDetails.setEmail(currentUser.getEmail());
+        currentUserDetails.setFirstName(currentUser.getFirstName());
+        currentUserDetails.setLastName(currentUser.getLastName());
+        currentUserDetails.setUserId(currentUser.getId());
+		return new ResponseEntity<>(currentUserDetails, HttpStatus.OK);
+	}
 }

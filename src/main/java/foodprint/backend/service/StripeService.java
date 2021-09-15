@@ -3,9 +3,9 @@ package foodprint.backend.service;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
+//import javax.annotation.PostConstruct;
 
-import com.stripe.Stripe;
+//import com.stripe.Stripe;
 import com.stripe.exception.ApiConnectionException;
 import com.stripe.exception.ApiException;
 import com.stripe.exception.AuthenticationException;
@@ -14,11 +14,11 @@ import com.stripe.exception.InvalidRequestException;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Charge;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.annotation.PropertySources;
+//import org.springframework.beans.factory.annotation.Value;
+//import org.springframework.context.annotation.PropertySource;
+//import org.springframework.context.annotation.PropertySources;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestMapping;
+//import org.springframework.web.bind.annotation.RequestMapping;
 
 import foodprint.backend.dto.ChargeRequest;
 

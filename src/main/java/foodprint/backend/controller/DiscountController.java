@@ -16,8 +16,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import foodprint.backend.dto.DiscountDTO;
 import foodprint.backend.model.Discount;
 import foodprint.backend.model.DiscountRepo;
+import foodprint.backend.model.Restaurant;
+import foodprint.backend.model.RestaurantRepo;
+
 import io.swagger.v3.oas.annotations.Operation;
 
 @RestController
@@ -25,10 +29,13 @@ import io.swagger.v3.oas.annotations.Operation;
 public class DiscountController {
 
     private DiscountRepo repo;
+
+    private RestaurantRepo restaurantRepo;
     
     @Autowired
-    DiscountController(DiscountRepo repo) {
+    DiscountController(DiscountRepo repo, RestaurantRepo restaurantRepo) {
         this.repo = repo;
+        this.restaurantRepo = restaurantRepo;
     }
 
     //GET: Get the discounts
@@ -47,18 +54,38 @@ public class DiscountController {
     @GetMapping({"/all"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Gets all discounts of a restaurant")
-    public ResponseEntity<List<Discount>> getAllDiscouont() {
+    public ResponseEntity<List<Discount>> getAllDiscount() {
         List<Discount> discount = repo.findAll();
         return new ResponseEntity<>(discount, HttpStatus.OK);
     }
 
     //POST: Create new Discount
-    @PostMapping
+    @PostMapping("/admin")
     @ResponseStatus(code = HttpStatus.CREATED)
     @Operation(summary = "Creates a new discount")
     public ResponseEntity<Discount> createDiscount(@RequestBody Discount discount) {
         var savedDiscount = repo.saveAndFlush(discount);
         return new ResponseEntity<>(savedDiscount, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/dto")
+    @ResponseStatus(code = HttpStatus.CREATED)
+    @Operation(summary = "Creates a new discount using dto")
+    public ResponseEntity<DiscountDTO> createDiscountDTO(@RequestBody DiscountDTO discount) {
+        Optional<Restaurant> restaurantOpt = restaurantRepo.findById(discount.getRestaurantId());
+
+        if (restaurantOpt.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        Discount savedDiscount = new Discount();
+        Restaurant restaurant = restaurantOpt.get();
+        savedDiscount.restaurant(restaurant)
+                     .discountDescription(discount.getDiscountDescription())
+                     .discountPercentage(discount.getDiscountPercentage());
+
+        repo.saveAndFlush(savedDiscount);
+        return new ResponseEntity<>(discount, HttpStatus.CREATED);
     }
 
     //PUT: Update Discount
