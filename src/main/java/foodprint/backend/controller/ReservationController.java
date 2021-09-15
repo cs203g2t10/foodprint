@@ -6,9 +6,7 @@ import java.util.ArrayList;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import foodprint.backend.dto.CreateReservationDTO;
 import foodprint.backend.model.LineItem;
 import foodprint.backend.model.Reservation;
 import foodprint.backend.model.ReservationRepo;
@@ -30,6 +29,8 @@ import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.RestaurantRepo;
 import foodprint.backend.model.UserRepo;
 import foodprint.backend.service.ReservationService;
+import foodprint.backend.model.User;
+import foodprint.backend.model.Reservation.Status;
 import io.swagger.v3.oas.annotations.Operation;
 
 @RestController
@@ -87,6 +88,37 @@ public class ReservationController {
         if (reservationService.slotAvailable(restaurant, startTime)) {
             var savedReservation = reservationRepo.saveAndFlush(reservation);
             return new ResponseEntity<>(savedReservation, HttpStatus.CREATED);
+        } else {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+    }
+
+    // POST: Create a new reservation (DTO)
+    @PostMapping({"/dto"})
+    @Operation(summary = "Create a new reservation using DTO")
+    public ResponseEntity<CreateReservationDTO> createReservationDTO(@RequestBody CreateReservationDTO req) {
+        Optional<User> userOpt = userRepo.findByEmail(req.getEmail());
+        if (userOpt.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        LocalDateTime date = req.getDate();
+        List<Reservation> reservationList = reservationRepo.findByDate(date);
+        Restaurant restaurantReservation = req.getRestaurant();
+
+        if (reservationList.size() < restaurantReservation.getRestaurantTableCapacity()) { 
+            User user = userOpt.get();
+            Reservation savedReservation = new Reservation();
+            savedReservation.user(user)
+                            .date(req.getDate())
+                            .pax(req.getPax())
+                            .isVaccinated(req.getIsVaccinated())
+                            .reservedOn(LocalDateTime.now())
+                            .status(Status.ONGOING)
+                            .lineItems(req.getLineItems())
+                            .restaurant(restaurantReservation);
+            reservationRepo.saveAndFlush(savedReservation);
+            return new ResponseEntity<>(req, HttpStatus.CREATED);
         } else {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
@@ -205,6 +237,7 @@ public class ReservationController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
             reservation.get().setLineItems(null);
+            reservationRepo.saveAndFlush(reservation.get());
         }
 
         reservation = reservationRepo.findById(id);
@@ -229,7 +262,8 @@ public class ReservationController {
         
     }
 
-    //Get all available reservation slots by date (should return a list of date objects (with the same date but different hour slots))
+    // TODO
+    // Get all available reservation slots by date (should return a list of date objects (with the same date but different hour slots))
     @GetMapping({"/slots/{restaurantId}/{date}"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Gets all available reservation slots by date")

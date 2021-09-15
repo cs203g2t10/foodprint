@@ -28,7 +28,7 @@ public class Discount {
     private String discountDescription;
 
     @Column(name = "discountPercentage")
-    @Schema(defaultValue="50%")
+    @Schema(defaultValue="50")
     private Integer discountPercentage;
 
     public Discount() {}

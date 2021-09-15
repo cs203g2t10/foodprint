@@ -6,13 +6,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.Table;
 
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 
 @Entity
-@Table
 @EnableTransactionManagement
 public class RestaurantManager extends User{
     

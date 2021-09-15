@@ -10,6 +10,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @Entity
 public class LineItem {
     
@@ -27,6 +29,7 @@ public class LineItem {
     private Reservation reservation;
 
     @Column(name = "quantity")
+    @Schema(defaultValue = "1")
     private Integer quantity;
 
     public LineItem() {}
