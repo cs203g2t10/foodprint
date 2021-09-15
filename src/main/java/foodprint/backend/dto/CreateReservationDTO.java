@@ -2,14 +2,11 @@ package foodprint.backend.dto;
 
 import java.util.List;
 import java.time.LocalDateTime;
-import foodprint.backend.model.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public class CreateReservationDTO {
-    
-    @Schema(defaultValue="bobbytan@gmail.com")
-    private String email;
 
+    @Schema(defaultValue = "2021-12-25T17:21:29.142Z")
     private LocalDateTime date;
 
     @Schema(defaultValue = "5")
@@ -18,28 +15,19 @@ public class CreateReservationDTO {
     @Schema(defaultValue = "true")
     private Boolean isVaccinated;
 
-    private List<LineItem> lineItems;
+    private List<LineItemDTO> lineItems;
     
-    private Restaurant restaurant;
+    private Integer restaurantId;
 
-    public CreateReservationDTO(String email, LocalDateTime date, Integer pax, Boolean isVaccinated, List<LineItem> lineItems, Restaurant restaurant) {
-        this.email = email;
+    public CreateReservationDTO(LocalDateTime date, Integer pax, Boolean isVaccinated, List<LineItemDTO> lineItems, Integer restaurantId) {
         this.date = date;
         this.pax = pax;
         this.isVaccinated = isVaccinated;
         this.lineItems = lineItems;
-        this.restaurant = restaurant;
+        this.restaurantId = restaurantId;
     }
 
     public CreateReservationDTO() {}
-
-    public String getEmail() {
-        return this.email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
 
     public LocalDateTime getDate() {
         return this.date;
@@ -65,20 +53,20 @@ public class CreateReservationDTO {
         this.isVaccinated = isVaccinated;
     }
 
-    public List<LineItem> getLineItems() {
+    public List<LineItemDTO> getLineItems() {
         return this.lineItems;
     }
 
-    public void setLineItems(List<LineItem> lineItems) {
+    public void setLineItems(List<LineItemDTO> lineItems) {
         this.lineItems = lineItems;
     }
 
-    public Restaurant getRestaurant() {
-        return this.restaurant;
+    public Integer getRestaurantId() {
+        return this.restaurantId;
     }
 
-    public void setRestaurant(Restaurant restaurant) {
-        this.restaurant = restaurant;
+    public void setRestaurant(Integer restaurantId) {
+        this.restaurantId = restaurantId;
     }
 
 }

@@ -11,6 +11,7 @@ import java.time.temporal.ChronoUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,7 +23,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import foodprint.backend.dto.CreateReservationDTO;
+import foodprint.backend.dto.LineItemDTO;
+import foodprint.backend.model.Food;
+import foodprint.backend.model.FoodRepo;
 import foodprint.backend.model.LineItem;
+import foodprint.backend.model.LineItemRepo;
 import foodprint.backend.model.Reservation;
 import foodprint.backend.model.ReservationRepo;
 import foodprint.backend.model.Restaurant;
@@ -41,15 +46,18 @@ public class ReservationController {
 
     private RestaurantRepo restaurantRepo;
 
-    private UserRepo userRepo;
+    private LineItemRepo lineItemRepo;
+
+    private FoodRepo foodRepo;
 
     private ReservationService reservationService;
 
     @Autowired
-    ReservationController(ReservationRepo reservationRepo, UserRepo userRepo, RestaurantRepo restaurantRepo, ReservationService reservationService) {
+    ReservationController(ReservationRepo reservationRepo, LineItemRepo lineItemRepo, RestaurantRepo restaurantRepo, FoodRepo foodRepo, ReservationService reservationService) {
         this.reservationRepo = reservationRepo;
         this.restaurantRepo = restaurantRepo;
-        this.userRepo = userRepo;
+        this.lineItemRepo = lineItemRepo;
+        this.foodRepo = foodRepo;
         this.reservationService = reservationService;
     }
 
@@ -77,7 +85,7 @@ public class ReservationController {
     }
 
     // POST: Create a new reservation
-    @PostMapping
+    @PostMapping({"/admin"})
     @ResponseStatus(code = HttpStatus.CREATED)
     @Operation(summary = "Creates a new reservation slot")
     public ResponseEntity<Reservation> createReservation(@RequestBody Reservation reservation) {
@@ -94,30 +102,45 @@ public class ReservationController {
     }
 
     // POST: Create a new reservation (DTO)
-    @PostMapping({"/dto"})
+    @PostMapping
     @Operation(summary = "Create a new reservation using DTO")
     public ResponseEntity<CreateReservationDTO> createReservationDTO(@RequestBody CreateReservationDTO req) {
-        Optional<User> userOpt = userRepo.findByEmail(req.getEmail());
-        if (userOpt.isEmpty()) {
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Optional<Restaurant> restaurantOpt = restaurantRepo.findById(req.getRestaurantId());
+        if (restaurantOpt.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+        Restaurant restaurant = restaurantOpt.get();
+        LocalDateTime dateOfReservation = req.getDate();
+        LocalDateTime startTime = dateOfReservation.truncatedTo(ChronoUnit.HOURS);
 
-        LocalDateTime date = req.getDate();
-        List<Reservation> reservationList = reservationRepo.findByDate(date);
-        Restaurant restaurantReservation = req.getRestaurant();
-
-        if (reservationList.size() < restaurantReservation.getRestaurantTableCapacity()) { 
-            User user = userOpt.get();
-            Reservation savedReservation = new Reservation();
-            savedReservation.user(user)
-                            .date(req.getDate())
-                            .pax(req.getPax())
-                            .isVaccinated(req.getIsVaccinated())
-                            .reservedOn(LocalDateTime.now())
-                            .status(Status.ONGOING)
-                            .lineItems(req.getLineItems())
-                            .restaurant(restaurantReservation);
-            reservationRepo.saveAndFlush(savedReservation);
+        if (reservationService.slotAvailable(restaurant, startTime)) {
+            Reservation reservation = new Reservation();
+            reservation.user(currentUser)
+                        .date(dateOfReservation)
+                        .pax(req.getPax())
+                        .isVaccinated(req.getIsVaccinated())
+                        .reservedOn(LocalDateTime.now())
+                        .status(Status.ONGOING)
+                        .restaurant(restaurant);
+            
+            List<LineItem> savedLineItems = new ArrayList<>();
+            for (LineItemDTO lineItem : req.getLineItems()) {
+                Optional<Food> foodOpt = foodRepo.findById(lineItem.getFoodId());
+                if (foodOpt.isEmpty()) {
+                    return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+                }
+                Food food = foodOpt.get();
+                if (!restaurant.getAllFood().contains(food)) {
+                    return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+                }
+                LineItem savedLineItem = new LineItem(food, reservation, lineItem.getQuantity());
+                savedLineItems.add(savedLineItem);
+                lineItemRepo.saveAndFlush(savedLineItem);
+            }
+            reservation.lineItems(savedLineItems);
+            reservationRepo.saveAndFlush(reservation);
             return new ResponseEntity<>(req, HttpStatus.CREATED);
         } else {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
