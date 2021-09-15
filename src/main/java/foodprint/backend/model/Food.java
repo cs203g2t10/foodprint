@@ -36,7 +36,7 @@ public class Food {
     private Integer foodId;
 
     @Column(name = "foodName")
-    @Schema(defaultValue="somefood")
+    @Schema(defaultValue="Sashimi")
     private String foodName;
 
     @ManyToOne(cascade=CascadeType.MERGE)
@@ -44,12 +44,14 @@ public class Food {
     private Restaurant restaurant;
 
     @Column(name = "foodDesc")
+    @Schema(defaultValue = "Salmon slices")
     private String foodDesc;
 
     @Column(name = "picturesPath")
     private String picturesPath;
 
     @Column(name = "foodprice")
+    @Schema(defaultValue = "10")
     private Double foodPrice;
 
     @Column(name = "foodDiscount")

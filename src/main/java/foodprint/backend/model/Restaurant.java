@@ -17,6 +17,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 
 @Entity
 @Table
@@ -30,18 +32,22 @@ public class Restaurant {
     private Integer restaurantId;
 
     @Column(name = "restaurantName")
+    @Schema(defaultValue="Sushi Tei")
     private String restaurantName;
 
     @Column(name = "restaurantDesc")
+    @Schema(defaultValue="Japanese restaurant")
     private String restaurantDesc;
 
     @Column(name = "picturesPath")
     private String picturesPath;
 
     @Column (name = "restaurantLocation")
+    @Schema(defaultValue="Serangoon")
     private String restaurantLocation;
 
     @Column (name = "restaurantTableCapacity")
+    @Schema(defaultValue="15")
     private Integer restaurantTableCapacity = 15;
 
     //what time the restaurant is open for reservation - assume 24 hour clock e.g "13:00" for 1pm

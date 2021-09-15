@@ -16,6 +16,8 @@ import javax.persistence.Table;
 
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @Entity
 @Table
 @EnableTransactionManagement
@@ -36,9 +38,11 @@ public class Reservation {
     private LocalDateTime date;
 
     @Column(name = "pax")
+    @Schema(defaultValue = "5")
     private Integer pax;
 
     @Column(name = "isVaccinated")
+    @Schema(defaultValue = "true")
     private Boolean isVaccinated;
 
     @Column(name = "reservedOn")
@@ -48,6 +52,7 @@ public class Reservation {
         ONGOING, CANCELLED
     }
     @Column(name = "status")
+    @Schema(defaultValue = "ONGOING")
     private Status status;
 
     @OneToMany(mappedBy = "reservation", cascade=CascadeType.MERGE)
@@ -85,10 +90,6 @@ public class Reservation {
 
     public Integer getReservationId() {
         return this.reservationId;
-    }
-
-    public void setReservationId(Integer reservationId) {
-        this.reservationId = reservationId;
     }
 
     public User getUser() {
@@ -154,5 +155,46 @@ public class Reservation {
     public void setRestaurant(Restaurant restaurant) {
         this.restaurant = restaurant;
     }
+
+    public Reservation user(User user) {
+        setUser(user);
+        return this;
+    }
+
+    public Reservation date(LocalDateTime date) {
+        setDate(date);
+        return this;
+    }
+
+    public Reservation pax(Integer pax) {
+        setPax(pax);
+        return this;
+    }
+
+    public Reservation isVaccinated(Boolean isVaccinated) {
+        setIsVaccinated(isVaccinated);
+        return this;
+    }
+
+    public Reservation reservedOn(LocalDateTime reservedOn) {
+        setReservedOn(reservedOn);
+        return this;
+    }
+
+    public Reservation status(Status status) {
+        setStatus(status);
+        return this;
+    }
+
+    public Reservation lineItems(List<LineItem> lineItems) {
+        setLineItems(lineItems);
+        return this;
+    }
+
+    public Reservation restaurant(Restaurant restaurant) {
+        setRestaurant(restaurant);
+        return this;
+    }
+
 
 }

@@ -14,6 +14,8 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @Entity
 @Table
 
@@ -24,9 +26,11 @@ public class Ingredient {
     private Integer ingredientId;
 
     @Column(name = "ingredientName")
+    @Schema(defaultValue = "Salmon")
     private String ingredientName;
 
     @Column(name = "ingredientDesc")
+    @Schema(defaultValue = "Sashimi grade salmon")
     private String ingredientDesc;
 
     @Column(name = "picturesPath")
@@ -36,6 +40,7 @@ public class Ingredient {
     // private Double ingredientPrice;
 
     @Column(name = "units")
+    @Schema(defaultValue = "1")
     private String units;
 
     @ManyToMany(mappedBy = "ingredients")
