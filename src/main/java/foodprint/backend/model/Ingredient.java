@@ -48,8 +48,7 @@ public class Ingredient {
 
     protected Ingredient () { }
 
-    public Ingredient (Integer ingredientId, String ingredientName) {
-        this.ingredientId = ingredientId;
+    public Ingredient (String ingredientName) {
         this.ingredientName = ingredientName;
         // this.ingredientPrice = ingredientPrice;
     }

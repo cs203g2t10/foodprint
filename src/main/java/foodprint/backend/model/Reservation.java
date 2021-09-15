@@ -23,7 +23,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @EnableTransactionManagement
 
 public class Reservation {
-
+    
     // Properties
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -55,7 +55,7 @@ public class Reservation {
     @Schema(defaultValue = "ONGOING")
     private Status status;
 
-    @OneToMany(mappedBy = "reservation", cascade=CascadeType.MERGE)
+    @OneToMany(mappedBy = "reservation", cascade=CascadeType.ALL)
     private List<LineItem> lineItems;
 
     @ManyToOne(cascade=CascadeType.MERGE)
@@ -65,8 +65,7 @@ public class Reservation {
     //Constructors
     public Reservation() {}
 
-    public Reservation(Integer reservationId, User user, LocalDateTime date, Integer pax, Boolean isVaccinated, LocalDateTime reservedOn, Status status, List<LineItem> lineItems, Restaurant restaurant) {
-        this.reservationId = reservationId;
+    public Reservation(User user, LocalDateTime date, Integer pax, Boolean isVaccinated, LocalDateTime reservedOn, Status status, List<LineItem> lineItems, Restaurant restaurant) {
         this.user = user;
         this.date = date;
         this.pax = pax;
@@ -77,8 +76,7 @@ public class Reservation {
         this.restaurant = restaurant;
     }
 
-    public Reservation(Integer reservationId, User user, LocalDateTime date, Integer pax, Boolean isVaccinated, LocalDateTime reservedOn, Status status, Restaurant restaurant) {
-        this.reservationId = reservationId;
+    public Reservation(User user, LocalDateTime date, Integer pax, Boolean isVaccinated, LocalDateTime reservedOn, Status status, Restaurant restaurant) {
         this.user = user;
         this.date = date;
         this.pax = pax;

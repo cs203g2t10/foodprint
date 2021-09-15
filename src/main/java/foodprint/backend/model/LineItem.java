@@ -24,7 +24,7 @@ public class LineItem {
     @JoinColumn(name = "foodId")
     private Food food;
 
-    @ManyToOne(cascade=CascadeType.MERGE)
+    @ManyToOne(cascade=CascadeType.ALL)
     @JoinColumn(name = "reservationId")
     private Reservation reservation;
 
@@ -34,8 +34,7 @@ public class LineItem {
 
     public LineItem() {}
 
-    public LineItem(Integer lineItemId, Food food, Reservation reservation, Integer quantity) {
-        this.lineItemId = lineItemId;
+    public LineItem(Food food, Reservation reservation, Integer quantity) {
         this.food = food;
         this.reservation = reservation;
         this.quantity = quantity;
@@ -43,10 +42,6 @@ public class LineItem {
 
     public Integer getLineItemId() {
         return this.lineItemId;
-    }
-
-    public void setLineItemId(Integer lineItemId) {
-        this.lineItemId = lineItemId;
     }
 
     public Food getFood() {

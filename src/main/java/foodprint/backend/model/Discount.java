@@ -33,8 +33,7 @@ public class Discount {
 
     public Discount() {}
 
-    public Discount(Integer discountId, Restaurant restaurant, String discountDescription, Integer discountPercentage) {
-        this.discountId = discountId;
+    public Discount(Restaurant restaurant, String discountDescription, Integer discountPercentage) {
         this.restaurant = restaurant;
         this.discountDescription = discountDescription;
         this.discountPercentage = discountPercentage;
