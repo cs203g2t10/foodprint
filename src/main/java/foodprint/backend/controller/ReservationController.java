@@ -32,7 +32,6 @@ import foodprint.backend.model.Reservation;
 import foodprint.backend.model.ReservationRepo;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.RestaurantRepo;
-import foodprint.backend.model.UserRepo;
 import foodprint.backend.service.ReservationService;
 import foodprint.backend.model.User;
 import foodprint.backend.model.Reservation.Status;

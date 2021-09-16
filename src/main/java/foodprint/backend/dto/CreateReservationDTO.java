@@ -65,7 +65,7 @@ public class CreateReservationDTO {
         return this.restaurantId;
     }
 
-    public void setRestaurant(Integer restaurantId) {
+    public void setRestaurantId(Integer restaurantId) {
         this.restaurantId = restaurantId;
     }
 
