@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 public class LineItemDTO {
 
-    @Schema(defaultValue = "0")
+    @Schema(defaultValue = "1")
     private Integer foodId;
 
     @Schema(defaultValue = "1")

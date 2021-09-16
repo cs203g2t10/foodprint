@@ -18,6 +18,7 @@ public class LineItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "lineItemId")
+    @Schema(defaultValue="1")
     private Integer lineItemId;
 
     @OneToOne(cascade=CascadeType.MERGE)

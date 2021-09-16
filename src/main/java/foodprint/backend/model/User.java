@@ -28,6 +28,7 @@ public class User implements UserDetails{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
+    @Schema(defaultValue="1")
     private Long id;
 
     @Column(name = "email", nullable=false, unique=true)

@@ -23,6 +23,7 @@ public class Ingredient {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ingredientId")
+    @Schema(defaultValue="1")
     private Integer ingredientId;
 
     @Column(name = "ingredientName")

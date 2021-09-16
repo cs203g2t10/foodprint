@@ -17,6 +17,7 @@ public class CreateReservationDTO {
 
     private List<LineItemDTO> lineItems;
     
+    @Schema(defaultValue = "1")
     private Integer restaurantId;
 
     public CreateReservationDTO(LocalDateTime date, Integer pax, Boolean isVaccinated, List<LineItemDTO> lineItems, Integer restaurantId) {

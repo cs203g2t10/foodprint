@@ -1,8 +1,12 @@
 package foodprint.backend.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 public class RestaurantDTO {
+    @Schema(defaultValue="Sushi Tei")
     private String restaurantName;
 
+    @Schema(defaultValue="Serangoon")
     private String restaurantLocation;
 
     public String getRestaurantName() {

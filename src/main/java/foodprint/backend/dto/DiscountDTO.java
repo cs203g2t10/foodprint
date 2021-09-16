@@ -1,11 +1,16 @@
 package foodprint.backend.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 public class DiscountDTO {
 
+    @Schema(defaultValue="1")
     private Integer restaurantId;
 
+    @Schema(defaultValue="1for1")
     private String discountDescription;
 
+    @Schema(defaultValue="50")
     private Integer discountPercentage;
 
     public DiscountDTO(Integer restaurantId, String discountDescription, Integer discountPercentage) {

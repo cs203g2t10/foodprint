@@ -33,6 +33,7 @@ public class Food {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "foodId")
+    @Schema(defaultValue="1")
     private Integer foodId;
 
     @Column(name = "foodName")

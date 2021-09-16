@@ -17,6 +17,7 @@ public class Discount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "discountId")
+    @Schema(defaultValue="1")
     private Integer discountId;
 
     @ManyToOne(cascade=CascadeType.MERGE)

@@ -9,7 +9,6 @@ import javax.persistence.ManyToOne;
 
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-
 @Entity
 @EnableTransactionManagement
 public class RestaurantManager extends User{

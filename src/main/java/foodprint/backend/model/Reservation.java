@@ -28,6 +28,7 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "reservationId")
+    @Schema(defaultValue="1")
     private Integer reservationId;
 
     @ManyToOne(cascade=CascadeType.MERGE)

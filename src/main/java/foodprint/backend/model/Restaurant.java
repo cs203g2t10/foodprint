@@ -29,6 +29,7 @@ public class Restaurant {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "restaurantId")
+    @Schema(defaultValue="1")
     private Integer restaurantId;
 
     @Column(name = "restaurantName")
