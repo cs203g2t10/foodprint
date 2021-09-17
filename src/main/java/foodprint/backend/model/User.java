@@ -13,6 +13,10 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -33,28 +37,34 @@ public class User implements UserDetails{
 
     @Column(name = "email", nullable=false, unique=true)
     @Schema(defaultValue="bobbytan@gmail.com")
+    @Email
     private String email;
 
     @Column(name = "fName", nullable = false)
     @Schema(defaultValue="Bobby")
+    @NotEmpty
     private String firstName;
 
     @Column(name = "lName", nullable = true)
     @Schema(defaultValue="Tan")
+    @NotEmpty
     private String lastName;
 
     @Column(name = "password", nullable = false)
     @Schema(defaultValue="SuperSecurePassw0rd")
+    @NotEmpty
     private String password;
 
     @Column(name = "role", nullable = false)
     @Schema(defaultValue="FP_USER")
+    @NotEmpty
     private String roles;
 
     @Column(name = "lastLogin", nullable = true)
     private LocalDateTime lastLogin;
 
     @Column(name = "registeredOn", nullable = false)
+    @NotNull
     private LocalDateTime registeredOn;
     
     @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE)

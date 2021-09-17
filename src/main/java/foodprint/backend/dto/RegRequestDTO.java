@@ -1,19 +1,34 @@
 package foodprint.backend.dto;
 
+
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public class RegRequestDTO {
 
     @Schema(defaultValue="bobbytan@gmail.com")
+    @NotEmpty @Email
     private String email;
 
     @Schema(defaultValue="SuperSecurePassw0rd")
+    @NotEmpty
+    @Size(min = 8, max = 60)
+    @Pattern(regexp = "(?=.*[0-9])", message = "must contain one digit.")
+    @Pattern(regexp = "(?=.*[a-z])", message = "must contain one lowercase letter.")
+    @Pattern(regexp = "(?=.*[A-Z])", message = "must contain one uppercase letter.")
+    // @Pattern(regexp = "(?=\\S+$)", message = "must contain no whitespace.")
     private String password;
 
     @Schema(defaultValue="Bobby")
+    @NotEmpty
     private String firstName;
 
     @Schema(defaultValue="Tan")
+    @NotEmpty
     private String lastName;
 
     public String getEmail() {

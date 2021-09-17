@@ -11,6 +11,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,6 +29,7 @@ import foodprint.backend.model.User;
 import foodprint.backend.model.UserRepo;
 import foodprint.backend.service.AuthenticationService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -48,7 +50,7 @@ public class AuthController {
 
     @PostMapping("/login")
     @Operation(summary = "Using the credentials, get a JWT authorization token")
-    public ResponseEntity<AuthResponseDTO> login(@RequestBody AuthRequestDTO req) {
+    public ResponseEntity<AuthResponseDTO> login(@Valid @RequestBody AuthRequestDTO req) {
         try {
 
             Authentication authenticate = authService.authenticate(
@@ -70,18 +72,22 @@ public class AuthController {
             return ResponseEntity.ok().header(HttpHeaders.AUTHORIZATION, jwtToken).body(responseBody);
 
         } catch (BadCredentialsException ex) {
-            
+
             AuthResponseDTO responseBody = new AuthResponseDTO();
             responseBody.setStatus("INCORRECT");
-            
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseBody);
 
+        } catch (UsernameNotFoundException ex) {
+        
+            AuthResponseDTO responseBody = new AuthResponseDTO();
+            responseBody.setStatus("INCORRECT");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseBody);
         }
     }
 
     @PostMapping("/register")
     @Operation(summary = "Register for a new user account")
-    public ResponseEntity<RegResponseDTO> register(@RequestBody RegRequestDTO request) {
+    public ResponseEntity<RegResponseDTO> register(@Valid @RequestBody RegRequestDTO request) {
         
         Optional<User> existingUser = repo.findByEmail(request.getEmail());
         if (existingUser.isPresent()) {

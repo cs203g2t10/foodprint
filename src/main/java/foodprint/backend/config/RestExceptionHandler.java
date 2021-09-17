@@ -1,0 +1,59 @@
+package foodprint.backend.config;
+
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+
+@RestControllerAdvice
+public class RestExceptionHandler extends ResponseEntityExceptionHandler {
+    
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+        MethodArgumentNotValidException ex,
+        HttpHeaders headers,
+        HttpStatus status,
+        WebRequest request ) {
+
+        LinkedHashMap<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", new Date());
+        body.put("status", status.value());
+        body.put("error", status.getReasonPhrase());
+        List<String> messages = new ArrayList<>();
+        for (ObjectError objectError : ex.getBindingResult().getAllErrors()){
+            if (objectError instanceof FieldError) {
+                FieldError fieldError = (FieldError) objectError;
+                messages.add(fieldError.getField() + " " + fieldError.getDefaultMessage());
+            } else {
+                messages.add(objectError.getDefaultMessage());
+            }
+        }
+        Collections.sort(messages);
+        body.put("message", messages);
+        body.put("path", request.getDescription(false));
+        return new ResponseEntity<>(body, headers, status);
+    }
+
+    /**
+     * Handle the case in which arguments for controller's methods did not match the type.
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public void handleTypeMismatch(HttpServletResponse response) throws IOException {
+        response.sendError(HttpStatus.BAD_REQUEST.value());
+    }
+}
