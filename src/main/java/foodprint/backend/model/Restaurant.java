@@ -176,4 +176,11 @@ public class Restaurant {
         this.restaurantWeekendClosing = restaurantWeekendClosing;
     }
     
+    public List<Discount> getAllDiscount() {
+        return discount;
+    }
+
+    public void setAllDiscount(List<Discount> discount) {
+        this.discount = discount;
+    }
 }
