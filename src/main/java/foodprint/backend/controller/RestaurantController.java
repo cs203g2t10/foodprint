@@ -21,10 +21,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 
+import foodprint.backend.dto.DiscountDTO;
 import foodprint.backend.model.Restaurant;
+import foodprint.backend.model.Discount;
 import foodprint.backend.dto.RestaurantDTO;
 import foodprint.backend.model.Food;
 import foodprint.backend.model.RestaurantRepo;
+import foodprint.backend.model.DiscountRepo;
 import io.swagger.v3.oas.annotations.Operation;
 import foodprint.backend.model.FoodRepo;
 
@@ -40,10 +43,12 @@ public class RestaurantController {
     private FoodRepo foodRepo;
 
     @Autowired
+    private DiscountRepo discountRepo;
+
+    @Autowired
     RestaurantController(RestaurantRepo repo) {
         this.repo = repo;
     }
-
 
     // GET: Get the restaurant
     @GetMapping({"/id/{restaurantId}"})
@@ -147,4 +152,11 @@ public class RestaurantController {
         return new ResponseEntity<>(allFood, HttpStatus.OK);
     }
 
+    @GetMapping({"/id/{restaurantId}/alldiscount"})
+    @ResponseStatus(code = HttpStatus.OK)
+    public ResponseEntity<List<Discount>> getAllRestaurantDiscount(@PathVariable("restaurantId") Integer restaurantId) {
+        Restaurant restaurant = repo.findByRestaurantId(restaurantId);
+        List<Discount> allDiscount = restaurant.getAllDiscount();
+        return new ResponseEntity<>(allDiscount, HttpStatus.OK);
+    }
 }
