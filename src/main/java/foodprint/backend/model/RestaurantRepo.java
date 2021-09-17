@@ -7,11 +7,11 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface RestaurantRepo extends JpaRepository<Restaurant, Integer> {
+public interface RestaurantRepo extends JpaRepository<Restaurant, Long> {
 
     Restaurant findByRestaurantName(String restaurantName);
 
-    Restaurant findByRestaurantId(Integer restaurantId);
+    Restaurant findByRestaurantId(Long restaurantId);
 
     List<Restaurant> findByRestaurantNameContains(String restaurantName);
 

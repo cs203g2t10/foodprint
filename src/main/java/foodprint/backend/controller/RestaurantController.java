@@ -21,15 +21,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 
-import foodprint.backend.dto.DiscountDTO;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.Discount;
 import foodprint.backend.dto.RestaurantDTO;
 import foodprint.backend.model.Food;
-import foodprint.backend.model.RestaurantRepo;
-import foodprint.backend.model.DiscountRepo;
+import foodprint.backend.service.RestaurantService;
 import io.swagger.v3.oas.annotations.Operation;
-import foodprint.backend.model.FoodRepo;
 
 // REST OpenAPI Swagger - http://localhost:8080/foodprint-swagger.html
 @CrossOrigin(origins = "http://localhost:3000")
@@ -37,24 +34,18 @@ import foodprint.backend.model.FoodRepo;
 @RequestMapping("/api/v1/restaurant")
 public class RestaurantController {
     
-    private RestaurantRepo repo;
+    private RestaurantService service;
 
     @Autowired
-    private FoodRepo foodRepo;
-
-    @Autowired
-    private DiscountRepo discountRepo;
-
-    @Autowired
-    RestaurantController(RestaurantRepo repo) {
-        this.repo = repo;
+    RestaurantController(RestaurantService service) {
+        this.service = service;
     }
 
     // GET: Get the restaurant
     @GetMapping({"/id/{restaurantId}"})
     @ResponseStatus(code = HttpStatus.OK)
-    public ResponseEntity<Restaurant> getRestaurant(@PathVariable("restaurantId") Integer id) {
-        Optional<Restaurant> restaurant = repo.findById(id);
+    public ResponseEntity<Restaurant> getRestaurant(@PathVariable("restaurantId") Long id) {
+        Optional<Restaurant> restaurant = service.get(id);
         if (restaurant.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -65,17 +56,17 @@ public class RestaurantController {
     @GetMapping({"/all"})
     @ResponseStatus(code = HttpStatus.OK)
     public ResponseEntity<List<Restaurant>> getAllRestaurants() {
-        List<Restaurant> restaurants = repo.findAll();
+        List<Restaurant> restaurants = service.getAllRestaurants();
         return new ResponseEntity<>(restaurants, HttpStatus.OK);
     }
 
     // POST: Create new restaurant
     @PostMapping
-    @Operation(summary = "create a new restaurant")
+    @Operation(summary = "Create a new restaurant")
     @ResponseStatus(code = HttpStatus.CREATED)
     public ResponseEntity<Restaurant> createRestaurant(@RequestBody RestaurantDTO restaurantDTO) {
         Restaurant restaurant = new Restaurant(restaurantDTO.getRestaurantName(), restaurantDTO.getRestaurantLocation());
-        var savedRestaurant = repo.saveAndFlush(restaurant);
+        Restaurant savedRestaurant = service.create(restaurant);
         return new ResponseEntity<>(savedRestaurant, HttpStatus.CREATED);
     }
 
@@ -83,13 +74,15 @@ public class RestaurantController {
     @PutMapping({"/id/{restaurantId}"})
     @ResponseStatus(code = HttpStatus.OK)
     public ResponseEntity<Restaurant> updateRestaurant(
-        @PathVariable("restaurantId") Integer id,
+        @PathVariable("restaurantId") Long id,
         @RequestBody Restaurant updatedRestaurant
     ) {
-        Optional<Restaurant> currentRestaurantOpt = repo.findById(id);
+
+        Optional<Restaurant> currentRestaurantOpt = service.get(id);
         if (currentRestaurantOpt.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+
         var currentRestaurant = currentRestaurantOpt.get();
         currentRestaurant.setRestaurantDesc(updatedRestaurant.getRestaurantDesc());
         currentRestaurant.setRestaurantName(updatedRestaurant.getRestaurantName());
@@ -100,23 +93,25 @@ public class RestaurantController {
         currentRestaurant.setRestaurantWeekdayOpening(updatedRestaurant.getRestaurantWeekdayOpening());
         currentRestaurant.setRestaurantWeekendClosing(updatedRestaurant.getRestaurantWeekendClosing());
         currentRestaurant.setRestaurantWeekendOpening(updatedRestaurant.getRestaurantWeekendOpening());
-        currentRestaurant = repo.saveAndFlush(currentRestaurant);
+        currentRestaurant = service.update(currentRestaurant);
+
         return new ResponseEntity<>(currentRestaurant, HttpStatus.OK);
     }
+
 
     // DELETE: Delete the restaurant
     @DeleteMapping({"/id/{restaurantId}"})
     @ResponseStatus(code = HttpStatus.OK)
-    public ResponseEntity<Restaurant> deleteRestaurant(@PathVariable("restaurantId") Integer id) {
-        var savedRestaurant = repo.findById(id);
+    public ResponseEntity<Restaurant> deleteRestaurant(@PathVariable("restaurantId") Long id) {
+        var savedRestaurant = service.get(id);
         
         if (savedRestaurant.isPresent()) {
-            repo.delete(savedRestaurant.get());
+            service.delete(savedRestaurant.get());
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         
-        savedRestaurant = repo.findById(id);
+        savedRestaurant = service.get(id);
         if (savedRestaurant.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.OK);
         }
@@ -124,39 +119,40 @@ public class RestaurantController {
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @GetMapping(value = "search", produces = "application/json")
-	public Page<Restaurant> search(@RequestParam("q") String query, @RequestParam(defaultValue = "1") int pageNum) {
-		Pageable pages = PageRequest.of(pageNum - 1, 5); 
 
-        // Pagination 
-		Page<Restaurant> searchResult = repo.findByRestaurantNameContains(pages, query);
-        
+    @GetMapping("/search")
+	public Page<Restaurant> search(@RequestParam("q") String query, @RequestParam(defaultValue = "1") int pageNum) {
+		Pageable page = PageRequest.of(pageNum - 1, 5); // Pagination
+		Page<Restaurant> searchResult = service.search(page, query);    
         return searchResult;
     }
 
     @PostMapping({"/id/{restaurantId}/food"})
     @ResponseStatus(code = HttpStatus.CREATED)
-    public ResponseEntity<Food> addRestaurantFood(@PathVariable("restaurantId") Integer restaurantId, @RequestBody Food food) {
-        Restaurant restaurant = repo.findByRestaurantId(restaurantId);
-        food.setRestaurant(restaurant);
-        var savedFood = foodRepo.saveAndFlush(food);
-        restaurant.getAllFood().add(food);
+    public ResponseEntity<Food> addRestaurantFood(@PathVariable("restaurantId") Long restaurantId, @RequestBody Food food) {
+        Food savedFood = service.addFood(restaurantId, food);
         return new ResponseEntity<>(savedFood, HttpStatus.CREATED);
     }
 
-    @GetMapping({"/id/{restaurantId}/allFood"})
+    @GetMapping({"/id/{restaurantId}/food/all"})
     @ResponseStatus(code = HttpStatus.OK)
-    public ResponseEntity<List<Food>> getAllRestaurantFood(@PathVariable("restaurantId") Integer restaurantId) {
-        Restaurant restaurant = repo.findByRestaurantId(restaurantId);
-        List<Food> allFood = restaurant.getAllFood();
+    public ResponseEntity<List<Food>> getAllRestaurantFood(@PathVariable("restaurantId") Long restaurantId) {
+        Optional<Restaurant> restaurant = service.get(restaurantId);
+        if (restaurant.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        List<Food> allFood = restaurant.get().getAllFood();
         return new ResponseEntity<>(allFood, HttpStatus.OK);
     }
 
-    @GetMapping({"/id/{restaurantId}/alldiscount"})
+    @GetMapping({"/id/{restaurantId}/discounts"})
     @ResponseStatus(code = HttpStatus.OK)
-    public ResponseEntity<List<Discount>> getAllRestaurantDiscount(@PathVariable("restaurantId") Integer restaurantId) {
-        Restaurant restaurant = repo.findByRestaurantId(restaurantId);
-        List<Discount> allDiscount = restaurant.getAllDiscount();
-        return new ResponseEntity<>(allDiscount, HttpStatus.OK);
+    public ResponseEntity<List<Discount>> getAllRestaurantDiscount(@PathVariable("restaurantId") Long restaurantId) {
+        Optional<Restaurant> restaurant = service.get(restaurantId);
+        if (restaurant.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        List<Discount> allDiscounts = restaurant.get().getAllDiscount();
+        return new ResponseEntity<>(allDiscounts, HttpStatus.OK);
     }
 }

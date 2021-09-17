@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class DiscountDTO {
 
     @Schema(defaultValue="1")
-    private Integer restaurantId;
+    private Long restaurantId;
 
     @Schema(defaultValue="1for1")
     private String discountDescription;
@@ -13,17 +13,17 @@ public class DiscountDTO {
     @Schema(defaultValue="50")
     private Integer discountPercentage;
 
-    public DiscountDTO(Integer restaurantId, String discountDescription, Integer discountPercentage) {
+    public DiscountDTO(Long restaurantId, String discountDescription, Integer discountPercentage) {
         this.restaurantId = restaurantId;
         this.discountDescription = discountDescription;
         this.discountPercentage = discountPercentage;
     }
 
-    public Integer getRestaurantId() {
+    public Long getRestaurantId() {
         return this.restaurantId;
     }
 
-    public void setRestaurantId(Integer restaurantId) {
+    public void setRestaurantId(Long restaurantId) {
         this.restaurantId = restaurantId;
     }
 
@@ -43,7 +43,7 @@ public class DiscountDTO {
         this.discountPercentage = discountPercentage;
     }
 
-    public DiscountDTO restaurantId(Integer restaurantId) {
+    public DiscountDTO restaurantId(Long restaurantId) {
         setRestaurantId(restaurantId);
         return this;
     }

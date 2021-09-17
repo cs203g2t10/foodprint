@@ -30,7 +30,7 @@ public class Restaurant {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "restaurantId")
     @Schema(defaultValue="1")
-    private Integer restaurantId;
+    private Long restaurantId;
 
     @Column(name = "restaurantName")
     @Schema(defaultValue="Sushi Tei")
@@ -83,7 +83,7 @@ public class Restaurant {
     }
 
     // Mutators and Accessors
-    public Integer getRestaurantId() {
+    public Long getRestaurantId() {
         return this.restaurantId;
     }
 

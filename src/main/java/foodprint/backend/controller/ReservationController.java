@@ -273,7 +273,7 @@ public class ReservationController {
     @GetMapping({"/all/{restaurantId}"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Gets all reservation slots by restaurant")
-    public ResponseEntity<List<Reservation>> getAllReservationByRestaurant(@PathVariable("restaurantId") Integer id) {
+    public ResponseEntity<List<Reservation>> getAllReservationByRestaurant(@PathVariable("restaurantId") Long id) {
         Optional<Restaurant> restaurant = restaurantRepo.findById(id);
         if (restaurant.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -289,7 +289,7 @@ public class ReservationController {
     @GetMapping({"/slots/{restaurantId}/{date}"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Gets all available reservation slots by date")
-    public ResponseEntity<List<LocalDateTime>> getAllAvailableSlotsByDateAndRestaurant(@PathVariable("restaurantId") Integer id, @PathVariable("date") String date) {
+    public ResponseEntity<List<LocalDateTime>> getAllAvailableSlotsByDateAndRestaurant(@PathVariable("restaurantId") Long id, @PathVariable("date") String date) {
         //Assume string date is in ISO format - 2021-19-14
         List<LocalDateTime> availableSlots = new ArrayList<LocalDateTime>();
         Optional<Restaurant> restaurant = restaurantRepo.findById(id);

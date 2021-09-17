@@ -18,9 +18,9 @@ public class CreateReservationDTO {
     private List<LineItemDTO> lineItems;
     
     @Schema(defaultValue = "1")
-    private Integer restaurantId;
+    private Long restaurantId;
 
-    public CreateReservationDTO(LocalDateTime date, Integer pax, Boolean isVaccinated, List<LineItemDTO> lineItems, Integer restaurantId) {
+    public CreateReservationDTO(LocalDateTime date, Integer pax, Boolean isVaccinated, List<LineItemDTO> lineItems, Long restaurantId) {
         this.date = date;
         this.pax = pax;
         this.isVaccinated = isVaccinated;
@@ -62,11 +62,11 @@ public class CreateReservationDTO {
         this.lineItems = lineItems;
     }
 
-    public Integer getRestaurantId() {
+    public Long getRestaurantId() {
         return this.restaurantId;
     }
 
-    public void setRestaurantId(Integer restaurantId) {
+    public void setRestaurantId(Long restaurantId) {
         this.restaurantId = restaurantId;
     }
 
