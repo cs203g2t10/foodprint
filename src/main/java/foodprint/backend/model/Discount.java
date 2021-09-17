@@ -9,9 +9,15 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Entity
+@JsonIgnoreProperties("restaurant")
+@EnableTransactionManagement
 public class Discount {
 
     @Id
@@ -21,7 +27,8 @@ public class Discount {
     private Integer discountId;
 
     @ManyToOne(cascade=CascadeType.MERGE)
-    @JoinColumn(name = "restaurant")
+    @JoinColumn(name = "restaurantId")
+    @Schema(defaultValue="1")
     private Restaurant restaurant;
 
     @Column(name = "discountDescription")
@@ -34,8 +41,8 @@ public class Discount {
 
     public Discount() {}
 
-    public Discount(Restaurant restaurant, String discountDescription, Integer discountPercentage) {
-        this.restaurant = restaurant;
+    public Discount(Integer discountId, String discountDescription, Integer discountPercentage) {
+        this.discountId = discountId;
         this.discountDescription = discountDescription;
         this.discountPercentage = discountPercentage;
     }
