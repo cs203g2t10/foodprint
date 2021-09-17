@@ -24,6 +24,7 @@ import org.springframework.data.domain.PageRequest;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.Discount;
 import foodprint.backend.dto.RestaurantDTO;
+import foodprint.backend.dto.DiscountDTO;
 import foodprint.backend.model.Food;
 import foodprint.backend.service.RestaurantService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -154,5 +155,82 @@ public class RestaurantController {
         }
         List<Discount> allDiscounts = restaurant.get().getAllDiscount();
         return new ResponseEntity<>(allDiscounts, HttpStatus.OK);
+    }
+
+    //GET: Get a discount of restaurant
+    @GetMapping({"/id/{restaurantId}/discount/id/{discountId}"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Gets a discount of restaurant")
+    public ResponseEntity<Discount> getDiscount(@PathVariable("restaurantId") Long restaurantId, @PathVariable("discountId") Long discountId) {
+        Optional<Restaurant> restaurant = service.get(restaurantId);
+        if (restaurant.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        List<Discount> allDiscounts = restaurant.get().getAllDiscount();
+        for(Discount discount : allDiscounts) {
+            if (discount.getDiscountId().equals(discountId)) {
+                Optional<Discount> discountFound = service.getDiscount(discountId);
+                return new ResponseEntity<>(discountFound.get(), HttpStatus.OK);
+            }
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    //POST: Creates new discount for restaurant
+    @PostMapping("/id/{restaurantId}/discount")
+    @ResponseStatus(code = HttpStatus.CREATED)
+    @Operation(summary = "Creates a new discount using dto")
+    public ResponseEntity<Discount> createDiscount(@PathVariable Long restaurantId, @RequestBody DiscountDTO discount) {
+        Optional<Restaurant> restaurantOpt = service.get(restaurantId);
+
+        if (restaurantOpt.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        Discount savedDiscount = service.addDiscount(restaurantId, discount);
+        return new ResponseEntity<>(savedDiscount, HttpStatus.CREATED);
+    }
+
+    //DELETE: Delete a discount from restaurant
+    @DeleteMapping({"/id/{restaurantId}/discount/id/{discountId}"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Deletes an existing discount")
+    public ResponseEntity<Discount> deleteDiscount(@PathVariable("restaurantId") Long restaurantId, @PathVariable("discountId") Long discountId) {
+        Optional<Restaurant> restaurant = service.get(restaurantId);
+        List<Discount> allDiscounts = restaurant.get().getAllDiscount();
+        
+        for (Discount discount : allDiscounts) {
+            if(discount.getDiscountId().equals(discountId)) {
+                service.deleteDiscount(discount);
+                return new ResponseEntity<>(HttpStatus.OK);
+            }
+        }
+        
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    //PUT: Update Discount
+    @PutMapping({"/id/{restaurantId}/discount/id/{discountId}"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Updates an existing discount")
+    public ResponseEntity<Discount> updateDiscount(
+        @PathVariable("restaurantId") Long restaurantId,
+        @PathVariable("discountId") Long discountId,
+        @RequestBody DiscountDTO updatedDiscount
+    ) {
+        Optional<Restaurant> restaurantOpt = service.get(restaurantId);
+        if (restaurantOpt.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        List<Discount> allDiscounts = service.get(restaurantId).get().getAllDiscount();
+        Discount changedDiscount = new Discount();
+        for(Discount discount : allDiscounts) {
+            if(discount.getDiscountId().equals(discountId)) {
+                changedDiscount = service.updateDiscount(discount, updatedDiscount);
+                return new ResponseEntity<>(changedDiscount, HttpStatus.OK);
+            }
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }

@@ -42,7 +42,7 @@ public class DiscountController {
     @GetMapping({"/id/{discountId}"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Gets a restaurant's discount")
-    public ResponseEntity<Discount> getDiscount(@PathVariable("discountId") Integer id) {
+    public ResponseEntity<Discount> getDiscount(@PathVariable("discountId") Long id) {
         Optional<Discount> discount = repo.findById(id);
         if (discount.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -93,7 +93,7 @@ public class DiscountController {
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Updates an existing discount")
     public ResponseEntity<Discount> updateDiscount(
-        @PathVariable("discountId") Integer id,
+        @PathVariable("discountId") Long id,
         @RequestBody Discount updatedDiscount
     ) {
         Optional<Discount> currentDiscountOpt = repo.findById(id);
@@ -111,7 +111,7 @@ public class DiscountController {
     @DeleteMapping({"/id/{discountId}"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Deletes an existing discount")
-    public ResponseEntity<Discount> deleteDiscount(@PathVariable("discountId") Integer id) {
+    public ResponseEntity<Discount> deleteDiscount(@PathVariable("discountId") Long id) {
         var savedDiscount = repo.findById(id);
         
         if (savedDiscount.isPresent()) {

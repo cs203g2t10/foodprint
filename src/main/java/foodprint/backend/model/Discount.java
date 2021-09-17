@@ -24,7 +24,7 @@ public class Discount {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "discountId")
     @Schema(defaultValue="1")
-    private Integer discountId;
+    private Long discountId;
 
     @ManyToOne(cascade=CascadeType.MERGE)
     @JoinColumn(name = "restaurantId")
@@ -41,13 +41,13 @@ public class Discount {
 
     public Discount() {}
 
-    public Discount(Integer discountId, String discountDescription, Integer discountPercentage) {
+    public Discount(Long discountId, String discountDescription, Integer discountPercentage) {
         this.discountId = discountId;
         this.discountDescription = discountDescription;
         this.discountPercentage = discountPercentage;
     }
     
-    public Integer getDiscountId() {
+    public Long getDiscountId() {
         return this.discountId;
     }
 
