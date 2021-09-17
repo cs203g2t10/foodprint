@@ -1,6 +1,6 @@
 package foodprint.backend.dto;
 
-public class RegResponse {
+public class RegResponseDTO {
     
     private String status;
 

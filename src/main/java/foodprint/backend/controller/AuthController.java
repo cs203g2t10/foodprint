@@ -19,11 +19,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import foodprint.backend.config.JwtTokenUtil;
-import foodprint.backend.dto.AuthRequest;
-import foodprint.backend.dto.AuthResponse;
+import foodprint.backend.dto.AuthRequestDTO;
+import foodprint.backend.dto.AuthResponseDTO;
 import foodprint.backend.dto.CurrentUserDetailsDTO;
-import foodprint.backend.dto.RegRequest;
-import foodprint.backend.dto.RegResponse;
+import foodprint.backend.dto.RegRequestDTO;
+import foodprint.backend.dto.RegResponseDTO;
 import foodprint.backend.model.User;
 import foodprint.backend.model.UserRepo;
 import foodprint.backend.service.AuthenticationService;
@@ -48,7 +48,7 @@ public class AuthController {
 
     @PostMapping("/login")
     @Operation(summary = "Using the credentials, get a JWT authorization token")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest req) {
+    public ResponseEntity<AuthResponseDTO> login(@RequestBody AuthRequestDTO req) {
         try {
 
             Authentication authenticate = authService.authenticate(
@@ -63,7 +63,7 @@ public class AuthController {
 
             String jwtToken = jwtTokenUtil.generateAccessToken(user);
 
-            AuthResponse responseBody = new AuthResponse();
+            AuthResponseDTO responseBody = new AuthResponseDTO();
             responseBody.setStatus("SUCCESS");
             responseBody.setToken(jwtToken);
 
@@ -71,7 +71,7 @@ public class AuthController {
 
         } catch (BadCredentialsException ex) {
             
-            AuthResponse responseBody = new AuthResponse();
+            AuthResponseDTO responseBody = new AuthResponseDTO();
             responseBody.setStatus("INCORRECT");
             
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseBody);
@@ -81,11 +81,11 @@ public class AuthController {
 
     @PostMapping("/register")
     @Operation(summary = "Register for a new user account")
-    public ResponseEntity<RegResponse> register(@RequestBody RegRequest request) {
+    public ResponseEntity<RegResponseDTO> register(@RequestBody RegRequestDTO request) {
         
         Optional<User> existingUser = repo.findByEmail(request.getEmail());
         if (existingUser.isPresent()) {
-            RegResponse resp = new RegResponse();
+            RegResponseDTO resp = new RegResponseDTO();
             resp.setStatus("EMAILEXISTS");
             return ResponseEntity.status(HttpStatus.CONFLICT).body(resp);
         }
@@ -99,7 +99,7 @@ public class AuthController {
         user.setRegisteredOn(LocalDateTime.now());
         user = repo.saveAndFlush(user);
         
-        RegResponse resp = new RegResponse();
+        RegResponseDTO resp = new RegResponseDTO();
         resp.setStatus("SUCCESS");
 
         return new ResponseEntity<>(resp, HttpStatus.OK);

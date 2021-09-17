@@ -2,7 +2,7 @@ package foodprint.backend.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-public class RegRequest {
+public class RegRequestDTO {
 
     @Schema(defaultValue="bobbytan@gmail.com")
     private String email;

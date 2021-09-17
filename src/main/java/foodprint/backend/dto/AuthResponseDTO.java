@@ -1,6 +1,6 @@
 package foodprint.backend.dto;
 
-public class AuthResponse {
+public class AuthResponseDTO {
 
     private String token;
     
