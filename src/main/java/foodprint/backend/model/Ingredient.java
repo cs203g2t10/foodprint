@@ -14,6 +14,8 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Entity
@@ -24,6 +26,7 @@ public class Ingredient {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ingredientId")
     @Schema(defaultValue="1")
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Integer ingredientId;
 
     @Column(name = "ingredientName")

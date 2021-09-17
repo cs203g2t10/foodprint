@@ -14,6 +14,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -29,6 +31,7 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "reservationId")
     @Schema(defaultValue="1")
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Integer reservationId;
 
     @ManyToOne(cascade=CascadeType.MERGE)

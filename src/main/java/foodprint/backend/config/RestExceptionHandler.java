@@ -12,6 +12,8 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import foodprint.backend.exceptions.NotFoundException;
+
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -56,4 +58,13 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     public void handleTypeMismatch(HttpServletResponse response) throws IOException {
         response.sendError(HttpStatus.BAD_REQUEST.value());
     }
+
+    /**
+     * Handle when a NotFoundException is thrown
+     */
+    @ExceptionHandler(NotFoundException.class)
+    public void handleNotFound(NotFoundException ex, HttpServletResponse response) throws IOException {
+        response.sendError(HttpStatus.NOT_FOUND.value(), ex.getMessage());
+    }
+
 }

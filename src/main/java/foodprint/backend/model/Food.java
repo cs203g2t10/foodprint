@@ -18,7 +18,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -26,15 +27,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 @Entity
 @Table
-@JsonIgnoreProperties("restaurant")
 @EnableTransactionManagement
 public class Food {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "foodId")
-    @Schema(defaultValue="1")
-    private Integer foodId;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Long foodId;
 
     @Column(name = "foodName")
     @Schema(defaultValue="Sashimi")
@@ -42,6 +42,7 @@ public class Food {
 
     @ManyToOne(cascade=CascadeType.MERGE)
     @JoinColumn(name="restaurantId")
+    @JsonIgnore
     private Restaurant restaurant;
 
     @Column(name = "foodDesc")
@@ -75,7 +76,7 @@ public class Food {
         this.foodDiscount = foodDiscount;
     }
 
-    public Integer getFoodId() {
+    public Long getFoodId() {
         return this.foodId;
     }
 

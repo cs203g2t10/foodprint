@@ -14,6 +14,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -30,6 +31,7 @@ public class Restaurant {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "restaurantId")
     @Schema(defaultValue="1")
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long restaurantId;
 
     @Column(name = "restaurantName")

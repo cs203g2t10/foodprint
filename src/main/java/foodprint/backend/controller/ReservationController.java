@@ -62,10 +62,10 @@ public class ReservationController {
 
 
     // GET: Get reservation by id
-    @GetMapping({"/id/{reservationId}"})
+    @GetMapping({"/{reservationId}"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Gets a reservation slot of a user")
-    public ResponseEntity<Reservation> getReservation(@PathVariable("reservationId") Integer id) {
+    public ResponseEntity<Reservation> getReservation(@PathVariable("reservationId") Long id) {
         Optional<Reservation> reservation = reservationRepo.findById(id);
         if (reservation.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -147,11 +147,11 @@ public class ReservationController {
     }
 
    // PUT: Update reservation
-   @PutMapping({"/id/{reservationId}"})
+   @PutMapping({"/{reservationId}"})
    @ResponseStatus(code = HttpStatus.OK)
    @Operation(summary = "Update a reservation slot")
    public ResponseEntity<Reservation> updateReservation(
-       @PathVariable("reservationId") Integer id,
+       @PathVariable("reservationId") Long id,
        @RequestBody Reservation updatedReservation
    ) {
        Optional<Reservation> currentReservationOpt = reservationRepo.findById(id);
@@ -169,10 +169,10 @@ public class ReservationController {
    }
 
    // DELETE: Delete reservation
-   @DeleteMapping({"/id/{reservationId}"})
+   @DeleteMapping({"/{reservationId}"})
    @ResponseStatus(code = HttpStatus.OK)
    @Operation(summary = "Delete an existing reservation slot")
-    public ResponseEntity<Reservation> deleteReservation(@PathVariable("reservationId") Integer id) {
+    public ResponseEntity<Reservation> deleteReservation(@PathVariable("reservationId") Long id) {
         var reservation = reservationRepo.findById(id);
         
         if (reservation.isPresent()) {
@@ -192,7 +192,7 @@ public class ReservationController {
     // TODO: API TESTING
     // POST: Create new lineItems by reservationId
     public ResponseEntity<List<LineItem>> createLineItems(
-        @PathVariable("reservationId") Integer id,
+        @PathVariable("reservationId") Long id,
         @RequestBody List<LineItem> lineItems
     ) {
         Optional<Reservation> currentReservationOpt = reservationRepo.findById(id);
@@ -211,9 +211,9 @@ public class ReservationController {
     }
 
     // GET: Get lineItems by reservationId
-    @GetMapping({"/id/{reservationId}/lineItems"})
+    @GetMapping({"/{reservationId}/lineItems"})
     @Operation(summary = "Get the list of lineItems under a reservationId")
-    public ResponseEntity<List<LineItem>> getLineItems(@PathVariable("reservationId") Integer id) {
+    public ResponseEntity<List<LineItem>> getLineItems(@PathVariable("reservationId") Long id) {
         Optional<Reservation> currentReservationOpt = reservationRepo.findById(id);
         if (currentReservationOpt.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -228,11 +228,11 @@ public class ReservationController {
     }
 
     // PUT: Update lineItems by reservationId
-    @PutMapping({"/id/{reservationId}/lineItems"})
+    @PutMapping({"/{reservationId}/lineItems"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Update the list of lineItems under a reservationId")
     public ResponseEntity<List<LineItem>> updateLineItems(
-        @PathVariable("reservationId") Integer id,
+        @PathVariable("reservationId") Long id,
         @RequestBody List<LineItem> updatedLineItems
     ) {
         Optional<Reservation> currentReservationOpt = reservationRepo.findById(id);
@@ -252,8 +252,8 @@ public class ReservationController {
     }
 
     // DELETE: Delete lineItems by reservationId
-    @DeleteMapping({"/id/{reservationId}/lineItems"})
-    public ResponseEntity<List<LineItem>> deleteLineItems(@PathVariable("reservationId") Integer id) {
+    @DeleteMapping({"/{reservationId}/lineItems"})
+    public ResponseEntity<List<LineItem>> deleteLineItems(@PathVariable("reservationId") Long id) {
         Optional<Reservation> reservation = reservationRepo.findById(id);
         if (reservation.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

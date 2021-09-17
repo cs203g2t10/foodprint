@@ -6,11 +6,11 @@ import foodprint.backend.dto.ChargeRequest.Currency;
 public class CheckoutDTO {
 
     private String stripePublicKey;
-    private Integer lineItemsId;
+    private Long lineItemsId;
     private Double amount;
     private ChargeRequest.Currency currency;
 
-    public CheckoutDTO(String stripePublicKey, Integer lineItemsId, Double amount, Currency currency) {
+    public CheckoutDTO(String stripePublicKey, Long lineItemsId, Double amount, Currency currency) {
         this.stripePublicKey = stripePublicKey;
         this.lineItemsId = lineItemsId;
         this.amount = amount;
@@ -21,7 +21,7 @@ public class CheckoutDTO {
         return stripePublicKey;
     }
     
-    public Integer getLineItemsId() {
+    public Long getLineItemsId() {
         return lineItemsId;
     }
     

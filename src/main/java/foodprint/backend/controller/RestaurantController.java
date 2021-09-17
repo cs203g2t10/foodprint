@@ -1,6 +1,5 @@
 package foodprint.backend.controller;
 
-import java.util.Optional;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +23,7 @@ import org.springframework.data.domain.PageRequest;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.Discount;
 import foodprint.backend.dto.RestaurantDTO;
+import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.dto.DiscountDTO;
 import foodprint.backend.model.Food;
 import foodprint.backend.service.RestaurantService;
@@ -43,48 +43,43 @@ public class RestaurantController {
     }
 
     // GET: Get the restaurant
-    @GetMapping({"/id/{restaurantId}"})
+    @GetMapping({"/{restaurantId}"})
     @ResponseStatus(code = HttpStatus.OK)
-    public ResponseEntity<Restaurant> getRestaurant(@PathVariable("restaurantId") Long id) {
-        Optional<Restaurant> restaurant = service.get(id);
-        if (restaurant.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(restaurant.get(), HttpStatus.OK);
+    @Operation(summary = "Gets a single restaurant from ID")
+    public ResponseEntity<Restaurant> restaurantGet(@PathVariable("restaurantId") Long id) {
+        Restaurant restaurant = service.get(id);
+        return new ResponseEntity<>(restaurant, HttpStatus.OK);
     }
 
     // GET (ALL): Get all the restaurants
-    @GetMapping({"/all"})
+    @GetMapping
     @ResponseStatus(code = HttpStatus.OK)
-    public ResponseEntity<List<Restaurant>> getAllRestaurants() {
+    @Operation(summary = "Gets all restaurants")
+    public ResponseEntity<List<Restaurant>> restaurantGetAll() {
         List<Restaurant> restaurants = service.getAllRestaurants();
         return new ResponseEntity<>(restaurants, HttpStatus.OK);
     }
 
     // POST: Create new restaurant
     @PostMapping
-    @Operation(summary = "Create a new restaurant")
     @ResponseStatus(code = HttpStatus.CREATED)
-    public ResponseEntity<Restaurant> createRestaurant(@RequestBody RestaurantDTO restaurantDTO) {
+    @Operation(summary = "Create a new restaurant using DTO")
+    public ResponseEntity<Restaurant> restaurantCreate(@RequestBody RestaurantDTO restaurantDTO) {
         Restaurant restaurant = new Restaurant(restaurantDTO.getRestaurantName(), restaurantDTO.getRestaurantLocation());
         Restaurant savedRestaurant = service.create(restaurant);
         return new ResponseEntity<>(savedRestaurant, HttpStatus.CREATED);
     }
 
     // PUT: Update the restaurant
-    @PutMapping({"/id/{restaurantId}"})
+    @PutMapping({"/{restaurantId}"})
     @ResponseStatus(code = HttpStatus.OK)
-    public ResponseEntity<Restaurant> updateRestaurant(
+    @Operation(summary = "Updates an existing restaurant")
+    public ResponseEntity<Restaurant> restaurantUpdate(
         @PathVariable("restaurantId") Long id,
         @RequestBody Restaurant updatedRestaurant
     ) {
 
-        Optional<Restaurant> currentRestaurantOpt = service.get(id);
-        if (currentRestaurantOpt.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        var currentRestaurant = currentRestaurantOpt.get();
+        Restaurant currentRestaurant = service.get(id);
         currentRestaurant.setRestaurantDesc(updatedRestaurant.getRestaurantDesc());
         currentRestaurant.setRestaurantName(updatedRestaurant.getRestaurantName());
         currentRestaurant.setRestaurantLocation(updatedRestaurant.getRestaurantLocation());
@@ -95,122 +90,126 @@ public class RestaurantController {
         currentRestaurant.setRestaurantWeekendClosing(updatedRestaurant.getRestaurantWeekendClosing());
         currentRestaurant.setRestaurantWeekendOpening(updatedRestaurant.getRestaurantWeekendOpening());
         currentRestaurant = service.update(currentRestaurant);
-
         return new ResponseEntity<>(currentRestaurant, HttpStatus.OK);
+
     }
 
 
     // DELETE: Delete the restaurant
-    @DeleteMapping({"/id/{restaurantId}"})
+    @DeleteMapping({"/{restaurantId}"})
     @ResponseStatus(code = HttpStatus.OK)
-    public ResponseEntity<Restaurant> deleteRestaurant(@PathVariable("restaurantId") Long id) {
-        var savedRestaurant = service.get(id);
+    @Operation(summary = "Deletes an existing restaurant")
+    public ResponseEntity<Restaurant> restaurantDelete(@PathVariable("restaurantId") Long id) {
+        Restaurant restaurant = service.get(id);
+        service.delete(restaurant);
         
-        if (savedRestaurant.isPresent()) {
-            service.delete(savedRestaurant.get());
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        
-        savedRestaurant = service.get(id);
-        if (savedRestaurant.isEmpty()) {
+        try { 
+            service.get(id);
+        } catch (NotFoundException ex) {
             return new ResponseEntity<>(HttpStatus.OK);
         }
-        
+
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 
     @GetMapping("/search")
-	public Page<Restaurant> search(@RequestParam("q") String query, @RequestParam(defaultValue = "1") int pageNum) {
+    @Operation(summary = "Search for an existing restaurant")
+	public Page<Restaurant> restaurantSearch(@RequestParam("q") String query, @RequestParam(defaultValue = "1") int pageNum) {
 		Pageable page = PageRequest.of(pageNum - 1, 5); // Pagination
 		Page<Restaurant> searchResult = service.search(page, query);    
         return searchResult;
     }
 
-    @PostMapping({"/id/{restaurantId}/food"})
+    /*
+    *
+    * Food related mappings
+    *
+    */
+
+    @PostMapping({"/{restaurantId}/food"})
     @ResponseStatus(code = HttpStatus.CREATED)
+    @Operation(summary = "Creates a new food instance within a restaurant")
     public ResponseEntity<Food> addRestaurantFood(@PathVariable("restaurantId") Long restaurantId, @RequestBody Food food) {
         Food savedFood = service.addFood(restaurantId, food);
         return new ResponseEntity<>(savedFood, HttpStatus.CREATED);
     }
 
-    @GetMapping({"/id/{restaurantId}/food/all"})
+    @GetMapping({"/{restaurantId}/food"})
     @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Gets all food of a restaurant")
     public ResponseEntity<List<Food>> getAllRestaurantFood(@PathVariable("restaurantId") Long restaurantId) {
-        Optional<Restaurant> restaurant = service.get(restaurantId);
-        if (restaurant.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        List<Food> allFood = restaurant.get().getAllFood();
+        Restaurant restaurant = service.get(restaurantId);
+        List<Food> allFood = restaurant.getAllFood();
         return new ResponseEntity<>(allFood, HttpStatus.OK);
     }
 
-    @GetMapping({"/id/{restaurantId}/discounts"})
+    @GetMapping({"/{restaurantId}/food/{foodId}"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Get a specific food from a restaurant")
+    public ResponseEntity<Food> getRestaurantFood(@PathVariable("restaurantId") Long restaurantId, @PathVariable("foodId") Long foodId ) {
+        Food food = service.getFood(restaurantId, foodId);
+        return new ResponseEntity<>(food, HttpStatus.OK);
+    }
+
+    /*
+    *
+    * Discount related mappings
+    *
+    */
+
+    @GetMapping({"/{restaurantId}/discount"})
     @ResponseStatus(code = HttpStatus.OK)
     public ResponseEntity<List<Discount>> getAllRestaurantDiscount(@PathVariable("restaurantId") Long restaurantId) {
-        Optional<Restaurant> restaurant = service.get(restaurantId);
-        if (restaurant.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        List<Discount> allDiscounts = restaurant.get().getAllDiscount();
+        Restaurant restaurant = service.get(restaurantId);
+        List<Discount> allDiscounts = restaurant.getAllDiscount();
         return new ResponseEntity<>(allDiscounts, HttpStatus.OK);
     }
 
     //GET: Get a discount of restaurant
-    @GetMapping({"/id/{restaurantId}/discount/id/{discountId}"})
+    @GetMapping({"/{restaurantId}/discount/{discountId}"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Gets a discount of restaurant")
     public ResponseEntity<Discount> getDiscount(@PathVariable("restaurantId") Long restaurantId, @PathVariable("discountId") Long discountId) {
-        Optional<Restaurant> restaurant = service.get(restaurantId);
-        if (restaurant.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        List<Discount> allDiscounts = restaurant.get().getAllDiscount();
+        Restaurant restaurant = service.get(restaurantId);
+        List<Discount> allDiscounts = restaurant.getAllDiscount();
         for(Discount discount : allDiscounts) {
             if (discount.getDiscountId().equals(discountId)) {
-                Optional<Discount> discountFound = service.getDiscount(discountId);
-                return new ResponseEntity<>(discountFound.get(), HttpStatus.OK);
+                Discount discountFound = service.getDiscount(discountId);
+                return new ResponseEntity<>(discountFound, HttpStatus.OK);
             }
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     //POST: Creates new discount for restaurant
-    @PostMapping("/id/{restaurantId}/discount")
+    @PostMapping("/{restaurantId}/discount")
     @ResponseStatus(code = HttpStatus.CREATED)
     @Operation(summary = "Creates a new discount using dto")
     public ResponseEntity<Discount> createDiscount(@PathVariable Long restaurantId, @RequestBody DiscountDTO discount) {
-        Optional<Restaurant> restaurantOpt = service.get(restaurantId);
-
-        if (restaurantOpt.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
+        // Restaurant restaurantOpt = service.get(restaurantId);
         Discount savedDiscount = service.addDiscount(restaurantId, discount);
         return new ResponseEntity<>(savedDiscount, HttpStatus.CREATED);
     }
 
     //DELETE: Delete a discount from restaurant
-    @DeleteMapping({"/id/{restaurantId}/discount/id/{discountId}"})
+    @DeleteMapping({"/{restaurantId}/discount/{discountId}"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Deletes an existing discount")
     public ResponseEntity<Discount> deleteDiscount(@PathVariable("restaurantId") Long restaurantId, @PathVariable("discountId") Long discountId) {
-        Optional<Restaurant> restaurant = service.get(restaurantId);
-        List<Discount> allDiscounts = restaurant.get().getAllDiscount();
-        
+        Restaurant restaurant = service.get(restaurantId);
+        List<Discount> allDiscounts = restaurant.getAllDiscount();
         for (Discount discount : allDiscounts) {
             if(discount.getDiscountId().equals(discountId)) {
                 service.deleteDiscount(discount);
                 return new ResponseEntity<>(HttpStatus.OK);
             }
         }
-        
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     //PUT: Update Discount
-    @PutMapping({"/id/{restaurantId}/discount/id/{discountId}"})
+    @PutMapping({"/{restaurantId}/discount/{discountId}"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Updates an existing discount")
     public ResponseEntity<Discount> updateDiscount(
@@ -218,12 +217,7 @@ public class RestaurantController {
         @PathVariable("discountId") Long discountId,
         @RequestBody DiscountDTO updatedDiscount
     ) {
-        Optional<Restaurant> restaurantOpt = service.get(restaurantId);
-        if (restaurantOpt.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        List<Discount> allDiscounts = service.get(restaurantId).get().getAllDiscount();
+        List<Discount> allDiscounts = service.get(restaurantId).getAllDiscount();
         Discount changedDiscount = new Discount();
         for(Discount discount : allDiscounts) {
             if(discount.getDiscountId().equals(discountId)) {

@@ -47,7 +47,7 @@ public class UserController {
     }
 
     // GET: Get the user by ID
-    @GetMapping({"/id/{id}"})
+    @GetMapping({"/{id}"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Gets a user account on Foodprint")
     public ResponseEntity<User> getUser(@PathVariable("id") Long id) {

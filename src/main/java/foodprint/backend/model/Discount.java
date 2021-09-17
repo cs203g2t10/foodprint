@@ -10,6 +10,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -24,6 +25,7 @@ public class Discount {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "discountId")
     @Schema(defaultValue="1")
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long discountId;
 
     @ManyToOne(cascade=CascadeType.MERGE)

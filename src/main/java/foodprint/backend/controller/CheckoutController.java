@@ -29,7 +29,7 @@ public class CheckoutController {
         // model.addAttribute("stripePublicKey", stripePublicKey);
         // model.addAttribute("currency", ChargeRequest.Currency.EUR);
         // Integer lineItemsId = reservation.getReservationId();
-        Integer lineItemsId = 12;
+        Long lineItemsId = 12L;
         Double amount = 1000.0;
         Currency currency = Currency.EUR;
         CheckoutDTO checkoutDTO = new CheckoutDTO(stripePublicKey, lineItemsId, amount, currency);

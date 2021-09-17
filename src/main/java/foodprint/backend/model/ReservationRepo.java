@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-public interface ReservationRepo extends JpaRepository<Reservation, Integer> {
+public interface ReservationRepo extends JpaRepository<Reservation, Long> {
     List<Reservation> findByDate(LocalDateTime dateOfReservation);
     List<Reservation> findByRestaurant(Restaurant restaurant);
     List<Reservation> findByRestaurantAndDateBetween(Restaurant restaurant, LocalDateTime after, LocalDateTime before);

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import foodprint.backend.model.Discount;
 import foodprint.backend.model.DiscountRepo;
 import foodprint.backend.dto.DiscountDTO;
+import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.Food;
 import foodprint.backend.model.FoodRepo;
 import foodprint.backend.model.Restaurant;
@@ -35,9 +36,9 @@ public class RestaurantService {
         return restaurants;
     }
 
-    public Optional<Restaurant> get(Long id) {
+    public Restaurant get(Long id) {
         Optional<Restaurant> restaurant = repo.findById(id);
-        return restaurant;
+        return restaurant.orElseThrow(() -> new NotFoundException("Restaurant not found"));
     }
 
     public Restaurant update(Restaurant restaurant) {
@@ -57,6 +58,12 @@ public class RestaurantService {
         return repo.findByRestaurantNameContains(page, query);
     }
 
+    /*
+    *
+    * Food related methods
+    *
+    */
+
     public Food addFood(Long restaurantId, Food food) {
         Restaurant restaurant = repo.findByRestaurantId(restaurantId);
         food.setRestaurant(restaurant);
@@ -64,6 +71,26 @@ public class RestaurantService {
         restaurant.getAllFood().add(savedFood);
         return savedFood;
     }
+
+    public List<Food> getAllFood(Long restaurantId) {
+        Restaurant restaurant = repo.findByRestaurantId(restaurantId);
+        return restaurant.getAllFood();
+    }
+
+    public Food getFood(Long restaurantId, Long foodId) {
+        Optional<Food> foodOpt = foodRepo.findById(foodId);
+        Food food = foodOpt.orElseThrow(() -> new NotFoundException("Food not found"));
+        if (food.getRestaurant().getRestaurantId() != restaurantId) {
+            throw new NotFoundException("Food found but in incorrect restaurant");
+        }
+        return food;
+    }
+
+    /*
+    *
+    * Discount related methods
+    *
+    */
 
     // public List<Discount> getDiscounts(Long restaurantId) {
     //     Optional<Discount> discount = discountRepo.findById(discountId);
@@ -92,8 +119,8 @@ public class RestaurantService {
         return currentDiscount;
     }
 
-    public Optional<Discount> getDiscount(Long discountId) {
+    public Discount getDiscount(Long discountId) {
         Optional<Discount> discount = discountRepo.findById(discountId);
-        return discount;
+        return discount.orElseThrow(() -> new NotFoundException("Discount not found"));
     }
 }

@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class LineItemDTO {
 
     @Schema(defaultValue = "1")
-    private Integer foodId;
+    private Long foodId;
 
     @Schema(defaultValue = "1")
     private Integer quantity;
@@ -13,16 +13,16 @@ public class LineItemDTO {
     public LineItemDTO() {
     }
 
-    public LineItemDTO(Integer foodId, Integer quantity) {
+    public LineItemDTO(Long foodId, Integer quantity) {
         this.foodId = foodId;
         this.quantity = quantity;
     }
 
-    public Integer getFoodId() {
+    public Long getFoodId() {
         return this.foodId;
     }
 
-    public void setFoodId(Integer foodId) {
+    public void setFoodId(Long foodId) {
         this.foodId = foodId;
     }
 

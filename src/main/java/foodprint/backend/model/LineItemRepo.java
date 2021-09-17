@@ -6,8 +6,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface LineItemRepo extends JpaRepository<LineItem, Integer> {
-    List<LineItem> findByLineItemId(Integer lineItemId);
+public interface LineItemRepo extends JpaRepository<LineItem, Long> {
+    List<LineItem> findByLineItemId(Long lineItemId);
     List<LineItem> findByFood(Food food);
     List<LineItem> findByReservation(Reservation reservation);
 }

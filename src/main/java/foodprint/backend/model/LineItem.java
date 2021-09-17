@@ -19,7 +19,7 @@ public class LineItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "lineItemId")
     @Schema(defaultValue="1")
-    private Integer lineItemId;
+    private Long lineItemId;
 
     @OneToOne(cascade=CascadeType.MERGE)
     @JoinColumn(name = "foodId")
@@ -41,7 +41,7 @@ public class LineItem {
         this.quantity = quantity;
     }
 
-    public Integer getLineItemId() {
+    public Long getLineItemId() {
         return this.lineItemId;
     }
 
