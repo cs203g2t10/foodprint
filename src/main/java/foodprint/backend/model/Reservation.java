@@ -32,7 +32,7 @@ public class Reservation {
     @Column(name = "reservationId")
     @Schema(defaultValue="1")
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private Integer reservationId;
+    private Long reservationId;
 
     @ManyToOne(cascade=CascadeType.MERGE)
     @JoinColumn(name = "userId")
@@ -90,7 +90,7 @@ public class Reservation {
         this.restaurant = restaurant;
     }
 
-    public Integer getReservationId() {
+    public Long getReservationId() {
         return this.reservationId;
     }
 

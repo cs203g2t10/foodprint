@@ -1,13 +1,15 @@
 package foodprint.backend.service;
 
+import java.util.Optional;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.ReservationRepo;
 import foodprint.backend.model.Reservation;
-
-import java.util.List;
+import foodprint.backend.exceptions.NotFoundException;
 
 import java.time.LocalDateTime;
 
@@ -31,4 +33,34 @@ public class ReservationService {
             return false;
         }
     }
+
+    public Reservation getReservationById(Long id) {
+        Optional<Reservation> reservation = reservationRepo.findById(id);
+        return reservation.orElseThrow(() -> new NotFoundException("Reservation not found"));
+    }
+
+    public List<Reservation> getAllReservationSlots() {
+        List<Reservation> reservationList = reservationRepo.findAll();
+        return reservationList;
+    }
+
+    public List<Reservation> getAllReservationByRestaurant(Restaurant restaurant) {
+        List<Reservation> reservationList = reservationRepo.findByRestaurant(restaurant);
+        return reservationList;
+    }
+
+    public Reservation create(Reservation reservation) {
+        return reservationRepo.saveAndFlush(reservation);
+    }
+
+    public Reservation update(Reservation reservation) {
+        return reservationRepo.saveAndFlush(reservation);
+    }
+
+    public void delete(Reservation reservation) {
+        reservationRepo.delete(reservation);
+        return;
+    }
+
+    
 }
