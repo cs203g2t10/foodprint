@@ -1,9 +1,12 @@
 package foodprint.backend.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotEmpty;
 
 public class RestaurantDTO {
+    
     @Schema(defaultValue="Sushi Tei")
+    @NotEmpty
     private String restaurantName;
 
     @Schema(defaultValue="Serangoon")

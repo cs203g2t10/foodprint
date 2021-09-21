@@ -1,6 +1,5 @@
 package foodprint.backend.controller;
 
-import java.util.Optional;
 import java.util.List;
 import java.util.ArrayList;
 import java.time.DayOfWeek;
@@ -25,7 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 import foodprint.backend.dto.CreateReservationDTO;
 import foodprint.backend.dto.LineItemDTO;
 import foodprint.backend.model.Food;
-import foodprint.backend.model.FoodRepo;
 import foodprint.backend.model.LineItem;
 import foodprint.backend.model.LineItemRepo;
 import foodprint.backend.model.Reservation;
@@ -43,17 +41,14 @@ public class ReservationController {
 
     private LineItemRepo lineItemRepo;
 
-    private FoodRepo foodRepo;
-
     private ReservationService reservationService;
 
     private RestaurantService restaurantService;
 
     @Autowired
-    ReservationController(LineItemRepo lineItemRepo,
-            FoodRepo foodRepo, ReservationService reservationService, RestaurantService restaurantService) {
+    ReservationController(LineItemRepo lineItemRepo, 
+    ReservationService reservationService, RestaurantService restaurantService) {
         this.lineItemRepo = lineItemRepo;
-        this.foodRepo = foodRepo;
         this.reservationService = reservationService;
         this.restaurantService = restaurantService;
     }
@@ -80,7 +75,7 @@ public class ReservationController {
     // POST: Create a new reservation
     @PostMapping({ "/admin" })
     @ResponseStatus(code = HttpStatus.CREATED)
-    @Operation(summary = "Creates a new reservation slot")
+    @Operation(summary = "Creates a new reservation slot by admins")
     public ResponseEntity<Reservation> createReservation(@RequestBody Reservation reservation) {
         Restaurant restaurant = reservation.getRestaurant();
         LocalDateTime dateOfReservation = reservation.getDate();
@@ -96,12 +91,10 @@ public class ReservationController {
 
     // POST: Create a new reservation (DTO)
     @PostMapping
-    @Operation(summary = "Create a new reservation using DTO")
+    @Operation(summary = "Creates a new reservation by users")
     public ResponseEntity<CreateReservationDTO> createReservationDTO(@RequestBody CreateReservationDTO req) {
         User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
         Restaurant restaurant = restaurantService.get(req.getRestaurantId());
-        
         LocalDateTime dateOfReservation = req.getDate();
         LocalDateTime startTime = dateOfReservation.truncatedTo(ChronoUnit.HOURS);
 
@@ -112,15 +105,7 @@ public class ReservationController {
 
             List<LineItem> savedLineItems = new ArrayList<>();
             for (LineItemDTO lineItem : req.getLineItems()) {
-                // do we need a service?
-                Optional<Food> foodOpt = foodRepo.findById(lineItem.getFoodId());
-                if (foodOpt.isEmpty()) {
-                    return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-                }
-                Food food = foodOpt.get();
-                if (!restaurant.getAllFood().contains(food)) {
-                    return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-                }
+                Food food = restaurantService.getFood(req.getRestaurantId(), lineItem.getFoodId());
                 LineItem savedLineItem = new LineItem(food, reservation, lineItem.getQuantity());
                 savedLineItems.add(savedLineItem);
                 lineItemRepo.saveAndFlush(savedLineItem);
@@ -186,14 +171,8 @@ public class ReservationController {
     @GetMapping({ "/{reservationId}/lineItems" })
     @Operation(summary = "Get the list of lineItems under a reservationId")
     public ResponseEntity<List<LineItem>> getLineItems(@PathVariable("reservationId") Long id) {
-        Reservation currentReservation = reservationService.getReservationById(id);    
-
-        List<LineItem> lineItems = currentReservation.getLineItems();
-        if (lineItems == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } else {
-            return new ResponseEntity<List<LineItem>>(lineItems, HttpStatus.OK);
-        }
+        List<LineItem> lineItems = reservationService.getLineItemsByReservationId(id);
+        return new ResponseEntity<List<LineItem>>(lineItems, HttpStatus.OK);
     }
 
     // PUT: Update lineItems by reservationId
