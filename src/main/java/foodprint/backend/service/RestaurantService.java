@@ -148,6 +148,38 @@ public class RestaurantService {
         return food;
     }
 
+    public void deleteFood(Long restaurantId, Long foodId) {
+        Restaurant restaurant = get(restaurantId);
+        List<Food> allFood = restaurant.getAllFood();
+        for (Food food : allFood) {
+            if (food.getFoodId().equals(foodId)) {
+                foodRepo.delete(food);
+                return;
+            }
+        }
+        throw new NotFoundException("Food not found");
+    }
+
+    public Food updateFood(Long restaurantId, Long foodId, Food updatedFood) {
+        Restaurant restaurant = get(restaurantId);
+        List<Food> allFood = restaurant.getAllFood();
+        for (Food food : allFood) {
+            if (food.getFoodId().equals(foodId)) {
+                food.setFoodName(updatedFood.getFoodName());
+                food.setFoodDesc(updatedFood.getFoodDesc());
+                food.setFoodDiscount(updatedFood.getFoodDiscount());
+                food.setFoodPrice(updatedFood.getFoodPrice());
+                food.setPicturesPath(updatedFood.getPicturesPath());
+                food = foodRepo.saveAndFlush(food);
+                return food;
+            }
+        }
+        throw new NotFoundException("Food not found");
+    }
+    
+    public Page<Food> searchFood(Pageable page, String query) {
+        return foodRepo.findByFoodNameContains(page,query);
+    }
     /*
     *
     * Discount related methods
@@ -172,16 +204,31 @@ public class RestaurantService {
     }
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
-    public void deleteDiscount(Discount discount) {
-        discountRepo.delete(discount);
+    public void deleteDiscount(Long restaurantId, Long discountId) {
+        Restaurant restaurant = get(restaurantId);
+        List<Discount> allDiscounts = restaurant.getDiscount();
+        for (Discount discount : allDiscounts) {
+            if (discount.getDiscountId().equals(discountId)) {
+                discountRepo.delete(discount);
+                return;
+            }
+        }
+        throw new NotFoundException("Discount not found");
     }
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
-    public Discount updateDiscount(Discount currentDiscount, DiscountDTO updatedDiscount) {
-        currentDiscount.setDiscountDescription(updatedDiscount.getDiscountDescription());
-        currentDiscount.setDiscountPercentage(updatedDiscount.getDiscountPercentage());
-        currentDiscount = discountRepo.saveAndFlush(currentDiscount);
-        return currentDiscount;
+    public Discount updateDiscount(Long restaurantId, Long discountId, Discount discount) {
+        Restaurant restaurant = get(restaurantId);
+        List<Discount> allDiscounts = restaurant.getDiscount();
+        for (Discount currentDiscount : allDiscounts) {
+            if (currentDiscount.getDiscountId().equals(discountId)) {
+                currentDiscount.setDiscountDescription(discount.getDiscountDescription());
+                currentDiscount.setDiscountPercentage(discount.getDiscountPercentage());
+                currentDiscount = discountRepo.saveAndFlush(currentDiscount);
+                return currentDiscount;
+            }
+        }
+        throw new NotFoundException("Discount not found");
     }
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")

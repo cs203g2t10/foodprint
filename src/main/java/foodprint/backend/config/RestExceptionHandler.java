@@ -12,6 +12,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import foodprint.backend.exceptions.AlreadyExistsException;
 import foodprint.backend.exceptions.DeleteFailedException;
 import foodprint.backend.exceptions.InsufficientPermissionsException;
 import foodprint.backend.exceptions.NotFoundException;
@@ -75,8 +76,13 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(InsufficientPermissionsException.class)
-    public void handleNotFound(InsufficientPermissionsException ex, HttpServletResponse response) throws IOException {
+    public void handleInsufficientPermissions(InsufficientPermissionsException ex, HttpServletResponse response) throws IOException {
         response.sendError(HttpStatus.FORBIDDEN.value(), ex.getMessage());
+    }
+    
+    @ExceptionHandler(AlreadyExistsException.class)
+    public void handleConflict(AlreadyExistsException ex, HttpServletResponse response) throws IOException {
+        response.sendError(HttpStatus.CONFLICT.value(), ex.getMessage());
     }
 
 }
