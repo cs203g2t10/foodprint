@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import foodprint.backend.model.Discount;
 import foodprint.backend.model.DiscountRepo;
 import foodprint.backend.dto.DiscountDTO;
+import foodprint.backend.exceptions.DeleteFailedException;
 import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.Food;
 import foodprint.backend.model.FoodRepo;
@@ -41,17 +42,57 @@ public class RestaurantService {
         return restaurant.orElseThrow(() -> new NotFoundException("Restaurant not found"));
     }
 
-    public Restaurant update(Restaurant restaurant) {
-        return repo.saveAndFlush(restaurant);
+    public Restaurant update(Long id, Restaurant updatedRestaurant) {
+
+        Restaurant currentRestaurant = this.get(id);
+
+        if (updatedRestaurant.getRestaurantDesc() != null) {
+            currentRestaurant.setRestaurantDesc(updatedRestaurant.getRestaurantDesc());
+        }
+        if (updatedRestaurant.getRestaurantName() != null) {
+            currentRestaurant.setRestaurantName(updatedRestaurant.getRestaurantName());
+        }
+        if (updatedRestaurant.getRestaurantName() != null) {
+            currentRestaurant.setRestaurantName(updatedRestaurant.getRestaurantName());
+        }
+        if (updatedRestaurant.getPicturesPath() != null) {
+            currentRestaurant.setRestaurantLocation(updatedRestaurant.getRestaurantLocation());
+        }
+        if (updatedRestaurant.getPicturesPath() != null) {
+            currentRestaurant.setPicturesPath(updatedRestaurant.getPicturesPath());
+        }
+        if (updatedRestaurant.getRestaurantTableCapacity() != null) {
+            currentRestaurant.setRestaurantTableCapacity(updatedRestaurant.getRestaurantTableCapacity());
+        }
+        if (updatedRestaurant.getRestaurantWeekdayClosing() != null) {
+            currentRestaurant.setRestaurantWeekdayClosing(updatedRestaurant.getRestaurantWeekdayClosing());
+        }
+        if (updatedRestaurant.getRestaurantWeekdayOpening() != null) {
+            currentRestaurant.setRestaurantWeekdayOpening(updatedRestaurant.getRestaurantWeekdayOpening());
+        }
+        if (updatedRestaurant.getRestaurantWeekendClosing() != null) {
+            currentRestaurant.setRestaurantWeekendClosing(updatedRestaurant.getRestaurantWeekendClosing());
+        }
+        if (updatedRestaurant.getRestaurantWeekendOpening() != null) {
+            currentRestaurant.setRestaurantWeekendOpening(updatedRestaurant.getRestaurantWeekendOpening());
+        }
+
+        return repo.saveAndFlush(currentRestaurant);
     }
 
     public Restaurant create(Restaurant restaurant) {
         return repo.saveAndFlush(restaurant);
     }
 
-    public void delete(Restaurant restaurant) {
+    public void delete(Long id) {
+        Restaurant restaurant = this.get(id);
         repo.delete(restaurant);
-        return;
+        try { 
+            this.get(id);
+            throw new DeleteFailedException("Restaurant could not be deleted");
+        } catch (NotFoundException ex) {
+            return;
+        }
     }
 
     public Page<Restaurant> search(Pageable page, String query) {

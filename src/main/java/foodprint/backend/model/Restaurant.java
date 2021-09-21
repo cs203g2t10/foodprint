@@ -12,6 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -36,6 +37,7 @@ public class Restaurant {
 
     @Column(name = "restaurantName")
     @Schema(defaultValue="Sushi Tei")
+    @NotEmpty
     private String restaurantName;
 
     @Column(name = "restaurantDesc")
