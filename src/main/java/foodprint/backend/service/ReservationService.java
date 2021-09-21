@@ -36,8 +36,6 @@ public class ReservationService {
     private RestaurantService restaurantService;
     private LineItemRepo lineItemRepo;
 
-    private RestaurantService restaurantService;
-
     @Autowired
     ReservationService(ReservationRepo reservationRepo, RestaurantService restaurantService, LineItemRepo lineItemRepo) {
         this.reservationRepo = reservationRepo;
