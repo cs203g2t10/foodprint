@@ -152,6 +152,42 @@ public class RestaurantController {
         return new ResponseEntity<>(food, HttpStatus.OK);
     }
 
+    // DELETE: Delete the food
+    @DeleteMapping({"/{restaurantId}/food/{foodId}"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Deletes an existing food item")
+    public ResponseEntity<Food> deleteRestaurantFood(@PathVariable("restaurantId") Long restaurantId, @PathVariable("foodId") Long foodId) {
+        service.deleteFood(restaurantId, foodId);
+        try {
+            service.getFood(restaurantId, foodId);
+        } catch (NotFoundException ex) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @PutMapping({"/{restaurantId}/food/{foodId}"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Updates an existing food item")
+    public ResponseEntity<Food> updateRestaurantFood(
+        @PathVariable("restaurantId") Long restaurantId,
+        @PathVariable("foodId") Long foodId,
+        @RequestBody Food updatedFood
+    ) {
+        Food food = service.updateFood(restaurantId, foodId, updatedFood);
+        return new ResponseEntity<>(food, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "search", produces = "application/json")
+    @Operation(summary = "Search for a food item")
+    public Page<Food> FoodSearch(@RequestParam("q") String query, @RequestParam(defaultValue = "1") int pageNum) {
+        Pageable pages = PageRequest.of(pageNum - 1, 5); //pagination
+        Page<Food> searchResult = service.searchFood(pages, query);
+
+        return searchResult;
+    }
+
     /*
     *
     * Discount related mappings
@@ -179,7 +215,7 @@ public class RestaurantController {
                 return new ResponseEntity<>(discountFound, HttpStatus.OK);
             }
         }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        throw new NotFoundException("Discount not found");
     }
 
     //POST: Creates new discount for restaurant
@@ -197,14 +233,13 @@ public class RestaurantController {
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Deletes an existing discount")
     public ResponseEntity<Discount> deleteDiscount(@PathVariable("restaurantId") Long restaurantId, @PathVariable("discountId") Long discountId) {
-        Restaurant restaurant = service.get(restaurantId);
-        List<Discount> allDiscounts = restaurant.getAllDiscount();
-        for (Discount discount : allDiscounts) {
-            if(discount.getDiscountId().equals(discountId)) {
-                service.deleteDiscount(discount);
-                return new ResponseEntity<>(HttpStatus.OK);
-            }
+        service.deleteDiscount(restaurantId, discountId);
+        try {
+            service.getDiscount(discountId);
+        } catch (NotFoundException ex) {
+            return new ResponseEntity<>(HttpStatus.OK);
         }
+
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -217,14 +252,8 @@ public class RestaurantController {
         @PathVariable("discountId") Long discountId,
         @RequestBody DiscountDTO updatedDiscount
     ) {
-        List<Discount> allDiscounts = service.get(restaurantId).getAllDiscount();
-        Discount changedDiscount = new Discount();
-        for(Discount discount : allDiscounts) {
-            if(discount.getDiscountId().equals(discountId)) {
-                changedDiscount = service.updateDiscount(discount, updatedDiscount);
-                return new ResponseEntity<>(changedDiscount, HttpStatus.OK);
-            }
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        Discount discount = new Discount(updatedDiscount.getDiscountDescription(), updatedDiscount.getDiscountPercentage());
+        Discount savedDiscount = service.updateDiscount(restaurantId, discountId, discount);
+        return new ResponseEntity<>(savedDiscount, HttpStatus.OK);
     }
 }

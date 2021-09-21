@@ -43,8 +43,7 @@ public class Discount {
 
     public Discount() {}
 
-    public Discount(Long discountId, String discountDescription, Integer discountPercentage) {
-        this.discountId = discountId;
+    public Discount(String discountDescription, Integer discountPercentage) {
         this.discountDescription = discountDescription;
         this.discountPercentage = discountPercentage;
     }
