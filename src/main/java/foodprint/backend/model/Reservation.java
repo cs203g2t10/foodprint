@@ -14,6 +14,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -34,6 +35,7 @@ public class Reservation {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long reservationId;
 
+    @JsonIgnore
     @ManyToOne(cascade=CascadeType.MERGE)
     @JoinColumn(name = "userId")
     private User user;

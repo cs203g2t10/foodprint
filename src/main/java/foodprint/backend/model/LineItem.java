@@ -10,6 +10,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Entity
@@ -25,6 +27,7 @@ public class LineItem {
     @JoinColumn(name = "foodId")
     private Food food;
 
+    @JsonIgnore
     @ManyToOne(cascade=CascadeType.ALL)
     @JoinColumn(name = "reservationId")
     private Reservation reservation;
