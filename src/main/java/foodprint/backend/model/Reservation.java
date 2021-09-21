@@ -64,6 +64,7 @@ public class Reservation {
     @OneToMany(mappedBy = "reservation", cascade=CascadeType.ALL)
     private List<LineItem> lineItems;
 
+    @JsonIgnore
     @ManyToOne(cascade=CascadeType.ALL)
     @JoinColumn(name="restaurantId")
     private Restaurant restaurant;

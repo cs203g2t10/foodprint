@@ -8,7 +8,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -23,7 +22,7 @@ public class LineItem {
     @Schema(defaultValue="1")
     private Long lineItemId;
 
-    @OneToOne(cascade=CascadeType.MERGE)
+    @ManyToOne
     @JoinColumn(name = "foodId")
     private Food food;
 

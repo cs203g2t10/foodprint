@@ -1,16 +1,11 @@
 package foodprint.backend.controller;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,17 +17,13 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import foodprint.backend.dto.CreateReservationDTO;
-import foodprint.backend.dto.LineItemDTO;
-import foodprint.backend.model.Food;
+import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.LineItem;
 import foodprint.backend.model.LineItemRepo;
 import foodprint.backend.model.Reservation;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.service.ReservationService;
 import foodprint.backend.service.RestaurantService;
-import foodprint.backend.model.User;
-import foodprint.backend.model.Reservation.Status;
-import foodprint.backend.exceptions.NotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 
 @RestController

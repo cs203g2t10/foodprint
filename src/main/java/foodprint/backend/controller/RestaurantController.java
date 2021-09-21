@@ -89,7 +89,7 @@ public class RestaurantController {
     @Operation(summary = "Deletes an existing restaurant")
     public ResponseEntity<Restaurant> restaurantDelete(@PathVariable("restaurantId") Long id) {
         service.delete(id);
-        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 

@@ -15,6 +15,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -65,8 +66,9 @@ public class Food {
         inverseJoinColumns = @JoinColumn(name = "ingredientId"))
     private Set<Ingredient> ingredients = new HashSet<>();
 
-    @OneToOne(mappedBy = "food", cascade = CascadeType.MERGE)
-    private LineItem lineItem;
+    @JsonIgnore
+    @OneToMany(mappedBy = "food", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LineItem> lineItems;
 
     public Food() {}
 
@@ -74,6 +76,14 @@ public class Food {
         this.foodName = foodName;
         this.foodPrice = foodPrice;
         this.foodDiscount = foodDiscount;
+    }
+
+    public List<LineItem> getLineItems() {
+        return lineItems;
+    }
+
+    public void setLineItems(List<LineItem> lineItems) {
+        this.lineItems = lineItems;
     }
 
     public Long getFoodId() {
@@ -131,5 +141,7 @@ public class Food {
     public void setFoodDiscount(Double foodDiscount) {
         this.foodDiscount = foodDiscount;
     }
+
+    
 
 }
