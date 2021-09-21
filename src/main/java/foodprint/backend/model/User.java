@@ -1,8 +1,12 @@
 package foodprint.backend.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -20,6 +24,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -157,8 +162,12 @@ public class User implements UserDetails{
     @Override
     @Schema(hidden=true)
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // return Arrays.asList(this.roles.split(","));
-        return null;
+        List<String> roles = Arrays.asList(this.roles.split(","));
+        Set<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
+        roles.forEach((role) -> {
+            authorities.add(new SimpleGrantedAuthority(role));
+        });
+        return authorities;
     }
 
     @Override

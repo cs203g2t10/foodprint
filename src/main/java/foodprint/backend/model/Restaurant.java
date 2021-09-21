@@ -56,19 +56,37 @@ public class Restaurant {
     @Schema(defaultValue="15")
     private Integer restaurantTableCapacity = 15;
 
-    //what time the restaurant is open for reservation - assume 24 hour clock e.g "13:00" for 1pm
-    @Column (name = "restaurantWeekdayOpening")
-    private Integer restaurantWeekdayOpening;
+    //what time the restaurant is open for reservation - assume 24 hour clock e.g "13:00" for 1pm -> values of 0- 23
+    @Column (name = "restaurantWeekdayOpeningHour")
+    @Schema(defaultValue ="9")
+    private Integer restaurantWeekdayOpeningHour;
+
+    //what time in minutes the restaurant is open for reservation -> should take in values of between 0 and 59 only
+    @Column (name = "restaurantWeekdayOpeningMinutes")
+    @Schema(defaultValue = "15")
+    private Integer restaurantWeekdayOpeningMinutes;
 
     //what time reservation slots close
-    @Column (name = "restaurantWeekdayClosing")
-    private Integer restaurantWeekdayClosing;
+    @Column (name = "restaurantWeekdayClosingHour")
+    @Schema(defaultValue = "22")
+    private Integer restaurantWeekdayClosingHour;
 
-    @Column (name = "restaurantWeekendOpening")
-    private Integer restaurantWeekendOpening;
+    @Column (name = "restaurantWeekdayClosingMinutes")
+    private Integer restaurantWeekdayClosingMinutes;
 
-    @Column (name = "restaurantWeekendClosing")
-    private Integer restaurantWeekendClosing;
+    @Schema(defaultValue = "11")
+    @Column (name = "restaurantWeekendOpeningHour")
+    private Integer restaurantWeekendOpeningHour;
+
+    @Column (name = "restaurantWeekendOpeningMinutes")
+    private Integer restaurantWeekendOpeningMinutes;
+
+    @Schema(defaultValue = "22")
+    @Column (name = "restaurantWeekendClosingHour")
+    private Integer restaurantWeekendClosingHour;
+
+    @Column (name = "restaurantWeekendClosingMinutes")
+    private Integer restaurantWeekendClosingMinutes;
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.MERGE)
     private List<Food> food;
@@ -152,37 +170,70 @@ public class Restaurant {
         this.restaurantTableCapacity = restaurantTableCapacity;
     }
 
-    public Integer getRestaurantWeekdayOpening() {
-        return this.restaurantWeekdayOpening;
+    public Integer getRestaurantWeekdayOpeningHour() {
+        return this.restaurantWeekdayOpeningHour;
     }
 
-    public void setRestaurantWeekdayOpening(Integer restaurantWeekdayOpening) {
-        this.restaurantWeekdayOpening = restaurantWeekdayOpening;
+    public void setRestaurantWeekdayOpeningHour(Integer restaurantWeekdayOpeningHour) {
+        this.restaurantWeekdayOpeningHour = restaurantWeekdayOpeningHour;
     }
 
-    public Integer getRestaurantWeekdayClosing() {
-        return this.restaurantWeekdayClosing;
+    public Integer getRestaurantWeekdayOpeningMinutes() {
+        return this.restaurantWeekdayOpeningMinutes;
     }
 
-    public void setRestaurantWeekdayClosing(Integer restaurantWeekdayClosing) {
-        this.restaurantWeekdayClosing = restaurantWeekdayClosing;
+    public void setRestaurantWeekdayOpeningMinutes(Integer restaurantWeekdayOpeningMinutes) {
+        this.restaurantWeekdayOpeningMinutes = restaurantWeekdayOpeningMinutes;
     }
 
-    public Integer getRestaurantWeekendOpening() {
-        return this.restaurantWeekendOpening;
+    public Integer getRestaurantWeekdayClosingHour() {
+        return this.restaurantWeekdayClosingHour;
     }
 
-    public void setRestaurantWeekendOpening(Integer restaurantWeekendOpening) {
-        this.restaurantWeekendOpening = restaurantWeekendOpening;
+    public void setRestaurantWeekdayClosingHour(Integer restaurantWeekdayClosingHour) {
+        this.restaurantWeekdayClosingHour = restaurantWeekdayClosingHour;
     }
 
-    public Integer getRestaurantWeekendClosing() {
-        return this.restaurantWeekendClosing;
+    public Integer getRestaurantWeekdayClosingMinutes() {
+        return this.restaurantWeekdayClosingMinutes;
     }
 
-    public void setRestaurantWeekendClosing(Integer restaurantWeekendClosing) {
-        this.restaurantWeekendClosing = restaurantWeekendClosing;
+    public void setRestaurantWeekdayClosingMinutes(Integer restaurantWeekdayClosingMinutes) {
+        this.restaurantWeekdayClosingMinutes = restaurantWeekdayClosingMinutes;
     }
+
+    public Integer getRestaurantWeekendOpeningHour() {
+        return this.restaurantWeekendOpeningHour;
+    }
+
+    public void setRestaurantWeekendOpeningHour(Integer restaurantWeekendOpeningHour) {
+        this.restaurantWeekendOpeningHour = restaurantWeekendOpeningHour;
+    }
+
+    public Integer getRestaurantWeekendOpeningMinutes() {
+        return this.restaurantWeekendOpeningMinutes;
+    }
+
+    public void setRestaurantWeekendOpeningMinutes(Integer restaurantWeekendOpeningMinutes) {
+        this.restaurantWeekendOpeningMinutes = restaurantWeekendOpeningMinutes;
+    }
+
+    public Integer getRestaurantWeekendClosingHour() {
+        return this.restaurantWeekendClosingHour;
+    }
+
+    public void setRestaurantWeekendClosingHour(Integer restaurantWeekendClosingHour) {
+        this.restaurantWeekendClosingHour = restaurantWeekendClosingHour;
+    }
+
+    public Integer getRestaurantWeekendClosingMinutes() {
+        return this.restaurantWeekendClosingMinutes;
+    }
+
+    public void setRestaurantWeekendClosingMinutes(Integer restaurantWeekendClosingMinutes) {
+        this.restaurantWeekendClosingMinutes = restaurantWeekendClosingMinutes;
+    }
+
     
     public List<Discount> getDiscount() {
         return discount;

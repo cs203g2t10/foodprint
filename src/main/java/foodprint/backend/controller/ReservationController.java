@@ -197,27 +197,7 @@ public class ReservationController {
     public ResponseEntity<List<LocalDateTime>> getAllAvailableSlotsByDateAndRestaurant(
             @PathVariable("restaurantId") Long id, @PathVariable("date") String date) {
         // Assume string date is in ISO format - 2021-19-14
-        List<LocalDateTime> availableSlots = new ArrayList<LocalDateTime>();
-        Restaurant restaurantReserved = restaurantService.get(id);
-    
-        LocalDate localDate = LocalDate.parse(date);
-        LocalDateTime startTime;
-        LocalDateTime endTime;
-        if (localDate.getDayOfWeek() == DayOfWeek.SATURDAY || localDate.getDayOfWeek() == DayOfWeek.SUNDAY) {
-            startTime = localDate.atTime(restaurantReserved.getRestaurantWeekendOpening(), 0);
-            endTime = localDate.atTime(restaurantReserved.getRestaurantWeekendClosing(), 0);
-        } else {
-            startTime = localDate.atTime(restaurantReserved.getRestaurantWeekdayOpening(), 0);
-            endTime = localDate.atTime(restaurantReserved.getRestaurantWeekdayClosing(), 0);
-        }
-
-        while (!startTime.equals(endTime)) {
-            if (reservationService.slotAvailable(restaurantReserved, startTime)) {
-                availableSlots.add(startTime);
-            }
-            startTime = startTime.plusHours(1); // iterate for every 1 hour
-        }
-        return new ResponseEntity<>(availableSlots, HttpStatus.OK);
+        return new ResponseEntity<>(reservationService.getAllAvailableSlotsByDateAndRestaurant(id, date), HttpStatus.OK);
     }
 
 }

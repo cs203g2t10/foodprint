@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import foodprint.backend.model.Discount;
@@ -32,16 +33,19 @@ public class RestaurantService {
         this.discountRepo = discountRepo;
     }
     
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public List<Restaurant> getAllRestaurants() {
         List<Restaurant> restaurants = repo.findAll();
         return restaurants;
     }
 
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Restaurant get(Long id) {
         Optional<Restaurant> restaurant = repo.findById(id);
         return restaurant.orElseThrow(() -> new NotFoundException("Restaurant not found"));
     }
 
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Restaurant update(Long id, Restaurant updatedRestaurant) {
 
         Restaurant currentRestaurant = this.get(id);
@@ -64,26 +68,40 @@ public class RestaurantService {
         if (updatedRestaurant.getRestaurantTableCapacity() != null) {
             currentRestaurant.setRestaurantTableCapacity(updatedRestaurant.getRestaurantTableCapacity());
         }
-        if (updatedRestaurant.getRestaurantWeekdayClosing() != null) {
-            currentRestaurant.setRestaurantWeekdayClosing(updatedRestaurant.getRestaurantWeekdayClosing());
+        if (updatedRestaurant.getRestaurantWeekdayClosingHour() != null) {
+            currentRestaurant.setRestaurantWeekdayClosingHour(updatedRestaurant.getRestaurantWeekdayClosingHour());
         }
-        if (updatedRestaurant.getRestaurantWeekdayOpening() != null) {
-            currentRestaurant.setRestaurantWeekdayOpening(updatedRestaurant.getRestaurantWeekdayOpening());
+        if (updatedRestaurant.getRestaurantWeekdayOpeningHour() != null) {
+            currentRestaurant.setRestaurantWeekdayOpeningHour(updatedRestaurant.getRestaurantWeekdayOpeningHour());
         }
-        if (updatedRestaurant.getRestaurantWeekendClosing() != null) {
-            currentRestaurant.setRestaurantWeekendClosing(updatedRestaurant.getRestaurantWeekendClosing());
+        if (updatedRestaurant.getRestaurantWeekendClosingHour() != null) {
+            currentRestaurant.setRestaurantWeekendClosingHour(updatedRestaurant.getRestaurantWeekendClosingHour());
         }
-        if (updatedRestaurant.getRestaurantWeekendOpening() != null) {
-            currentRestaurant.setRestaurantWeekendOpening(updatedRestaurant.getRestaurantWeekendOpening());
+        if (updatedRestaurant.getRestaurantWeekendOpeningHour() != null) {
+            currentRestaurant.setRestaurantWeekendOpeningHour(updatedRestaurant.getRestaurantWeekendOpeningHour());
+        }
+        if (updatedRestaurant.getRestaurantWeekdayClosingMinutes() != null) {
+            currentRestaurant.setRestaurantWeekdayClosingMinutes(updatedRestaurant.getRestaurantWeekdayClosingMinutes());
+        }
+        if (updatedRestaurant.getRestaurantWeekdayOpeningMinutes() != null) {
+            currentRestaurant.setRestaurantWeekdayOpeningMinutes(updatedRestaurant.getRestaurantWeekdayOpeningMinutes());
+        }
+        if (updatedRestaurant.getRestaurantWeekendClosingMinutes() != null) {
+            currentRestaurant.setRestaurantWeekendClosingMinutes(updatedRestaurant.getRestaurantWeekendClosingMinutes());
+        }
+        if (updatedRestaurant.getRestaurantWeekendOpeningMinutes() != null) {
+            currentRestaurant.setRestaurantWeekendOpeningMinutes(updatedRestaurant.getRestaurantWeekendOpeningMinutes());
         }
 
         return repo.saveAndFlush(currentRestaurant);
     }
 
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Restaurant create(Restaurant restaurant) {
         return repo.saveAndFlush(restaurant);
     }
 
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public void delete(Long id) {
         Restaurant restaurant = this.get(id);
         repo.delete(restaurant);
@@ -105,6 +123,7 @@ public class RestaurantService {
     *
     */
 
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Food addFood(Long restaurantId, Food food) {
         Restaurant restaurant = repo.findByRestaurantId(restaurantId);
         food.setRestaurant(restaurant);
@@ -113,11 +132,13 @@ public class RestaurantService {
         return savedFood;
     }
 
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public List<Food> getAllFood(Long restaurantId) {
         Restaurant restaurant = repo.findByRestaurantId(restaurantId);
         return restaurant.getAllFood();
     }
 
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Food getFood(Long restaurantId, Long foodId) {
         Optional<Food> foodOpt = foodRepo.findById(foodId);
         Food food = foodOpt.orElseThrow(() -> new NotFoundException("Food not found"));
@@ -138,6 +159,7 @@ public class RestaurantService {
     //     return discount;
     // }
 
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Discount addDiscount(Long restaurantId, DiscountDTO discount) {
         Restaurant restaurant = repo.findByRestaurantId(restaurantId);
         Discount Discount = new Discount();
@@ -149,10 +171,12 @@ public class RestaurantService {
         return savedDiscount;
     }
 
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public void deleteDiscount(Discount discount) {
         discountRepo.delete(discount);
     }
 
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Discount updateDiscount(Discount currentDiscount, DiscountDTO updatedDiscount) {
         currentDiscount.setDiscountDescription(updatedDiscount.getDiscountDescription());
         currentDiscount.setDiscountPercentage(updatedDiscount.getDiscountPercentage());
@@ -160,6 +184,7 @@ public class RestaurantService {
         return currentDiscount;
     }
 
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Discount getDiscount(Long discountId) {
         Optional<Discount> discount = discountRepo.findById(discountId);
         return discount.orElseThrow(() -> new NotFoundException("Discount not found"));
