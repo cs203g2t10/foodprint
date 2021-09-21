@@ -1,11 +1,13 @@
 package foodprint.backend.service;
 
 import java.util.Optional;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import foodprint.backend.model.LineItem;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.ReservationRepo;
 import foodprint.backend.model.Reservation;
@@ -37,6 +39,11 @@ public class ReservationService {
     public Reservation getReservationById(Long id) {
         Optional<Reservation> reservation = reservationRepo.findById(id);
         return reservation.orElseThrow(() -> new NotFoundException("Reservation not found"));
+    }
+
+    public List<LineItem> getLineItemsByReservationId(Long id) {
+        List<LineItem> lineItems = reservationRepo.findLineItemsByReservationId(id);
+        return lineItems;
     }
 
     public List<Reservation> getAllReservationSlots() {
