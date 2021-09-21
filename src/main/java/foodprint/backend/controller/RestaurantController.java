@@ -142,7 +142,7 @@ public class RestaurantController {
     @ResponseStatus(code = HttpStatus.OK)
     public ResponseEntity<List<Discount>> getAllRestaurantDiscount(@PathVariable("restaurantId") Long restaurantId) {
         Restaurant restaurant = service.get(restaurantId);
-        List<Discount> allDiscounts = restaurant.getAllDiscount();
+        List<Discount> allDiscounts = restaurant.getDiscount();
         return new ResponseEntity<>(allDiscounts, HttpStatus.OK);
     }
 
@@ -152,7 +152,7 @@ public class RestaurantController {
     @Operation(summary = "Gets a discount of restaurant")
     public ResponseEntity<Discount> getDiscount(@PathVariable("restaurantId") Long restaurantId, @PathVariable("discountId") Long discountId) {
         Restaurant restaurant = service.get(restaurantId);
-        List<Discount> allDiscounts = restaurant.getAllDiscount();
+        List<Discount> allDiscounts = restaurant.getDiscount();
         for(Discount discount : allDiscounts) {
             if (discount.getDiscountId().equals(discountId)) {
                 Discount discountFound = service.getDiscount(discountId);
@@ -178,7 +178,7 @@ public class RestaurantController {
     @Operation(summary = "Deletes an existing discount")
     public ResponseEntity<Discount> deleteDiscount(@PathVariable("restaurantId") Long restaurantId, @PathVariable("discountId") Long discountId) {
         Restaurant restaurant = service.get(restaurantId);
-        List<Discount> allDiscounts = restaurant.getAllDiscount();
+        List<Discount> allDiscounts = restaurant.getDiscount();
         for (Discount discount : allDiscounts) {
             if(discount.getDiscountId().equals(discountId)) {
                 service.deleteDiscount(discount);
@@ -197,7 +197,7 @@ public class RestaurantController {
         @PathVariable("discountId") Long discountId,
         @RequestBody DiscountDTO updatedDiscount
     ) {
-        List<Discount> allDiscounts = service.get(restaurantId).getAllDiscount();
+        List<Discount> allDiscounts = service.get(restaurantId).getDiscount();
         Discount changedDiscount = new Discount();
         for(Discount discount : allDiscounts) {
             if(discount.getDiscountId().equals(discountId)) {

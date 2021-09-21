@@ -145,7 +145,7 @@ public class RestaurantService {
                      .discountDescription(discount.getDiscountDescription())
                      .discountPercentage(discount.getDiscountPercentage());
         var savedDiscount = discountRepo.saveAndFlush(Discount);
-        restaurant.getAllDiscount().add(savedDiscount);
+        restaurant.getDiscount().add(savedDiscount);
         return savedDiscount;
     }
 

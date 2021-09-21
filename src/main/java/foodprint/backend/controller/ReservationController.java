@@ -75,47 +75,18 @@ public class ReservationController {
     // POST: Create a new reservation
     @PostMapping({ "/admin" })
     @ResponseStatus(code = HttpStatus.CREATED)
-    @Operation(summary = "Creates a new reservation slot by admins")
+    @Operation(summary = "For admins to create a new reservation slot")
     public ResponseEntity<Reservation> createReservation(@RequestBody Reservation reservation) {
-        Restaurant restaurant = reservation.getRestaurant();
-        LocalDateTime dateOfReservation = reservation.getDate();
-        LocalDateTime startTime = dateOfReservation.truncatedTo(ChronoUnit.HOURS);
-
-        if (reservationService.slotAvailable(restaurant, startTime)) {
-            Reservation savedReservation = reservationService.create(reservation);
-            return new ResponseEntity<>(savedReservation, HttpStatus.CREATED);
-        } else {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
+        reservationService.create(reservation);
+        return new ResponseEntity<>(reservation, HttpStatus.CREATED);
     }
 
     // POST: Create a new reservation (DTO)
     @PostMapping
-    @Operation(summary = "Creates a new reservation by users")
+    @Operation(summary = "For users to create a new reservation slot")
     public ResponseEntity<CreateReservationDTO> createReservationDTO(@RequestBody CreateReservationDTO req) {
-        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Restaurant restaurant = restaurantService.get(req.getRestaurantId());
-        LocalDateTime dateOfReservation = req.getDate();
-        LocalDateTime startTime = dateOfReservation.truncatedTo(ChronoUnit.HOURS);
-
-        if (reservationService.slotAvailable(restaurant, startTime)) {
-            Reservation reservation = new Reservation();
-            reservation.user(currentUser).date(dateOfReservation).pax(req.getPax()).isVaccinated(req.getIsVaccinated())
-                    .reservedOn(LocalDateTime.now()).status(Status.ONGOING).restaurant(restaurant);
-
-            List<LineItem> savedLineItems = new ArrayList<>();
-            for (LineItemDTO lineItem : req.getLineItems()) {
-                Food food = restaurantService.getFood(req.getRestaurantId(), lineItem.getFoodId());
-                LineItem savedLineItem = new LineItem(food, reservation, lineItem.getQuantity());
-                savedLineItems.add(savedLineItem);
-                lineItemRepo.saveAndFlush(savedLineItem);
-            }
-            reservation.lineItems(savedLineItems);
-            reservationService.create(reservation);
-            return new ResponseEntity<>(req, HttpStatus.CREATED);
-        } else {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
+        reservationService.create(req);
+        return new ResponseEntity<>(req, HttpStatus.CREATED);
     }
 
     // PUT: Update reservation

@@ -14,6 +14,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -69,15 +70,18 @@ public class Restaurant {
     @Column (name = "restaurantWeekendClosing")
     private Integer restaurantWeekendClosing;
 
-
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.MERGE)
     private List<Food> food;
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.MERGE)
     private List<RestaurantManager> restaurantManagers;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.MERGE)
     private List<Discount> discount;
+
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
+    private List<Reservation> reservations;
 
     protected Restaurant () { }
 
@@ -180,11 +184,19 @@ public class Restaurant {
         this.restaurantWeekendClosing = restaurantWeekendClosing;
     }
     
-    public List<Discount> getAllDiscount() {
+    public List<Discount> getDiscount() {
         return discount;
     }
 
-    public void setAllDiscount(List<Discount> discount) {
+    public void setDiscount(List<Discount> discount) {
         this.discount = discount;
+    }
+
+    public List<Reservation> getAllReservations() {
+        return reservations;
+    }
+
+    public void setAllReservations(List<Reservation> reservations) {
+        this.reservations = reservations;
     }
 }
