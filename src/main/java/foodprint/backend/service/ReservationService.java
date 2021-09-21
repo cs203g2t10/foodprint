@@ -21,7 +21,6 @@ import foodprint.backend.model.Reservation;
 import foodprint.backend.model.ReservationRepo;
 import foodprint.backend.model.User;
 import foodprint.backend.model.Reservation.Status;
-import foodprint.backend.exceptions.InsufficientPermissionsException;
 import foodprint.backend.exceptions.NotFoundException;
 
 import java.time.DayOfWeek;
@@ -35,8 +34,6 @@ public class ReservationService {
     private ReservationRepo reservationRepo;
     private RestaurantService restaurantService;
     private LineItemRepo lineItemRepo;
-
-    private RestaurantService restaurantService;
 
     @Autowired
     ReservationService(ReservationRepo reservationRepo, RestaurantService restaurantService, LineItemRepo lineItemRepo) {
