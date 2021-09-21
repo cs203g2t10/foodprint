@@ -49,7 +49,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             return;
         }
 
-        logger.info(authHeader);
+        // logger.info(authHeader);
 
         if (authHeader.isEmpty() || !authHeader.startsWith("Bearer ")) {
             chain.doFilter(request, response);
@@ -78,7 +78,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             new WebAuthenticationDetailsSource().buildDetails(request)
         );
 
-        logger.info("Auth OK");
+        logger.info("Auth OK - Email: {}: - Authorities: {}", userDetails.getUsername(), userDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
         chain.doFilter(request, response);
     }

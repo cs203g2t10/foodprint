@@ -2,6 +2,8 @@ package foodprint.backend.controller;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -64,7 +66,7 @@ public class RestaurantController {
     @PostMapping
     @ResponseStatus(code = HttpStatus.CREATED)
     @Operation(summary = "Create a new restaurant using DTO")
-    public ResponseEntity<Restaurant> restaurantCreate(@RequestBody RestaurantDTO restaurantDTO) {
+    public ResponseEntity<Restaurant> restaurantCreate(@RequestBody @Valid RestaurantDTO restaurantDTO) {
         Restaurant restaurant = new Restaurant(restaurantDTO.getRestaurantName(), restaurantDTO.getRestaurantLocation());
         Restaurant savedRestaurant = service.create(restaurant);
         return new ResponseEntity<>(savedRestaurant, HttpStatus.CREATED);
@@ -73,25 +75,12 @@ public class RestaurantController {
     // PUT: Update the restaurant
     @PutMapping({"/{restaurantId}"})
     @ResponseStatus(code = HttpStatus.OK)
-    @Operation(summary = "Updates an existing restaurant")
+    @Operation(summary = "Updates an existing restaurant, only changed fields need to be set")
     public ResponseEntity<Restaurant> restaurantUpdate(
         @PathVariable("restaurantId") Long id,
-        @RequestBody Restaurant updatedRestaurant
-    ) {
-
-        Restaurant currentRestaurant = service.get(id);
-        currentRestaurant.setRestaurantDesc(updatedRestaurant.getRestaurantDesc());
-        currentRestaurant.setRestaurantName(updatedRestaurant.getRestaurantName());
-        currentRestaurant.setRestaurantLocation(updatedRestaurant.getRestaurantLocation());
-        currentRestaurant.setPicturesPath(updatedRestaurant.getPicturesPath());
-        currentRestaurant.setRestaurantTableCapacity(updatedRestaurant.getRestaurantTableCapacity());
-        currentRestaurant.setRestaurantWeekdayClosing(updatedRestaurant.getRestaurantWeekdayClosing());
-        currentRestaurant.setRestaurantWeekdayOpening(updatedRestaurant.getRestaurantWeekdayOpening());
-        currentRestaurant.setRestaurantWeekendClosing(updatedRestaurant.getRestaurantWeekendClosing());
-        currentRestaurant.setRestaurantWeekendOpening(updatedRestaurant.getRestaurantWeekendOpening());
-        currentRestaurant = service.update(currentRestaurant);
-        return new ResponseEntity<>(currentRestaurant, HttpStatus.OK);
-
+        @RequestBody @Valid Restaurant updatedRestaurant) {
+        updatedRestaurant = service.update(id, updatedRestaurant);
+        return new ResponseEntity<>(updatedRestaurant, HttpStatus.OK);
     }
 
 
@@ -100,15 +89,7 @@ public class RestaurantController {
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Deletes an existing restaurant")
     public ResponseEntity<Restaurant> restaurantDelete(@PathVariable("restaurantId") Long id) {
-        Restaurant restaurant = service.get(id);
-        service.delete(restaurant);
-        
-        try { 
-            service.get(id);
-        } catch (NotFoundException ex) {
-            return new ResponseEntity<>(HttpStatus.OK);
-        }
-
+        service.delete(id);
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -198,7 +179,7 @@ public class RestaurantController {
     @ResponseStatus(code = HttpStatus.OK)
     public ResponseEntity<List<Discount>> getAllRestaurantDiscount(@PathVariable("restaurantId") Long restaurantId) {
         Restaurant restaurant = service.get(restaurantId);
-        List<Discount> allDiscounts = restaurant.getAllDiscount();
+        List<Discount> allDiscounts = restaurant.getDiscount();
         return new ResponseEntity<>(allDiscounts, HttpStatus.OK);
     }
 
@@ -208,7 +189,7 @@ public class RestaurantController {
     @Operation(summary = "Gets a discount of restaurant")
     public ResponseEntity<Discount> getDiscount(@PathVariable("restaurantId") Long restaurantId, @PathVariable("discountId") Long discountId) {
         Restaurant restaurant = service.get(restaurantId);
-        List<Discount> allDiscounts = restaurant.getAllDiscount();
+        List<Discount> allDiscounts = restaurant.getDiscount();
         for(Discount discount : allDiscounts) {
             if (discount.getDiscountId().equals(discountId)) {
                 Discount discountFound = service.getDiscount(discountId);
