@@ -1,7 +1,6 @@
 package foodprint.backend.model;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -165,7 +164,7 @@ public class User implements UserDetails{
         List<String> roles = Arrays.asList(this.roles.split(","));
         Set<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
         roles.forEach((role) -> {
-            authorities.add(new SimpleGrantedAuthority(role));
+            authorities.add(new SimpleGrantedAuthority(role.trim()));
         });
         return authorities;
     }
