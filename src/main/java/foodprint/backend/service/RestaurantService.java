@@ -68,17 +68,29 @@ public class RestaurantService {
         if (updatedRestaurant.getRestaurantTableCapacity() != null) {
             currentRestaurant.setRestaurantTableCapacity(updatedRestaurant.getRestaurantTableCapacity());
         }
-        if (updatedRestaurant.getRestaurantWeekdayClosing() != null) {
-            currentRestaurant.setRestaurantWeekdayClosing(updatedRestaurant.getRestaurantWeekdayClosing());
+        if (updatedRestaurant.getRestaurantWeekdayClosingHour() != null) {
+            currentRestaurant.setRestaurantWeekdayClosingHour(updatedRestaurant.getRestaurantWeekdayClosingHour());
         }
-        if (updatedRestaurant.getRestaurantWeekdayOpening() != null) {
-            currentRestaurant.setRestaurantWeekdayOpening(updatedRestaurant.getRestaurantWeekdayOpening());
+        if (updatedRestaurant.getRestaurantWeekdayOpeningHour() != null) {
+            currentRestaurant.setRestaurantWeekdayOpeningHour(updatedRestaurant.getRestaurantWeekdayOpeningHour());
         }
-        if (updatedRestaurant.getRestaurantWeekendClosing() != null) {
-            currentRestaurant.setRestaurantWeekendClosing(updatedRestaurant.getRestaurantWeekendClosing());
+        if (updatedRestaurant.getRestaurantWeekendClosingHour() != null) {
+            currentRestaurant.setRestaurantWeekendClosingHour(updatedRestaurant.getRestaurantWeekendClosingHour());
         }
-        if (updatedRestaurant.getRestaurantWeekendOpening() != null) {
-            currentRestaurant.setRestaurantWeekendOpening(updatedRestaurant.getRestaurantWeekendOpening());
+        if (updatedRestaurant.getRestaurantWeekendOpeningHour() != null) {
+            currentRestaurant.setRestaurantWeekendOpeningHour(updatedRestaurant.getRestaurantWeekendOpeningHour());
+        }
+        if (updatedRestaurant.getRestaurantWeekdayClosingMinutes() != null) {
+            currentRestaurant.setRestaurantWeekdayClosingMinutes(updatedRestaurant.getRestaurantWeekdayClosingMinutes());
+        }
+        if (updatedRestaurant.getRestaurantWeekdayOpeningMinutes() != null) {
+            currentRestaurant.setRestaurantWeekdayOpeningMinutes(updatedRestaurant.getRestaurantWeekdayOpeningMinutes());
+        }
+        if (updatedRestaurant.getRestaurantWeekendClosingMinutes() != null) {
+            currentRestaurant.setRestaurantWeekendClosingMinutes(updatedRestaurant.getRestaurantWeekendClosingMinutes());
+        }
+        if (updatedRestaurant.getRestaurantWeekendOpeningMinutes() != null) {
+            currentRestaurant.setRestaurantWeekendOpeningMinutes(updatedRestaurant.getRestaurantWeekendOpeningMinutes());
         }
 
         return repo.saveAndFlush(currentRestaurant);
