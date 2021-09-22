@@ -88,14 +88,14 @@ public class Restaurant {
     @Column (name = "restaurantWeekendClosingMinutes")
     private Integer restaurantWeekendClosingMinutes;
 
-    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.MERGE)
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
     private List<Food> food;
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.MERGE)
     private List<RestaurantManager> restaurantManagers;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.MERGE)
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
     private List<Discount> discount;
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)

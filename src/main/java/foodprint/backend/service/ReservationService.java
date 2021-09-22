@@ -16,7 +16,6 @@ import foodprint.backend.model.Food;
 import foodprint.backend.model.LineItem;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.service.RestaurantService;
-import foodprint.backend.model.LineItemRepo;
 import foodprint.backend.model.Reservation;
 import foodprint.backend.model.ReservationRepo;
 import foodprint.backend.model.User;
@@ -33,13 +32,11 @@ public class ReservationService {
 
     private ReservationRepo reservationRepo;
     private RestaurantService restaurantService;
-    private LineItemRepo lineItemRepo;
 
     @Autowired
-    ReservationService(ReservationRepo reservationRepo, RestaurantService restaurantService, LineItemRepo lineItemRepo) {
+    ReservationService(ReservationRepo reservationRepo, RestaurantService restaurantService) {
         this.reservationRepo = reservationRepo;
         this.restaurantService = restaurantService;
-        this.lineItemRepo = lineItemRepo;
     }
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
@@ -62,8 +59,11 @@ public class ReservationService {
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public List<LineItem> getLineItemsByReservationId(Long id) {
-        List<LineItem> lineItems = reservationRepo.findLineItemsByReservationId(id);
-        return lineItems;
+        Optional<Reservation> reservation = reservationRepo.findById(id);
+        if (reservation.isEmpty()) {
+            throw new NotFoundException("Reservation not found");
+        }
+        return reservation.get().getLineItems();
     }
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
@@ -79,17 +79,6 @@ public class ReservationService {
     }
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
-    public Reservation create(Reservation reservation) {
-        Restaurant restaurant = reservation.getRestaurant();
-        LocalDateTime dateOfReservation = reservation.getDate();
-        LocalDateTime startTime = dateOfReservation.truncatedTo(ChronoUnit.HOURS);
-        if (this.slotAvailable(restaurant, startTime)) {
-            return reservationRepo.saveAndFlush(reservation);
-        } else {
-            throw new NotFoundException("Slot not found");
-        }
-    }
-
     public Reservation create(CreateReservationDTO req) {
         User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Restaurant restaurant = restaurantService.get(req.getRestaurantId());
@@ -106,7 +95,6 @@ public class ReservationService {
                 Food food = restaurantService.getFood(req.getRestaurantId(), lineItem.getFoodId());
                 LineItem savedLineItem = new LineItem(food, reservation, lineItem.getQuantity());
                 savedLineItems.add(savedLineItem);
-                lineItemRepo.saveAndFlush(savedLineItem);
             }
             reservation.lineItems(savedLineItems);
             return reservationRepo.saveAndFlush(reservation);

@@ -22,12 +22,12 @@ public class LineItem {
     @Schema(defaultValue="1")
     private Long lineItemId;
 
-    @ManyToOne
+    @ManyToOne(cascade=CascadeType.MERGE)
     @JoinColumn(name = "foodId")
     private Food food;
 
     @JsonIgnore
-    @ManyToOne(cascade=CascadeType.ALL)
+    @ManyToOne(cascade=CascadeType.MERGE)
     @JoinColumn(name = "reservationId")
     private Reservation reservation;
 

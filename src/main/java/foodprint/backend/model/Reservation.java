@@ -65,7 +65,7 @@ public class Reservation {
     private List<LineItem> lineItems;
 
     @JsonIgnore
-    @ManyToOne(cascade=CascadeType.ALL)
+    @ManyToOne(cascade=CascadeType.MERGE)
     @JoinColumn(name="restaurantId")
     private Restaurant restaurant;
 

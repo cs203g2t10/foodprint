@@ -63,15 +63,6 @@ public class ReservationController {
         return new ResponseEntity<>(reservationList, HttpStatus.OK);
     }
 
-    // POST: Create a new reservation
-    @PostMapping({ "/admin" })
-    @ResponseStatus(code = HttpStatus.CREATED)
-    @Operation(summary = "For admins to create a new reservation slot")
-    public ResponseEntity<Reservation> createReservation(@RequestBody Reservation reservation) {
-        reservationService.create(reservation);
-        return new ResponseEntity<>(reservation, HttpStatus.CREATED);
-    }
-
     // POST: Create a new reservation (DTO)
     @PostMapping
     @Operation(summary = "For users to create a new reservation slot")
@@ -114,12 +105,10 @@ public class ReservationController {
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    // TODO: API TESTING
     // POST: Create new lineItems by reservationId
     public ResponseEntity<List<LineItem>> createLineItems(@PathVariable("reservationId") Long id,
             @RequestBody List<LineItem> lineItems) {
         Reservation currentReservation = reservationService.getReservationById(id);    
-
         if (currentReservation.getLineItems() != null) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         } else {
@@ -158,10 +147,13 @@ public class ReservationController {
     // DELETE: Delete lineItems by reservationId
     @DeleteMapping({ "/{reservationId}/lineItems" })
     public ResponseEntity<List<LineItem>> deleteLineItems(@PathVariable("reservationId") Long id) {
-        Reservation reservation = reservationService.getReservationById(id);    
+        Reservation reservation = reservationService.getReservationById(id);
+        List<LineItem> lineItems = reservation.getLineItems();
+        for (LineItem lineItem : lineItems) {
+            lineItemRepo.delete(lineItem);
+        }
         reservation.setLineItems(null);
         reservationService.update(reservation);
-
         reservation = reservationService.getReservationById(id); 
         if (reservation.getLineItems() == null) {
             return new ResponseEntity<>(HttpStatus.OK);

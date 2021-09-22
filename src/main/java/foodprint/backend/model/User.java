@@ -74,7 +74,7 @@ public class User implements UserDetails{
     @NotNull
     private LocalDateTime registeredOn;
     
-    @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Reservation> reservations;
 
     // Constructors
