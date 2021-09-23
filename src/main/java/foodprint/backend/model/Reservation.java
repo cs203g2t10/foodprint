@@ -36,7 +36,7 @@ public class Reservation {
     private Long reservationId;
 
     @JsonIgnore
-    @ManyToOne(cascade=CascadeType.MERGE)
+    @ManyToOne
     @JoinColumn(name = "userId")
     private User user;
 
@@ -65,7 +65,7 @@ public class Reservation {
     private List<LineItem> lineItems;
 
     @JsonIgnore
-    @ManyToOne(cascade=CascadeType.MERGE)
+    @ManyToOne
     @JoinColumn(name="restaurantId")
     private Restaurant restaurant;
 

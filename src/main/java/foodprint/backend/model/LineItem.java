@@ -1,6 +1,5 @@
 package foodprint.backend.model;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -22,12 +21,12 @@ public class LineItem {
     @Schema(defaultValue="1")
     private Long lineItemId;
 
-    @ManyToOne(cascade=CascadeType.MERGE)
+    @ManyToOne
     @JoinColumn(name = "foodId")
     private Food food;
 
     @JsonIgnore
-    @ManyToOne(cascade=CascadeType.MERGE)
+    @ManyToOne
     @JoinColumn(name = "reservationId")
     private Reservation reservation;
 

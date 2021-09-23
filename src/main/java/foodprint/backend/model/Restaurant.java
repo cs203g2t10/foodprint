@@ -48,30 +48,30 @@ public class Restaurant {
     @Column(name = "picturesPath")
     private String picturesPath;
 
-    @Column (name = "restaurantLocation")
+    @Column(name = "restaurantLocation")
     @Schema(defaultValue="Serangoon")
     private String restaurantLocation;
 
-    @Column (name = "restaurantTableCapacity")
+    @Column(name = "restaurantTableCapacity")
     @Schema(defaultValue="15")
     private Integer restaurantTableCapacity = 15;
 
     //what time the restaurant is open for reservation - assume 24 hour clock e.g "13:00" for 1pm -> values of 0- 23
-    @Column (name = "restaurantWeekdayOpeningHour")
+    @Column(name = "restaurantWeekdayOpeningHour")
     @Schema(defaultValue ="9")
     private Integer restaurantWeekdayOpeningHour;
 
     //what time in minutes the restaurant is open for reservation -> should take in values of between 0 and 59 only
-    @Column (name = "restaurantWeekdayOpeningMinutes")
+    @Column(name = "restaurantWeekdayOpeningMinutes")
     @Schema(defaultValue = "15")
     private Integer restaurantWeekdayOpeningMinutes;
 
     //what time reservation slots close
-    @Column (name = "restaurantWeekdayClosingHour")
+    @Column(name = "restaurantWeekdayClosingHour")
     @Schema(defaultValue = "22")
     private Integer restaurantWeekdayClosingHour;
 
-    @Column (name = "restaurantWeekdayClosingMinutes")
+    @Column(name = "restaurantWeekdayClosingMinutes")
     private Integer restaurantWeekdayClosingMinutes;
 
     @Schema(defaultValue = "11")
@@ -98,6 +98,7 @@ public class Restaurant {
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
     private List<Discount> discount;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
     private List<Reservation> reservations;
 

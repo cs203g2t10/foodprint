@@ -1,6 +1,5 @@
 package foodprint.backend.model;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -28,7 +27,7 @@ public class Discount {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long discountId;
 
-    @ManyToOne(cascade=CascadeType.MERGE)
+    @ManyToOne
     @JoinColumn(name = "restaurantId")
     @Schema(defaultValue="1")
     private Restaurant restaurant;

@@ -40,7 +40,7 @@ public class Food {
     @Schema(defaultValue="Sashimi")
     private String foodName;
 
-    @ManyToOne(cascade=CascadeType.MERGE)
+    @ManyToOne
     @JoinColumn(name="restaurantId")
     @JsonIgnore
     private Restaurant restaurant;

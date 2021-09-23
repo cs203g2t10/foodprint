@@ -15,7 +15,6 @@ import foodprint.backend.dto.LineItemDTO;
 import foodprint.backend.model.Food;
 import foodprint.backend.model.LineItem;
 import foodprint.backend.model.Restaurant;
-import foodprint.backend.service.RestaurantService;
 import foodprint.backend.model.Reservation;
 import foodprint.backend.model.ReservationRepo;
 import foodprint.backend.model.User;
