@@ -33,6 +33,8 @@ build/
 .vscode/
 data/demo.mv.db
 data/demo.trace.db
+data/foodprint.mv.db
+data/foodprint.trace.db
 mvnw
 
 secrets.properties
