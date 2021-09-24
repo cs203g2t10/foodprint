@@ -17,6 +17,8 @@ jobs:
           token: ${{ secrets.TELEGRAM_TOKEN }}
           format: markdown
           message: |
+            Repository: foodprint
+            
             New [push](${{ github.event.head_commit.url }}) by [${{ github.actor }}](github.com/${{ github.actor }}) ref: ${{ github.event.ref }}
             
             Last commit description:
