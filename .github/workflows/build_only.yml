@@ -5,9 +5,13 @@ name: Java CI with Maven
 
 on:
   push:
-    branches: [ main, production ]
+    branches:
+    - '**'            # matches every branch
+    - '!production'   # excludes production since it has its own build
   pull_request:
-    branches: [ main, production ]
+    branches:
+    - '**'            # matches every branch
+    - '!production'   # excludes production since it has its own build
 
 jobs:
   build:
