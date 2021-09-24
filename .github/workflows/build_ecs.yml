@@ -63,12 +63,13 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
       
-    - run: cp application.properties target/application.properties
+    - name: Copy application.properties file
+      run: cp application.properties target/application.properties
 
     - name: Build, tag, and push image to Amazon ECR
       id: build-image
       env:
-        ECR_REGISTRY: fprint
+        ECR_REGISTRY: g1n2x3c2
         ECR_REPOSITORY: fprint-backend
         IMAGE_TAG: ${{ github.sha }}
       run: |
