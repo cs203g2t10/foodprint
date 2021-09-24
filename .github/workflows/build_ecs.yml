@@ -74,8 +74,8 @@ jobs:
         context: .devcontainer
         create_repo: fprint-backend
         tags: |
-          public.ecr.aws/g1n2x3c2/${{ steps.repoName.outputs.reponame }}:latest
-          public.ecr.aws/g1n2x3c2/${{ steps.repoName.outputs.reponame }}:${{ steps.sha.outputs.sha7 }}
+          public.ecr.aws/g1n2x3c2/fprint-backend:latest
+          public.ecr.aws/g1n2x3c2/fprint-backend:${{ github.sha }}
 
     - name: Fill in the new image ID in the Amazon ECS task definition
       id: task-def
