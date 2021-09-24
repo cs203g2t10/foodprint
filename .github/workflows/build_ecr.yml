@@ -49,6 +49,7 @@ jobs:
         java-version: '11'
         distribution: 'adopt'
         cache: maven
+        architecture: aarch64
     
     - name: Get short SHA
       id: sha
