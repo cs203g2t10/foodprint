@@ -34,7 +34,7 @@ name: Build and Deploy to Amazon ECS
 
 jobs:
   deploy:
-    name: Deploy
+    name: Build and push to ECR
     runs-on: ubuntu-latest
     environment: production
 
@@ -68,7 +68,7 @@ jobs:
     - name: Build, tag, and push image to Amazon ECR
       id: build-image
       env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REGISTRY: fprint
         ECR_REPOSITORY: fprint-backend
         IMAGE_TAG: ${{ github.sha }}
       run: |
