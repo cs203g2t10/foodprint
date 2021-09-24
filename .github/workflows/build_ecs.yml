@@ -77,8 +77,9 @@ jobs:
         # push it to ECR so that it can
         # be deployed to ECS.
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        docker push public.ecr.aws/$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        echo "::set-output name=image::public.ecr.aws/$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG public.ecr.aws/g1n2x3c2/fprint-backend:latest
+        docker push public.ecr.aws/g1n2x3c2/fprint-backend:latest
+        echo "::set-output name=image::public.ecr.aws/g1n2x3c2/fprint-backend:latest"
 
     - name: Fill in the new image ID in the Amazon ECS task definition
       id: task-def
