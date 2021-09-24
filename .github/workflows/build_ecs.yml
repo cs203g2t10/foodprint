@@ -30,7 +30,7 @@ on:
     branches: [ production ]
   
 
-name: Deploy to Amazon ECS
+name: Build and Deploy to Amazon ECS
 
 jobs:
   deploy:
