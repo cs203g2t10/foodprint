@@ -30,10 +30,9 @@ on:
     branches: [ production ]
   workflow_dispatch: {}
 
-
 name: Build and Deploy to Amazon ECS
 
-jobs:
+jobs:  
   deploy:
     name: Build and push to ECR
     runs-on: [self-hosted, linux, ARM64]
@@ -42,15 +41,7 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-      
-    - name: Set up JDK 11
-      uses: actions/setup-java@v2
-      with:
-        java-version: '11'
-        distribution: 'adopt'
-        cache: maven
-        architecture: aarch64
-    
+         
     - name: Get short SHA
       id: sha
       run: echo "::set-output name=sha7::$(echo ${GITHUB_SHA} | cut -c1-7)"
@@ -82,6 +73,19 @@ jobs:
         tags: |
           public.ecr.aws/g1n2x3c2/fprint-backend:latest
           public.ecr.aws/g1n2x3c2/fprint-backend:${{ steps.sha.outputs.sha7 }}
+
+  webhook:
+    name: Trigger webhook for automated deployment
+    runs-on: 	ubuntu-latest
+    needs: [deploy]
+    environment: production
+    steps:
+    - name: Webhook
+      uses: joelwmale/webhook-action@master
+      with:
+        url: ${{ secrets.WEBHOOK_URL }}
+        headers: '{"repository": "cs203g2t10/foodprint"}'
+        body: '{"event": "deployment", "repository": "cs203g2t10/foodprint"}'
 
     # - name: Fill in the new image ID in the Amazon ECS task definition
     #   id: task-def
