@@ -115,7 +115,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         @Bean
         public CorsConfigurationSource corsConfigurationSource() {
             final CorsConfiguration configuration = new CorsConfiguration();
-            configuration.setAllowedOrigins(List.of("http://localhost:3000", "https://foodprint.works"));
+            configuration.setAllowedOrigins(List.of("http://localhost:3000", "https://foodprint.works", "https://api.foodprint.works"));
             configuration.setAllowedMethods(List.of("HEAD",
                     "GET", "POST", "PUT", "DELETE", "PATCH"));
             // setAllowCredentials(true) is important, otherwise:
