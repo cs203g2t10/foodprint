@@ -33,7 +33,7 @@ on:
 
 name: Build and Deploy to Amazon ECS
 
-jobs:
+jobs:  
   deploy:
     name: Build and push to ECR
     runs-on: [self-hosted, linux, ARM64]
@@ -82,6 +82,19 @@ jobs:
         tags: |
           public.ecr.aws/g1n2x3c2/fprint-backend:latest
           public.ecr.aws/g1n2x3c2/fprint-backend:${{ steps.sha.outputs.sha7 }}
+
+  webhook:
+    name: Trigger webhook for automated deployment
+    runs-on: [self-hosted, linux, ARM64]
+    needs: [deploy]
+    environment: production
+    steps:
+    - name: Webhook
+      uses: joelwmale/webhook-action@master
+      with:
+        url: ${{ secrets.WEBHOOK_URL }}
+        headers: '{"repository": "cs203g2t10/foodprint"}'
+        body: '{"event": "deployment", "repository": "cs203g2t10/foodprint"}'
 
     # - name: Fill in the new image ID in the Amazon ECS task definition
     #   id: task-def
