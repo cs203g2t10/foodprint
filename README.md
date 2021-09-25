@@ -1,6 +1,10 @@
 # foodprint
 CS203 Collaborative Software Development Project
 
+[![Java CI with Maven](https://github.com/cs203g2t10/foodprint/actions/workflows/build_only.yml/badge.svg)](https://github.com/cs203g2t10/foodprint/actions/workflows/build_only.yml)
+
+[![Build, Push to ECR and Hook](https://github.com/cs203g2t10/foodprint/actions/workflows/build_ecr_hook.yml/badge.svg?branch=production)](https://github.com/cs203g2t10/foodprint/actions/workflows/build_ecr_hook.yml)
+
 ## Problem Statement
 Problem Statement
 Due to the frequently changing restrictions, the process of healing from Covid-19 and creating a new normal has not been easy. The food and beverage industry has been particularly affected by the highly volatile and unpredictable dine-in crowd, resulting in revenue loss and closures of businesses (Lim, 2021). 
