@@ -77,7 +77,7 @@ jobs:
 
   webhook:
     name: Trigger webhook for automated deployment
-    runs-on: [self-hosted, linux, ARM64]
+    runs-on: ubuntu
     needs: [deploy]
     environment: production
     steps:
