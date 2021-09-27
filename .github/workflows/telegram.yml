@@ -1,0 +1,25 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Telegram Message
+
+# Controls when the workflow will run
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: send custom message with args
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          format: markdown
+          message: |
+            Repository: foodprint
+            
+            New [push](${{ github.event.head_commit.url }}) by [${{ github.actor }}](github.com/${{ github.actor }}) ref: ${{ github.event.ref }}
+            
+            Last commit description:
+            ${{ github.event.head_commit.message }}
