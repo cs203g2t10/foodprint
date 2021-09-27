@@ -16,6 +16,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.List;
 import java.util.Optional;
 
+import foodprint.backend.exceptions.AlreadyExistsException;
+import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.User;
 import foodprint.backend.model.UserRepo;
 import foodprint.backend.service.UserService;
@@ -32,15 +34,15 @@ public class UserServiceTest {
     @InjectMocks
     private UserService userService;
     
-    @Test // Why does it not work?
+    @Test
     void addUser_NewEmail_ReturnUser() {
         User user = new User("bobbytan@gmail.com", "SuperSecurePassw0rd", "Bobby Tan");
-
         when(users.findByEmail(any(String.class))).thenReturn(Optional.empty());
         when(users.saveAndFlush(any(User.class))).thenReturn(user);
         when(passwordEncoder.encode("SuperSecurePassw0rd")).thenReturn("$2a$12$uaTxLl9sPzGbIozqCB0wcuKjmmsZNW2mswGw5VRdsU4XFWs9Se7Uq");
 
         User savedUser = userService.createUser(user);
+        
         assertNotNull(savedUser);
         verify(users).findByEmail(user.getEmail());
         verify(users).saveAndFlush(user);
@@ -53,7 +55,7 @@ public class UserServiceTest {
 
         try {
             userService.createUser(user);
-        } catch (Exception e) {
+        } catch (AlreadyExistsException e) {
             assertEquals("User with the same email already exists", e.getMessage());
         }
 
@@ -66,5 +68,33 @@ public class UserServiceTest {
         assertNotNull(retrievedUser);
     }
 
+    @Test
+    void updateUser_NotFound_ReturnError(){
+        User user = new User("bobbytan@gmail.com", "SuperSecurePassw0rd", "Bobby Tan");
+        Long userId = 10L;
+        when(users.findByEmail(any(String.class))).thenReturn(Optional.empty());
+
+        try {
+            userService.updateUser(userId, user);
+        } catch (NotFoundException e) {
+            assertEquals("User not found", e.getMessage());
+        }
+
+        verify(users).findByEmail(user.getEmail());
+    }
+
+    @Test
+    void updateUser_SameEmail_ReturnError() {
+        User user = new User("bobbytan@gmail.com", "SuperSecurePassw0rd", "Bobby Tan");
+        when(users.findByEmail(any(String.class))).thenReturn(Optional.of(user));
+
+        try {
+            userService.updateUser(user.getId(), user);
+        } catch (AlreadyExistsException e) {
+            assertEquals("User with the same email already exists", e.getMessage());
+        }
+
+        verify(users).findByEmail(user.getEmail());
+    }
     
 }
