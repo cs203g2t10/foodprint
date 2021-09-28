@@ -1,5 +1,7 @@
 package foodprint.backend.dto;
 
+import foodprint.backend.model.Reservation.Status;
+
 import java.util.List;
 import java.time.LocalDateTime;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -25,6 +27,8 @@ public class ReservationDTO {
     private Boolean isVaccinated;
 
     private List<NamedLineItemDTO> lineItems;
+
+    private Status status;
 
     public ReservationDTO() {}
 
@@ -88,5 +92,11 @@ public class ReservationDTO {
         this.restaurantName = restaurantName;
     }
 
+    public Status getStatus() {
+        return status;
+    }
 
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 }
