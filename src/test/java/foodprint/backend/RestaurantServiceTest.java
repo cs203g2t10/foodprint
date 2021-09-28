@@ -65,15 +65,11 @@ public class RestaurantServiceTest {
         Long restaurantId = 1L;
         Food food = new Food("Sashimi", 50.0, 0.0);
 
-        when(repo.findByRestaurantId(any(Long.class))).thenReturn(restaurant);
-        // when (repo.saveAndFlush(any(Restaurant.class))).thenReturn(restaurant);
-        when (foodRepo.saveAndFlush(any(Food.class))).thenReturn(food);
-        //when (repo.getALlFoo)
+        when(repo.findByRestaurantId(restaurantId)).thenReturn(restaurant);
+        when (foodRepo.saveAndFlush(food)).thenReturn(food);
 
-        // Restaurant createdRestaurant = restaurantService.create(restaurant);
         Food savedFood = restaurantService.addFood(restaurantId, food);
 
-        // assertNotNull(createdRestaurant);
         assertNotNull(savedFood);
         verify(repo).findByRestaurantId(restaurantId);
         verify(foodRepo).saveAndFlush(food);

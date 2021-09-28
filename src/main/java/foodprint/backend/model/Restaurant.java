@@ -1,6 +1,6 @@
 package foodprint.backend.model;
 
-
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -89,7 +89,7 @@ public class Restaurant {
     private Integer restaurantWeekendClosingMinutes;
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
-    private List<Food> food;
+    private List<Food> food = new ArrayList<Food>();
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.MERGE)
     private List<RestaurantManager> restaurantManagers;
