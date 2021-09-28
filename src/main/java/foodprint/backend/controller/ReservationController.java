@@ -42,7 +42,7 @@ public class ReservationController {
     private RestaurantService restaurantService;
 
     @Autowired
-    ReservationController(LineItemRepo lineItemRepo, 
+    ReservationController(LineItemRepo lineItemRepo,
     ReservationService reservationService, RestaurantService restaurantService) {
         this.lineItemRepo = lineItemRepo;
         this.reservationService = reservationService;

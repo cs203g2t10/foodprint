@@ -11,17 +11,16 @@ import foodprint.backend.model.Discount;
 import foodprint.backend.model.DiscountRepo;
 import foodprint.backend.dto.DiscountDTO;
 import foodprint.backend.dto.FoodDTO;
+import foodprint.backend.dto.FoodIngredientQuantityDTO;
 import foodprint.backend.exceptions.DeleteFailedException;
 import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.Food;
 import foodprint.backend.model.FoodRepo;
 import foodprint.backend.model.Ingredient;
 import foodprint.backend.model.Restaurant;
-import foodprint.backend.model.LineItem;
-import foodprint.backend.model.Reservation;
 import foodprint.backend.model.RestaurantRepo;
-import io.swagger.v3.oas.annotations.links.Link;
-import foodprint.backend.model.ReservationRepo;
+import foodprint.backend.model.IngredientRepo;
+import foodprint.backend.model.FoodIngredientQuantity;
 
 @Service
 public class RestaurantService {
@@ -32,12 +31,15 @@ public class RestaurantService {
 
     private DiscountRepo discountRepo;
 
-    private ReservationRepo reservationRepo;
+    private IngredientRepo ingredientRepo;
 
-    public RestaurantService(RestaurantRepo repo, FoodRepo foodRepo, DiscountRepo discountRepo) {
+
+    public RestaurantService(RestaurantRepo repo, FoodRepo foodRepo, DiscountRepo discountRepo, 
+        IngredientRepo ingredientRepo) {
         this.repo = repo;
         this.foodRepo = foodRepo;
         this.discountRepo = discountRepo;
+        this.ingredientRepo = ingredientRepo;
     }
     
     @PreAuthorize("hasAnyAuthority('FP_USER')")
@@ -131,10 +133,36 @@ public class RestaurantService {
     */
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
-    public Food addFood(Long restaurantId, Food food) {
+    public Food addFood(Long restaurantId, FoodDTO foodDTO) {
         Restaurant restaurant = repo.findByRestaurantId(restaurantId);
-        food.setRestaurant(restaurant);
-        var savedFood = foodRepo.saveAndFlush(food);
+
+        Food newFood = new Food(foodDTO.getFoodName(), foodDTO.getFoodPrice(), 0.00);
+        newFood.setPicturesPath(new ArrayList<String>());
+
+        List<Ingredient> ingredients = getAllRestaurantIngredients(restaurantId);
+        Set<FoodIngredientQuantity> foodIngredientQuantity = new HashSet<>();
+        List<FoodIngredientQuantityDTO> ingredientQuantity = foodDTO.getIngredientQuantityList();
+
+        for (FoodIngredientQuantityDTO entry : ingredientQuantity) {
+            Ingredient newIngredient = null;
+            for(Ingredient ingredient : ingredients) {
+                if(ingredient.getIngredientId() == entry.getIngredientId()) {
+                    newIngredient = ingredient;
+                }
+            }
+
+            if (newIngredient == null) {
+                throw new NotFoundException("restaurant does not have the ingredient");
+            } 
+
+            FoodIngredientQuantity newFoodIngredientQuantity = new FoodIngredientQuantity(newFood, newIngredient, entry.getQuantity());
+            foodIngredientQuantity.add(newFoodIngredientQuantity);
+        }
+
+        newFood.setFoodIngredientQuantity(foodIngredientQuantity);
+
+        newFood.setRestaurant(restaurant);
+        var savedFood = foodRepo.saveAndFlush(newFood);
         restaurant.getAllFood().add(savedFood);
         return savedFood;
     }
@@ -244,13 +272,34 @@ public class RestaurantService {
         return discount.orElseThrow(() -> new NotFoundException("Discount not found"));
     }
 
+    /*
+    *
+    * Ingredient related methods
+    *
+    */
+
     @PreAuthorize("hasAnyAuthority('FP_USER')")
-    public List<Ingredient> getRestaurantIngredients(Long restaurantId) {
+    public List<Ingredient> getAllRestaurantIngredients(Long restaurantId) {
         Restaurant restaurant = get(restaurantId);
         if (restaurant == null) {
             throw new NotFoundException("Restaurant does not exist");
         }
         return restaurant.getIngredients();
+    }
+
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    public Ingredient addRestaurantIngredient(Long restaurantId, Ingredient newIngredient) {
+        Restaurant restaurant = get(restaurantId);
+        if (restaurant == null) {
+            throw new NotFoundException("Restaurant does not exist");
+        }
+        List<Ingredient> ingredients = restaurant.getIngredients();
+        ingredients.add(newIngredient);
+        restaurant.setIngredients(ingredients);
+        newIngredient.setRestaurant(restaurant);
+        ingredientRepo.saveAndFlush(newIngredient);
+        repo.saveAndFlush(restaurant);
+        return newIngredient;
     }
 
   

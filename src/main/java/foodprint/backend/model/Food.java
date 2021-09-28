@@ -139,4 +139,8 @@ public class Food {
         this.foodIngredientQuantity = foodIngredientQuantity;
     }
 
+    public Set<FoodIngredientQuantity> getFoodIngredientQuantity() {
+        return this.foodIngredientQuantity;
+    }
+
 }

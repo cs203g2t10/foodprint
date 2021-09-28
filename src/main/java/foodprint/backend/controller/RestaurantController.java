@@ -22,9 +22,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 
-import foodprint.backend.model.FoodIngredientQuantity;
 import foodprint.backend.model.Ingredient;
-import foodprint.backend.dto.FoodIngredientQuantityDTO;
+import foodprint.backend.dto.IngredientDTO;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.Discount;
 import foodprint.backend.dto.RestaurantDTO;
@@ -117,41 +116,15 @@ public class RestaurantController {
     @Operation(summary = "Creates a new food instance within a restaurant")
     public ResponseEntity<Food> addRestaurantFood(@PathVariable("restaurantId") Long restaurantId, @RequestBody FoodDTO food) {
         Restaurant restaurant = service.get(restaurantId);
-        if(restaurant == null) {
+        if(restaurant == null)
             throw new NotFoundException("restaurant does not exist");
-        }
-        Food newFood = new Food(food.getFoodName(), food.getFoodPrice(), 0.00);
-        newFood.setPicturesPath(new ArrayList<String>());
 
-        List<Ingredient> ingredients = service.getRestaurantIngredients(restaurantId);
-
-        Set<FoodIngredientQuantity> foodIngredientQuantity = new HashSet<>();
-        List<FoodIngredientQuantityDTO> ingredientQuantity = food.getIngredientQuantityList();
-
-        for (FoodIngredientQuantityDTO entry : ingredientQuantity) {
-            Ingredient newIngredient = null;
-            boolean found = false;
-            for(Ingredient ingredient : ingredients) {
-                if(ingredient.getIngredientId() == entry.getIngredientId()) {
-                    newIngredient = ingredient;
-                    found = true;
-                }
-            }
-
-            if (!found) {
-                throw new NotFoundException("restaurant does not have the ingredient");
-            } else {
-                FoodIngredientQuantity newFoodIngredientQuantity = new FoodIngredientQuantity(newFood, newIngredient, entry.getQuantity());
-                foodIngredientQuantity.add(newFoodIngredientQuantity);
-            }
-        }
-
-
-        Food savedFood = service.addFood(restaurantId, newFood);
+       
+        Food savedFood = service.addFood(restaurantId, food);
         return new ResponseEntity<>(savedFood, HttpStatus.CREATED);
     }
 
-    @GetMapping({"/{restaurantId}/food"})
+    @GetMapping({"/{restaurantId}/allFood"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Gets all food of a restaurant")
     public ResponseEntity<List<Food>> getAllRestaurantFood(@PathVariable("restaurantId") Long restaurantId) {
@@ -273,6 +246,30 @@ public class RestaurantController {
         return new ResponseEntity<>(savedDiscount, HttpStatus.OK);
     }
 
+    /*
+    *
+    * Ingredient related mappings
+    *
+    */
+
+    //POST: Creates new ingredient for restaurant
+    @PostMapping("/{restaurantId}/ingredient")
+    @ResponseStatus(code = HttpStatus.CREATED)
+    @Operation(summary = "Creates a new ingredient for restaurant")
+    public ResponseEntity<Ingredient> createRestaurantIngredient(@PathVariable Long restaurantId, @RequestBody IngredientDTO ingredientDTO) {
+        Ingredient newIngredient = service.addRestaurantIngredient(restaurantId, new Ingredient(ingredientDTO.getIngredientName()));
+        return new ResponseEntity<>(newIngredient, HttpStatus.CREATED);
+    }
+
+    //GET: Get all ingredients for restaurant
+    @GetMapping("/{restaurantId}/AllIngredients")
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Gets all restaurant ingredients")
+    public ResponseEntity<List<Ingredient>> restaurantGetAllIngredients(@PathVariable Long restaurantId) {
+        List<Ingredient> ingredients = service.getAllRestaurantIngredients(restaurantId);
+        return new ResponseEntity<>(ingredients, HttpStatus.OK);
+    }
+
     // @GetMapping({"/{restaurantId}/calculateIngredients"})
     // @ResponseStatus(code = HttpStatus.OK)
     // @Operation(summary = "Calculate ingredients")
@@ -293,13 +290,4 @@ public class RestaurantController {
         restaurant.setRestaurantWeekendOpeningMinutes(restaurantDTO.getRestaurantWeekendOpeningMinutes());
         return restaurant;
     }
-
-    // //POST: Creates new ingredient for restaurant
-    // @PostMapping("/{restaurantId}/ingredient/{ingredientId")
-    // @ResponseStatus(code = HttpStatus.CREATED)
-    // @Operation(summary = "Creates a new ingredient for restaurant")
-    // public ResponseEntity<Discount> createRestaurantIngredeint(@PathVariable Long restaurantId, @RequestBody Ingredient ingredient) {
-        
-    //     return null;
-    // }
 }
