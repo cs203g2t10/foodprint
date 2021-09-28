@@ -96,7 +96,7 @@ public class Restaurant {
 
     @JsonIgnore
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
-    private List<Discount> discount;
+    private List<Discount> discount = new ArrayList<Discount>();
 
     @JsonIgnore
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
@@ -107,6 +107,23 @@ public class Restaurant {
     public Restaurant (String restaurantName, String restaurantLocation) {
         this.restaurantName = restaurantName;
         this.restaurantLocation = restaurantLocation;
+    }
+
+
+    public Restaurant(String restaurantName, String restaurantDesc, String picturesPath, String restaurantLocation, Integer restaurantTableCapacity, Integer restaurantWeekdayOpeningHour, Integer restaurantWeekdayOpeningMinutes, Integer restaurantWeekdayClosingHour, Integer restaurantWeekdayClosingMinutes, Integer restaurantWeekendOpeningHour, Integer restaurantWeekendOpeningMinutes, Integer restaurantWeekendClosingHour, Integer restaurantWeekendClosingMinutes) {
+        this.restaurantName = restaurantName;
+        this.restaurantDesc = restaurantDesc;
+        this.picturesPath = picturesPath;
+        this.restaurantLocation = restaurantLocation;
+        this.restaurantTableCapacity = restaurantTableCapacity;
+        this.restaurantWeekdayOpeningHour = restaurantWeekdayOpeningHour;
+        this.restaurantWeekdayOpeningMinutes = restaurantWeekdayOpeningMinutes;
+        this.restaurantWeekdayClosingHour = restaurantWeekdayClosingHour;
+        this.restaurantWeekdayClosingMinutes = restaurantWeekdayClosingMinutes;
+        this.restaurantWeekendOpeningHour = restaurantWeekendOpeningHour;
+        this.restaurantWeekendOpeningMinutes = restaurantWeekendOpeningMinutes;
+        this.restaurantWeekendClosingHour = restaurantWeekendClosingHour;
+        this.restaurantWeekendClosingMinutes = restaurantWeekendClosingMinutes;
     }
 
     // Mutators and Accessors

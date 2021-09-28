@@ -218,7 +218,7 @@ public class RestaurantService {
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Discount updateDiscount(Long restaurantId, Long discountId, Discount discount) {
-        Restaurant restaurant = get(restaurantId);
+        Restaurant restaurant = repo.findByRestaurantId(restaurantId);
         List<Discount> allDiscounts = restaurant.getDiscount();
         for (Discount currentDiscount : allDiscounts) {
             if (currentDiscount.getDiscountId().equals(discountId)) {
