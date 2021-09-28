@@ -249,6 +249,15 @@ public class RestaurantService {
         return picture;
     }
 
+    public Picture saveFoodPicture(Long restaurantId, Long foodId, String title, String description, MultipartFile file) {
+        Picture picture = pictureService.savePicture(title, description, file);
+        Food food = getFood(restaurantId, foodId);
+        List<Picture> picList = food.getPictures();
+        picList.add(picture);
+        foodRepo.saveAndFlush(food);
+        return picture;
+    }
+
     public Boolean pictureInRestaurant(Long restaurantId, Long pictureId) {
         Restaurant restaurant = get(restaurantId);
         List<Picture> restaurantPics = restaurant.getPictures();
@@ -258,6 +267,24 @@ public class RestaurantService {
             }
         }
         return false;
+    }
+
+    public Boolean pictureInFood(Long restaurantId, Long foodId, Long pictureId) {
+        Food food = getFood(restaurantId, foodId);
+        List<Picture> foodPics = food.getPictures();
+        for (Picture p: foodPics) {
+            if (p.getId().equals(pictureId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public String getFoodPictureById(Long restaurantId, Long foodId, Long pictureId ) {
+        if (!pictureInFood(restaurantId, foodId, pictureId)) {
+            throw new NotFoundException("Picture not found in restaurant");
+        }
+        return pictureService.getPictureById(pictureId);
     }
 
     public String getPictureById(Long restaurantId, Long pictureId) {
@@ -281,10 +308,32 @@ public class RestaurantService {
         }
     }
 
+    public void deleteFoodPicture(Long restaurantId, Long foodId, Long pictureId) {
+        if (!pictureInFood(restaurantId, foodId, pictureId)) {
+            throw new NotFoundException("Picture not found in restaurant");
+        } else {
+            Food food = getFood(restaurantId, foodId);
+            List<Picture> pictures = food.getPictures();
+            Picture picture = pictureService.get(pictureId);
+            pictures.remove(picture);
+            food.setPictures(pictures);
+            foodRepo.saveAndFlush(food);
+            pictureService.deletePicture(pictureId); 
+        }
+    }
+
+
     public Picture updatePictureInformation(Long restaurantId, Long pictureId, Picture picture) {
         if (!pictureInRestaurant(restaurantId, pictureId)) { //check if pic id is in restaurant list
             throw new NotFoundException("Picture not found in restaurant");
         }
+        return pictureService.updatedPicture(pictureId, picture);
+    }
+
+    public Picture updateFoodPictureInformation(Long restaurantId, Long foodId, Long pictureId, Picture picture) {
+        if (!pictureInFood(restaurantId, foodId, pictureId)) {
+            throw new NotFoundException("Picture not found in restaurant");
+        } 
         return pictureService.updatedPicture(pictureId, picture);
     }
 }

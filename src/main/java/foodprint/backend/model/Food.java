@@ -129,6 +129,14 @@ public class Food {
         this.foodDiscount = foodDiscount;
     }
 
+    public List<Picture> getPictures() {
+        return pictures;
+    }
+
+    public void setPictures(List<Picture> pictures) {
+        this.pictures = pictures;
+    }
+
     
 
 }
