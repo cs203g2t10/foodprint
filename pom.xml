@@ -109,7 +109,7 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
 					<arguments>
-						<argument>--spring.config.additional-location="data/secrets.properties"</argument>
+						<argument>--spring.config.additional-location=data/secrets.properties</argument>
 					</arguments>
 				</configuration>
 			</plugin>
