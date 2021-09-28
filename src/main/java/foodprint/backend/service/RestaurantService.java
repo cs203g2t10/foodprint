@@ -161,14 +161,20 @@ public class RestaurantService {
     }
 
     public Food updateFood(Long restaurantId, Long foodId, Food updatedFood) {
-        Food food = repo.findByRestaurantIdAndFoodId(restaurantId, foodId).orElseThrow(() ->  new NotFoundException("Food not found"));
-        food.setFoodName(updatedFood.getFoodName());
-        food.setFoodDesc(updatedFood.getFoodDesc());
-        food.setFoodDiscount(updatedFood.getFoodDiscount());
-        food.setFoodPrice(updatedFood.getFoodPrice());
-        food.setPicturesPath(updatedFood.getPicturesPath());
-        Food savedFood = foodRepo.saveAndFlush(food);
-        return savedFood;
+        Restaurant restaurant = get(restaurantId);
+        List<Food> allFood = restaurant.getAllFood();
+        for (Food food : allFood) {
+            if (food.getFoodId().equals(foodId)) {
+                food.setFoodName(updatedFood.getFoodName());
+                food.setFoodDesc(updatedFood.getFoodDesc());
+                food.setFoodDiscount(updatedFood.getFoodDiscount());
+                food.setFoodPrice(updatedFood.getFoodPrice());
+                food.setPicturesPath(updatedFood.getPicturesPath());
+                food = foodRepo.saveAndFlush(food);
+                return food;
+            }
+        }
+        throw new NotFoundException("Food not found");
     }
     
     public Page<Food> searchFood(Pageable page, String query) {

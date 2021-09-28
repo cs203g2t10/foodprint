@@ -18,6 +18,8 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import com.jayway.jsonpath.Option;
@@ -154,18 +156,18 @@ public class RestaurantServiceTest {
 
     @Test
     void updateFood_FoodExist_ReturnUpdatedFood() {
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Serangoon");
         Long restaurantId = 1L;
         Food food = new Food("Sashimi", "Desc", "Pictures", 50.0, 0.0);
-        Long foodId = 2L;
+        Long foodId = 1L;
         Food updatedFood = new Food("Sashimi", "Desc", "Pictures", 25.0, 0.0);
-
-        when(repo.findByRestaurantIdAndFoodId(any(Long.class), any(Long.class))).thenReturn(Optional.of(food));
+        when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
         when(foodRepo.saveAndFlush(any(Food.class))).thenReturn(food);
 
-        Food savedFood = restaurantService.updateFood(restaurantId, foodId, updatedFood);
+        Food savedFood = restaurantService.updateFood(restaurantId, foodId, food);
 
         assertNotNull(savedFood);
-        verify(repo).findByRestaurantIdAndFoodId(restaurantId, foodId);
+        verify(repo).findById(restaurantId);
         verify(foodRepo).saveAndFlush(food);
     }
 
