@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.PageRequest;
 
 import foodprint.backend.model.Restaurant;
@@ -96,8 +98,18 @@ public class RestaurantController {
 
     @GetMapping("/search")
     @Operation(summary = "Search for an existing restaurant")
-	public Page<Restaurant> restaurantSearch(@RequestParam("q") String query, @RequestParam(defaultValue = "1") int pageNum) {
-		Pageable page = PageRequest.of(pageNum - 1, 5); // Pagination
+	public Page<Restaurant> restaurantSearch(
+        @RequestParam("q") String query, 
+        @RequestParam(name = "p", defaultValue = "1") int pageNum,
+        @RequestParam(name = "sortDesc", defaultValue ="false") Boolean sortDesc
+    ) {
+
+        Direction direction = Sort.Direction.ASC;
+        if (sortDesc) {
+            direction = Sort.Direction.DESC;
+        }
+
+		Pageable page = PageRequest.of(pageNum - 1, 5, direction); // Pagination
 		Page<Restaurant> searchResult = service.search(page, query);    
         return searchResult;
     }
