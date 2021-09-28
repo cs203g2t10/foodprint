@@ -261,18 +261,30 @@ public class RestaurantService {
     }
 
     public String getPictureById(Long restaurantId, Long pictureId) {
-        Picture picture = pictureService.get(pictureId); //check if pic exists
         if (!pictureInRestaurant(restaurantId, pictureId)) {
             throw new NotFoundException("Picture not found in restaurant");
         }
-        return String.format("%s%s/%s", "https://foodprint-amazon-storage.s3.ap-southeast-1.amazonaws.com/", picture.getImagePath(), picture.getImageFileName().replace(" ", "+"));
+        return pictureService.getPictureById(pictureId);
     }
 
     public void deletePicture(Long restaurantId, Long pictureId) {
         if (!pictureInRestaurant(restaurantId, pictureId)) { //check if pic id is in restaurant list
             throw new NotFoundException("Picture not found in restaurant");
         } else {
+            Restaurant restaurant = get(restaurantId);
+            List<Picture> pictures = restaurant.getPictures();
+            Picture picture = pictureService.get(pictureId);
+            pictures.remove(picture);
+            restaurant.setPictures(pictures);
+            repo.saveAndFlush(restaurant);
             pictureService.deletePicture(pictureId); 
         }
+    }
+
+    public Picture updatePictureInformation(Long restaurantId, Long pictureId, Picture picture) {
+        if (!pictureInRestaurant(restaurantId, pictureId)) { //check if pic id is in restaurant list
+            throw new NotFoundException("Picture not found in restaurant");
+        }
+        return pictureService.updatedPicture(pictureId, picture);
     }
 }

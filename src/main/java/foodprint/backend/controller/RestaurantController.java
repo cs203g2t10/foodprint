@@ -30,6 +30,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.web.multipart.MultipartFile;
 
 import foodprint.backend.dto.DiscountDTO;
+import foodprint.backend.dto.PictureDTO;
 import foodprint.backend.dto.RestaurantDTO;
 import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.Discount;
@@ -277,14 +278,15 @@ public class RestaurantController {
         return new ResponseEntity<>(service.savePicture(restaurantId, title, description, file), HttpStatus.CREATED);
     }
 
-    @GetMapping({"/{restauarntId}/picture/{pictureId}"})
+    @GetMapping({"/{restaurantId}/picture/{pictureId}"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Get a picture of a restaurant by using restaurant id and picture id")
     public ResponseEntity<String> getPictureById(@PathVariable("restaurantId") Long restaurantId, @PathVariable("pictureId") Long pictureId) {
-        return new ResponseEntity<>(service.getPictureById(restaurantId, pictureId), HttpStatus.OK);
+        String url = service.getPictureById(restaurantId, pictureId);
+        return new ResponseEntity<>(url, HttpStatus.OK);
     }
 
-    @DeleteMapping({"/{restauarntId}/picture/{pictureId}"})
+    @DeleteMapping({"/{restaurantId}/picture/{pictureId}"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Deletes a restaurant's picture by id")
     public ResponseEntity<Picture> deletePicture(@PathVariable("restaurantId") Long restaurantId, @PathVariable("pictureId") Long pictureId) {
@@ -296,6 +298,20 @@ public class RestaurantController {
         }
 
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @PutMapping({"/{restaurantId}/picture/{pictureId}"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Updates a picture's title and description")
+    public ResponseEntity<Picture> updatePictureInformation(
+        @PathVariable("restaurantId") Long restaurantId,
+        @PathVariable("pictureId") Long pictureId,
+        @RequestBody PictureDTO updatedPicture
+    ) {
+        
+        Picture picture = new Picture(updatedPicture.getTitle() , updatedPicture.getDescription());
+        Picture savedPicture = service.updatePictureInformation(restaurantId, pictureId, picture);
+        return new ResponseEntity<>(savedPicture, HttpStatus.OK);
     }
 
     // DTO <-> Entity Conversion Helper Methods

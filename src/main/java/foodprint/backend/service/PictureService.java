@@ -111,4 +111,12 @@ public class PictureService  {
             return;
         }
     }
+
+    public Picture updatedPicture(Long pictureId, Picture newPicture) {
+        Picture oldPicture = get(pictureId);
+        oldPicture.setDescription(newPicture.getDescription());
+        oldPicture.setTitle(newPicture.getTitle());
+        oldPicture = repository.saveAndFlush(oldPicture);
+        return oldPicture;
+    }
 }

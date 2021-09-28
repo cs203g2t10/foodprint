@@ -42,6 +42,11 @@ public class Picture {
         this.imageFileName = imageFileName;
     }
 
+    public Picture(String title, String description) {
+        this.title = title;
+        this.description = description;
+    }
+
     public Picture() {
     }
 
