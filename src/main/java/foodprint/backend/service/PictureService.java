@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import foodprint.backend.config.BucketName;
+import foodprint.backend.exceptions.DeleteFailedException;
 import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.Picture;
 import foodprint.backend.model.PictureRepo;
@@ -36,6 +37,10 @@ public class PictureService  {
         this.repository = repository;
     }
 
+    public Picture get(Long id) {
+        Optional<Picture> picture = repository.findById(id);
+        return picture.orElseThrow(() -> new NotFoundException("Picture not found"));
+    }
 
     public Picture savePicture(String title, String description, MultipartFile file) {
         //check if the file is empty
@@ -70,8 +75,8 @@ public class PictureService  {
         //         .build();
         path = String.format("%s", uuid);
         Picture picture = new Picture(title, description, path, fileName);
-        repository.save(picture);
-        return repository.findByTitle(picture.getTitle());
+        repository.saveAndFlush(picture);
+        return picture;
     }
 
     public byte[] downloadPictureImage(Long id) {
@@ -82,7 +87,8 @@ public class PictureService  {
     public List<Picture> getAllPictures() {
         List<Picture> pictures = new ArrayList<>();
         repository.findAll().forEach(pictures::add);
-        return pictures;
+        return 
+        pictures;
     }
 
     public String getPictureById(Long id) {
@@ -93,5 +99,16 @@ public class PictureService  {
         
         String url = String.format("%s%s/%s", "https://foodprint-amazon-storage.s3.ap-southeast-1.amazonaws.com/", picture.get().getImagePath(), picture.get().getImageFileName().replace(" ", "+"));
         return url;
+    }
+
+    public void deletePicture(Long id) {
+        Picture picture = get(id);
+        repository.delete(picture);
+        try {
+            this.get(id);
+            throw new DeleteFailedException("Picture could not be deleted");
+        } catch (NotFoundException e) {
+            return;
+        }
     }
 }

@@ -3,18 +3,22 @@ package foodprint.backend.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import foodprint.backend.model.Discount;
-import foodprint.backend.model.DiscountRepo;
 import foodprint.backend.dto.DiscountDTO;
 import foodprint.backend.exceptions.DeleteFailedException;
 import foodprint.backend.exceptions.NotFoundException;
+import foodprint.backend.model.Discount;
+import foodprint.backend.model.DiscountRepo;
 import foodprint.backend.model.Food;
 import foodprint.backend.model.FoodRepo;
+import foodprint.backend.model.Picture;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.RestaurantRepo;
 
@@ -27,10 +31,15 @@ public class RestaurantService {
 
     private DiscountRepo discountRepo;
 
-    public RestaurantService(RestaurantRepo repo, FoodRepo foodRepo, DiscountRepo discountRepo) {
+    private PictureService pictureService;
+    
+    
+    @Autowired
+    public RestaurantService(RestaurantRepo repo, FoodRepo foodRepo, DiscountRepo discountRepo, PictureService pictureService) {
         this.repo = repo;
         this.foodRepo = foodRepo;
         this.discountRepo = discountRepo;
+        this.pictureService = pictureService;
     }
     
     @PreAuthorize("hasAnyAuthority('FP_USER')")
@@ -59,12 +68,7 @@ public class RestaurantService {
         if (updatedRestaurant.getRestaurantName() != null) {
             currentRestaurant.setRestaurantName(updatedRestaurant.getRestaurantName());
         }
-        if (updatedRestaurant.getPicturesPath() != null) {
-            currentRestaurant.setRestaurantLocation(updatedRestaurant.getRestaurantLocation());
-        }
-        if (updatedRestaurant.getPicturesPath() != null) {
-            currentRestaurant.setPicturesPath(updatedRestaurant.getPicturesPath());
-        }
+
         if (updatedRestaurant.getRestaurantTableCapacity() != null) {
             currentRestaurant.setRestaurantTableCapacity(updatedRestaurant.getRestaurantTableCapacity());
         }
@@ -169,7 +173,6 @@ public class RestaurantService {
                 food.setFoodDesc(updatedFood.getFoodDesc());
                 food.setFoodDiscount(updatedFood.getFoodDiscount());
                 food.setFoodPrice(updatedFood.getFoodPrice());
-                food.setPicturesPath(updatedFood.getPicturesPath());
                 food = foodRepo.saveAndFlush(food);
                 return food;
             }
@@ -235,5 +238,41 @@ public class RestaurantService {
     public Discount getDiscount(Long discountId) {
         Optional<Discount> discount = discountRepo.findById(discountId);
         return discount.orElseThrow(() -> new NotFoundException("Discount not found"));
+    }
+
+    public Picture savePicture(Long restaurantId, String title, String description, MultipartFile file) {
+        Picture picture = pictureService.savePicture(title, description, file);
+        Restaurant restaurant = get(restaurantId);
+        List<Picture> picList = restaurant.getPictures();
+        picList.add(picture);
+        repo.saveAndFlush(restaurant);
+        return picture;
+    }
+
+    public Boolean pictureInRestaurant(Long restaurantId, Long pictureId) {
+        Restaurant restaurant = get(restaurantId);
+        List<Picture> restaurantPics = restaurant.getPictures();
+        for (Picture p: restaurantPics) {
+            if (p.getId().equals(pictureId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public String getPictureById(Long restaurantId, Long pictureId) {
+        Picture picture = pictureService.get(pictureId); //check if pic exists
+        if (!pictureInRestaurant(restaurantId, pictureId)) {
+            throw new NotFoundException("Picture not found in restaurant");
+        }
+        return String.format("%s%s/%s", "https://foodprint-amazon-storage.s3.ap-southeast-1.amazonaws.com/", picture.getImagePath(), picture.getImageFileName().replace(" ", "+"));
+    }
+
+    public void deletePicture(Long restaurantId, Long pictureId) {
+        if (!pictureInRestaurant(restaurantId, pictureId)) { //check if pic id is in restaurant list
+            throw new NotFoundException("Picture not found in restaurant");
+        } else {
+            pictureService.deletePicture(pictureId); 
+        }
     }
 }

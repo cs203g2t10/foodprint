@@ -5,7 +5,11 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,13 +27,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.web.multipart.MultipartFile;
 
-import foodprint.backend.model.Restaurant;
-import foodprint.backend.model.Discount;
+import foodprint.backend.dto.DiscountDTO;
 import foodprint.backend.dto.RestaurantDTO;
 import foodprint.backend.exceptions.NotFoundException;
-import foodprint.backend.dto.DiscountDTO;
+import foodprint.backend.model.Discount;
 import foodprint.backend.model.Food;
+import foodprint.backend.model.Picture;
+import foodprint.backend.model.Restaurant;
+import foodprint.backend.service.PictureService;
 import foodprint.backend.service.RestaurantService;
 import io.swagger.v3.oas.annotations.Operation;
 
@@ -260,6 +267,36 @@ public class RestaurantController {
         return new ResponseEntity<>(savedDiscount, HttpStatus.OK);
     }
 
+    @PostMapping(path = "/{restaurantId}/uploadPicture",
+                consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+                produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(code = HttpStatus.CREATED)
+    public ResponseEntity<Picture> savePicture(@PathVariable("restaurantId") Long restaurantId, @RequestParam("title") String title,
+                                            @RequestParam("description") String description,
+                                            @RequestParam("file") MultipartFile file) {                                
+        return new ResponseEntity<>(service.savePicture(restaurantId, title, description, file), HttpStatus.CREATED);
+    }
+
+    @GetMapping({"/{restauarntId}/picture/{pictureId}"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Get a picture of a restaurant by using restaurant id and picture id")
+    public ResponseEntity<String> getPictureById(@PathVariable("restaurantId") Long restaurantId, @PathVariable("pictureId") Long pictureId) {
+        return new ResponseEntity<>(service.getPictureById(restaurantId, pictureId), HttpStatus.OK);
+    }
+
+    @DeleteMapping({"/{restauarntId}/picture/{pictureId}"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Deletes a restaurant's picture by id")
+    public ResponseEntity<Picture> deletePicture(@PathVariable("restaurantId") Long restaurantId, @PathVariable("pictureId") Long pictureId) {
+        service.deletePicture(restaurantId, pictureId);
+        try {
+            service.getPictureById(restaurantId, pictureId);
+        } catch (NotFoundException ex) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
     // DTO <-> Entity Conversion Helper Methods
 
@@ -294,5 +331,8 @@ public class RestaurantController {
         dto.setRestaurantWeekendOpeningHour(restaurant.getRestaurantWeekendClosingHour());
         dto.setRestaurantWeekendOpeningMinutes(restaurant.getRestaurantWeekendOpeningMinutes());
         return dto;
+
     }
+    
+   
 }

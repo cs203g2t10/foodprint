@@ -49,9 +49,6 @@ public class Food {
     @Schema(defaultValue = "Salmon slices")
     private String foodDesc;
 
-    @Column(name = "picturesPath")
-    private String picturesPath;
-
     @Column(name = "foodprice")
     @Schema(defaultValue = "10")
     private Double foodPrice;
@@ -68,6 +65,9 @@ public class Food {
     @JsonIgnore
     @OneToMany(mappedBy = "food", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<LineItem> lineItems;
+
+    @OneToMany
+    private List<Picture> pictures;
 
     public Food() {}
 
@@ -97,7 +97,6 @@ public class Food {
         this.foodName = foodName;
     }
 
-    
     public Restaurant getRestaurant() {
         return this.restaurant;
     }
@@ -112,17 +111,6 @@ public class Food {
 
     public void setFoodDesc(String foodDesc) {
         this.foodDesc = foodDesc;
-    }
-
-    public List<String> getPicturesPath() {
-        String[] arr = picturesPath.split(",");
-        List<String> list = Arrays.asList(arr);
-        return list;
-    }
-
-    public void setPicturesPath(List<String> list) {
-        String picturesPath = String.join(",", list);
-        this.picturesPath = picturesPath;
     }
 
     public Double getFoodPrice() {
