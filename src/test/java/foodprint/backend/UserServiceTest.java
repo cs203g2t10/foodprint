@@ -50,7 +50,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void addUser_SameEmail_ReturnError() {
+    void addUser_SameEmail_ReturnException() {
         User user = new User("bobbytan@gmail.com", "SuperSecurePassw0rd", "Bobby Tan");
         when(users.findByEmail(any(String.class))).thenReturn(Optional.of(user));
 
@@ -70,9 +70,34 @@ public class UserServiceTest {
     }
 
     @Test
-    void updateUser_NotFound_ReturnError(){
+    void getUser_NonExistentId_ReturnException() {
+        Long userId = 1L;
+        when(users.findById(any(Long.class))).thenReturn(Optional.empty());
+
+        try {
+            userService.getUser(userId);
+        } catch (NotFoundException e) {
+            assertEquals("User not found", e.getMessage());
+        }
+
+        verify(users).findById(userId);
+    }
+
+    @Test
+    void getUser_ExistingId_ReturnUser() {
         User user = new User("bobbytan@gmail.com", "SuperSecurePassw0rd", "Bobby Tan");
-        Long userId = 10L;
+        Long userId = 1L;
+        when(users.findById(any(Long.class))).thenReturn(Optional.of(user));
+
+        userService.getUser(userId);
+
+        verify(users).findById(userId);
+    }
+
+    @Test
+    void updateUser_NotFound_ReturnException(){
+        User user = new User("bobbytan@gmail.com", "SuperSecurePassw0rd", "Bobby Tan");
+        Long userId = 1L;
         when(users.findByEmail(any(String.class))).thenReturn(Optional.empty());
 
         try {
@@ -85,12 +110,13 @@ public class UserServiceTest {
     }
 
     @Test
-    void updateUser_SameEmail_ReturnError() {
+    void updateUser_SameEmail_ReturnException() {
         User user = new User("bobbytan@gmail.com", "SuperSecurePassw0rd", "Bobby Tan");
+        Long userId = 1L;
         when(users.findByEmail(any(String.class))).thenReturn(Optional.of(user));
 
         try {
-            userService.updateUser(user.getId(), user);
+            userService.updateUser(userId, user);
         } catch (AlreadyExistsException e) {
             assertEquals("User with the same email already exists", e.getMessage());
         }
@@ -101,30 +127,42 @@ public class UserServiceTest {
     @Test
     void updateUser_NewEmail_ReturnUser() {
         User user = new User("bobbytan@gmail.com", "SuperSecurePassw0rd", "Bobby Tan");
+        Long userId = 1L;
         when(users.findByEmail(any(String.class))).thenReturn(Optional.empty());
-        when(users.findById(null)).thenReturn(Optional.of(user));
+        when(users.findById(any(Long.class))).thenReturn(Optional.of(user));
         when(passwordEncoder.encode("SuperSecurePassw0rd")).thenReturn("$2a$12$uaTxLl9sPzGbIozqCB0wcuKjmmsZNW2mswGw5VRdsU4XFWs9Se7Uq");
         when(users.saveAndFlush(any(User.class))).thenReturn(user);
 
-        User updatedUser = userService.updateUser(user.getId(), user);
+        User updatedUser = userService.updateUser(userId, user);
 
         assertNotNull(updatedUser);
         verify(users).findByEmail(user.getEmail());
-        verify(users).findById(user.getId());
+        verify(users).findById(userId);
         verify(passwordEncoder).encode("SuperSecurePassw0rd");
         verify(users).saveAndFlush(user);
     }
 
     @Test
-    void deleteUser_UserDoesNotExist_ReturnError() {
-        User user = new User("bobbytan@gmail.com", "SuperSecurePassw0rd", "Bobby Tan");
-        when(users.findById(null)).thenReturn(Optional.empty());
+    void deleteUser_UserDoesNotExist_ReturnException() {
+        Long userId = 1L;
+        when(users.findById(any(Long.class))).thenReturn(Optional.empty());
 
         try {
-            userService.deleteUser(user.getId());
+            userService.deleteUser(userId);
         } catch (NotFoundException e) {
             assertEquals("User not found", e.getMessage());
         }
-        verify(users).findById(user.getId());
+        verify(users).findById(userId);
+    }
+
+    @Test
+    void deleteUser_UsertExists_Success() {
+        User user = new User("bobbytan@gmail.com", "SuperSecurePassw0rd", "Bobby Tan");
+        Long userId = 1L;
+        when(users.findById(any(Long.class))).thenReturn(Optional.of(user));
+
+        userService.deleteUser(userId);
+
+        verify(users).findById(userId);
     }
 }
