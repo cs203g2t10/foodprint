@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 
 public class RestaurantDTO {
+
+    private Long restaurantId;
     
     @Schema(defaultValue="Sushi Tei")
     @NotEmpty
@@ -44,6 +46,15 @@ public class RestaurantDTO {
 
     @Schema(defaultValue = "30")
     private Integer restaurantWeekendClosingMinutes;
+
+
+    public Long getRestaurantId() {
+        return restaurantId;
+    }
+
+    public void setRestaurantId(Long restaurantId) {
+        this.restaurantId = restaurantId;
+    }
 
     public String getRestaurantName() {
         return restaurantName;

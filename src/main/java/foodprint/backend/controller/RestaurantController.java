@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.PageRequest;
 
 import foodprint.backend.model.Restaurant;
@@ -94,12 +96,20 @@ public class RestaurantController {
     }
 
 
-    @GetMapping("/search")
+    @GetMapping({"/search"})
     @Operation(summary = "Search for an existing restaurant")
-	public Page<Restaurant> restaurantSearch(@RequestParam("q") String query, @RequestParam(defaultValue = "1") int pageNum) {
-		Pageable page = PageRequest.of(pageNum - 1, 5); // Pagination
-		Page<Restaurant> searchResult = service.search(page, query);    
-        return searchResult;
+	public Page<RestaurantDTO> restaurantSearch(
+        @RequestParam("q") String query, 
+        @RequestParam(name = "p", defaultValue = "1") int pageNum,
+        @RequestParam(name = "sortBy", defaultValue = "restaurantName") String sortField,
+        @RequestParam(name = "sortDesc", defaultValue ="false") Boolean sortDesc
+    ) {
+        Direction direction = (sortDesc) ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Sort sorting = Sort.by(direction, sortField);
+		Pageable page = PageRequest.of(pageNum - 1, 5, sorting); // Pagination
+		Page<Restaurant> searchResult = service.search(page, query);
+        Page<RestaurantDTO> searchResultsDTO = searchResult.map(result -> convertToDTO(result));
+        return searchResultsDTO;
     }
 
     /*
@@ -160,14 +170,26 @@ public class RestaurantController {
         return new ResponseEntity<>(food, HttpStatus.OK);
     }
 
-    @GetMapping(value = "search", produces = "application/json")
-    @Operation(summary = "Search for a food item")
-    public Page<Food> FoodSearch(@RequestParam("q") String query, @RequestParam(defaultValue = "1") int pageNum) {
-        Pageable pages = PageRequest.of(pageNum - 1, 5); //pagination
-        Page<Food> searchResult = service.searchFood(pages, query);
+    // @GetMapping({"/foodSearch"})
+    // @Operation(summary = "Search for a food item")
+    // public Page<Food> FoodSearch(
+    //     @RequestParam("q") String query,
+    //     @RequestParam(defaultValue = "1") int pageNum,
+    //     @RequestParam(name = "sortBy", defaultValue = "restaurantName") String sortField,
+    //     @RequestParam(name = "sortDesc", defaultValue ="false") Boolean sortDesc
+    // ) {
+    //     Direction direction = Sort.Direction.ASC;
+        
+    //     if (sortDesc) {
+    //         direction = Sort.Direction.DESC;
+    //     }
 
-        return searchResult;
-    }
+    //     Sort sorting = Sort.by(direction, sortField);
+	// 	Pageable page = PageRequest.of(pageNum - 1, 5, sorting); // Pagination
+    //     Page<Food> searchResult = service.searchFood(page, query);
+
+    //     return searchResult;
+    // }
 
     /*
     *
@@ -238,6 +260,9 @@ public class RestaurantController {
         return new ResponseEntity<>(savedDiscount, HttpStatus.OK);
     }
 
+
+    // DTO <-> Entity Conversion Helper Methods
+
     public Restaurant convertToEntity(RestaurantDTO restaurantDTO) {
         Restaurant restaurant = new Restaurant(restaurantDTO.getRestaurantName(), restaurantDTO.getRestaurantLocation());
         restaurant.setRestaurantDesc(restaurantDTO.getRestaurantDesc());
@@ -251,5 +276,23 @@ public class RestaurantController {
         restaurant.setRestaurantWeekendOpeningHour(restaurantDTO.getRestaurantWeekendClosingHour());
         restaurant.setRestaurantWeekendOpeningMinutes(restaurantDTO.getRestaurantWeekendOpeningMinutes());
         return restaurant;
+    }
+
+    public RestaurantDTO convertToDTO(Restaurant restaurant) {
+        RestaurantDTO dto = new RestaurantDTO();
+        dto.setRestaurantId(restaurant.getRestaurantId());
+        dto.setRestaurantName(restaurant.getRestaurantName());
+        dto.setRestaurantLocation(restaurant.getRestaurantLocation());
+        dto.setRestaurantDesc(restaurant.getRestaurantDesc());
+        dto.setRestaurantTableCapacity(restaurant.getRestaurantTableCapacity());
+        dto.setRestaurantWeekdayClosingHour(restaurant.getRestaurantWeekdayClosingHour());
+        dto.setRestaurantWeekdayClosingMinutes(restaurant.getRestaurantWeekdayClosingMinutes());
+        dto.setRestaurantWeekdayOpeningHour(restaurant.getRestaurantWeekdayOpeningHour());
+        dto.setRestaurantWeekdayOpeningMinutes(restaurant.getRestaurantWeekdayOpeningMinutes());
+        dto.setRestaurantWeekendClosingHour(restaurant.getRestaurantWeekendClosingMinutes());
+        dto.setRestaurantWeekendClosingMinutes(restaurant.getRestaurantWeekendClosingMinutes());
+        dto.setRestaurantWeekendOpeningHour(restaurant.getRestaurantWeekendClosingHour());
+        dto.setRestaurantWeekendOpeningMinutes(restaurant.getRestaurantWeekendOpeningMinutes());
+        return dto;
     }
 }
