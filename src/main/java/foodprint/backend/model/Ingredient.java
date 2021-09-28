@@ -2,7 +2,6 @@ package foodprint.backend.model;
 
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -11,7 +10,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -40,6 +41,10 @@ public class Ingredient {
     @Column(name = "picturesPath")
     private String picturesPath;
 
+    @ManyToOne
+    @JoinColumn(name = "restaurant_id")
+    private Restaurant restaurant;
+
     // @Column(name = "ingredientPrice")
     // private Double ingredientPrice;
 
@@ -47,8 +52,8 @@ public class Ingredient {
     @Schema(defaultValue = "1")
     private String units;
 
-    @ManyToMany(mappedBy = "ingredients")
-    private Set<Food> food = new HashSet<>();
+    @OneToMany(mappedBy = "ingredient")
+    private Set<FoodIngredientQuantity> foodIngredientQuantity;
 
     protected Ingredient () { }
 
