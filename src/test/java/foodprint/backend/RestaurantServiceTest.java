@@ -20,6 +20,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
+import com.jayway.jsonpath.Option;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -152,20 +154,18 @@ public class RestaurantServiceTest {
 
     @Test
     void updateFood_FoodExist_ReturnUpdatedFood() {
-        Restaurant restaurant = new Restaurant("Sushi Tei", "Serangon");
         Long restaurantId = 1L;
         Food food = new Food("Sashimi", "Desc", "Pictures", 50.0, 0.0);
         Long foodId = 2L;
+        Food updatedFood = new Food("Sashimi", "Desc", "Pictures", 25.0, 0.0);
 
-        when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
-        // when(foodRepo.findById(any(Long.class))).thenReturn(Optional.of(food));
+        when(repo.findByRestaurantIdAndFoodId(any(Long.class), any(Long.class))).thenReturn(Optional.of(food));
         when(foodRepo.saveAndFlush(any(Food.class))).thenReturn(food);
 
-        Food updatedFood = restaurantService.updateFood(restaurantId, foodId, food);
+        Food savedFood = restaurantService.updateFood(restaurantId, foodId, updatedFood);
 
-        assertNotNull(updatedFood);
-        verify(repo).findById(restaurantId);
-        // verify(foodRepo.findById(foodId));
+        assertNotNull(savedFood);
+        verify(repo).findByRestaurantIdAndFoodId(restaurantId, foodId);
         verify(foodRepo).saveAndFlush(food);
     }
 
