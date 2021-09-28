@@ -101,6 +101,10 @@ public class Restaurant {
     @JsonIgnore
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
     private List<Reservation> reservations;
+    
+    @JsonIgnore
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
+    private List<Ingredient> ingredients;
 
     protected Restaurant () { }
 
@@ -153,6 +157,14 @@ public class Restaurant {
             String picturesPath = String.join(",", list);
             this.picturesPath = picturesPath;
         }
+    }
+
+    public List<Ingredient> getIngredients() {
+        return this.ingredients;
+    }
+
+    public void setIngredients(List<Ingredient> ingredients) {
+        this.ingredients = ingredients;
     }
 
     public String getRestaurantLocation() {
