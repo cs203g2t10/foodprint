@@ -7,17 +7,23 @@ import java.util.Optional;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.util.IOUtils;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class FileStore {
+
     private final AmazonS3 amazonS3;
 
+    @Autowired
     public FileStore(AmazonS3 amazonS3) {
         this.amazonS3 = amazonS3;
     }
@@ -33,10 +39,15 @@ public class FileStore {
             }
         });
         try {
-            amazonS3.putObject(path, fileName, inputStream, objectMetadata);
+            var objRequest = new PutObjectRequest(path, fileName, inputStream, objectMetadata)
+                                            .withCannedAcl(CannedAccessControlList.PublicRead);
+            amazonS3.putObject(objRequest);
+            // String publicURL = ((AmazonS3Client) amazonS3).getResourceUrl("foodprint-amazon-storage", fileName);
+            // System.out.println(publicURL);
         } catch (AmazonServiceException e) {
             throw new IllegalStateException("Failed to upload the file", e);
         }
+        
     }
 
     public byte[] download(String path, String key) {

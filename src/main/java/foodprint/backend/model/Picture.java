@@ -1,6 +1,8 @@
 package foodprint.backend.model;
 
 import java.util.Objects;
+import java.util.UUID;
+
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -8,6 +10,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+
 
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -32,6 +35,8 @@ public class Picture {
     @Column(name = "imageFileName" )
     private String imageFileName;
 
+    // @Column(name = "URL")
+    // private String url;
 
     public Picture(String title, String description, String imagePath, String imageFileName) {
         this.title = title;
@@ -107,6 +112,15 @@ public class Picture {
         setImageFileName(imageFileName);
         return this;
     }
+
+
+    // public String getUrl() {
+    //     return url;
+    // }
+
+    // public void setUrl(String url) {
+    //     this.url = url;
+    // }
 
 
     @Override

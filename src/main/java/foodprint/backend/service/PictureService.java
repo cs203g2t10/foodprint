@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import foodprint.backend.config.BucketName;
+import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.Picture;
 import foodprint.backend.model.PictureRepo;
 
@@ -53,7 +54,8 @@ public class PictureService  {
         metadata.put("Content-Type", file.getContentType());
         metadata.put("Content-Length", String.valueOf(file.getSize()));
         //Save Image in S3 and then save Picture in the database
-        String path = String.format("%s/%s", BucketName.PICTURE_IMAGE.getBucketName(), UUID.randomUUID());
+        UUID uuid = UUID.randomUUID();
+        String path = String.format("%s/%s", BucketName.PICTURE_IMAGE.getBucketName(), uuid);
         String fileName = String.format("%s", file.getOriginalFilename());
         try {
             fileStore.upload(path, fileName, Optional.of(metadata), file.getInputStream());
@@ -66,19 +68,30 @@ public class PictureService  {
         //         .imagePath(path)
         //         .imageFileName(fileName)
         //         .build();
+        path = String.format("%s", uuid);
         Picture picture = new Picture(title, description, path, fileName);
         repository.save(picture);
         return repository.findByTitle(picture.getTitle());
     }
 
     public byte[] downloadPictureImage(Long id) {
-        Picture Picture = repository.findById(id).get();
-        return fileStore.download(Picture.getImagePath(), Picture.getImageFileName());
+        Picture picture = repository.findById(id).get();
+        return fileStore.download(picture.getImagePath(), picture.getImageFileName());
     }
 
     public List<Picture> getAllPictures() {
-        List<Picture> Pictures = new ArrayList<>();
-        repository.findAll().forEach(Pictures::add);
-        return Pictures;
+        List<Picture> pictures = new ArrayList<>();
+        repository.findAll().forEach(pictures::add);
+        return pictures;
+    }
+
+    public String getPictureById(Long id) {
+        Optional<Picture> picture = repository.findById(id);
+        if (picture.isEmpty()) {
+            throw new NotFoundException("Picture not found.");
+        }
+        
+        String url = String.format("%s%s/%s", "https://foodprint-amazon-storage.s3.ap-southeast-1.amazonaws.com/", picture.get().getImagePath(), picture.get().getImageFileName().replace(" ", "+"));
+        return url;
     }
 }
