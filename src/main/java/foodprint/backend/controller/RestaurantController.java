@@ -1,6 +1,6 @@
 package foodprint.backend.controller;
 
-import java.util.List;
+import java.util.*;
 
 import javax.validation.Valid;
 
@@ -24,12 +24,16 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.PageRequest;
 
+import foodprint.backend.model.FoodIngredientQuantity;
+import foodprint.backend.model.Ingredient;
+import foodprint.backend.dto.FoodIngredientQuantityDTO;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.Discount;
 import foodprint.backend.dto.RestaurantDTO;
 import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.dto.DiscountDTO;
 import foodprint.backend.model.Food;
+import foodprint.backend.dto.FoodDTO;
 import foodprint.backend.service.RestaurantService;
 import io.swagger.v3.oas.annotations.Operation;
 
@@ -121,8 +125,39 @@ public class RestaurantController {
     @PostMapping({"/{restaurantId}/food"})
     @ResponseStatus(code = HttpStatus.CREATED)
     @Operation(summary = "Creates a new food instance within a restaurant")
-    public ResponseEntity<Food> addRestaurantFood(@PathVariable("restaurantId") Long restaurantId, @RequestBody Food food) {
-        Food savedFood = service.addFood(restaurantId, food);
+    public ResponseEntity<Food> addRestaurantFood(@PathVariable("restaurantId") Long restaurantId, @RequestBody FoodDTO food) {
+        Restaurant restaurant = service.get(restaurantId);
+        if(restaurant == null) {
+            throw new NotFoundException("restaurant does not exist");
+        }
+        Food newFood = new Food(food.getFoodName(), food.getFoodPrice(), 0.00);
+        newFood.setPicturesPath(new ArrayList<String>());
+
+        List<Ingredient> ingredients = service.getRestaurantIngredients(restaurantId);
+
+        Set<FoodIngredientQuantity> foodIngredientQuantity = new HashSet<>();
+        List<FoodIngredientQuantityDTO> ingredientQuantity = food.getIngredientQuantityList();
+
+        for (FoodIngredientQuantityDTO entry : ingredientQuantity) {
+            Ingredient newIngredient = null;
+            boolean found = false;
+            for(Ingredient ingredient : ingredients) {
+                if(ingredient.getIngredientId() == entry.getIngredientId()) {
+                    newIngredient = ingredient;
+                    found = true;
+                }
+            }
+
+            if (!found) {
+                throw new NotFoundException("restaurant does not have the ingredient");
+            } else {
+                FoodIngredientQuantity newFoodIngredientQuantity = new FoodIngredientQuantity(newFood, newIngredient, entry.getQuantity());
+                foodIngredientQuantity.add(newFoodIngredientQuantity);
+            }
+        }
+
+
+        Food savedFood = service.addFood(restaurantId, newFood);
         return new ResponseEntity<>(savedFood, HttpStatus.CREATED);
     }
 
@@ -260,8 +295,13 @@ public class RestaurantController {
         return new ResponseEntity<>(savedDiscount, HttpStatus.OK);
     }
 
+    // @GetMapping({"/{restaurantId}/calculateIngredients"})
+    // @ResponseStatus(code = HttpStatus.OK)
+    // @Operation(summary = "Calculate ingredients")
+    // public ResponseEntity<List>
 
     // DTO <-> Entity Conversion Helper Methods
+
 
     public Restaurant convertToEntity(RestaurantDTO restaurantDTO) {
         Restaurant restaurant = new Restaurant(restaurantDTO.getRestaurantName(), restaurantDTO.getRestaurantLocation());
@@ -295,4 +335,12 @@ public class RestaurantController {
         dto.setRestaurantWeekendOpeningMinutes(restaurant.getRestaurantWeekendOpeningMinutes());
         return dto;
     }
+    // //POST: Creates new ingredient for restaurant
+    // @PostMapping("/{restaurantId}/ingredient/{ingredientId")
+    // @ResponseStatus(code = HttpStatus.CREATED)
+    // @Operation(summary = "Creates a new ingredient for restaurant")
+    // public ResponseEntity<Discount> createRestaurantIngredeint(@PathVariable Long restaurantId, @RequestBody Ingredient ingredient) {
+        
+    //     return null;
+    // }
 }

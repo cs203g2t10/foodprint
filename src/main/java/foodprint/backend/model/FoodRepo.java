@@ -9,6 +9,8 @@ import java.util.List;
 @Repository
 public interface FoodRepo extends JpaRepository<Food, Long> {
 
+    Food findByFoodId(Long foodId);
+
     Food findByFoodName(String foodName);
 
     List<Food> findByFoodNameContains(String foodName);

@@ -1,7 +1,6 @@
 package foodprint.backend.service;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,12 +10,18 @@ import org.springframework.stereotype.Service;
 import foodprint.backend.model.Discount;
 import foodprint.backend.model.DiscountRepo;
 import foodprint.backend.dto.DiscountDTO;
+import foodprint.backend.dto.FoodDTO;
 import foodprint.backend.exceptions.DeleteFailedException;
 import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.Food;
 import foodprint.backend.model.FoodRepo;
+import foodprint.backend.model.Ingredient;
 import foodprint.backend.model.Restaurant;
+import foodprint.backend.model.LineItem;
+import foodprint.backend.model.Reservation;
 import foodprint.backend.model.RestaurantRepo;
+import io.swagger.v3.oas.annotations.links.Link;
+import foodprint.backend.model.ReservationRepo;
 
 @Service
 public class RestaurantService {
@@ -26,6 +31,8 @@ public class RestaurantService {
     private FoodRepo foodRepo;
 
     private DiscountRepo discountRepo;
+
+    private ReservationRepo reservationRepo;
 
     public RestaurantService(RestaurantRepo repo, FoodRepo foodRepo, DiscountRepo discountRepo) {
         this.repo = repo;
@@ -236,4 +243,43 @@ public class RestaurantService {
         Optional<Discount> discount = discountRepo.findById(discountId);
         return discount.orElseThrow(() -> new NotFoundException("Discount not found"));
     }
+
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    public List<Ingredient> getRestaurantIngredients(Long restaurantId) {
+        Restaurant restaurant = get(restaurantId);
+        if (restaurant == null) {
+            throw new NotFoundException("Restaurant does not exist");
+        }
+        return restaurant.getIngredients();
+    }
+
+  
+
+
+    // @PreAuthorize("hasAnyAuthority('FP_USER')")
+    // public HashMap<Ingredient, Integer> calculateIngredientsNeeded(Long restaurantId) {
+    //     HashMap<Ingredient, Integer> map = new HashMap<>();
+    //     Restaurant restaurant = repo.findByRestaurantId(restaurantId);
+    //     if (restaurant == null) {
+    //         throw new NotFoundException("Restaurant does not exist");
+    //     }
+
+    //     List<Reservation> reservations = reservationRepo.findByRestaurant(restaurant);
+    //     Iterator<Reservation> reservationItr = reservations.iterator();
+    //     while (reservationItr.hasNext()) {
+    //         Reservation reservation = reservationItr.next();
+    //         List<LineItem> lineItems = reservation.getLineItems();
+            
+    //         Iterator<LineItem> lineItr = lineItems.iterator();
+    //         while (lineItr.hasNext()) {
+    //             LineItem lineItem = lineItr.next();
+    //             Food food = lineItem.getFood();
+    //             if (map.containsKey(food)) {
+    //                 food.getIngredients();
+    //             } 
+    //         }
+    //     }
+
+    //     return null;
+    // }
 }
