@@ -34,8 +34,7 @@ public class RestaurantService {
     private IngredientRepo ingredientRepo;
 
 
-    public RestaurantService(RestaurantRepo repo, FoodRepo foodRepo, DiscountRepo discountRepo, 
-        IngredientRepo ingredientRepo) {
+    public RestaurantService(RestaurantRepo repo, FoodRepo foodRepo, DiscountRepo discountRepo, IngredientRepo ingredientRepo) {
         this.repo = repo;
         this.foodRepo = foodRepo;
         this.discountRepo = discountRepo;
@@ -277,7 +276,6 @@ public class RestaurantService {
     * Ingredient related methods
     *
     */
-
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public List<Ingredient> getAllRestaurantIngredients(Long restaurantId) {
         Restaurant restaurant = get(restaurantId);
@@ -301,7 +299,6 @@ public class RestaurantService {
         repo.saveAndFlush(restaurant);
         return newIngredient;
     }
-
   
 
 
