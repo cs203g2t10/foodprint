@@ -134,7 +134,7 @@ public class RestaurantController {
         return new ResponseEntity<>(savedFood, HttpStatus.CREATED);
     }
 
-    @GetMapping({"/{restaurantId}/allFood"})
+    @GetMapping({"/{restaurantId}/food"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Gets all food of a restaurant")
     public ResponseEntity<List<Food>> getAllRestaurantFood(@PathVariable("restaurantId") Long restaurantId) {

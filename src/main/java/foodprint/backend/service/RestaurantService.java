@@ -41,13 +41,11 @@ public class RestaurantService {
         this.ingredientRepo = ingredientRepo;
     }
     
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public List<Restaurant> getAllRestaurants() {
         List<Restaurant> restaurants = repo.findAll();
         return restaurants;
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Restaurant get(Long id) {
         Optional<Restaurant> restaurant = repo.findById(id);
         return restaurant.orElseThrow(() -> new NotFoundException("Restaurant not found"));
@@ -166,13 +164,11 @@ public class RestaurantService {
         return savedFood;
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public List<Food> getAllFood(Long restaurantId) {
         Restaurant restaurant = repo.findByRestaurantId(restaurantId);
         return restaurant.getAllFood();
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Food getFood(Long restaurantId, Long foodId) {
         Optional<Food> foodOpt = foodRepo.findById(foodId);
         Food food = foodOpt.orElseThrow(() -> new NotFoundException("Food not found"));
@@ -182,6 +178,7 @@ public class RestaurantService {
         return food;
     }
 
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public void deleteFood(Long restaurantId, Long foodId) {
         Restaurant restaurant = get(restaurantId);
         List<Food> allFood = restaurant.getAllFood();
@@ -194,6 +191,7 @@ public class RestaurantService {
         throw new NotFoundException("Food not found");
     }
 
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Food updateFood(Long restaurantId, Long foodId, Food updatedFood) {
         Restaurant restaurant = get(restaurantId);
         List<Food> allFood = restaurant.getAllFood();
@@ -211,6 +209,7 @@ public class RestaurantService {
         throw new NotFoundException("Food not found");
     }
     
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Page<Food> searchFood(Pageable page, String query) {
         return foodRepo.findByFoodNameContains(page,query);
     }
