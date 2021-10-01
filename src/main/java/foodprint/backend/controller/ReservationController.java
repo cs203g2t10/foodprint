@@ -42,7 +42,7 @@ public class ReservationController {
     private RestaurantService restaurantService;
 
     @Autowired
-    ReservationController(LineItemRepo lineItemRepo, 
+    ReservationController(LineItemRepo lineItemRepo,
     ReservationService reservationService, RestaurantService restaurantService) {
         this.lineItemRepo = lineItemRepo;
         this.reservationService = reservationService;
@@ -76,14 +76,14 @@ public class ReservationController {
             @RequestBody CreateReservationDTO pendingReservationDTO) {
 
         var reservation = this.convertToEntity(pendingReservationDTO);
+        var restaurant = restaurantService.get(pendingReservationDTO.getRestaurantId());
+        reservation.setRestaurant(restaurant);
+        reservation.changeReservationId(id);
         var updatedReservation = reservationService.update(reservation);
         var updatedReservationDTO = this.convertToDTO(updatedReservation);
         return new ResponseEntity<>(updatedReservationDTO, HttpStatus.OK);
     }
 
-    // TODO: Cancel reservation  - cancels the reservation (change the status) but not delete it
-
-    
     // GET: Get all reservations
     @GetMapping({ "/admin/all" })
     @ResponseStatus(code = HttpStatus.OK)
@@ -219,6 +219,7 @@ public class ReservationController {
         reservationDTO.setRestaurantId(reservation.getRestaurant().getRestaurantId());
         reservationDTO.setPax(reservation.getPax());
         reservationDTO.setReservationId(reservation.getReservationId());
+        reservationDTO.setStatus(reservation.getStatus());
         
         List<NamedLineItemDTO> lineItemDtos = new ArrayList<>();
         for (LineItem lineItem : reservation.getLineItems()) {
@@ -242,12 +243,13 @@ public class ReservationController {
         reservation.setDate(dto.getDate());
         reservation.setPax(dto.getPax());
         reservation.setIsVaccinated(dto.getIsVaccinated());
+        reservation.setStatus(dto.getStatus());
 
         if (dto.getLineItems() != null) {
             List<LineItem> lineItems = new ArrayList<LineItem>();
             for (LineItemDTO lineItemDto : dto.getLineItems()) {
                 LineItem lineItem = new LineItem();
-                Long foodId = lineItem.getFood().getFoodId();
+                Long foodId = lineItemDto.getFoodId();
                 Food food = restaurantService.getFood(restaurantId, foodId);
                 lineItem.setFood(food);
                 lineItem.setQuantity(lineItemDto.getQuantity());

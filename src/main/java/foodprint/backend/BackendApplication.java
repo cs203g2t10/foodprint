@@ -1,17 +1,15 @@
 package foodprint.backend;
 
-
 import java.net.InetAddress;
 import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
-import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.filter.CommonsRequestLoggingFilter;
@@ -19,8 +17,8 @@ import org.springframework.web.filter.CommonsRequestLoggingFilter;
 @SpringBootApplication(exclude = { SecurityAutoConfiguration.class, ManagementWebSecurityAutoConfiguration.class })
 public class BackendApplication {
 
-	@LocalServerPort
-	int localServerPort;
+	@Value("${server.port}")
+	int serverPort;
 
 	private Logger logger = LoggerFactory.getLogger(BackendApplication.class);
 
@@ -38,7 +36,7 @@ public class BackendApplication {
 			logger.info("There are " + beanNames.length + " beans in total");
 			logger.info("Site should be up at (ctrl-click): http://{}:{}/swagger", 
 				InetAddress.getLocalHost().getHostAddress(), 
-				localServerPort
+				serverPort
 			);
 		};
 	}

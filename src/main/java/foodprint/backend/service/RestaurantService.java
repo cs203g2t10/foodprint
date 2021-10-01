@@ -1,7 +1,6 @@
 package foodprint.backend.service;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,12 +10,17 @@ import org.springframework.stereotype.Service;
 import foodprint.backend.model.Discount;
 import foodprint.backend.model.DiscountRepo;
 import foodprint.backend.dto.DiscountDTO;
+import foodprint.backend.dto.FoodDTO;
+import foodprint.backend.dto.FoodIngredientQuantityDTO;
 import foodprint.backend.exceptions.DeleteFailedException;
 import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.Food;
 import foodprint.backend.model.FoodRepo;
+import foodprint.backend.model.Ingredient;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.RestaurantRepo;
+import foodprint.backend.model.IngredientRepo;
+import foodprint.backend.model.FoodIngredientQuantity;
 
 @Service
 public class RestaurantService {
@@ -27,19 +31,21 @@ public class RestaurantService {
 
     private DiscountRepo discountRepo;
 
-    public RestaurantService(RestaurantRepo repo, FoodRepo foodRepo, DiscountRepo discountRepo) {
+    private IngredientRepo ingredientRepo;
+
+
+    public RestaurantService(RestaurantRepo repo, FoodRepo foodRepo, DiscountRepo discountRepo, IngredientRepo ingredientRepo) {
         this.repo = repo;
         this.foodRepo = foodRepo;
         this.discountRepo = discountRepo;
+        this.ingredientRepo = ingredientRepo;
     }
     
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public List<Restaurant> getAllRestaurants() {
         List<Restaurant> restaurants = repo.findAll();
         return restaurants;
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Restaurant get(Long id) {
         Optional<Restaurant> restaurant = repo.findById(id);
         return restaurant.orElseThrow(() -> new NotFoundException("Restaurant not found"));
@@ -124,21 +130,45 @@ public class RestaurantService {
     */
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
-    public Food addFood(Long restaurantId, Food food) {
+    public Food addFood(Long restaurantId, FoodDTO foodDTO) {
         Restaurant restaurant = repo.findByRestaurantId(restaurantId);
-        food.setRestaurant(restaurant);
-        var savedFood = foodRepo.saveAndFlush(food);
+
+        Food newFood = new Food(foodDTO.getFoodName(), foodDTO.getFoodPrice(), 0.00);
+        newFood.setPicturesPath(new ArrayList<String>());
+
+        List<Ingredient> ingredients = getAllRestaurantIngredients(restaurantId);
+        Set<FoodIngredientQuantity> foodIngredientQuantity = new HashSet<>();
+        List<FoodIngredientQuantityDTO> ingredientQuantity = foodDTO.getIngredientQuantityList();
+
+        for (FoodIngredientQuantityDTO entry : ingredientQuantity) {
+            Ingredient newIngredient = null;
+            for(Ingredient ingredient : ingredients) {
+                if(ingredient.getIngredientId() == entry.getIngredientId()) {
+                    newIngredient = ingredient;
+                }
+            }
+
+            if (newIngredient == null) {
+                throw new NotFoundException("restaurant does not have the ingredient");
+            } 
+
+            FoodIngredientQuantity newFoodIngredientQuantity = new FoodIngredientQuantity(newFood, newIngredient, entry.getQuantity());
+            foodIngredientQuantity.add(newFoodIngredientQuantity);
+        }
+
+        newFood.setFoodIngredientQuantity(foodIngredientQuantity);
+
+        newFood.setRestaurant(restaurant);
+        var savedFood = foodRepo.saveAndFlush(newFood);
         restaurant.getAllFood().add(savedFood);
         return savedFood;
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public List<Food> getAllFood(Long restaurantId) {
         Restaurant restaurant = repo.findByRestaurantId(restaurantId);
         return restaurant.getAllFood();
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Food getFood(Long restaurantId, Long foodId) {
         Optional<Food> foodOpt = foodRepo.findById(foodId);
         Food food = foodOpt.orElseThrow(() -> new NotFoundException("Food not found"));
@@ -148,6 +178,7 @@ public class RestaurantService {
         return food;
     }
 
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public void deleteFood(Long restaurantId, Long foodId) {
         Restaurant restaurant = get(restaurantId);
         List<Food> allFood = restaurant.getAllFood();
@@ -160,6 +191,7 @@ public class RestaurantService {
         throw new NotFoundException("Food not found");
     }
 
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Food updateFood(Long restaurantId, Long foodId, Food updatedFood) {
         Restaurant restaurant = get(restaurantId);
         List<Food> allFood = restaurant.getAllFood();
@@ -177,6 +209,7 @@ public class RestaurantService {
         throw new NotFoundException("Food not found");
     }
     
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Page<Food> searchFood(Pageable page, String query) {
         return foodRepo.findByFoodNameContains(page,query);
     }
@@ -236,4 +269,62 @@ public class RestaurantService {
         Optional<Discount> discount = discountRepo.findById(discountId);
         return discount.orElseThrow(() -> new NotFoundException("Discount not found"));
     }
+
+    /*
+    *
+    * Ingredient related methods
+    *
+    */
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    public List<Ingredient> getAllRestaurantIngredients(Long restaurantId) {
+        Restaurant restaurant = get(restaurantId);
+        if (restaurant == null) {
+            throw new NotFoundException("Restaurant does not exist");
+        }
+        return restaurant.getIngredients();
+    }
+
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    public Ingredient addRestaurantIngredient(Long restaurantId, Ingredient newIngredient) {
+        Restaurant restaurant = get(restaurantId);
+        if (restaurant == null) {
+            throw new NotFoundException("Restaurant does not exist");
+        }
+        List<Ingredient> ingredients = restaurant.getIngredients();
+        ingredients.add(newIngredient);
+        restaurant.setIngredients(ingredients);
+        newIngredient.setRestaurant(restaurant);
+        ingredientRepo.saveAndFlush(newIngredient);
+        repo.saveAndFlush(restaurant);
+        return newIngredient;
+    }
+  
+
+
+    // @PreAuthorize("hasAnyAuthority('FP_USER')")
+    // public HashMap<Ingredient, Integer> calculateIngredientsNeeded(Long restaurantId) {
+    //     HashMap<Ingredient, Integer> map = new HashMap<>();
+    //     Restaurant restaurant = repo.findByRestaurantId(restaurantId);
+    //     if (restaurant == null) {
+    //         throw new NotFoundException("Restaurant does not exist");
+    //     }
+
+    //     List<Reservation> reservations = reservationRepo.findByRestaurant(restaurant);
+    //     Iterator<Reservation> reservationItr = reservations.iterator();
+    //     while (reservationItr.hasNext()) {
+    //         Reservation reservation = reservationItr.next();
+    //         List<LineItem> lineItems = reservation.getLineItems();
+            
+    //         Iterator<LineItem> lineItr = lineItems.iterator();
+    //         while (lineItr.hasNext()) {
+    //             LineItem lineItem = lineItr.next();
+    //             Food food = lineItem.getFood();
+    //             if (map.containsKey(food)) {
+    //                 food.getIngredients();
+    //             } 
+    //         }
+    //     }
+
+    //     return null;
+    // }
 }

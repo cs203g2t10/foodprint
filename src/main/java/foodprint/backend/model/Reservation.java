@@ -93,6 +93,10 @@ public class Reservation {
         this.restaurant = restaurant;
     }
 
+    public void changeReservationId(Long reservationId) {
+        this.reservationId = reservationId;
+    }
+
     public Long getReservationId() {
         return this.reservationId;
     }

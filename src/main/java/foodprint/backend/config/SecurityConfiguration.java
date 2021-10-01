@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -76,26 +77,38 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
         // Set permissions on endpoints
         http.authorizeRequests()
+        
             // Our public endpoints
-            .antMatchers("/api/v1/auth/login").permitAll()
-            .antMatchers("/api/v1/auth/register").permitAll()
-            .antMatchers("/api/v1/user").permitAll()
-            .antMatchers("/swagger/**").permitAll()
-            .antMatchers("/swagger-ui/**").permitAll()
-            .antMatchers("/swagger-ui/index.html").permitAll()
-            .antMatchers("/swagger-ui/index.html").permitAll()
-            .antMatchers("/v3/api-docs/**").permitAll()
-            .antMatchers("/h2-console/**").permitAll()
-            .antMatchers("/favicon.ico").permitAll()
+            .antMatchers(HttpMethod.GET, 
+                "/api/v1/restaurant/*/food",
+                "/api/v1/restaurant/*",
+                "/api/v1/restaurant"
+            ).permitAll()
+
+            .antMatchers(
+                "/api/v1/auth/login",
+                "/api/v1/auth/register",
+                "/api/v1/user"
+            ).permitAll()
+
+            .antMatchers(
+                "/swagger/**",
+                "/swagger-ui/**",
+                "/swagger-ui/index.html",
+                "/v3/api-docs/**",
+                "/h2-console/**",
+                "/favicon.ico"
+            ).permitAll()
+
             // Our private endpoints
             .anyRequest().authenticated()
             .and();
 
-        // Add JWT token filter
-        http.addFilterBefore(
-            jwtTokenFilter,
-            UsernamePasswordAuthenticationFilter.class
-        );
+            // Add JWT token filter
+            http.addFilterBefore(
+                jwtTokenFilter,
+                UsernamePasswordAuthenticationFilter.class
+            );
     }
 
         // Used by spring security if CORS is enabled.

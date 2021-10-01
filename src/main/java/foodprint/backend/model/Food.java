@@ -1,7 +1,6 @@
 package foodprint.backend.model;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -12,8 +11,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -59,11 +56,8 @@ public class Food {
     @Column(name = "foodDiscount")
     private Double foodDiscount;
 
-    @ManyToMany
-    @JoinTable(name = "food_ingredients",
-        joinColumns = @JoinColumn(name = "foodId"),
-        inverseJoinColumns = @JoinColumn(name = "ingredientId"))
-    private Set<Ingredient> ingredients = new HashSet<>();
+    @OneToMany(mappedBy = "food")
+    private Set<FoodIngredientQuantity> foodIngredientQuantity;
 
     @JsonIgnore
     @OneToMany(mappedBy = "food", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -147,6 +141,14 @@ public class Food {
 
     public void setFoodDiscount(Double foodDiscount) {
         this.foodDiscount = foodDiscount;
+    }
+
+    public void setFoodIngredientQuantity(Set<FoodIngredientQuantity> foodIngredientQuantity) {
+        this.foodIngredientQuantity = foodIngredientQuantity;
+    }
+
+    public Set<FoodIngredientQuantity> getFoodIngredientQuantity() {
+        return this.foodIngredientQuantity;
     }
 
 }
