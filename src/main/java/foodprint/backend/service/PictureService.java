@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -42,6 +43,7 @@ public class PictureService  {
         return picture.orElseThrow(() -> new NotFoundException("Picture not found"));
     }
 
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Picture savePicture(String title, String description, MultipartFile file) {
         //check if the file is empty
         if (file.isEmpty()) {
@@ -84,6 +86,7 @@ public class PictureService  {
         return fileStore.download(picture.getImagePath(), picture.getImageFileName());
     }
 
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public List<Picture> getAllPictures() {
         List<Picture> pictures = new ArrayList<>();
         repository.findAll().forEach(pictures::add);
@@ -91,6 +94,7 @@ public class PictureService  {
         pictures;
     }
 
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public String getPictureById(Long id) {
         Optional<Picture> picture = repository.findById(id);
         if (picture.isEmpty()) {
@@ -101,6 +105,7 @@ public class PictureService  {
         return url;
     }
 
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public void deletePicture(Long id) {
         Picture picture = get(id);
         repository.delete(picture);
@@ -112,6 +117,7 @@ public class PictureService  {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Picture updatedPicture(Long pictureId, Picture newPicture) {
         Picture oldPicture = get(pictureId);
         oldPicture.setDescription(newPicture.getDescription());
