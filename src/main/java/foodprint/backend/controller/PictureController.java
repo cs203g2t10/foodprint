@@ -57,7 +57,7 @@ public class PictureController {
     public ResponseEntity<Picture> savePicture(@RequestParam("title") String title,
                                          @RequestParam("description") String description,
                                          @RequestParam("file") MultipartFile file) {
-        return new ResponseEntity<>(service.savePicture(title, description, file), HttpStatus.OK);
+        return new ResponseEntity<>(service.savePicture(title, description, file), HttpStatus.CREATED);
     }
 
     @GetMapping(value = "{id}/image/download")
