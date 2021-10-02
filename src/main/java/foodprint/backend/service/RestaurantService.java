@@ -238,15 +238,17 @@ public class RestaurantService {
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public void deleteDiscount(Long restaurantId, Long discountId) {
-        Restaurant restaurant = get(restaurantId);
-        List<Discount> allDiscounts = restaurant.getDiscount();
-        for (Discount discount : allDiscounts) {
-            if (discount.getDiscountId().equals(discountId)) {
+        if (discountRepo.existsById(discountId)) {
+            Discount discount = discountRepo.getById(discountId);
+            if (discount.getRestaurant().getRestaurantId().equals(restaurantId)) {
                 discountRepo.delete(discount);
                 return;
+            } else {
+                throw new NotFoundException("Discount found but not in correct restaurant");
             }
+        } else {
+            throw new NotFoundException("Discount not found");
         }
-        throw new NotFoundException("Discount not found");
     }
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
