@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +13,6 @@ import foodprint.backend.dto.CreateReservationDTO;
 import foodprint.backend.dto.LineItemDTO;
 import foodprint.backend.model.Food;
 import foodprint.backend.model.LineItem;
-import foodprint.backend.model.LineItemRepo;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.Reservation;
 import foodprint.backend.model.ReservationRepo;
@@ -32,13 +30,11 @@ public class ReservationService {
 
     private ReservationRepo reservationRepo;
     private RestaurantService restaurantService;
-    private LineItemRepo lineItemRepo;
 
     @Autowired
-    ReservationService(ReservationRepo reservationRepo, RestaurantService restaurantService, LineItemRepo lineItemRepo) {
+    ReservationService(ReservationRepo reservationRepo, RestaurantService restaurantService) {
         this.reservationRepo = reservationRepo;
         this.restaurantService = restaurantService;
-        this.lineItemRepo = lineItemRepo;
     }
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
@@ -81,8 +77,7 @@ public class ReservationService {
     }
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
-    public Reservation create(CreateReservationDTO req) {
-        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    public Reservation create(User currentUser, CreateReservationDTO req) {
         Restaurant restaurant = restaurantService.get(req.getRestaurantId());
         LocalDateTime dateOfReservation = req.getDate();
         LocalDateTime startTime = dateOfReservation.truncatedTo(ChronoUnit.HOURS);
@@ -108,6 +103,14 @@ public class ReservationService {
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Reservation update(Reservation oldReservation, Reservation reservation) {
 
+        reservation.setReservedOn(oldReservation.getReservedOn());
+        reservation.setUser(oldReservation.getUser());
+        
+        LocalDateTime startTime = reservation.getDate().truncatedTo(ChronoUnit.HOURS);
+        if (!this.slotAvailable(reservation.getRestaurant(), startTime)) {
+            throw new NotFoundException("Slot not found");
+        }
+
         List<LineItem> oldLineItems = oldReservation.getLineItems();
         for (int i = 0; i < oldLineItems.size(); i++) {
             oldLineItems.remove(oldLineItems.get(i));
@@ -124,9 +127,9 @@ public class ReservationService {
         
     }
 
-    public Reservation adminUpdate(Reservation reservation) {
-        return reservationRepo.saveAndFlush(reservation);
-    }
+    // public Reservation adminUpdate(Reservation reservation) {
+    //     return reservationRepo.saveAndFlush(reservation);
+    // }
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public void delete(Reservation reservation) {

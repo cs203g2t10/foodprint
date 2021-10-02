@@ -71,10 +71,9 @@ public class Food {
         this.foodDiscount = foodDiscount;
     }
 
-    public Food(String foodName, String foodDesc, String picturesPath, Double foodPrice, Double foodDiscount) {
+    public Food(String foodName, String foodDesc, Double foodPrice, Double foodDiscount) {
         this.foodName = foodName;
         this.foodDesc = foodDesc;
-        this.picturesPath = picturesPath;
         this.foodPrice = foodPrice;
         this.foodDiscount = foodDiscount;
     }

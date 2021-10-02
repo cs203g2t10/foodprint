@@ -115,10 +115,9 @@ public class Restaurant {
     }
 
 
-    public Restaurant(String restaurantName, String restaurantDesc, String picturesPath, String restaurantLocation, Integer restaurantTableCapacity, Integer restaurantWeekdayOpeningHour, Integer restaurantWeekdayOpeningMinutes, Integer restaurantWeekdayClosingHour, Integer restaurantWeekdayClosingMinutes, Integer restaurantWeekendOpeningHour, Integer restaurantWeekendOpeningMinutes, Integer restaurantWeekendClosingHour, Integer restaurantWeekendClosingMinutes) {
+    public Restaurant(String restaurantName, String restaurantDesc, String restaurantLocation, Integer restaurantTableCapacity, Integer restaurantWeekdayOpeningHour, Integer restaurantWeekdayOpeningMinutes, Integer restaurantWeekdayClosingHour, Integer restaurantWeekdayClosingMinutes, Integer restaurantWeekendOpeningHour, Integer restaurantWeekendOpeningMinutes, Integer restaurantWeekendClosingHour, Integer restaurantWeekendClosingMinutes) {
         this.restaurantName = restaurantName;
         this.restaurantDesc = restaurantDesc;
-        this.picturesPath = picturesPath;
         this.restaurantLocation = restaurantLocation;
         this.restaurantTableCapacity = restaurantTableCapacity;
         this.restaurantWeekdayOpeningHour = restaurantWeekdayOpeningHour;

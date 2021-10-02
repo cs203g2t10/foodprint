@@ -60,7 +60,7 @@ public class RestaurantServiceTest {
     @Test
     void updateRestaurant_RestaurantFound_ReturnUpdatedRestaurant() {
         //Restaurant restaurant = new Restaurant("Sushi Tei", "Serangoon");
-        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "pictures", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10);
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10);
         Long restaurantId = 1L;
 
         when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
@@ -76,7 +76,7 @@ public class RestaurantServiceTest {
 
     @Test
     void updateRestaurant_RestaurantNotFound_ReturnError() {
-        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "pictures", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10);
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10);
         Long restaurantId = 1L;
 
         when(repo.findById(any(Long.class))).thenReturn(Optional.empty());

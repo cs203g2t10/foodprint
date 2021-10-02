@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +29,7 @@ import foodprint.backend.model.LineItemRepo;
 import foodprint.backend.model.Reservation;
 import foodprint.backend.model.ReservationRepo;
 import foodprint.backend.model.Restaurant;
+import foodprint.backend.model.User;
 import foodprint.backend.service.ReservationService;
 import foodprint.backend.service.RestaurantService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -76,7 +78,8 @@ public class ReservationController {
     @PostMapping
     @Operation(summary = "For users to create a new reservation slot")
     public ResponseEntity<ReservationDTO> createReservationDTO(@RequestBody CreateReservationDTO req) {
-        var reservation = reservationService.create(req);
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var reservation = reservationService.create(currentUser, req);
         var reservationDTO = this.convertToDTO(reservation);
         return new ResponseEntity<>(reservationDTO, HttpStatus.CREATED);
     }
