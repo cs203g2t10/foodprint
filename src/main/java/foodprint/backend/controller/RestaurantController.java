@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -80,8 +81,8 @@ public class RestaurantController {
         return new ResponseEntity<>(savedRestaurant, HttpStatus.CREATED);
     }
 
-    // PUT: Update the restaurant
-    @PutMapping({"/{restaurantId}"})
+    // PATCH: Update the restaurant
+    @PatchMapping({"/{restaurantId}"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Updates an existing restaurant, only changed fields need to be set")
     public ResponseEntity<Restaurant> restaurantUpdate(

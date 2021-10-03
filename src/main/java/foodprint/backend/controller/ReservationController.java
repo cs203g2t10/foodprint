@@ -11,9 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -27,7 +27,6 @@ import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.Food;
 import foodprint.backend.model.LineItem;
 import foodprint.backend.model.Reservation;
-import foodprint.backend.model.ReservationRepo;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.User;
 import foodprint.backend.service.ReservationService;
@@ -42,17 +41,11 @@ public class ReservationController {
 
     private RestaurantService restaurantService;
 
-    private ReservationRepo reservationRepo;
 
     @Autowired
-    ReservationController(
-        ReservationService reservationService,
-        RestaurantService restaurantService,
-        ReservationRepo reservationRepo
-    ) {
+    ReservationController(ReservationService reservationService, RestaurantService restaurantService) {
         this.reservationService = reservationService;
         this.restaurantService = restaurantService;
-        this.reservationRepo = reservationRepo;
     }
 
     // GET: Get reservation by id (DTO)
@@ -85,19 +78,23 @@ public class ReservationController {
     }
 
     // PUT: Update reservation (DTO)
-    @PutMapping({ "/{reservationId}" })
+    @PatchMapping({ "/{reservationId}" })
     @Operation(summary = "For users to update an existing reservation slot")
-    public ResponseEntity<ReservationDTO> updateReservationDTO(@PathVariable("reservationId") Long id,
-            @RequestBody CreateReservationDTO pendingReservationDTO) {
+    public ResponseEntity<ReservationDTO> updateReservationDTO(
+        @PathVariable("reservationId") Long id,
+        @RequestBody CreateReservationDTO pendingReservationDTO
+    ) {
 
+        var currentReservation = reservationService.getReservationById(id);
+        var restaurant = currentReservation.getRestaurant();
+
+        // Dont allow users to change the restaurant of their reservation
+        pendingReservationDTO.setRestaurantId(restaurant.getRestaurantId());
         var reservation = this.convertToEntity(pendingReservationDTO);
-        var restaurant = restaurantService.get(pendingReservationDTO.getRestaurantId());
         reservation.setRestaurant(restaurant);
-
         var updatedReservation = reservationService.update(id, reservation);
         var updatedReservationDTO = this.convertToDTO(updatedReservation);
         return new ResponseEntity<>(updatedReservationDTO, HttpStatus.OK);
-
     }
 
     // DELETE: Delete reservation

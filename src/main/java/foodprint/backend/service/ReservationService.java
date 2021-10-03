@@ -14,7 +14,6 @@ import foodprint.backend.dto.CreateReservationDTO;
 import foodprint.backend.dto.LineItemDTO;
 import foodprint.backend.model.Food;
 import foodprint.backend.model.LineItem;
-import foodprint.backend.model.LineItemRepo;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.Reservation;
 import foodprint.backend.model.ReservationRepo;
@@ -32,13 +31,11 @@ public class ReservationService {
 
     private ReservationRepo reservationRepo;
     private RestaurantService restaurantService;
-    private LineItemRepo lineItemRepo;
 
     @Autowired
-    ReservationService(ReservationRepo reservationRepo, RestaurantService restaurantService, LineItemRepo lineItemRepo) {
+    ReservationService(ReservationRepo reservationRepo, RestaurantService restaurantService) {
         this.reservationRepo = reservationRepo;
         this.restaurantService = restaurantService;
-        this.lineItemRepo = lineItemRepo;
     }
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
@@ -82,6 +79,7 @@ public class ReservationService {
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Reservation create(User currentUser, CreateReservationDTO req) {
+
         Restaurant restaurant = restaurantService.get(req.getRestaurantId());
         LocalDateTime dateOfReservation = req.getDate();
         LocalDateTime startTime = dateOfReservation.truncatedTo(ChronoUnit.HOURS);
@@ -91,9 +89,16 @@ public class ReservationService {
         }
 
         Reservation reservation = new Reservation();
-        reservation.user(currentUser).date(dateOfReservation).pax(req.getPax()).isVaccinated(req.getIsVaccinated())
-                .reservedOn(LocalDateTime.now()).status(Status.ONGOING).restaurant(restaurant);
+        reservation.user(currentUser)
+                    .date(dateOfReservation)
+                    .pax(req.getPax())
+                    .isVaccinated(req.getIsVaccinated())
+                    .reservedOn(LocalDateTime.now())
+                    .status(Status.ONGOING)
+                    .restaurant(restaurant);
+
         HashMap<Food, Integer> lineItemsHashMap = new HashMap<>();
+
         for (LineItemDTO lineItemDTO : req.getLineItems()) {
             Food food = restaurantService.getFood(req.getRestaurantId(), lineItemDTO.getFoodId());
             if (lineItemsHashMap.containsKey(food)) {
@@ -102,17 +107,20 @@ public class ReservationService {
                 lineItemsHashMap.put(food, lineItemDTO.getQuantity());
             }
         }
+
         List<LineItem> savedLineItems = new ArrayList<>();
         for (Food key : lineItemsHashMap.keySet()) {
             LineItem savedLineItem = new LineItem(key, reservation, lineItemsHashMap.get(key));
             savedLineItems.add(savedLineItem);
         }
+
         reservation.lineItems(savedLineItems);
         return reservationRepo.saveAndFlush(reservation);
     }
-
+    
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Reservation update(Long id, Reservation reservation) {
+
         LocalDateTime startTime = reservation.getDate().truncatedTo(ChronoUnit.HOURS);
         if (!this.slotAvailable(reservation.getRestaurant(), startTime)) {
             throw new NotFoundException("Slot not found");
@@ -123,9 +131,11 @@ public class ReservationService {
         if (reservation.getIsVaccinated() != null) {
             currentReservation.setIsVaccinated(reservation.getIsVaccinated());
         }
+
         if (reservation.getDate() != null) {
             currentReservation.setDate(reservation.getDate());
         }
+
         if (reservation.getLineItems() != null) {
             List<LineItem> currentLineItems = currentReservation.getLineItems();
             currentLineItems.clear();
@@ -135,12 +145,16 @@ public class ReservationService {
             }
             currentLineItems.addAll(newLineItems);
         }
+
         if (reservation.getPax() != null) {
             currentReservation.setPax(reservation.getPax());
         }
-        if (reservation.getRestaurant() != null) {
-            currentReservation.setRestaurant(reservation.getRestaurant());
-        }
+
+        // Disallow changing of restaurants cause that doesnt make sense
+        // if (reservation.getRestaurant() != null) {
+        //     currentReservation.setRestaurant(reservation.getRestaurant());
+        // }
+
         if (reservation.getStatus() != null) {
             currentReservation.setStatus(reservation.getStatus());
         }
