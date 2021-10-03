@@ -123,7 +123,7 @@ public class RestaurantServiceTest {
 
     @Test
     void deleteRestaurant_RestaurantFound_Return() {
-        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "pictures", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10);
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10);
         Long restaurantId = 1L;
         ReflectionTestUtils.setField(restaurant, "restaurantId", restaurantId);
 
@@ -207,7 +207,7 @@ public class RestaurantServiceTest {
         List<String> pictures = new ArrayList<>();
         pictures.add("picture");
         Food newFood = new Food("Sushi", 30.0, 10.0);
-        newFood.setPicturesPath(pictures);
+        //newFood.setPicturesPath(pictures);
         FoodDTO newFoodDTO = new FoodDTO();
         List<FoodIngredientQuantityDTO> list = new ArrayList<>(); 
         newFoodDTO.setIngredientQuantityList(list);
@@ -237,7 +237,7 @@ public class RestaurantServiceTest {
     void updateFood_FoodExist_ReturnUpdatedFood() {
         Restaurant restaurant = new Restaurant("Sushi Tei", "Serangoon");
         Food food = new Food("Sashimi", 50.0, 0.0);
-        Food anotherFood2 = new Food("Sashimi", "Salmon slices","pictures", 40.0, 0.0);
+        //Food anotherFood2 = new Food("Sashimi", "Salmon slices","pictures", 40.0, 0.0);
         Long restaurantId = 1L;
         Long foodId = 1L;
         List<Food> allFood = new ArrayList<>();
@@ -249,7 +249,7 @@ public class RestaurantServiceTest {
 
         restaurantService.create(restaurant);
         restaurant.setAllFood(allFood);
-        Food updatedFood = restaurantService.updateFood(restaurantId, foodId, anotherFood2);
+        Food updatedFood = restaurantService.updateFood(restaurantId, foodId, food);
 
         verify(repo).findById(restaurantId);
     }
@@ -455,7 +455,7 @@ public class RestaurantServiceTest {
         Long discountId = 1L;
         Long restaurantId = 1L;
         DiscountDTO discountdto = new DiscountDTO(restaurantId,discount.getDiscountDescription(), discount.getDiscountPercentage());
-        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "pictures", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10);
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc","Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10);
         ReflectionTestUtils.setField(restaurant, "restaurantId", restaurantId);
         
         when(repo.findByRestaurantId(any(Long.class))).thenReturn(restaurant);
