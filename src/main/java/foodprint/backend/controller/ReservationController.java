@@ -186,6 +186,8 @@ public class ReservationController {
                 lineItems.add(lineItem);
             }
             reservation.setLineItems(lineItems);
+        } else {
+            reservation.setLineItems(null);
         }
 
         return reservation;
