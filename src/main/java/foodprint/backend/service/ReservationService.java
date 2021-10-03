@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,6 +14,7 @@ import foodprint.backend.dto.CreateReservationDTO;
 import foodprint.backend.dto.LineItemDTO;
 import foodprint.backend.model.Food;
 import foodprint.backend.model.LineItem;
+import foodprint.backend.model.LineItemRepo;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.Reservation;
 import foodprint.backend.model.ReservationRepo;
@@ -30,11 +32,13 @@ public class ReservationService {
 
     private ReservationRepo reservationRepo;
     private RestaurantService restaurantService;
+    private LineItemRepo lineItemRepo;
 
     @Autowired
-    ReservationService(ReservationRepo reservationRepo, RestaurantService restaurantService) {
+    ReservationService(ReservationRepo reservationRepo, RestaurantService restaurantService, LineItemRepo lineItemRepo) {
         this.reservationRepo = reservationRepo;
         this.restaurantService = restaurantService;
+        this.lineItemRepo = lineItemRepo;
     }
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
@@ -82,53 +86,98 @@ public class ReservationService {
         LocalDateTime dateOfReservation = req.getDate();
         LocalDateTime startTime = dateOfReservation.truncatedTo(ChronoUnit.HOURS);
 
-        if (this.slotAvailable(restaurant, startTime)) {
-            Reservation reservation = new Reservation();
-            reservation.user(currentUser).date(dateOfReservation).pax(req.getPax()).isVaccinated(req.getIsVaccinated())
-                    .reservedOn(LocalDateTime.now()).status(Status.ONGOING).restaurant(restaurant);
-
-            List<LineItem> savedLineItems = new ArrayList<>();
-            for (LineItemDTO lineItem : req.getLineItems()) {
-                Food food = restaurantService.getFood(req.getRestaurantId(), lineItem.getFoodId());
-                LineItem savedLineItem = new LineItem(food, reservation, lineItem.getQuantity());
-                savedLineItems.add(savedLineItem);
-            }
-            reservation.lineItems(savedLineItems);
-            return reservationRepo.saveAndFlush(reservation);
-        } else {
+        if (!this.slotAvailable(restaurant, startTime)) {
             throw new NotFoundException("Slot not found");
         }
+
+        Reservation reservation = new Reservation();
+        reservation.user(currentUser).date(dateOfReservation).pax(req.getPax()).isVaccinated(req.getIsVaccinated())
+                .reservedOn(LocalDateTime.now()).status(Status.ONGOING).restaurant(restaurant);
+        HashMap<Food, Integer> lineItemsHashMap = new HashMap<>();
+        for (LineItemDTO lineItemDTO : req.getLineItems()) {
+            Food food = restaurantService.getFood(req.getRestaurantId(), lineItemDTO.getFoodId());
+            if (lineItemsHashMap.containsKey(food)) {
+                lineItemsHashMap.put(food, lineItemDTO.getQuantity() + lineItemsHashMap.get(food));
+            } else {
+                lineItemsHashMap.put(food, lineItemDTO.getQuantity());
+            }
+        }
+        List<LineItem> savedLineItems = new ArrayList<>();
+        for (Food key : lineItemsHashMap.keySet()) {
+            LineItem savedLineItem = new LineItem(key, reservation, lineItemsHashMap.get(key));
+            savedLineItems.add(savedLineItem);
+        }
+        reservation.lineItems(savedLineItems);
+        return reservationRepo.saveAndFlush(reservation);
     }
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
-    public Reservation update(Reservation oldReservation, Reservation reservation) {
-
-        reservation.setReservedOn(oldReservation.getReservedOn());
-        reservation.setUser(oldReservation.getUser());
-        
+    public Reservation update(Long id, Reservation reservation) {
         LocalDateTime startTime = reservation.getDate().truncatedTo(ChronoUnit.HOURS);
         if (!this.slotAvailable(reservation.getRestaurant(), startTime)) {
             throw new NotFoundException("Slot not found");
         }
 
-        List<LineItem> oldLineItems = oldReservation.getLineItems();
-        for (int i = 0; i < oldLineItems.size(); i++) {
-            oldLineItems.remove(oldLineItems.get(i));
+        Reservation currentReservation = reservationRepo.getById(id);
+
+        if (reservation.getIsVaccinated() != null) {
+            currentReservation.setIsVaccinated(reservation.getIsVaccinated());
+        }
+        if (reservation.getDate() != null) {
+            currentReservation.setDate(reservation.getDate());
+        }
+        if (reservation.getLineItems() != null) {
+            List<LineItem> currentLineItems = currentReservation.getLineItems();
+            currentLineItems.clear();
+            List<LineItem> newLineItems = reservation.getLineItems();
+            for (LineItem li : newLineItems) {
+                li.setReservation(currentReservation);
+            }
+            currentLineItems.addAll(newLineItems);
+        }
+        if (reservation.getPax() != null) {
+            currentReservation.setPax(reservation.getPax());
+        }
+        if (reservation.getRestaurant() != null) {
+            currentReservation.setRestaurant(reservation.getRestaurant());
+        }
+        if (reservation.getStatus() != null) {
+            currentReservation.setStatus(reservation.getStatus());
         }
 
-        if (reservation.getStatus().equals(Status.CANCELLED)) {
-            List<LineItem> newLineItems = reservation.getLineItems();
-            for (int i = 0; i < newLineItems.size(); i++) {
-                newLineItems.remove(newLineItems.get(i));
-            }
+        if (reservation.getStatus() == Status.CANCELLED) {
+            List<LineItem> currentLineItems = currentReservation.getLineItems();
+            currentLineItems.clear();
         }
-        reservation.changeReservationId(oldReservation.getReservationId());
-        return reservationRepo.saveAndFlush(reservation);
-        
+        return reservationRepo.saveAndFlush(currentReservation);
+
+        // reservation.setReservedOn(oldReservation.getReservedOn());
+        // reservation.setUser(oldReservation.getUser());
+
+        // LocalDateTime startTime =
+        // reservation.getDate().truncatedTo(ChronoUnit.HOURS);
+        // if (!this.slotAvailable(reservation.getRestaurant(), startTime)) {
+        // throw new NotFoundException("Slot not found");
+        // }
+
+        // List<LineItem> oldLineItems = oldReservation.getLineItems();
+        // for (int i = 0; i < oldLineItems.size(); i++) {
+        // oldLineItems.remove(oldLineItems.get(i));
+        // }
+
+        // if (reservation.getStatus().equals(Status.CANCELLED)) {
+        // List<LineItem> newLineItems = reservation.getLineItems();
+        // for (int i = 0; i < newLineItems.size(); i++) {
+        // newLineItems.remove(newLineItems.get(i));
+        // }
+        // }
+        // reservation.changeReservationId(oldReservation.getReservationId());
+        // return reservationRepo.saveAndFlush(reservation);
+
     }
 
     // public Reservation adminUpdate(Reservation reservation) {
-    //     return reservationRepo.saveAndFlush(reservation);
+    // return reservationRepo.saveAndFlush(reservation);
     // }
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")

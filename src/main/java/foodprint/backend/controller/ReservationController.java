@@ -2,6 +2,7 @@ package foodprint.backend.controller;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,9 +93,8 @@ public class ReservationController {
         var reservation = this.convertToEntity(pendingReservationDTO);
         var restaurant = restaurantService.get(pendingReservationDTO.getRestaurantId());
         reservation.setRestaurant(restaurant);
-        var oldReservation = reservationRepo.getById(id);
 
-        var updatedReservation = reservationService.update(oldReservation, reservation);
+        var updatedReservation = reservationService.update(id, reservation);
         var updatedReservationDTO = this.convertToDTO(updatedReservation);
         return new ResponseEntity<>(updatedReservationDTO, HttpStatus.OK);
 
@@ -175,17 +175,21 @@ public class ReservationController {
         reservation.setStatus(dto.getStatus());
 
         if (dto.getLineItems() != null) {
-            List<LineItem> lineItems = new ArrayList<LineItem>();
-            for (LineItemDTO lineItemDto : dto.getLineItems()) {
-                LineItem lineItem = new LineItem();
-                Long foodId = lineItemDto.getFoodId();
-                Food food = restaurantService.getFood(restaurantId, foodId);
-                lineItem.setFood(food);
-                lineItem.setQuantity(lineItemDto.getQuantity());
-                lineItem.setReservation(reservation);
-                lineItems.add(lineItem);
+            HashMap<Food, Integer> lineItemsHashMap = new HashMap<>();
+            for (LineItemDTO lineItemDTO : dto.getLineItems()) {
+                Food food = restaurantService.getFood(restaurantId, lineItemDTO.getFoodId());
+                if (lineItemsHashMap.containsKey(food)) {
+                    lineItemsHashMap.put(food, lineItemDTO.getQuantity() + lineItemsHashMap.get(food));
+                } else {
+                    lineItemsHashMap.put(food, lineItemDTO.getQuantity());
+                }
             }
-            reservation.setLineItems(lineItems);
+            List<LineItem> savedLineItems = new ArrayList<>();
+            for (Food key : lineItemsHashMap.keySet()) {
+                LineItem savedLineItem = new LineItem(key, reservation, lineItemsHashMap.get(key));
+                savedLineItems.add(savedLineItem);
+            }
+            reservation.setLineItems(savedLineItems);
         } else {
             reservation.setLineItems(null);
         }
