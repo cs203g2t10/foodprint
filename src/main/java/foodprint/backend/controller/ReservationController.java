@@ -25,7 +25,6 @@ import foodprint.backend.dto.NamedLineItemDTO;
 import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.Food;
 import foodprint.backend.model.LineItem;
-import foodprint.backend.model.LineItemRepo;
 import foodprint.backend.model.Reservation;
 import foodprint.backend.model.ReservationRepo;
 import foodprint.backend.model.Restaurant;
@@ -38,8 +37,6 @@ import io.swagger.v3.oas.annotations.Operation;
 @RequestMapping("/api/v1/reservation")
 public class ReservationController {
 
-    private LineItemRepo lineItemRepo;
-
     private ReservationService reservationService;
 
     private RestaurantService restaurantService;
@@ -47,9 +44,11 @@ public class ReservationController {
     private ReservationRepo reservationRepo;
 
     @Autowired
-    ReservationController(LineItemRepo lineItemRepo, ReservationService reservationService,
-            RestaurantService restaurantService, ReservationRepo reservationRepo) {
-        this.lineItemRepo = lineItemRepo;
+    ReservationController(
+        ReservationService reservationService,
+        RestaurantService restaurantService,
+        ReservationRepo reservationRepo
+    ) {
         this.reservationService = reservationService;
         this.restaurantService = restaurantService;
         this.reservationRepo = reservationRepo;
@@ -100,27 +99,6 @@ public class ReservationController {
         return new ResponseEntity<>(updatedReservationDTO, HttpStatus.OK);
 
     }
-
-    // PUT: Update reservation
-    // @PutMapping({ "/admin/{reservationId}" })
-    // @ResponseStatus(code = HttpStatus.OK)
-    // @Operation(summary = "Update a reservation slot")
-    // public ResponseEntity<Reservation> updateReservation(@PathVariable("reservationId") Long id,
-    //         @RequestBody Reservation currentReservation) {
-
-    //     var oldReservation = reservationRepo.getById(id);
-    //     var updatedReservation = reservationService.update(oldReservation, currentReservation);
-    //     /*
-    //     Reservation currentReservation = reservationService.getReservationById(id);
-    //     currentReservation.setDate(updatedReservation.getDate());
-    //     currentReservation.setIsVaccinated(updatedReservation.getIsVaccinated());
-    //     currentReservation.setLineItems(updatedReservation.getLineItems());
-    //     currentReservation.setPax(updatedReservation.getPax());
-    //     currentReservation.setStatus(updatedReservation.getStatus());
-    //     currentReservation = reservationService.adminUpdate(currentReservation);
-    //     */
-    //     return new ResponseEntity<>(updatedReservation, HttpStatus.OK);
-    // }
 
     // DELETE: Delete reservation
     @DeleteMapping({ "/admin/{reservationId}" })
@@ -212,71 +190,4 @@ public class ReservationController {
 
         return reservation;
     }
-
-    // TODO: Convert to take in LineItemDTO and return NamedLineItemDTO
-    // POST: Create new lineItems by reservationId
-    // @PostMapping({ "/{reservationId}/lineItems" })
-    // @Operation
-    // public ResponseEntity<List<LineItem>>
-    // createLineItems(@PathVariable("reservationId") Long id,
-    // @RequestBody List<LineItem> lineItems) {
-    // Reservation currentReservation = reservationService.getReservationById(id);
-    // if (currentReservation.getLineItems() != null) {
-    // return new ResponseEntity<>(HttpStatus.CONFLICT);
-    // } else {
-    // currentReservation.setLineItems(lineItems);
-    // currentReservation = reservationService.update(currentReservation);
-    // return new ResponseEntity<>(currentReservation.getLineItems(),
-    // HttpStatus.OK);
-    // }
-    // }
-
-    // // GET: Get lineItems by reservationId
-    // @GetMapping({ "/{reservationId}/lineItems" })
-    // @Operation(summary = "Get the list of lineItems under a reservationId")
-    // public ResponseEntity<List<LineItem>>
-    // getLineItems(@PathVariable("reservationId") Long id) {
-    // List<LineItem> lineItems =
-    // reservationService.getLineItemsByReservationId(id);
-    // return new ResponseEntity<List<LineItem>>(lineItems, HttpStatus.OK);
-    // }
-
-    // TODO: Convert to take in LineItemDTO and return NamedLineItemDTO
-    // PUT: Update lineItems by reservationId
-    // @PutMapping({ "/{reservationId}/lineItems" })
-    // @ResponseStatus(code = HttpStatus.OK)
-    // @Operation(summary = "Update the list of lineItems under a reservationId")
-    // public ResponseEntity<List<LineItem>>
-    // updateLineItems(@PathVariable("reservationId") Long id,
-    // @RequestBody List<LineItem> updatedLineItems) {
-    // Reservation currentReservation = reservationService.getReservationById(id);
-
-    // List<LineItem> lineItems = currentReservation.getLineItems();
-    // if (lineItems == null) {
-    // return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    // } else {
-    // currentReservation.setLineItems(updatedLineItems);
-    // currentReservation = reservationService.update(currentReservation);
-    // return new ResponseEntity<>(currentReservation.getLineItems(),
-    // HttpStatus.OK);
-    // }
-    // }
-
-    // DELETE: Delete lineItems by reservationId
-    // @DeleteMapping({ "/{reservationId}/lineItems" })
-    // public ResponseEntity<List<LineItem>>
-    // deleteLineItems(@PathVariable("reservationId") Long id) {
-    // Reservation reservation = reservationService.getReservationById(id);
-    // List<LineItem> lineItems = reservation.getLineItems();
-    // for (LineItem lineItem : lineItems) {
-    // lineItemRepo.delete(lineItem);
-    // }
-    // reservation.setLineItems(null);
-    // reservationService.update(reservation);
-    // reservation = reservationService.getReservationById(id);
-    // if (reservation.getLineItems() == null) {
-    // return new ResponseEntity<>(HttpStatus.OK);
-    // }
-    // return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-    // }
 }

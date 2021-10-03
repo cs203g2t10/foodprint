@@ -1,12 +1,9 @@
 package foodprint.backend;
 
 import foodprint.backend.dto.DiscountDTO;
-import foodprint.backend.dto.RestaurantDTO;
 import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.Discount;
-
 import foodprint.backend.model.DiscountRepo;
-import foodprint.backend.model.Food;
 import foodprint.backend.model.FoodRepo;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.RestaurantRepo;
@@ -18,11 +15,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-
-import com.jayway.jsonpath.Option;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

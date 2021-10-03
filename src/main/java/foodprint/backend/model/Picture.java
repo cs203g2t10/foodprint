@@ -116,7 +116,6 @@ public class Picture {
         return this;
     }
 
-
     public String getUrl() {
         return url;
     }
