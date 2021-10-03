@@ -45,8 +45,6 @@ public class Restaurant {
     @Schema(defaultValue="Japanese restaurant")
     private String restaurantDesc;
 
-    @Column(name = "picturesPath")
-    private String picturesPath;
 
     @Column(name = "restaurantLocation")
     @Schema(defaultValue="Serangoon")
@@ -106,6 +104,9 @@ public class Restaurant {
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
     private List<Ingredient> ingredients;
 
+    @OneToMany
+    private List<Picture> pictures;
+
     protected Restaurant () { }
 
     public Restaurant (String restaurantName, String restaurantLocation) {
@@ -114,10 +115,9 @@ public class Restaurant {
     }
 
 
-    public Restaurant(String restaurantName, String restaurantDesc, String picturesPath, String restaurantLocation, Integer restaurantTableCapacity, Integer restaurantWeekdayOpeningHour, Integer restaurantWeekdayOpeningMinutes, Integer restaurantWeekdayClosingHour, Integer restaurantWeekdayClosingMinutes, Integer restaurantWeekendOpeningHour, Integer restaurantWeekendOpeningMinutes, Integer restaurantWeekendClosingHour, Integer restaurantWeekendClosingMinutes) {
+    public Restaurant(String restaurantName, String restaurantDesc, String restaurantLocation, Integer restaurantTableCapacity, Integer restaurantWeekdayOpeningHour, Integer restaurantWeekdayOpeningMinutes, Integer restaurantWeekdayClosingHour, Integer restaurantWeekdayClosingMinutes, Integer restaurantWeekendOpeningHour, Integer restaurantWeekendOpeningMinutes, Integer restaurantWeekendClosingHour, Integer restaurantWeekendClosingMinutes) {
         this.restaurantName = restaurantName;
         this.restaurantDesc = restaurantDesc;
-        this.picturesPath = picturesPath;
         this.restaurantLocation = restaurantLocation;
         this.restaurantTableCapacity = restaurantTableCapacity;
         this.restaurantWeekdayOpeningHour = restaurantWeekdayOpeningHour;
@@ -159,21 +159,12 @@ public class Restaurant {
         this.restaurantDesc = restaurantDesc;
     }
 
-    public List<String> getPicturesPath() {
-        if (picturesPath == null) {
-            return null;
-        }
-
-        String[] arr = picturesPath.split(",");
-        List<String> list = Arrays.asList(arr);
-        return list;
+    public List<Picture> getPictures() {
+        return pictures;
     }
 
-    public void setPicturesPath(List<String> list) {
-        if (!list.isEmpty()) {
-            String picturesPath = String.join(",", list);
-            this.picturesPath = picturesPath;
-        }
+    public void setPictures(List<Picture> pictures) {
+        this.pictures = pictures;
     }
 
     public List<Ingredient> getIngredients() {

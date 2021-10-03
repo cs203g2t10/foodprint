@@ -15,10 +15,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import foodprint.backend.config.BucketName;
+import foodprint.backend.exceptions.DeleteFailedException;
 import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.Picture;
 import foodprint.backend.model.PictureRepo;
@@ -36,7 +38,12 @@ public class PictureService  {
         this.repository = repository;
     }
 
+    public Picture get(Long id) {
+        Optional<Picture> picture = repository.findById(id);
+        return picture.orElseThrow(() -> new NotFoundException("Picture not found"));
+    }
 
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Picture savePicture(String title, String description, MultipartFile file) {
         //check if the file is empty
         if (file.isEmpty()) {
@@ -70,8 +77,8 @@ public class PictureService  {
         //         .build();
         path = String.format("%s", uuid);
         Picture picture = new Picture(title, description, path, fileName);
-        repository.save(picture);
-        return repository.findByTitle(picture.getTitle());
+        repository.saveAndFlush(picture);
+        return picture;
     }
 
     public byte[] downloadPictureImage(Long id) {
@@ -79,12 +86,15 @@ public class PictureService  {
         return fileStore.download(picture.getImagePath(), picture.getImageFileName());
     }
 
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public List<Picture> getAllPictures() {
         List<Picture> pictures = new ArrayList<>();
         repository.findAll().forEach(pictures::add);
-        return pictures;
+        return 
+        pictures;
     }
 
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public String getPictureById(Long id) {
         Optional<Picture> picture = repository.findById(id);
         if (picture.isEmpty()) {
@@ -93,5 +103,26 @@ public class PictureService  {
         
         String url = String.format("%s%s/%s", "https://foodprint-amazon-storage.s3.ap-southeast-1.amazonaws.com/", picture.get().getImagePath(), picture.get().getImageFileName().replace(" ", "+"));
         return url;
+    }
+
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    public void deletePicture(Long id) {
+        Picture picture = get(id);
+        repository.delete(picture);
+        try {
+            this.get(id);
+            throw new DeleteFailedException("Picture could not be deleted");
+        } catch (NotFoundException e) {
+            return;
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    public Picture updatedPicture(Long pictureId, Picture newPicture) {
+        Picture oldPicture = get(pictureId);
+        oldPicture.setDescription(newPicture.getDescription());
+        oldPicture.setTitle(newPicture.getTitle());
+        oldPicture = repository.saveAndFlush(oldPicture);
+        return oldPicture;
     }
 }

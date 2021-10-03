@@ -61,7 +61,7 @@ public class Reservation {
     @Schema(defaultValue = "ONGOING")
     private Status status;
 
-    @OneToMany(mappedBy = "reservation", cascade=CascadeType.ALL)
+    @OneToMany(mappedBy = "reservation", cascade=CascadeType.ALL, orphanRemoval = true)
     private List<LineItem> lineItems;
 
     @JsonIgnore

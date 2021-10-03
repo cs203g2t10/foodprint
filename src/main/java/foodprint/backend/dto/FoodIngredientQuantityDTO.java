@@ -1,10 +1,13 @@
 package foodprint.backend.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public class FoodIngredientQuantityDTO {
 
+    @Schema(defaultValue = "1")
     private Integer ingredientId;
 
+    @Schema(defaultValue = "1")
     private Integer quantity;
 
     public Integer getIngredientId() {

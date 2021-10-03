@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -40,8 +39,8 @@ public class ReservationService {
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public boolean slotAvailable(Restaurant restaurant, LocalDateTime date) {
-        //assumes that duration of slot is 1 hour
-        LocalDateTime endTime = date.plusHours(1); 
+        // assumes that duration of slot is 1 hour
+        LocalDateTime endTime = date.plusHours(1);
         List<Reservation> reservations = reservationRepo.findByRestaurantAndDateBetween(restaurant, date, endTime);
         if (reservations.size() < restaurant.getRestaurantTableCapacity()) {
             return true;
@@ -78,8 +77,7 @@ public class ReservationService {
     }
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
-    public Reservation create(CreateReservationDTO req) {
-        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    public Reservation create(User currentUser, CreateReservationDTO req) {
         Restaurant restaurant = restaurantService.get(req.getRestaurantId());
         LocalDateTime dateOfReservation = req.getDate();
         LocalDateTime startTime = dateOfReservation.truncatedTo(ChronoUnit.HOURS);
@@ -103,9 +101,35 @@ public class ReservationService {
     }
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
-    public Reservation update(Reservation reservation) {
+    public Reservation update(Reservation oldReservation, Reservation reservation) {
+
+        reservation.setReservedOn(oldReservation.getReservedOn());
+        reservation.setUser(oldReservation.getUser());
+        
+        LocalDateTime startTime = reservation.getDate().truncatedTo(ChronoUnit.HOURS);
+        if (!this.slotAvailable(reservation.getRestaurant(), startTime)) {
+            throw new NotFoundException("Slot not found");
+        }
+
+        List<LineItem> oldLineItems = oldReservation.getLineItems();
+        for (int i = 0; i < oldLineItems.size(); i++) {
+            oldLineItems.remove(oldLineItems.get(i));
+        }
+
+        if (reservation.getStatus().equals(Status.CANCELLED)) {
+            List<LineItem> newLineItems = reservation.getLineItems();
+            for (int i = 0; i < newLineItems.size(); i++) {
+                newLineItems.remove(newLineItems.get(i));
+            }
+        }
+        reservation.changeReservationId(oldReservation.getReservationId());
         return reservationRepo.saveAndFlush(reservation);
+        
     }
+
+    // public Reservation adminUpdate(Reservation reservation) {
+    //     return reservationRepo.saveAndFlush(reservation);
+    // }
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public void delete(Reservation reservation) {
@@ -125,10 +149,11 @@ public class ReservationService {
                 startTime = localDate.atTime(restaurantReserved.getRestaurantWeekendOpeningHour(), 0);
             } else if (restaurantReserved.getRestaurantWeekendOpeningMinutes() <= 30) {
                 startTime = localDate.atTime(restaurantReserved.getRestaurantWeekendOpeningHour(), 30);
-            } else { //assume output can only range from 0 to 59
+            } else { // assume output can only range from 0 to 59
                 startTime = localDate.atTime(restaurantReserved.getRestaurantWeekendOpeningHour() + 1, 0);
             }
-            endTime = localDate.atTime(restaurantReserved.getRestaurantWeekendClosingHour(), restaurantReserved.getRestaurantWeekendClosingMinutes());
+            endTime = localDate.atTime(restaurantReserved.getRestaurantWeekendClosingHour(),
+                    restaurantReserved.getRestaurantWeekendClosingMinutes());
         } else {
             if (restaurantReserved.getRestaurantWeekdayOpeningMinutes() == 0) {
                 startTime = localDate.atTime(restaurantReserved.getRestaurantWeekdayOpeningHour(), 0);
@@ -137,10 +162,11 @@ public class ReservationService {
             } else {
                 startTime = localDate.atTime(restaurantReserved.getRestaurantWeekdayOpeningHour() + 1, 0);
             }
-            endTime = localDate.atTime(restaurantReserved.getRestaurantWeekdayClosingHour(), restaurantReserved.getRestaurantWeekdayClosingMinutes());
+            endTime = localDate.atTime(restaurantReserved.getRestaurantWeekdayClosingHour(),
+                    restaurantReserved.getRestaurantWeekdayClosingMinutes());
         }
 
-        while(!startTime.equals(endTime)  && startTime.isBefore(endTime)) {
+        while (!startTime.equals(endTime) && startTime.isBefore(endTime)) {
             if (this.slotAvailable(restaurantReserved, startTime)) {
                 availableSlots.add(startTime);
             }
@@ -149,5 +175,4 @@ public class ReservationService {
         return availableSlots;
     }
 
-    
 }

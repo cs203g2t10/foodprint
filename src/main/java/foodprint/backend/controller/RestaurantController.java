@@ -5,7 +5,11 @@ import java.util.*;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,19 +27,23 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.web.multipart.MultipartFile;
 
 import foodprint.backend.model.Ingredient;
+import foodprint.backend.model.Picture;
 import foodprint.backend.dto.IngredientDTO;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.Discount;
+import foodprint.backend.dto.DiscountDTO;
+import foodprint.backend.dto.PictureDTO;
 import foodprint.backend.dto.RestaurantDTO;
 import foodprint.backend.exceptions.NotFoundException;
-import foodprint.backend.dto.DiscountDTO;
+import foodprint.backend.model.Discount;
 import foodprint.backend.model.Food;
 import foodprint.backend.dto.FoodDTO;
+import foodprint.backend.model.Restaurant;
 import foodprint.backend.service.RestaurantService;
 import io.swagger.v3.oas.annotations.Operation;
-
 // REST OpenAPI Swagger - http://localhost:8080/foodprint-swagger.html
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
@@ -270,7 +278,6 @@ public class RestaurantController {
 
     /*
     *
-    * Ingredient related mappings
     *
     */
 
@@ -297,9 +304,99 @@ public class RestaurantController {
     // @Operation(summary = "Calculate ingredients")
     // public ResponseEntity<List>
 
+    @PostMapping(path = "/{restaurantId}/uploadPicture",
+                consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+                produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(code = HttpStatus.CREATED)
+    public ResponseEntity<Picture> savePicture(@PathVariable("restaurantId") Long restaurantId, @RequestParam("title") String title,
+                                            @RequestParam("description") String description,
+                                            @RequestParam("file") MultipartFile file) {                                
+        return new ResponseEntity<>(service.savePicture(restaurantId, title, description, file), HttpStatus.CREATED);
+    }
+
+    @GetMapping({"/{restaurantId}/picture/{pictureId}"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Get a picture of a restaurant by using restaurant id and picture id")
+    public ResponseEntity<String> getPictureById(@PathVariable("restaurantId") Long restaurantId, @PathVariable("pictureId") Long pictureId) {
+        String url = service.getPictureById(restaurantId, pictureId);
+        return new ResponseEntity<>(url, HttpStatus.OK);
+    }
+
+    @DeleteMapping({"/{restaurantId}/picture/{pictureId}"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Deletes a restaurant's picture by id")
+    public ResponseEntity<Picture> deletePicture(@PathVariable("restaurantId") Long restaurantId, @PathVariable("pictureId") Long pictureId) {
+        service.deletePicture(restaurantId, pictureId);
+        try {
+            service.getPictureById(restaurantId, pictureId);
+        } catch (NotFoundException ex) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @PutMapping({"/{restaurantId}/picture/{pictureId}"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Updates a picture's title and description")
+    public ResponseEntity<Picture> updatePictureInformation(
+        @PathVariable("restaurantId") Long restaurantId,
+        @PathVariable("pictureId") Long pictureId,
+        @RequestBody PictureDTO updatedPicture
+    ) {
+        Picture picture = new Picture(updatedPicture.getTitle() , updatedPicture.getDescription());
+        Picture savedPicture = service.updatePictureInformation(restaurantId, pictureId, picture);
+        return new ResponseEntity<>(savedPicture, HttpStatus.OK);
+    }
+
+     
+    @PostMapping(path = "/{restaurantId}/food/{foodId}/uploadPicture",
+                consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+                produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(code = HttpStatus.CREATED)
+    public ResponseEntity<Picture> savePictureForFood(@PathVariable("restaurantId") Long restaurantId, @PathVariable("foodId") Long foodId, @RequestParam("title") String title,
+                                            @RequestParam("description") String description,
+                                            @RequestParam("file") MultipartFile file) {                                
+        return new ResponseEntity<>(service.saveFoodPicture(restaurantId, foodId, title, description, file), HttpStatus.CREATED);
+    }
+
+    //TODO fix the nesting (make DTO??)
+    @GetMapping({"/{restaurantId}/food/{foodId}/picture/{pictureId}/"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Get a picture of a restaurant's food by using restaurant id, picture id and food id")
+    public ResponseEntity<String> getPictureById(@PathVariable("restaurantId") Long restaurantId,  @PathVariable("foodId") Long foodId,  @PathVariable("pictureId") Long pictureId) {
+        String url = service.getFoodPictureById(restaurantId, foodId, pictureId);
+        return new ResponseEntity<>(url, HttpStatus.OK);
+    }
+
+    @DeleteMapping({"/{restaurantId}/food/{foodId}/picture/{pictureId}/"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Deletes a food's picture by id")
+    public ResponseEntity<Picture> deleteFoodPicture(@PathVariable("restaurantId") Long restaurantId, @PathVariable("foodId") Long foodId, @PathVariable("pictureId") Long pictureId) {
+        service.deleteFoodPicture(restaurantId, foodId, pictureId);
+        try {
+            service.getFoodPictureById(restaurantId, foodId, pictureId);
+        } catch (NotFoundException ex) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @PutMapping({"/{restaurantId}/food/{foodId}/picture/{pictureId}/"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Updates a picture's title and description")
+    public ResponseEntity<Picture> updateFoodPictureInformation(
+        @PathVariable("restaurantId") Long restaurantId,
+        @PathVariable("foodId") Long foodId,
+        @PathVariable("pictureId") Long pictureId,
+        @RequestBody PictureDTO updatedPicture
+    ) {
+        Picture picture = new Picture(updatedPicture.getTitle() , updatedPicture.getDescription());
+        Picture savedPicture = service.updateFoodPictureInformation(restaurantId, foodId, pictureId, picture);
+        return new ResponseEntity<>(savedPicture, HttpStatus.OK);
+    }
 
     // DTO <-> Entity Conversion Helper Methods
-
     public Restaurant convertToEntity(RestaurantDTO restaurantDTO) {
         Restaurant restaurant = new Restaurant(restaurantDTO.getRestaurantName(), restaurantDTO.getRestaurantLocation());
         restaurant.setRestaurantDesc(restaurantDTO.getRestaurantDesc());
@@ -331,6 +428,7 @@ public class RestaurantController {
         dto.setRestaurantWeekendOpeningHour(restaurant.getRestaurantWeekendClosingHour());
         dto.setRestaurantWeekendOpeningMinutes(restaurant.getRestaurantWeekendOpeningMinutes());
         return dto;
+
     }
     // //POST: Creates new ingredient for restaurant
     // @PostMapping("/{restaurantId}/ingredient/{ingredientId")
@@ -340,4 +438,5 @@ public class RestaurantController {
         
     //     return null;
     // }
+   
 }
