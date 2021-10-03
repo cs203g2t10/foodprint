@@ -32,14 +32,15 @@ public class Picture {
     @Column(name = "imageFileName" )
     private String imageFileName;
 
-    // @Column(name = "URL")
-    // private String url;
+    @Column(name = "url")
+    private String url;
 
-    public Picture(String title, String description, String imagePath, String imageFileName) {
+    public Picture(String title, String description, String imagePath, String imageFileName, String url) {
         this.title = title;
         this.description = description;
         this.imagePath = imagePath;
         this.imageFileName = imageFileName;
+        this.url = url;
     }
 
     public Picture(String title, String description) {
@@ -116,13 +117,13 @@ public class Picture {
     }
 
 
-    // public String getUrl() {
-    //     return url;
-    // }
+    public String getUrl() {
+        return url;
+    }
 
-    // public void setUrl(String url) {
-    //     this.url = url;
-    // }
+    public void setUrl(String url) {
+        this.url = url;
+    }
 
 
     @Override
