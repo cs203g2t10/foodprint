@@ -2,6 +2,7 @@ package foodprint.backend.controller;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,9 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -25,9 +26,7 @@ import foodprint.backend.dto.NamedLineItemDTO;
 import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.Food;
 import foodprint.backend.model.LineItem;
-import foodprint.backend.model.LineItemRepo;
 import foodprint.backend.model.Reservation;
-import foodprint.backend.model.ReservationRepo;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.User;
 import foodprint.backend.service.ReservationService;
@@ -38,21 +37,15 @@ import io.swagger.v3.oas.annotations.Operation;
 @RequestMapping("/api/v1/reservation")
 public class ReservationController {
 
-    private LineItemRepo lineItemRepo;
-
     private ReservationService reservationService;
 
     private RestaurantService restaurantService;
 
-    private ReservationRepo reservationRepo;
 
     @Autowired
-    ReservationController(LineItemRepo lineItemRepo, ReservationService reservationService,
-            RestaurantService restaurantService, ReservationRepo reservationRepo) {
-        this.lineItemRepo = lineItemRepo;
+    ReservationController(ReservationService reservationService, RestaurantService restaurantService) {
         this.reservationService = reservationService;
         this.restaurantService = restaurantService;
-        this.reservationRepo = reservationRepo;
     }
 
     // GET: Get reservation by id (DTO)
@@ -85,42 +78,24 @@ public class ReservationController {
     }
 
     // PUT: Update reservation (DTO)
-    @PutMapping({ "/{reservationId}" })
+    @PatchMapping({ "/{reservationId}" })
     @Operation(summary = "For users to update an existing reservation slot")
-    public ResponseEntity<ReservationDTO> updateReservationDTO(@PathVariable("reservationId") Long id,
-            @RequestBody CreateReservationDTO pendingReservationDTO) {
+    public ResponseEntity<ReservationDTO> updateReservationDTO(
+        @PathVariable("reservationId") Long id,
+        @RequestBody CreateReservationDTO pendingReservationDTO
+    ) {
 
+        var currentReservation = reservationService.getReservationById(id);
+        var restaurant = currentReservation.getRestaurant();
+
+        // Dont allow users to change the restaurant of their reservation
+        pendingReservationDTO.setRestaurantId(restaurant.getRestaurantId());
         var reservation = this.convertToEntity(pendingReservationDTO);
-        var restaurant = restaurantService.get(pendingReservationDTO.getRestaurantId());
         reservation.setRestaurant(restaurant);
-        var oldReservation = reservationRepo.getById(id);
-
-        var updatedReservation = reservationService.update(oldReservation, reservation);
+        var updatedReservation = reservationService.update(id, reservation);
         var updatedReservationDTO = this.convertToDTO(updatedReservation);
         return new ResponseEntity<>(updatedReservationDTO, HttpStatus.OK);
-
     }
-
-    // PUT: Update reservation
-    // @PutMapping({ "/admin/{reservationId}" })
-    // @ResponseStatus(code = HttpStatus.OK)
-    // @Operation(summary = "Update a reservation slot")
-    // public ResponseEntity<Reservation> updateReservation(@PathVariable("reservationId") Long id,
-    //         @RequestBody Reservation currentReservation) {
-
-    //     var oldReservation = reservationRepo.getById(id);
-    //     var updatedReservation = reservationService.update(oldReservation, currentReservation);
-    //     /*
-    //     Reservation currentReservation = reservationService.getReservationById(id);
-    //     currentReservation.setDate(updatedReservation.getDate());
-    //     currentReservation.setIsVaccinated(updatedReservation.getIsVaccinated());
-    //     currentReservation.setLineItems(updatedReservation.getLineItems());
-    //     currentReservation.setPax(updatedReservation.getPax());
-    //     currentReservation.setStatus(updatedReservation.getStatus());
-    //     currentReservation = reservationService.adminUpdate(currentReservation);
-    //     */
-    //     return new ResponseEntity<>(updatedReservation, HttpStatus.OK);
-    // }
 
     // DELETE: Delete reservation
     @DeleteMapping({ "/admin/{reservationId}" })
@@ -197,86 +172,25 @@ public class ReservationController {
         reservation.setStatus(dto.getStatus());
 
         if (dto.getLineItems() != null) {
-            List<LineItem> lineItems = new ArrayList<LineItem>();
-            for (LineItemDTO lineItemDto : dto.getLineItems()) {
-                LineItem lineItem = new LineItem();
-                Long foodId = lineItemDto.getFoodId();
-                Food food = restaurantService.getFood(restaurantId, foodId);
-                lineItem.setFood(food);
-                lineItem.setQuantity(lineItemDto.getQuantity());
-                lineItem.setReservation(reservation);
-                lineItems.add(lineItem);
+            HashMap<Food, Integer> lineItemsHashMap = new HashMap<>();
+            for (LineItemDTO lineItemDTO : dto.getLineItems()) {
+                Food food = restaurantService.getFood(restaurantId, lineItemDTO.getFoodId());
+                if (lineItemsHashMap.containsKey(food)) {
+                    lineItemsHashMap.put(food, lineItemDTO.getQuantity() + lineItemsHashMap.get(food));
+                } else {
+                    lineItemsHashMap.put(food, lineItemDTO.getQuantity());
+                }
             }
-            reservation.setLineItems(lineItems);
+            List<LineItem> savedLineItems = new ArrayList<>();
+            for (Food key : lineItemsHashMap.keySet()) {
+                LineItem savedLineItem = new LineItem(key, reservation, lineItemsHashMap.get(key));
+                savedLineItems.add(savedLineItem);
+            }
+            reservation.setLineItems(savedLineItems);
+        } else {
+            reservation.setLineItems(null);
         }
 
         return reservation;
     }
-
-    // TODO: Convert to take in LineItemDTO and return NamedLineItemDTO
-    // POST: Create new lineItems by reservationId
-    // @PostMapping({ "/{reservationId}/lineItems" })
-    // @Operation
-    // public ResponseEntity<List<LineItem>>
-    // createLineItems(@PathVariable("reservationId") Long id,
-    // @RequestBody List<LineItem> lineItems) {
-    // Reservation currentReservation = reservationService.getReservationById(id);
-    // if (currentReservation.getLineItems() != null) {
-    // return new ResponseEntity<>(HttpStatus.CONFLICT);
-    // } else {
-    // currentReservation.setLineItems(lineItems);
-    // currentReservation = reservationService.update(currentReservation);
-    // return new ResponseEntity<>(currentReservation.getLineItems(),
-    // HttpStatus.OK);
-    // }
-    // }
-
-    // // GET: Get lineItems by reservationId
-    // @GetMapping({ "/{reservationId}/lineItems" })
-    // @Operation(summary = "Get the list of lineItems under a reservationId")
-    // public ResponseEntity<List<LineItem>>
-    // getLineItems(@PathVariable("reservationId") Long id) {
-    // List<LineItem> lineItems =
-    // reservationService.getLineItemsByReservationId(id);
-    // return new ResponseEntity<List<LineItem>>(lineItems, HttpStatus.OK);
-    // }
-
-    // TODO: Convert to take in LineItemDTO and return NamedLineItemDTO
-    // PUT: Update lineItems by reservationId
-    // @PutMapping({ "/{reservationId}/lineItems" })
-    // @ResponseStatus(code = HttpStatus.OK)
-    // @Operation(summary = "Update the list of lineItems under a reservationId")
-    // public ResponseEntity<List<LineItem>>
-    // updateLineItems(@PathVariable("reservationId") Long id,
-    // @RequestBody List<LineItem> updatedLineItems) {
-    // Reservation currentReservation = reservationService.getReservationById(id);
-
-    // List<LineItem> lineItems = currentReservation.getLineItems();
-    // if (lineItems == null) {
-    // return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    // } else {
-    // currentReservation.setLineItems(updatedLineItems);
-    // currentReservation = reservationService.update(currentReservation);
-    // return new ResponseEntity<>(currentReservation.getLineItems(),
-    // HttpStatus.OK);
-    // }
-    // }
-
-    // DELETE: Delete lineItems by reservationId
-    // @DeleteMapping({ "/{reservationId}/lineItems" })
-    // public ResponseEntity<List<LineItem>>
-    // deleteLineItems(@PathVariable("reservationId") Long id) {
-    // Reservation reservation = reservationService.getReservationById(id);
-    // List<LineItem> lineItems = reservation.getLineItems();
-    // for (LineItem lineItem : lineItems) {
-    // lineItemRepo.delete(lineItem);
-    // }
-    // reservation.setLineItems(null);
-    // reservationService.update(reservation);
-    // reservation = reservationService.getReservationById(id);
-    // if (reservation.getLineItems() == null) {
-    // return new ResponseEntity<>(HttpStatus.OK);
-    // }
-    // return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-    // }
 }

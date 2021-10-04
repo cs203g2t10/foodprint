@@ -3,44 +3,38 @@ package foodprint.backend;
 import foodprint.backend.dto.DiscountDTO;
 import foodprint.backend.dto.FoodDTO;
 import foodprint.backend.dto.FoodIngredientQuantityDTO;
-import foodprint.backend.dto.RestaurantDTO;
+
 import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.Discount;
-
 import foodprint.backend.model.DiscountRepo;
 import foodprint.backend.model.Food;
-import foodprint.backend.model.FoodIngredientQuantity;
+
 import foodprint.backend.model.FoodRepo;
 import foodprint.backend.model.Ingredient;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.RestaurantRepo;
 import foodprint.backend.service.RestaurantService;
-import javassist.tools.reflect.Reflection;
+
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Optional;
 
-import com.jayway.jsonpath.Option;
-
-import org.aopalliance.intercept.Invocation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.context.TestPropertySources;
+
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)

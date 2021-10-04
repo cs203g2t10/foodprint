@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -22,11 +23,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.web.multipart.MultipartFile;
 
 import foodprint.backend.model.Ingredient;
@@ -38,10 +36,8 @@ import foodprint.backend.dto.DiscountDTO;
 import foodprint.backend.dto.PictureDTO;
 import foodprint.backend.dto.RestaurantDTO;
 import foodprint.backend.exceptions.NotFoundException;
-import foodprint.backend.model.Discount;
 import foodprint.backend.model.Food;
 import foodprint.backend.dto.FoodDTO;
-import foodprint.backend.model.Restaurant;
 import foodprint.backend.service.RestaurantService;
 import io.swagger.v3.oas.annotations.Operation;
 // REST OpenAPI Swagger - http://localhost:8080/foodprint-swagger.html
@@ -85,8 +81,8 @@ public class RestaurantController {
         return new ResponseEntity<>(savedRestaurant, HttpStatus.CREATED);
     }
 
-    // PUT: Update the restaurant
-    @PutMapping({"/{restaurantId}"})
+    // PATCH: Update the restaurant
+    @PatchMapping({"/{restaurantId}"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Updates an existing restaurant, only changed fields need to be set")
     public ResponseEntity<Restaurant> restaurantUpdate(
@@ -185,27 +181,6 @@ public class RestaurantController {
         Food food = service.updateFood(restaurantId, foodId, updatedFood);
         return new ResponseEntity<>(food, HttpStatus.OK);
     }
-
-    // @GetMapping({"/foodSearch"})
-    // @Operation(summary = "Search for a food item")
-    // public Page<Food> FoodSearch(
-    //     @RequestParam("q") String query,
-    //     @RequestParam(defaultValue = "1") int pageNum,
-    //     @RequestParam(name = "sortBy", defaultValue = "restaurantName") String sortField,
-    //     @RequestParam(name = "sortDesc", defaultValue ="false") Boolean sortDesc
-    // ) {
-    //     Direction direction = Sort.Direction.ASC;
-        
-    //     if (sortDesc) {
-    //         direction = Sort.Direction.DESC;
-    //     }
-
-    //     Sort sorting = Sort.by(direction, sortField);
-	// 	Pageable page = PageRequest.of(pageNum - 1, 5, sorting); // Pagination
-    //     Page<Food> searchResult = service.searchFood(page, query);
-
-    //     return searchResult;
-    // }
 
     /*
     *
@@ -430,13 +405,5 @@ public class RestaurantController {
         return dto;
 
     }
-    // //POST: Creates new ingredient for restaurant
-    // @PostMapping("/{restaurantId}/ingredient/{ingredientId")
-    // @ResponseStatus(code = HttpStatus.CREATED)
-    // @Operation(summary = "Creates a new ingredient for restaurant")
-    // public ResponseEntity<Discount> createRestaurantIngredeint(@PathVariable Long restaurantId, @RequestBody Ingredient ingredient) {
-        
-    //     return null;
-    // }
    
 }

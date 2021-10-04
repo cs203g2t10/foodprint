@@ -211,13 +211,15 @@ public class ReservationServiceTest {
         Reservation updatedReservation = new Reservation(user, LocalDateTime.now(), 3, true, LocalDateTime.now(), Status.ONGOING, lineItems, restaurant);
         reservationList.add(reservation);
         when(reservations.findByRestaurantAndDateBetween(any(Restaurant.class), any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(reservationList);
-        when(reservations.saveAndFlush(any(Reservation.class))).thenReturn(updatedReservation);
+        when(reservations.getById(any(Long.class))).thenReturn(reservation);
+        when(reservations.saveAndFlush(any(Reservation.class))).thenReturn(reservation);
 
-        Reservation result = reservationService.update(reservation, updatedReservation);
+        Reservation result = reservationService.update(reservationId, updatedReservation);
 
-        assertEquals(updatedReservation, result);
+        assertEquals(reservation, result);
         verify(reservations).findByRestaurantAndDateBetween(restaurant, startTime.truncatedTo(ChronoUnit.HOURS), endTime.truncatedTo(ChronoUnit.HOURS));
-        verify(reservations).saveAndFlush(updatedReservation);
+        verify(reservations).getById(reservationId);
+        verify(reservations).saveAndFlush(reservation);
     }
 
     @Test
@@ -229,7 +231,7 @@ public class ReservationServiceTest {
         when(reservations.findByRestaurantAndDateBetween(any(Restaurant.class), any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(reservationList);
 
         try {
-            reservationService.update(reservation, updatedReservation);
+            reservationService.update(reservationId, updatedReservation);
         } catch (NotFoundException e) {
             assertEquals("Slot not found", e.getMessage());
         }

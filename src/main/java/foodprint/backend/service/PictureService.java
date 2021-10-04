@@ -76,7 +76,8 @@ public class PictureService  {
         //         .imageFileName(fileName)
         //         .build();
         path = String.format("%s", uuid);
-        Picture picture = new Picture(title, description, path, fileName);
+        String url = String.format("%s%s/%s", "https://foodprint-amazon-storage.s3.ap-southeast-1.amazonaws.com/", path, fileName.replace(" ", "+"));
+        Picture picture = new Picture(title, description, path, fileName, url);
         repository.saveAndFlush(picture);
         return picture;
     }
