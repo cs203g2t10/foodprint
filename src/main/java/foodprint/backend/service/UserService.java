@@ -52,6 +52,11 @@ public class UserService {
     }
 
     public User updateUser(Long id, User updatedUser) {
+        Optional<User> existingUserByEmail = userRepo.findByEmail(updatedUser.getEmail());
+        if (existingUserByEmail.isPresent()) {
+            throw new AlreadyExistsException("User with the same email already exists");
+        }
+
         User existingUser = this.getUser(id);
         existingUser = updateUser(id, existingUser, updatedUser);
         return existingUser;
