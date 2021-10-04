@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -50,13 +52,25 @@ public class UserService {
     }
 
     public User updateUser(Long id, User updatedUser) {
-        
         Optional<User> existingUserByEmail = userRepo.findByEmail(updatedUser.getEmail());
         if (existingUserByEmail.isPresent()) {
             throw new AlreadyExistsException("User with the same email already exists");
         }
 
         User existingUser = this.getUser(id);
+        existingUser = updateUser(id, existingUser, updatedUser);
+        return existingUser;
+    }
+    
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN') OR #existingUser.email == authentication.name")
+    public User updateUser(Long id, @Param("existingUser") User existingUser,  User updatedUser) {
+        
+        Optional<User> existingUserByEmail = userRepo.findByEmail(updatedUser.getEmail());
+        if (existingUserByEmail.isPresent()) {
+            throw new AlreadyExistsException("User with the same email already exists");
+        }
+
+        existingUser = this.getUser(id);
         if (updatedUser.getEmail() != null) {
             existingUser.setEmail(updatedUser.getEmail());
         }
