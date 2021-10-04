@@ -64,13 +64,7 @@ public class UserService {
     
     @PreAuthorize("hasAnyAuthority('FP_ADMIN') OR #existingUser.email == authentication.name")
     public User updateUser(Long id, @Param("existingUser") User existingUser,  User updatedUser) {
-        
-        Optional<User> existingUserByEmail = userRepo.findByEmail(updatedUser.getEmail());
-        if (existingUserByEmail.isPresent()) {
-            throw new AlreadyExistsException("User with the same email already exists");
-        }
 
-        existingUser = this.getUser(id);
         if (updatedUser.getEmail() != null) {
             existingUser.setEmail(updatedUser.getEmail());
         }
