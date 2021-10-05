@@ -38,6 +38,7 @@ import foodprint.backend.model.Food;
 import foodprint.backend.model.Ingredient;
 import foodprint.backend.model.Picture;
 import foodprint.backend.model.Restaurant;
+// import foodprint.backend.service.EmailService;
 import foodprint.backend.service.RestaurantService;
 import io.swagger.v3.oas.annotations.Operation;
 // REST OpenAPI Swagger - http://localhost:8080/foodprint-swagger.html
@@ -47,11 +48,18 @@ import io.swagger.v3.oas.annotations.Operation;
 public class RestaurantController {
     
     private RestaurantService service;
+	// private EmailService emailService;
 
     @Autowired
     RestaurantController(RestaurantService service) {
         this.service = service;
     }
+
+    // @Autowired
+    // RestaurantController(RestaurantService service, EmailService emailService) {
+    //     this.service = service;
+    //     this.emailService = emailService;
+    // }
 
     // GET: Get the restaurant
     @GetMapping({"/{restaurantId}"})
@@ -406,5 +414,10 @@ public class RestaurantController {
 
     }
    
+    // @GetMapping({ "/test/email"})
+    // public String emailTest() {
+    //     emailService.sendSimpleEmail("leowyixuanlyx@gmail.com", "Test", "Test");
+    //     return "index";
+    // }
 
 }
