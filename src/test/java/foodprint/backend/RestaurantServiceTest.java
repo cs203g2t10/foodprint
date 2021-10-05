@@ -11,16 +11,20 @@ import foodprint.backend.model.Food;
 
 import foodprint.backend.model.FoodRepo;
 import foodprint.backend.model.Ingredient;
+import foodprint.backend.model.IngredientRepo;
+import foodprint.backend.model.Picture;
+import foodprint.backend.model.PictureRepo;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.RestaurantRepo;
+import foodprint.backend.service.PictureService;
 import foodprint.backend.service.RestaurantService;
 
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,8 +43,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 public class RestaurantServiceTest {
-
-    RestaurantService restaurantService1 = mock(RestaurantService.class);
     
     @Mock
     private RestaurantRepo repo;
@@ -51,8 +53,17 @@ public class RestaurantServiceTest {
     @Mock
     private DiscountRepo discountRepo;
 
+    @Mock
+    private IngredientRepo ingredientRepo;
+
+    @Mock 
+    private PictureRepo pictureRepo;
+
     @InjectMocks
     private RestaurantService restaurantService;
+
+    @InjectMocks
+    private PictureService pictureService;
 
     //-------Restaurant-related Testing---------\
 
@@ -121,7 +132,7 @@ public class RestaurantServiceTest {
         Long restaurantId = 1L;
         ReflectionTestUtils.setField(restaurant, "restaurantId", restaurantId);
 
-        // repo.saveAndFlush(restaurant);
+        doNothing().when(repo).delete(any(Restaurant.class));
         when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant)).thenReturn(Optional.empty());
 
         restaurantService.create(restaurant);
@@ -129,6 +140,7 @@ public class RestaurantServiceTest {
 
         //restaurantService.get(restaurantId);
         assertNotNull(restaurant);
+        verify(repo, times(2)).findById(restaurantId);
         verify(repo).delete(restaurant);
     }
 
@@ -172,6 +184,8 @@ public class RestaurantServiceTest {
         } catch (NotFoundException e) {
             assertEquals("Restaurant not found", e.getMessage());
         }
+
+        verify(repo).findById(restaurantId);
     }
 
     //------------Food-related Testing---------------
@@ -224,7 +238,7 @@ public class RestaurantServiceTest {
 
         assertNotNull(savedFood);
         verify(repo).findById(restaurantId);
-        verify(repo).findById(restaurantId);
+        verify(repo).findByRestaurantId(restaurantId);
     }
 
     @Test
@@ -461,7 +475,9 @@ public class RestaurantServiceTest {
         restaurantService.deleteDiscount(restaurantId, discountId);
 
         assertNotNull(discount);
-        verify(discountRepo).delete(discount);
+        verify(discountRepo).getById(discountId);
+        verify(discountRepo).existsById(discountId);
+        verify(repo).findByRestaurantId(restaurantId);
     }
 
     @Test
@@ -479,4 +495,185 @@ public class RestaurantServiceTest {
 
         verify(discountRepo).existsById(discountId);
     }
+
+    //-------Ingredient-related testing---------
+    @Test
+    void getAllRestaurantIngredients_RestaurantExistAndIngredientsExist_ReturnIngredients() {
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10);
+        Long restaurantId = 1L;
+        List<Ingredient> ingredients = new ArrayList<>();
+        Ingredient ingredient = new Ingredient("Salmon");
+        ingredients.add(ingredient);
+
+        when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
+
+        restaurant.setIngredients(ingredients);
+        List<Ingredient> getIngredients  = restaurantService.getAllRestaurantIngredients(restaurantId);
+
+        assertNotNull(getIngredients);
+        verify(repo).findById(restaurantId);
+    }
+
+    @Test
+    void getAllRestaurantIngredients_RestaurantDoNotExist_ReturnError() {
+        Long restaurantId = 1L;
+
+        when(repo.findById(any(Long.class))).thenReturn(Optional.empty());
+
+        try {
+            List<Ingredient> getIngredients = restaurantService.getAllRestaurantIngredients(restaurantId);
+        } catch(NotFoundException e) {
+            assertEquals("Restaurant not found", e.getMessage());
+        }
+
+        verify(repo).findById(restaurantId);
+    }
+
+    @Test
+    void addRestaurantIngredient_RestaurantExist_ReturnIngredient() {
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10);
+        Long restaurantId = 1L;
+        List<Ingredient> ingredients = new ArrayList<>();
+        Ingredient ingredient = new Ingredient("Salmon");
+        restaurant.setIngredients(ingredients);
+
+        when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
+        when(ingredientRepo.saveAndFlush(any(Ingredient.class))).thenReturn(ingredient);
+        when(repo.saveAndFlush(any(Restaurant.class))).thenReturn(restaurant);
+
+        Ingredient addIngredient = restaurantService.addRestaurantIngredient(restaurantId, ingredient);
+        
+        assertNotNull(addIngredient);
+        verify(repo).findById(restaurantId);
+        verify(ingredientRepo).saveAndFlush(ingredient);
+        verify(repo).saveAndFlush(restaurant);
+    }
+
+    @Test
+    void addRestaurantIngredient_RestaurantDoNotExist_ReturnError() {
+        Long restaurantId = 1L;
+        Ingredient ingredient = new Ingredient("Salmon");
+
+        when(repo.findById(any(Long.class))).thenReturn(Optional.empty());
+
+        try {
+            Ingredient addIngredient = restaurantService.addRestaurantIngredient(restaurantId, ingredient);
+        } catch(NotFoundException e) {
+            assertEquals("Restaurant not found", e.getMessage());
+        }
+
+        verify(repo).findById(restaurantId);
+    }
+
+    //--------Picture-related testing---------
+    @Test
+    void pictureInRestaurant_pictureExist_ReturnTrue() {
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10);
+        Long restaurantId = 1L;
+        Picture pic = new Picture("image", "desc", "Path", "file", "www.file.com");
+        Long pictureId = 2L;
+        ReflectionTestUtils.setField(pic, "pictureId", pictureId);
+        List<Picture> picList = new ArrayList<>();
+        picList.add(pic);
+        restaurant.setPictures(picList);
+
+        when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
+
+        Boolean pictureExist = restaurantService.pictureInRestaurant(restaurantId, pictureId);
+
+        assertTrue(pictureExist);
+        verify(repo).findById(restaurantId);
+    }
+
+    @Test
+    void pictureInRestaurant_pictureDoNotExist_ReturnFalse() {
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10);
+        Long restaurantId = 1L;
+        Picture pic = new Picture("image", "desc", "Path", "file", "www.file.com");
+        Long pictureId = 2L;
+        ReflectionTestUtils.setField(pic, "pictureId", pictureId);
+        List<Picture> picList = new ArrayList<>();
+        picList.add(pic);
+        restaurant.setPictures(picList);
+        Long anotherPictureId = 3L;
+
+        when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
+
+        Boolean pictureDoNotExist = restaurantService.pictureInRestaurant(restaurantId, anotherPictureId);
+
+        assertFalse(pictureDoNotExist);
+        verify(repo).findById(restaurantId);
+    }
+
+    @Test
+    void pictureInFood_FoodPicExist_ReturnTrue() {
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10);
+        Long restaurantId = 1L;
+        Food food = new Food("Sashimi", 50.0, 0.0);
+        Long foodId = 2L;
+        food.setRestaurant(restaurant);
+        Long pictureId = 3L;
+        Picture pic = new Picture("image", "desc", "Path", "file", "www.file.com");
+        List<Picture> picList = new ArrayList<>();
+        picList.add(pic);
+        food.setPictures(picList);
+        ReflectionTestUtils.setField(restaurant, "restaurantId", restaurantId);
+        ReflectionTestUtils.setField(pic, "pictureId", pictureId);
+
+        when(foodRepo.findById(any(Long.class))).thenReturn(Optional.of(food));
+
+        Boolean foodExist = restaurantService.pictureInFood(restaurantId, foodId, pictureId);
+        assertTrue(foodExist);
+        verify(foodRepo).findById(foodId);
+    }
+
+    @Test
+    void pictureInFood_FoodPicDoNotExist_ReturnFalse() {
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10);
+        Long restaurantId = 1L;
+        Food food = new Food("Sashimi", 50.0, 0.0);
+        Long foodId = 2L;
+        food.setRestaurant(restaurant);
+        Long pictureId = 3L;
+        Picture pic = new Picture("image", "desc", "Path", "file", "www.file.com");
+        List<Picture> picList = new ArrayList<>();
+        picList.add(pic);
+        food.setPictures(picList);
+        Long anotherPictureId = 4L;
+        ReflectionTestUtils.setField(restaurant, "restaurantId", restaurantId);
+        ReflectionTestUtils.setField(pic, "pictureId", pictureId);
+
+        when(foodRepo.findById(any(Long.class))).thenReturn(Optional.of(food));
+
+        Boolean foodPicDoNotExist = restaurantService.pictureInFood(restaurantId, foodId, anotherPictureId);
+        assertFalse(foodPicDoNotExist);
+        verify(foodRepo).findById(foodId);
+    }
+
+    //Integration testing
+    // @Test
+    // void getFoodPictureById_FoodPictureFoundInRestaurant_ReturnFoodPicture() {
+    //     Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10);
+    //     Long restaurantId = 1L;
+    //     Food food = new Food("Sashimi", 50.0, 0.0);
+    //     Long foodId = 2L;
+    //     Long pictureId = 3L;
+    //     Picture pic = new Picture("image", "desc", "Path", "file", "www.file.com");
+    //     List<Picture> picList = new ArrayList<>();
+    //     picList.add(pic);
+    //     food.setPictures(picList);
+    //     food.setRestaurant(restaurant);
+    //     FileStore fileStore = new FileStore(amazonS3);
+    //     ReflectionTestUtils.setField(restaurant, "restaurantId", restaurantId);
+    //     ReflectionTestUtils.setField(pic, "pictureId", pictureId);
+    //     ReflectionTestUtils.setField(food, "foodId", foodId);
+
+    //     when(foodRepo.findById(any(Long.class))).thenReturn(Optional.of(food));
+    //     when(pictureRepo.findById(any(Long.class))).thenReturn(Optional.of(pic));
+
+    //     PictureService pictureService = new PictureService(fileStore, pictureRepo);
+    //     String foodPic = restaurantService.getFoodPictureById(restaurantId, foodId, pictureId);
+    //     assertNotNull(foodPic);
+    //     verify(foodRepo).findById(foodId);
+    // }
 }
