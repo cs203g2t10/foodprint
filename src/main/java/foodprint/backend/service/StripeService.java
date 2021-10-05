@@ -11,8 +11,6 @@ import com.stripe.model.Charge;
 
 import com.stripe.param.ChargeCreateParams;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.annotation.PropertySources;
 import org.springframework.stereotype.Service;
 //import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -22,10 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import javax.annotation.PostConstruct;
 
 @Service
- @RequestMapping("/api/v1/restaurant")
- @PropertySources({
-     @PropertySource(value = "file:data/secrets.properties")
- })
+@RequestMapping("/api/v1/restaurant")
 public class StripeService {
 
      @Value("${STRIPE_SECRET_KEY}")
