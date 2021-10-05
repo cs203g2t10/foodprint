@@ -91,7 +91,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 "/api/v1/auth/login",
                 "/api/v1/auth/register",
                 "/api/v1/user",
-                "/api/v1/user/auth/**"
+                "/api/v1/user/auth/**",
+                "/api/v1/auth/register/confirm/*"
             ).permitAll()
 
             .antMatchers(

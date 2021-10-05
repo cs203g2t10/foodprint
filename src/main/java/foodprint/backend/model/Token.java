@@ -25,9 +25,8 @@ and password resetting purposes
 @EnableTransactionManagement
 public class Token {
 
-    public static final int REGISTRATION_TOKEN = 1;
-    public static final int EMAIL_CONFIRMATION_TOKEN = 2;
-    public static final int PASSWORD_RESET_REQUEST_TOKEN = 3;
+    public static final int EMAIL_CONFIRMATION_TOKEN = 1;
+    public static final int PASSWORD_RESET_REQUEST_TOKEN = 2;
 
     // Properties
     @Id
@@ -87,10 +86,8 @@ public class Token {
     public String getTypeName() {
         switch (type) {
             case 1:
-                return "REGISTRATION";
-            case 2:
                 return "EMAIL CONFIRMATION";
-            case 3:
+            case 2:
                 return "FORGOT PASSWORD";
             default:
                 return "OTHER";
