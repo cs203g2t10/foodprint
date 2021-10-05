@@ -117,43 +117,44 @@ public class UserController {
     RESET PASSWORD POST METHOD
     */
     @PostMapping({ "auth/requestResetPwd" })
-    @Operation(summary = "Raise a reset password request")
-    public ResponseEntity<RequestResetPwdDTO> requestResetPwd(@RequestBody RequestResetPwdDTO requestResetPwdDTO) {
+    @Operation(summary = "Raises a reset password request")
+    public ResponseEntity<String> requestResetPwd(@RequestBody RequestResetPwdDTO requestResetPwdDTO) {
         String email = requestResetPwdDTO.getEmail();
         try {
             userService.requestPasswordReset(email);
-            return new ResponseEntity<>(requestResetPwdDTO, HttpStatus.CREATED);
+            return new ResponseEntity<>("Email sent, check your inbox!", HttpStatus.CREATED);
         } catch (NotFoundException e) {
-            return new ResponseEntity<>(requestResetPwdDTO, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Email not found", HttpStatus.NOT_FOUND);
         } catch (MailException e) {
-            return new ResponseEntity<>(requestResetPwdDTO, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("Unknown error occurred", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    /*
+
     @GetMapping({ "auth/resetpwd/{token}" })
+    @Operation(summary = "Checks validity of reset password token")
     public ResponseEntity<String> resetPwd(@PathVariable("token") String token) {
         try {
             userService.checkPasswordReset(token);
-            return new ResponseEntity<>(token, HttpStatus.CREATED);
+            return new ResponseEntity<>("Valid token", HttpStatus.OK);
         } catch (InvalidException e) {
-            return new ResponseEntity<>(token, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Invalid token", HttpStatus.BAD_REQUEST);
         } catch (NotFoundException e) {
-            return new ResponseEntity<>(token, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Token not found", HttpStatus.NOT_FOUND);
         }
     }
 
     @PostMapping({ "auth/resetpwd/{token}" })
-    public ResponseEntity<ResetPwdDTO> doResetPwd(@Valid @RequestBody ResetPwdDTO userForForm, @PathVariable("token") String token) {
+    @Operation(summary = "Reset password")
+    public ResponseEntity<String> doResetPwd(@Valid @RequestBody ResetPwdDTO userForForm, @PathVariable("token") String token) {
         String newPassword = userForForm.getPassword();
         try {
             userService.doPasswordReset(token, newPassword);
-            return new ResponseEntity<>(userForForm, HttpStatus.CREATED);
+            return new ResponseEntity<>("Password successfully changed", HttpStatus.CREATED);
         } catch (InvalidException e) {
-            return new ResponseEntity<>(userForForm, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Invalid token", HttpStatus.BAD_REQUEST);
         } catch (NotFoundException e) {
-            return new ResponseEntity<>(userForForm, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Token not found", HttpStatus.NOT_FOUND);
         }
     }
-    */
 }

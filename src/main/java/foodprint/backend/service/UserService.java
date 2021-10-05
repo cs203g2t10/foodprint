@@ -108,7 +108,6 @@ public class UserService {
     // --------------------------- PASSWORD RESET ---------------------------------
 
     public void requestPasswordReset(String email) {
-
         User user = userRepo.findByEmail(email).orElseThrow(() -> new NotFoundException("User not found"));
 
         Token token = new Token(Token.PASSWORD_RESET_REQUEST_TOKEN, user);
@@ -117,7 +116,7 @@ public class UserService {
         // Craft and send the email
         String emailBody = String.format(
             "Hi %s, \n\n" +    
-            "You have requested for a password reset! Please use this link to set a new password http://foodprint.works/auth/resetpwd/%s \n\n" +
+            "You have requested for a password reset! Please use this link to set a new password http://foodprint.works/api/v1/user/auth/resetpwd/%s \n\n" +
             "This verification token will expire in 48 hours. You can safely ignore this email if you did not request for it. \n\n" +
             "Regards,\nFoodprint Support",
             user.getFirstName(),
@@ -132,46 +131,33 @@ public class UserService {
         }
     }
 
-    /*
     public void checkPasswordReset(String tok) {
-
         Token token = tokenRepo.findByToken(tok);
-
         if (token == null) {
             throw new NotFoundException("Token not found");
         }
-
         if (!token.isValid() || token.getType() != Token.PASSWORD_RESET_REQUEST_TOKEN) {
             throw new InvalidException("Token invalid");
         }
     }
 
     public void doPasswordReset(String tok, String password) {
-
-        // if (!password.matches(pwdRegex)) {
-        //     return PasswordResetResult.PASSWORD_REQ_UNMET;
-        // } do via dto and controller
-
         Token token = tokenRepo.findByToken(tok);
-
         if (token == null) {
             throw new NotFoundException("Token not found");
         }
 
         User user = token.getRequestor();
-
         if (!token.isValid() || token.getType() != Token.PASSWORD_RESET_REQUEST_TOKEN) {
             throw new InvalidException("Token invalid");
         }
 
         String encodedPassword = passwordEncoder.encode(password);
-        
         user.setPassword(encodedPassword);
         token.setUsed(true);
 
         tokenRepo.save(token);
         userRepo.save(user);
     }
-    */
 
 }
