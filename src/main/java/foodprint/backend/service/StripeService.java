@@ -36,7 +36,7 @@ public class StripeService {
          Stripe.apiKey = secretKey;
      }
     
-    public Charge charge(ChargeRequest chargeRequest) 
+    public Charge charge(ChargeRequest chargeRequest)
       throws AuthenticationException, InvalidRequestException,
         ApiConnectionException, CardException, ApiException, StripeException {
          String token = chargeRequest.getStripeToken();
@@ -44,17 +44,10 @@ public class StripeService {
                 ChargeCreateParams.builder()
                 .setAmount(chargeRequest.getAmount())
                 .setCurrency(chargeRequest.getCurrency().toString())
-                .setDescription("Example")
+                .setDescription(chargeRequest.getDescription())
                 .setSource(token)
                 .build();
         Charge charge = Charge.create(params);
         return charge;
-//        Map<String, Object> chargeParams = new HashMap<>();
-//        chargeParams.put("amount", chargeRequest.getAmount());
-//        chargeParams.put("currency", chargeRequest.getCurrency());
-//        chargeParams.put("description", chargeRequest.getDescription());
-//        chargeParams.put("source", chargeRequest.getStripeToken());
-//        return Charge.create(chargeParams);
-//        return new Charge();
     }
 }
