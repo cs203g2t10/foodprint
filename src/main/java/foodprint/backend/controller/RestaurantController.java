@@ -282,14 +282,14 @@ public class RestaurantController {
         return new ResponseEntity<>(ingredients, HttpStatus.OK);
     }
 
-    @GetMapping({"/{restaurantId}/calculateIngredients"})
+    @GetMapping({"/{restaurantId}/calculateIngredientsToday"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Calculate ingredients")
-    public ResponseEntity<Map<String, Integer>> calculateIngredients (@PathVariable Long restaurantId) {
+    public ResponseEntity<Map<String, Integer>> calculateIngredientsToday (@PathVariable Long restaurantId) {
         Restaurant restaurant = service.get(restaurantId);
         if(restaurant == null)
             throw new NotFoundException("restaurant does not exist");
-        Map<String, Integer> result = service.calculateIngredientsNeeded(restaurant);
+        Map<String, Integer> result = service.calculateIngredientsNeededToday(restaurant);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
