@@ -1,6 +1,6 @@
 package foodprint.backend.controller;
 
-import java.util.List;
+import java.util.*;
 
 import javax.validation.Valid;
 
@@ -282,10 +282,16 @@ public class RestaurantController {
         return new ResponseEntity<>(ingredients, HttpStatus.OK);
     }
 
-    // @GetMapping({"/{restaurantId}/calculateIngredients"})
-    // @ResponseStatus(code = HttpStatus.OK)
-    // @Operation(summary = "Calculate ingredients")
-    // public ResponseEntity<List>
+    @GetMapping({"/{restaurantId}/calculateIngredients"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Calculate ingredients")
+    public ResponseEntity<Map<String, Integer>> calculateIngredients (@PathVariable Long restaurantId) {
+        Restaurant restaurant = service.get(restaurantId);
+        if(restaurant == null)
+            throw new NotFoundException("restaurant does not exist");
+        Map<String, Integer> result = service.calculateIngredientsNeeded(restaurant);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
 
     @PostMapping(path = "/{restaurantId}/uploadPicture",
                 consumes = MediaType.MULTIPART_FORM_DATA_VALUE,

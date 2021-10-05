@@ -1,9 +1,5 @@
 package foodprint.backend.service;
 
-import java.util.HashMap;
-import java.util.Map;
-
-
 import com.stripe.Stripe;
 import com.stripe.exception.ApiConnectionException;
 import com.stripe.exception.ApiException;
