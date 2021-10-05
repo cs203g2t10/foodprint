@@ -340,6 +340,35 @@ public class RestaurantService {
     }
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
+    public HashMap<String, Integer> calculateIngredientsNeededBetween(Restaurant restaurant, LocalDate startDate, LocalDate endDate) {
+        HashMap<String, Integer> map = new HashMap<>();
+        List<Reservation> reservations = reservationRepo.findByRestaurant(restaurant);
+
+        for(Reservation reservation : reservations) {
+            LocalDate date = reservation.getDate().toLocalDate();
+            if (date.isBefore(endDate.plusDays(1)) && date.isAfter(startDate.minusDays(1))) {               
+                List<LineItem> lineItems = reservation.getLineItems();
+            
+                for (LineItem lineItem : lineItems){
+                    Food food = lineItem.getFood();
+                    Set<FoodIngredientQuantity> foodIngreQuantity = food.getFoodIngredientQuantity();
+                    for(FoodIngredientQuantity entry : foodIngreQuantity) {
+                        Ingredient currIngredient = entry.getIngredient();
+                        if (map.containsKey(currIngredient.getIngredientName())) {
+                            Integer currQuantity = map.get(currIngredient.getIngredientName());
+                            map.put(currIngredient.getIngredientName(), currQuantity + entry.getQuantity() * lineItem.getQuantity());
+                        } else {
+                            map.put(currIngredient.getIngredientName(), entry.getQuantity() * lineItem.getQuantity());
+                        }
+                    }
+                }
+            }
+        }
+
+        return map;
+    }
+
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Picture savePicture(Long restaurantId, String title, String description, MultipartFile file) {
         Picture picture = pictureService.savePicture(title, description, file);
         Restaurant restaurant = get(restaurantId);
