@@ -1,6 +1,6 @@
 package foodprint.backend.controller;
 
-import java.util.List;
+import java.util.*;
 
 import javax.validation.Valid;
 
@@ -38,6 +38,7 @@ import foodprint.backend.model.Food;
 import foodprint.backend.model.Ingredient;
 import foodprint.backend.model.Picture;
 import foodprint.backend.model.Restaurant;
+// import foodprint.backend.service.EmailService;
 import foodprint.backend.service.RestaurantService;
 import io.swagger.v3.oas.annotations.Operation;
 // REST OpenAPI Swagger - http://localhost:8080/foodprint-swagger.html
@@ -47,11 +48,18 @@ import io.swagger.v3.oas.annotations.Operation;
 public class RestaurantController {
     
     private RestaurantService service;
+	// private EmailService emailService;
 
     @Autowired
     RestaurantController(RestaurantService service) {
         this.service = service;
     }
+
+    // @Autowired
+    // RestaurantController(RestaurantService service, EmailService emailService) {
+    //     this.service = service;
+    //     this.emailService = emailService;
+    // }
 
     // GET: Get the restaurant
     @GetMapping({"/{restaurantId}"})
@@ -274,10 +282,16 @@ public class RestaurantController {
         return new ResponseEntity<>(ingredients, HttpStatus.OK);
     }
 
-    // @GetMapping({"/{restaurantId}/calculateIngredients"})
-    // @ResponseStatus(code = HttpStatus.OK)
-    // @Operation(summary = "Calculate ingredients")
-    // public ResponseEntity<List>
+    @GetMapping({"/{restaurantId}/calculateIngredients"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Calculate ingredients")
+    public ResponseEntity<Map<String, Integer>> calculateIngredients (@PathVariable Long restaurantId) {
+        Restaurant restaurant = service.get(restaurantId);
+        if(restaurant == null)
+            throw new NotFoundException("restaurant does not exist");
+        Map<String, Integer> result = service.calculateIngredientsNeeded(restaurant);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
 
     @PostMapping(path = "/{restaurantId}/uploadPicture",
                 consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
@@ -406,5 +420,10 @@ public class RestaurantController {
 
     }
    
+    // @GetMapping({ "/test/email"})
+    // public String emailTest() {
+    //     emailService.sendSimpleEmail("leowyixuanlyx@gmail.com", "Test", "Test");
+    //     return "index";
+    // }
 
 }

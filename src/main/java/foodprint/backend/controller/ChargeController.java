@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 //import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,19 +24,10 @@ public class ChargeController {
     private StripeService paymentsService;
 
     @PostMapping("/")
-    public ResponseEntity<ChargeDTO> charge(ChargeRequest chargeRequest)
+    public ResponseEntity<ChargeDTO> charge(@RequestBody ChargeRequest chargeRequest)
       throws StripeException {
-        chargeRequest.setDescription("Example charge");
-        chargeRequest.setCurrency(Currency.EUR);
         Charge charge = paymentsService.charge(chargeRequest);
         ChargeDTO chargeDTO = new ChargeDTO(charge.getId(), charge.getStatus(), charge.getBalanceTransaction());
-        return new ResponseEntity<>(chargeDTO, HttpStatus.CREATED);
+        return new ResponseEntity<ChargeDTO>(chargeDTO, HttpStatus.CREATED);
     }
-
-    // @ExceptionHandler(StripeException.class)
-    // public String handleError(Model model, StripeException ex) {
-    //     model.addAttribute("error", ex.getMessage());
-    //     return "result";
-    // }
-    
 }

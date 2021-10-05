@@ -2,6 +2,8 @@ package foodprint.backend.service;
 
 import java.util.*;
 
+import com.stripe.param.CreditNoteCreateParams.Line;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,7 +20,10 @@ import foodprint.backend.model.DiscountRepo;
 import foodprint.backend.model.Food;
 import foodprint.backend.model.FoodRepo;
 import foodprint.backend.model.Ingredient;
+import foodprint.backend.model.LineItem;
 import foodprint.backend.model.Picture;
+import foodprint.backend.model.ReservationRepo;
+import foodprint.backend.model.Reservation;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.RestaurantRepo;
 import foodprint.backend.model.IngredientRepo;
@@ -37,14 +42,17 @@ public class RestaurantService {
 
     private PictureService pictureService;
 
+    private ReservationRepo reservationRepo;
 
 
-    public RestaurantService(RestaurantRepo repo, FoodRepo foodRepo, DiscountRepo discountRepo, IngredientRepo ingredientRepo, PictureService pictureService) {
+
+    public RestaurantService(RestaurantRepo repo, FoodRepo foodRepo, DiscountRepo discountRepo, IngredientRepo ingredientRepo, PictureService pictureService, ReservationRepo reservationRepo) {
         this.repo = repo;
         this.foodRepo = foodRepo;
         this.discountRepo = discountRepo;
         this.ingredientRepo = ingredientRepo;
         this.pictureService = pictureService;
+        this.reservationRepo = reservationRepo;
     }
     
     public List<Restaurant> getAllRestaurants() {
@@ -161,7 +169,6 @@ public class RestaurantService {
 
         newFood.setRestaurant(restaurant);
         var savedFood = foodRepo.saveAndFlush(newFood);
-        restaurant.getAllFood().add(savedFood);
         return savedFood;
     }
 
@@ -303,32 +310,31 @@ public class RestaurantService {
   
 
 
-    // @PreAuthorize("hasAnyAuthority('FP_USER')")
-    // public HashMap<Ingredient, Integer> calculateIngredientsNeeded(Long restaurantId) {
-    //     HashMap<Ingredient, Integer> map = new HashMap<>();
-    //     Restaurant restaurant = repo.findByRestaurantId(restaurantId);
-    //     if (restaurant == null) {
-    //         throw new NotFoundException("Restaurant does not exist");
-    //     }
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    public HashMap<String, Integer> calculateIngredientsNeeded(Restaurant restaurant) {
+        HashMap<String, Integer> map = new HashMap<>();
+        List<Reservation> reservations = reservationRepo.findByRestaurant(restaurant);
 
-    //     List<Reservation> reservations = reservationRepo.findByRestaurant(restaurant);
-    //     Iterator<Reservation> reservationItr = reservations.iterator();
-    //     while (reservationItr.hasNext()) {
-    //         Reservation reservation = reservationItr.next();
-    //         List<LineItem> lineItems = reservation.getLineItems();
-            
-    //         Iterator<LineItem> lineItr = lineItems.iterator();
-    //         while (lineItr.hasNext()) {
-    //             LineItem lineItem = lineItr.next();
-    //             Food food = lineItem.getFood();
-    //             if (map.containsKey(food)) {
-    //                 food.getIngredients();
-    //             } 
-    //         }
-    //     }
+        for(Reservation reservation : reservations) {
+            List<LineItem> lineItems = reservation.getLineItems();
 
-    //     return null;
-    // }
+            for (LineItem lineItem : lineItems){
+                Food food = lineItem.getFood();
+                Set<FoodIngredientQuantity> foodIngreQuantity = food.getFoodIngredientQuantity();
+                for(FoodIngredientQuantity entry : foodIngreQuantity) {
+                    Ingredient currIngredient = entry.getIngredient();
+                    if (map.containsKey(currIngredient.getIngredientName())) {
+                        Integer currQuantity = map.get(currIngredient.getIngredientName());
+                        map.put(currIngredient.getIngredientName(), currQuantity + entry.getQuantity() * lineItem.getQuantity());
+                    } else {
+                        map.put(currIngredient.getIngredientName(), entry.getQuantity() * lineItem.getQuantity());
+                    }
+                }
+            }
+        }
+
+        return map;
+    }
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Picture savePicture(Long restaurantId, String title, String description, MultipartFile file) {
