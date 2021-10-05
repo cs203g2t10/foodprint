@@ -12,13 +12,17 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import foodprint.backend.dto.UpdateUserDTO;
+import foodprint.backend.dto.RequestResetPwdDTO;
+import foodprint.backend.dto.ResetPwdDTO;
+import foodprint.backend.exceptions.InvalidException;
+import foodprint.backend.exceptions.MailException;
+import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.User;
 import foodprint.backend.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -109,5 +113,47 @@ public class UserController {
         return dto;
     }
 
-    
+    /*
+    RESET PASSWORD POST METHOD
+    */
+    @PostMapping({ "auth/requestResetPwd" })
+    @Operation(summary = "Raise a reset password request")
+    public ResponseEntity<RequestResetPwdDTO> requestResetPwd(@RequestBody RequestResetPwdDTO requestResetPwdDTO) {
+        String email = requestResetPwdDTO.getEmail();
+        try {
+            userService.requestPasswordReset(email);
+            return new ResponseEntity<>(requestResetPwdDTO, HttpStatus.CREATED);
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(requestResetPwdDTO, HttpStatus.NOT_FOUND);
+        } catch (MailException e) {
+            return new ResponseEntity<>(requestResetPwdDTO, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /*
+    @GetMapping({ "auth/resetpwd/{token}" })
+    public ResponseEntity<String> resetPwd(@PathVariable("token") String token) {
+        try {
+            userService.checkPasswordReset(token);
+            return new ResponseEntity<>(token, HttpStatus.CREATED);
+        } catch (InvalidException e) {
+            return new ResponseEntity<>(token, HttpStatus.BAD_REQUEST);
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(token, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PostMapping({ "auth/resetpwd/{token}" })
+    public ResponseEntity<ResetPwdDTO> doResetPwd(@Valid @RequestBody ResetPwdDTO userForForm, @PathVariable("token") String token) {
+        String newPassword = userForForm.getPassword();
+        try {
+            userService.doPasswordReset(token, newPassword);
+            return new ResponseEntity<>(userForForm, HttpStatus.CREATED);
+        } catch (InvalidException e) {
+            return new ResponseEntity<>(userForForm, HttpStatus.BAD_REQUEST);
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(userForForm, HttpStatus.NOT_FOUND);
+        }
+    }
+    */
 }

@@ -10,21 +10,31 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import foodprint.backend.exceptions.AlreadyExistsException;
+import foodprint.backend.exceptions.InvalidException;
+import foodprint.backend.exceptions.MailException;
 import foodprint.backend.exceptions.NotFoundException;
+import foodprint.backend.model.Token;
+import foodprint.backend.model.TokenRepo;
 import foodprint.backend.model.User;
 import foodprint.backend.model.UserRepo;
 
 @Service
 public class UserService {
-    
+
     private UserRepo userRepo;
 
     private PasswordEncoder passwordEncoder;
 
+    private TokenRepo tokenRepo;
+
+    private EmailService emailService;
+
     @Autowired
-    UserService(UserRepo repo, PasswordEncoder passwordEncoder) {
+    UserService(UserRepo repo, PasswordEncoder passwordEncoder, TokenRepo tokenRepo, EmailService emailService) {
         this.userRepo = repo;
         this.passwordEncoder = passwordEncoder;
+        this.tokenRepo = tokenRepo;
+        this.emailService = emailService;
     }
 
     public User createUser(User user) {
@@ -94,5 +104,74 @@ public class UserService {
         User existingUser = this.getUser(id);
         this.userRepo.deleteById(existingUser.getId());
     }
+
+    // --------------------------- PASSWORD RESET ---------------------------------
+
+    public void requestPasswordReset(String email) {
+
+        User user = userRepo.findByEmail(email).orElseThrow(() -> new NotFoundException("User not found"));
+
+        Token token = new Token(Token.PASSWORD_RESET_REQUEST_TOKEN, user);
+        tokenRepo.save(token);
+
+        // Craft and send the email
+        String emailBody = String.format(
+            "Hi %s, \n\n" +    
+            "You have requested for a password reset! Please use this link to set a new password http://foodprint.works/auth/resetpwd/%s \n\n" +
+            "This verification token will expire in 48 hours. You can safely ignore this email if you did not request for it. \n\n" +
+            "Regards,\nFoodprint Support",
+            user.getFirstName(),
+            token.getToken()
+        );
+
+        try {
+            emailService.sendSimpleEmail(user, "Foodprint Password Reset", emailBody);
+        } catch (MailException e) {
+            tokenRepo.delete(token); // Rollback
+            throw new MailException(e.getMessage());
+        }
+    }
+
+    /*
+    public void checkPasswordReset(String tok) {
+
+        Token token = tokenRepo.findByToken(tok);
+
+        if (token == null) {
+            throw new NotFoundException("Token not found");
+        }
+
+        if (!token.isValid() || token.getType() != Token.PASSWORD_RESET_REQUEST_TOKEN) {
+            throw new InvalidException("Token invalid");
+        }
+    }
+
+    public void doPasswordReset(String tok, String password) {
+
+        // if (!password.matches(pwdRegex)) {
+        //     return PasswordResetResult.PASSWORD_REQ_UNMET;
+        // } do via dto and controller
+
+        Token token = tokenRepo.findByToken(tok);
+
+        if (token == null) {
+            throw new NotFoundException("Token not found");
+        }
+
+        User user = token.getRequestor();
+
+        if (!token.isValid() || token.getType() != Token.PASSWORD_RESET_REQUEST_TOKEN) {
+            throw new InvalidException("Token invalid");
+        }
+
+        String encodedPassword = passwordEncoder.encode(password);
+        
+        user.setPassword(encodedPassword);
+        token.setUsed(true);
+
+        tokenRepo.save(token);
+        userRepo.save(user);
+    }
+    */
 
 }
