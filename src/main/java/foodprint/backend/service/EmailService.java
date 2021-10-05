@@ -33,7 +33,7 @@ public class EmailService {
     @Value("${foodprint.email.server}")
     private String emailServer;
 
-    @Value("${foodprint.email.password}")
+    @Value("${FOODPRINT_EMAIL_PASSWORD}")
     private String emailPassword;
 
     private Logger logger = LoggerFactory.getLogger(EmailService.class);
