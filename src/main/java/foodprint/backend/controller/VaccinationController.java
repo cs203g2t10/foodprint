@@ -45,9 +45,6 @@ public class VaccinationController {
     ) {
 
         User currentUser = userService.getUser(userId);
-        if (currentUser.isVaccinated()) {
-            return new ResponseEntity<VaccinationResponseDTO>(new VaccinationResponseDTO("Vaccinated", "Vaccination already certified for " + currentUser.getVaccinationName()), HttpStatus.OK);
-        }
 
         try {
             String vaccineCertString = new String(file.getBytes());

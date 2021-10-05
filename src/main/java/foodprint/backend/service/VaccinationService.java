@@ -33,8 +33,8 @@ public class VaccinationService {
         this.userService = userService;
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_ADMIN') OR #user.email == authentication.name")
-    public void validateVaccination(@Param("user") User user, String oaFileString) {
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN') OR #usrParam.email == authentication.name")
+    public void validateVaccination(@Param("usrParam") User user, String oaFileString) {
         var client = HttpClient.newHttpClient();
         
         var request = HttpRequest.newBuilder(URI.create(url))
