@@ -45,6 +45,9 @@ public class VaccinationController {
     ) {
 
         User currentUser = userService.getUser(userId);
+        if (currentUser.isVaccinated()) {
+            return new ResponseEntity<VaccinationResponseDTO>(new VaccinationResponseDTO("Vaccinated", "Vaccination already certified for " + currentUser.getVaccinationName()), HttpStatus.OK);
+        }
 
         try {
             String vaccineCertString = new String(file.getBytes());
@@ -57,7 +60,7 @@ public class VaccinationController {
         
         currentUser = userService.getUser(userId);
         if (currentUser.isVaccinated()) {
-            return new ResponseEntity<VaccinationResponseDTO>(new VaccinationResponseDTO("Vaccinated", ""), HttpStatus.OK);
+            return new ResponseEntity<VaccinationResponseDTO>(new VaccinationResponseDTO("Vaccinated", "Vaccination certified for " + currentUser.getVaccinationName()), HttpStatus.OK);
         } else {
             return new ResponseEntity<VaccinationResponseDTO>(new VaccinationResponseDTO("Unvaccinated", "An error occurred and validation failed."), HttpStatus.INTERNAL_SERVER_ERROR);
         }
