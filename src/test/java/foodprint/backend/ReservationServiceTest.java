@@ -198,8 +198,10 @@ public class ReservationServiceTest {
 
         try {
             reservationService.create(user, req);
-        } catch (NotFoundException e) {
-            assertEquals("Slot not found", e.getMessage());
+        } catch (Exception e) {
+            LocalDateTime dateOfReservation = reservation.getDate();
+            String msg = String.format("Slot not available for %s on %d %s %d at %d:%dHr", restaurant.getRestaurantName(), dateOfReservation.getDayOfMonth(), dateOfReservation.getMonth(), dateOfReservation.getYear(), dateOfReservation.getHour(), dateOfReservation.getMinute());
+            assertEquals(msg, e.getMessage());
         }
 
         verify(restaurantService).get(restaurantId);

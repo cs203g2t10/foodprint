@@ -98,7 +98,7 @@ public class UserServiceTest {
     void updateUser_NotFound_ReturnException(){
         User user = new User("bobbytan@gmail.com", "SuperSecurePassw0rd", "Bobby Tan");
         Long userId = 1L;
-        when(users.findByEmail(any(String.class))).thenReturn(Optional.empty());
+        when(users.findById(any(Long.class))).thenReturn(Optional.empty());
 
         try {
             userService.updateUser(userId, user);
@@ -106,22 +106,23 @@ public class UserServiceTest {
             assertEquals("User not found", e.getMessage());
         }
 
-        verify(users).findByEmail(user.getEmail());
+        verify(users).findById(userId);
     }
 
     @Test
-    void updateUser_SameEmail_ReturnException() {
+    void updateUser_SameEmail_ReturnUser() {
         User user = new User("bobbytan@gmail.com", "SuperSecurePassw0rd", "Bobby Tan");
         Long userId = 1L;
+        when(users.findById(any(Long.class))).thenReturn(Optional.of(user));
         when(users.findByEmail(any(String.class))).thenReturn(Optional.of(user));
+        when(users.saveAndFlush(any(User.class))).thenReturn(user);
 
-        try {
-            userService.updateUser(userId, user);
-        } catch (AlreadyExistsException e) {
-            assertEquals("User with the same email already exists", e.getMessage());
-        }
+        User updatedUser = userService.updateUser(userId, user);
 
+        assertNotNull(updatedUser);
+        verify(users).findById(userId);
         verify(users).findByEmail(user.getEmail());
+        verify(users).saveAndFlush(user);
     }
     
     @Test
