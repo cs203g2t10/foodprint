@@ -69,25 +69,21 @@ public class UserService {
     
     @PreAuthorize("hasAnyAuthority('FP_ADMIN') OR #existingUser.email == authentication.name")
     public User updateUser(Long id, @Param("existingUser") User existingUser,  User updatedUser) {
-        
+
         if (updatedUser.getEmail() != null) {
             existingUser.setEmail(updatedUser.getEmail());
         }
-
         if (updatedUser.getFirstName() != null) {
             existingUser.setFirstName(updatedUser.getFirstName());
         }
-
         if (updatedUser.getLastName() != null) {
             existingUser.setLastName(updatedUser.getLastName());
         }
-
         if (updatedUser.getPassword() != null) {
             String plaintextPassword = updatedUser.getPassword();
             String encodedPassword = passwordEncoder.encode(plaintextPassword);
             existingUser.setPassword(encodedPassword);
         }
-
         if (updatedUser.getRoles() != null) {
             existingUser.setRoles(updatedUser.getRoles().replace(" ", ""));
         }
