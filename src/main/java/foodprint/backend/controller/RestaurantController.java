@@ -1,8 +1,13 @@
 package foodprint.backend.controller;
 
-import java.util.List;
+import java.util.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.text.SimpleDateFormat;  
+import java.time.format.DateTimeFormatter;
 
 import javax.validation.Valid;
+// import javax.ws.rs.BadRequestException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -33,6 +38,7 @@ import foodprint.backend.dto.IngredientDTO;
 import foodprint.backend.dto.PictureDTO;
 import foodprint.backend.dto.RestaurantDTO;
 import foodprint.backend.exceptions.NotFoundException;
+import foodprint.backend.exceptions.BadRequestException;
 import foodprint.backend.model.Discount;
 import foodprint.backend.model.Food;
 import foodprint.backend.model.Ingredient;
@@ -282,10 +288,39 @@ public class RestaurantController {
         return new ResponseEntity<>(ingredients, HttpStatus.OK);
     }
 
-    // @GetMapping({"/{restaurantId}/calculateIngredients"})
-    // @ResponseStatus(code = HttpStatus.OK)
-    // @Operation(summary = "Calculate ingredients")
-    // public ResponseEntity<List>
+    @GetMapping({"/{restaurantId}/calculateIngredientsToday"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Calculate ingredients needed today")
+    public ResponseEntity<Map<String, Integer>> calculateIngredientsToday (@PathVariable Long restaurantId) {
+        Restaurant restaurant = service.get(restaurantId);
+        if(restaurant == null)
+            throw new NotFoundException("restaurant does not exist");
+        Map<String, Integer> result = service.calculateIngredientsNeededToday(restaurant);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @GetMapping({"/{restaurantId}/calculateIngredientsBetween"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Calculate ingredients needed between start and end date (inclusive)")
+    public ResponseEntity<Map<String, Integer>> calculateIngredientsBetween (@PathVariable Long restaurantId, @RequestParam("start") String startDate, @RequestParam("end") String endDate) {
+        Restaurant restaurant = service.get(restaurantId);
+        if(restaurant == null) {
+            throw new NotFoundException("restaurant does not exist");
+        }
+        
+        // DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-mm-dd");
+        LocalDate start = LocalDate.parse(startDate);
+        LocalDate end = LocalDate.parse(endDate);
+        if (start.isBefore(LocalDateTime.now().toLocalDate())) {
+            throw new BadRequestException("starting date should be after today");
+        } else if (start.isAfter(end)) {
+            throw new BadRequestException("start date should be before end date");
+        }
+        Map<String, Integer> result = service.calculateIngredientsNeededBetween(restaurant, start, end);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+   
 
     @PostMapping(path = "/{restaurantId}/uploadPicture",
                 consumes = MediaType.MULTIPART_FORM_DATA_VALUE,

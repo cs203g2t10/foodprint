@@ -1,9 +1,5 @@
 package foodprint.backend.service;
 
-import java.util.HashMap;
-import java.util.Map;
-
-
 import com.stripe.Stripe;
 import com.stripe.exception.ApiConnectionException;
 import com.stripe.exception.ApiException;
@@ -40,25 +36,18 @@ public class StripeService {
          Stripe.apiKey = secretKey;
      }
     
-    public Charge charge(ChargeRequest chargeRequest) 
+    public Charge charge(ChargeRequest chargeRequest)
       throws AuthenticationException, InvalidRequestException,
         ApiConnectionException, CardException, ApiException, StripeException {
          String token = chargeRequest.getStripeToken();
         ChargeCreateParams params =
                 ChargeCreateParams.builder()
-                .setAmount(999L)
-                .setCurrency("usd")
-                .setDescription("Example")
+                .setAmount(chargeRequest.getAmount())
+                .setCurrency(chargeRequest.getCurrency().toString())
+                .setDescription(chargeRequest.getDescription())
                 .setSource(token)
                 .build();
         Charge charge = Charge.create(params);
         return charge;
-//        Map<String, Object> chargeParams = new HashMap<>();
-//        chargeParams.put("amount", chargeRequest.getAmount());
-//        chargeParams.put("currency", chargeRequest.getCurrency());
-//        chargeParams.put("description", chargeRequest.getDescription());
-//        chargeParams.put("source", chargeRequest.getStripeToken());
-//        return Charge.create(chargeParams);
-//        return new Charge();
     }
 }

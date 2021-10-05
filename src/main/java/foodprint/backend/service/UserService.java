@@ -62,11 +62,6 @@ public class UserService {
     }
 
     public User updateUser(Long id, User updatedUser) {
-        Optional<User> existingUserByEmail = userRepo.findByEmail(updatedUser.getEmail());
-        if (existingUserByEmail.isPresent()) {
-            throw new AlreadyExistsException("User with the same email already exists");
-        }
-
         User existingUser = this.getUser(id);
         existingUser = updateUser(id, existingUser, updatedUser);
         return existingUser;
@@ -95,6 +90,14 @@ public class UserService {
 
         if (updatedUser.getRoles() != null) {
             existingUser.setRoles(updatedUser.getRoles().replace(" ", ""));
+        }
+
+        if (updatedUser.getVaccinationDob() != null) {
+            existingUser.setVaccinationDob(updatedUser.getVaccinationDob());
+        }
+
+        if (updatedUser.getVaccinationName() != null) {
+            existingUser.setVaccinationName(updatedUser.getVaccinationName());
         }
 
         return this.userRepo.saveAndFlush(existingUser);

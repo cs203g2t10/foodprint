@@ -163,6 +163,7 @@ public class ReservationController {
         reservationDTO.setPax(reservation.getPax());
         reservationDTO.setReservationId(reservation.getReservationId());
         reservationDTO.setStatus(reservation.getStatus());
+        reservationDTO.setPrice(reservation.getPrice());
 
         List<NamedLineItemDTO> lineItemDtos = new ArrayList<>();
         for (LineItem lineItem : reservation.getLineItems()) {

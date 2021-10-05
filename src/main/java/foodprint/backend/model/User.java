@@ -1,5 +1,6 @@
 package foodprint.backend.model;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
@@ -77,6 +78,12 @@ public class User implements UserDetails{
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Reservation> reservations;
 
+    @Column(name = "vaccinationName", nullable = true)
+    private String vaccinationName;
+
+    @Column(name = "vaccinationDob", nullable = true)
+    private LocalDate vaccinationDob;
+
     // Constructors
     public User() {}
 
@@ -152,6 +159,29 @@ public class User implements UserDetails{
         this.reservations = reservations;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getVaccinationName() {
+        return this.vaccinationName;
+    }
+
+    public void setVaccinationName(String vaccinationName) {
+        this.vaccinationName = vaccinationName;
+    }
+
+    public LocalDate getVaccinationDob() {
+        return this.vaccinationDob;
+    }
+
+    public void setVaccinationDob(LocalDate vaccinationDob) {
+        this.vaccinationDob = vaccinationDob;
+    }
+
+    public boolean isVaccinated() {
+        return (this.vaccinationDob != null && this.vaccinationName != null);
+    }
 
     @Override
     public String getPassword() {
@@ -199,10 +229,22 @@ public class User implements UserDetails{
         return true;
     }
 
+
     @Override
     public String toString() {
-        return "User [email=" + email + ", firstName=" + firstName + ", id=" + id + ", lastName=" + lastName
-                + ", password=" + password + ", roles=" + roles + "]";
+        return "{" +
+            " id='" + getId() + "'" +
+            ", email='" + getEmail() + "'" +
+            ", firstName='" + getFirstName() + "'" +
+            ", lastName='" + getLastName() + "'" +
+            ", password='" + getPassword() + "'" +
+            ", roles='" + getRoles() + "'" +
+            ", lastLogin='" + getLastLogin() + "'" +
+            ", registeredOn='" + getRegisteredOn() + "'" +
+            ", reservations='" + getReservations() + "'" +
+            ", vaccinationName='" + getVaccinationName() + "'" +
+            ", vaccinationDob='" + getVaccinationDob() + "'" +
+            "}";
     }
 
     

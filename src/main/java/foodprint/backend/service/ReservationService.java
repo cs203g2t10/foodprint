@@ -245,4 +245,12 @@ public class ReservationService {
         return availableSlots;
     }
 
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    public void setPaid(Long reservationId) {
+        Reservation reservation = getReservationById(reservationId);
+        reservation.setStatus(Status.PAID);
+        reservationRepo.saveAndFlush(reservation);
+    }
+
+
 }
