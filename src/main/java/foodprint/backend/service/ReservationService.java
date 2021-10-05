@@ -57,6 +57,12 @@ public class ReservationService {
     }
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
+    public List<Reservation> getAllReservationByUser(User user) {
+        List<Reservation> reservationList = reservationRepo.findByUser(user);
+        return reservationList;
+    }
+
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public List<LineItem> getLineItemsByReservationId(Long id) {
         Optional<Reservation> reservation = reservationRepo.findById(id);
         if (reservation.isEmpty()) {
@@ -85,7 +91,8 @@ public class ReservationService {
         LocalDateTime startTime = dateOfReservation.truncatedTo(ChronoUnit.HOURS);
 
         if (!this.slotAvailable(restaurant, startTime)) {
-            throw new NotFoundException("Slot not found");
+            String msg = String.format("Slot not available for %s on %d %s %d at %d:%dHr", restaurant.getRestaurantName(), dateOfReservation.getDayOfMonth(), dateOfReservation.getMonth(), dateOfReservation.getYear(), dateOfReservation.getHour(), dateOfReservation.getMinute());
+            throw new NotFoundException(msg);
         }
 
         Reservation reservation = new Reservation();
