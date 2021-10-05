@@ -1,11 +1,13 @@
 package foodprint.backend.service;
 
+import foodprint.backend.exceptions.MailException;
 import foodprint.backend.model.User;
 import foodprint.backend.model.UserRepo;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailAuthenticationException;
 import org.springframework.mail.MailParseException;
 import org.springframework.mail.MailSendException;
@@ -22,8 +24,17 @@ public class EmailService {
     @Autowired
     UserRepo userRepo;
 
-    @Autowired
-    ServerService serverService;
+    @Value("${foodprint.email.address}")
+    private String emailSender;
+
+    @Value("${foodprint.email.port}")
+    private String emailPort;
+
+    @Value("${foodprint.email.server}")
+    private String emailServer;
+
+    @Value("${foodprint.email.password}")
+    private String emailPassword;
 
     private Logger logger = LoggerFactory.getLogger(EmailService.class);
 
@@ -31,10 +42,10 @@ public class EmailService {
 
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
 
-        mailSender.setHost(serverService.getEmailServer());
-        mailSender.setPort(Integer.parseInt(serverService.getEmailPort()));
-        mailSender.setUsername(serverService.getEmailSender());
-        mailSender.setPassword(serverService.getEmailPassword());
+        mailSender.setHost(emailServer);
+        mailSender.setPort(Integer.parseInt(emailPort));
+        mailSender.setUsername(emailSender);
+        mailSender.setPassword(emailPassword);
         
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");
@@ -45,20 +56,15 @@ public class EmailService {
         return mailSender;
     }
 
-    public String foodprintHostname() {
-        return serverService.getFoodprintHostname();
-    }
-
-    public boolean sendSimpleEmail(User recipient, String subject, String content) {
+    public void sendSimpleEmail(User recipient, String subject, String content) {
         String email = recipient.getEmail();
-        return sendSimpleEmail(email, subject, content);
+        sendSimpleEmail(email, subject, content);
     }
 
-    public boolean sendSimpleEmail(String recipientEmail, String subject, String content) {
+    public void sendSimpleEmail(String recipientEmail, String subject, String content) {
 
         if (javaMailSender() == null) {
             logger.info("Mail sender is null, cannot continue...");
-            return false;
         }
         
         SimpleMailMessage message = new SimpleMailMessage();
@@ -69,35 +75,19 @@ public class EmailService {
         message.setText(content);
 
         try {
-
             javaMailSender().send(message);
-
         } catch (MailParseException e) {
-
             logger.info("An error occurred while parsing email content");
-            e.printStackTrace();
-            return false;
-
+            throw new MailException("An error occurred while parsing email content");
         } catch (MailAuthenticationException e) {
-
-            logger.info("An error occurred while authenticating mail server credentials");
-            e.printStackTrace();
-            return false;
-
+            logger.info("An error occurred while authenticating mail server credentials"); 
+            throw new MailException("An error occurred while authenticating mail server credentials");
         } catch (MailSendException e) {
-
-            logger.info("An error occurred while trying to send the email.");
-            e.printStackTrace();
-            return false;
-
+            logger.info("An error occurred while trying to send the email");
+            throw new MailException("An error occurred while trying to send the email");
         } catch (NullPointerException e) {
-
             logger.info("Mail sender was uninitialized or null");
-            e.printStackTrace();
-            return false;
-
+            throw new MailException("Mail sender was uninitialized or null");
         }
-        
-        return true;
     }
 }
