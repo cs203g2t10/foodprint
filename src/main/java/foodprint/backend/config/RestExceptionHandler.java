@@ -15,6 +15,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import foodprint.backend.exceptions.AlreadyExistsException;
 import foodprint.backend.exceptions.DeleteFailedException;
 import foodprint.backend.exceptions.InsufficientPermissionsException;
+import foodprint.backend.exceptions.MailException;
 import foodprint.backend.exceptions.NotFoundException;
 
 import javax.servlet.http.HttpServletResponse;
@@ -83,6 +84,11 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(AlreadyExistsException.class)
     public void handleConflict(AlreadyExistsException ex, HttpServletResponse response) throws IOException {
         response.sendError(HttpStatus.CONFLICT.value(), ex.getMessage());
+    }
+
+    @ExceptionHandler(MailException.class)
+    public void handleMailError(MailException ex, HttpServletResponse response) throws IOException {
+        response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage());
     }
 
 }
