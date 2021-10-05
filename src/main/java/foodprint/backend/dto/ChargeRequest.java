@@ -4,16 +4,16 @@ package foodprint.backend.dto;
 public class ChargeRequest {
 
     public enum Currency {
-        EUR, USD;
+        EUR, USD, SGD;
     }
 
     private String description;
-    private Integer amount;
+    private Long amount;
     private Currency currency;
     private String stripeEmail;
     private String stripeToken;
 
-    public ChargeRequest(String description, Integer amount, Currency currency, String stripeEmail, String stripeToken) {
+    public ChargeRequest(String description, Long amount, Currency currency, String stripeEmail, String stripeToken) {
         this.description = description;
         this.amount = amount;
         this.currency = currency;
@@ -29,7 +29,7 @@ public class ChargeRequest {
         this.description = desc;
     }
 
-    public Integer getAmount() {
+    public Long getAmount() {
         return amount;
     }
 

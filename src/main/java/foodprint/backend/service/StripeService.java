@@ -46,8 +46,8 @@ public class StripeService {
          String token = chargeRequest.getStripeToken();
         ChargeCreateParams params =
                 ChargeCreateParams.builder()
-                .setAmount(999L)
-                .setCurrency("usd")
+                .setAmount(chargeRequest.getAmount())
+                .setCurrency(chargeRequest.getCurrency().toString())
                 .setDescription("Example")
                 .setSource(token)
                 .build();

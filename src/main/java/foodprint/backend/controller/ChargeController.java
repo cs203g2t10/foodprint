@@ -26,20 +26,8 @@ public class ChargeController {
     @PostMapping("/")
     public ResponseEntity<ChargeDTO> charge(@RequestBody ChargeRequest chargeRequest)
       throws StripeException {
-//        System.out.println("HI" + chargeRequest.getAmount());
-//        System.out.println("Good morning" + chargeRequest.getStripeToken());
-//        chargeRequest.setDescription("Example charge");
-//        chargeRequest.setCurrency(Currency.EUR);
         Charge charge = paymentsService.charge(chargeRequest);
-//        Charge charge = paymentsService.charge(chargeRequest);
         ChargeDTO chargeDTO = new ChargeDTO(charge.getId(), charge.getStatus(), charge.getBalanceTransaction());
         return new ResponseEntity<ChargeDTO>(chargeDTO, HttpStatus.CREATED);
     }
-
-    // @ExceptionHandler(StripeException.class)
-    // public String handleError(Model model, StripeException ex) {
-    //     model.addAttribute("error", ex.getMessage());
-    //     return "result";
-    // }
-    
 }
