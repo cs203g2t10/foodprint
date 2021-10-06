@@ -18,7 +18,7 @@ public class Picture {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "pictureId" )
-    private Long id;
+    private Long pictureId;
 
     @Column(name = "title" )
     private String title;
@@ -52,11 +52,11 @@ public class Picture {
     }
 
     public Long getId() {
-        return this.id;
+        return this.pictureId;
     }
 
     public void setId(Long id) {
-        this.id = id;
+        this.pictureId = id;
     }
 
     public String getTitle() {
@@ -133,12 +133,12 @@ public class Picture {
             return false;
         }
         Picture picture = (Picture) o;
-        return Objects.equals(id, picture.id) && Objects.equals(title, picture.title) && Objects.equals(description, picture.description) && Objects.equals(imagePath, picture.imagePath) && Objects.equals(imageFileName, picture.imageFileName);
+        return Objects.equals(pictureId, picture.pictureId) && Objects.equals(title, picture.title) && Objects.equals(description, picture.description) && Objects.equals(imagePath, picture.imagePath) && Objects.equals(imageFileName, picture.imageFileName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, description, imagePath, imageFileName);
+        return Objects.hash(pictureId, title, description, imagePath, imageFileName);
     }
 
 

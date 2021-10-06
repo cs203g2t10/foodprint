@@ -52,7 +52,7 @@ public class Food {
     @Column(name = "foodDiscount")
     private Double foodDiscount;
 
-    @OneToMany(mappedBy = "food")
+    @OneToMany(mappedBy = "food", cascade = CascadeType.ALL)
     private Set<FoodIngredientQuantity> foodIngredientQuantity;
 
     @JsonIgnore

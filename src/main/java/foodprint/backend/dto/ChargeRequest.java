@@ -4,21 +4,28 @@ package foodprint.backend.dto;
 public class ChargeRequest {
 
     public enum Currency {
-        EUR, USD;
+        EUR, USD, SGD;
     }
 
+    private Long reservationId;
     private String description;
-    private Integer amount;
+    private Long amount;
     private Currency currency;
     private String stripeEmail;
     private String stripeToken;
 
-    public ChargeRequest(String description, Integer amount, Currency currency, String stripeEmail, String stripeToken) {
+
+    public ChargeRequest(Long reservationId, String description, Long amount, Currency currency, String stripeEmail, String stripeToken) {
+        this.reservationId = reservationId;
         this.description = description;
         this.amount = amount;
         this.currency = currency;
         this.stripeEmail = stripeEmail;
         this.stripeToken = stripeToken;
+    }
+
+    public Long getReservationId() {
+        return reservationId;
     }
 
     public String getDescription() {
@@ -29,7 +36,7 @@ public class ChargeRequest {
         this.description = desc;
     }
 
-    public Integer getAmount() {
+    public Long getAmount() {
         return amount;
     }
 

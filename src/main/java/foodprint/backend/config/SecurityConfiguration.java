@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -22,6 +23,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import foodprint.backend.model.UserRepo;
 
+@Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(
   prePostEnabled = true, 
@@ -88,7 +90,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .antMatchers(
                 "/api/v1/auth/login",
                 "/api/v1/auth/register",
-                "/api/v1/user"
+                "/api/v1/user",
+                "/api/v1/user/auth/**",
+                "/api/v1/auth/register/confirm/*"
             ).permitAll()
 
             .antMatchers(

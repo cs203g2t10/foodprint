@@ -13,7 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Entity
 public class FoodIngredientQuantity {
     @EmbeddedId
-    private FoodIngredientQuantityKey id;
+    private FoodIngredientQuantityKey id = new FoodIngredientQuantityKey();
 
     @ManyToOne
     @MapsId("ingredientId")
@@ -28,6 +28,10 @@ public class FoodIngredientQuantity {
 
     @Schema(defaultValue = "1")
     private Integer quantity;
+
+    public FoodIngredientQuantity() {
+        
+    }
 
     public FoodIngredientQuantity(Food food, Ingredient ingredient, Integer quantity) {
         this.food = food;

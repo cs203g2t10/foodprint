@@ -13,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +26,8 @@ import foodprint.backend.dto.AuthResponseDTO;
 import foodprint.backend.dto.CurrentUserDetailsDTO;
 import foodprint.backend.dto.RegRequestDTO;
 import foodprint.backend.dto.RegResponseDTO;
+import foodprint.backend.exceptions.RegistrationException;
+import foodprint.backend.exceptions.UserUnverifiedException;
 import foodprint.backend.model.User;
 import foodprint.backend.model.UserRepo;
 import foodprint.backend.service.AuthenticationService;
@@ -40,6 +43,8 @@ public class AuthController {
     private AuthenticationService authService;
 
     private UserRepo repo;
+
+    
 
     @Autowired
     public AuthController(JwtTokenUtil jwtTokenUtil, AuthenticationService authService, UserRepo userRepo) {
@@ -82,6 +87,14 @@ public class AuthController {
             AuthResponseDTO responseBody = new AuthResponseDTO();
             responseBody.setStatus("INCORRECT");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseBody);
+
+        } catch (UserUnverifiedException ex) {
+
+            AuthResponseDTO responseBody = new AuthResponseDTO();
+            responseBody.setStatus("USER_UNVERIFIED");
+            authService.emailConfirmation(repo.findByEmail(req.getEmail()).get());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseBody);
+            
         }
     }
 
@@ -101,14 +114,39 @@ public class AuthController {
         user.setLastName(request.getLastName());
         user.setEmail(request.getEmail());
         user.setPassword(authService.encodePassword(request.getPassword()));
-        user.setRoles("FP_USER");
+        // user.setRoles("FP_USER");
+        user.setRoles("FP_UNVERIFIED");
         user.setRegisteredOn(LocalDateTime.now());
         user = repo.saveAndFlush(user);
-        
-        RegResponseDTO resp = new RegResponseDTO();
-        resp.setStatus("SUCCESS");
 
-        return new ResponseEntity<>(resp, HttpStatus.OK);
+        RegResponseDTO resp = new RegResponseDTO();
+
+        try {
+            authService.emailConfirmation(user);
+            resp.setStatus("SUCCESS");
+            return new ResponseEntity<>(resp, HttpStatus.OK);
+        } catch (RegistrationException ex) {
+            resp.setStatus("EMAIL_ERROR");
+            return new ResponseEntity<>(resp, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
+    @GetMapping("/register/confirm/{token}")
+    public ResponseEntity<RegResponseDTO> confirmEmail(@PathVariable("token") String token) {
+        RegResponseDTO resp = new RegResponseDTO();
+        try {
+
+            authService.confirmRegistration(token);
+            resp.setStatus("SUCCESS");
+            return new ResponseEntity<>(resp, HttpStatus.OK);
+
+        } catch (RegistrationException ex) {
+
+            resp.setStatus("VERIFICATION_UNSUCCESSFUL");
+            return new ResponseEntity<>(resp, HttpStatus.INTERNAL_SERVER_ERROR);
+
+        }
     }
 
     @GetMapping({"/whoami"})
