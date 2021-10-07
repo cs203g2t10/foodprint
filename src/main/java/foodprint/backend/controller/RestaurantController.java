@@ -3,8 +3,6 @@ package foodprint.backend.controller;
 import java.util.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.text.SimpleDateFormat;  
-import java.time.format.DateTimeFormatter;
 
 import javax.validation.Valid;
 // import javax.ws.rs.BadRequestException;
@@ -308,7 +306,6 @@ public class RestaurantController {
             throw new NotFoundException("restaurant does not exist");
         }
         
-        // DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-mm-dd");
         LocalDate start = LocalDate.parse(startDate);
         LocalDate end = LocalDate.parse(endDate);
         if (start.isBefore(LocalDateTime.now().toLocalDate())) {
