@@ -41,7 +41,6 @@ public class ReservationController {
 
     private RestaurantService restaurantService;
 
-
     @Autowired
     ReservationController(ReservationService reservationService, RestaurantService restaurantService) {
         this.reservationService = reservationService;
@@ -58,6 +57,51 @@ public class ReservationController {
         return new ResponseEntity<>(reservationDTO, HttpStatus.OK);
     }
 
+    // GET: Get reservation by user
+    @GetMapping({ "/all" })
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Gets all the reservation(s) of a user")
+    public ResponseEntity<List<ReservationDTO>> getAllReservationByUser() {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        List<Reservation> reservations = reservationService.getAllReservationByUser(user);
+        List<ReservationDTO> reservationDTOs = new ArrayList<>();
+        for (Reservation reservation : reservations) {
+            ReservationDTO reservationDTO = this.convertToDTO(reservation);
+            reservationDTOs.add(reservationDTO);
+        }
+        return new ResponseEntity<>(reservationDTOs, HttpStatus.OK);
+    }
+
+    // GET: Get upcoming reservation by user
+    @GetMapping({ "/upcoming" })
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Gets all the reservation(s) of a user")
+    public ResponseEntity<List<ReservationDTO>> getUserUpcomingReservations() {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        List<Reservation> reservations = reservationService.getUserUpcomingReservations(user);
+        List<ReservationDTO> reservationDTOs = new ArrayList<>();
+        for (Reservation reservation : reservations) {
+            ReservationDTO reservationDTO = this.convertToDTO(reservation);
+            reservationDTOs.add(reservationDTO);
+        }
+        return new ResponseEntity<>(reservationDTOs, HttpStatus.OK);
+    }
+
+    // GET: Get past reservation by user
+    @GetMapping({ "/past" })
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Gets all the reservation(s) of a user")
+    public ResponseEntity<List<ReservationDTO>> getUserPastReservations() {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        List<Reservation> reservations = reservationService.getUserPastReservations(user);
+        List<ReservationDTO> reservationDTOs = new ArrayList<>();
+        for (Reservation reservation : reservations) {
+            ReservationDTO reservationDTO = this.convertToDTO(reservation);
+            reservationDTOs.add(reservationDTO);
+        }
+        return new ResponseEntity<>(reservationDTOs, HttpStatus.OK);
+    }
+
     // GET: Get all reservations
     @GetMapping({ "/admin/all" })
     @ResponseStatus(code = HttpStatus.OK)
@@ -72,18 +116,21 @@ public class ReservationController {
     @Operation(summary = "For users to create a new reservation slot")
     public ResponseEntity<ReservationDTO> createReservationDTO(@RequestBody CreateReservationDTO req) {
         User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        var reservation = reservationService.create(currentUser, req);
-        var reservationDTO = this.convertToDTO(reservation);
-        return new ResponseEntity<>(reservationDTO, HttpStatus.CREATED);
+        try {
+            var reservation = reservationService.create(currentUser, req);
+            var reservationDTO = this.convertToDTO(reservation);
+            return new ResponseEntity<>(reservationDTO, HttpStatus.CREATED);
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_ACCEPTABLE);
+        }
+
     }
 
     // PUT: Update reservation (DTO)
     @PatchMapping({ "/{reservationId}" })
     @Operation(summary = "For users to update an existing reservation slot")
-    public ResponseEntity<ReservationDTO> updateReservationDTO(
-        @PathVariable("reservationId") Long id,
-        @RequestBody CreateReservationDTO pendingReservationDTO
-    ) {
+    public ResponseEntity<ReservationDTO> updateReservationDTO(@PathVariable("reservationId") Long id,
+            @RequestBody CreateReservationDTO pendingReservationDTO) {
 
         var currentReservation = reservationService.getReservationById(id);
         var restaurant = currentReservation.getRestaurant();
@@ -146,6 +193,7 @@ public class ReservationController {
         reservationDTO.setPax(reservation.getPax());
         reservationDTO.setReservationId(reservation.getReservationId());
         reservationDTO.setStatus(reservation.getStatus());
+        reservationDTO.setPrice(reservation.getPrice());
 
         List<NamedLineItemDTO> lineItemDtos = new ArrayList<>();
         for (LineItem lineItem : reservation.getLineItems()) {

@@ -57,6 +57,38 @@ public class ReservationService {
     }
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
+    public List<Reservation> getAllReservationByUser(User user) {
+        List<Reservation> reservationList = reservationRepo.findByUser(user);
+        return reservationList;
+    }
+
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    public List<Reservation> getUserUpcomingReservations(User user) {
+        List<Reservation> reservationList = reservationRepo.findByUser(user);
+        List<Reservation> result = new ArrayList<>();
+        for(Reservation reservation : reservationList) {
+            LocalDateTime date = reservation.getDate();
+            if (date.isAfter(LocalDateTime.now())) {
+                result.add(reservation);
+            }
+        }
+        return result;
+    }
+
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    public List<Reservation> getUserPastReservations(User user) {
+        List<Reservation> reservationList = reservationRepo.findByUser(user);
+        List<Reservation> result = new ArrayList<>();
+        for(Reservation reservation : reservationList) {
+            LocalDateTime date = reservation.getDate();
+            if (date.isBefore(LocalDateTime.now())) {
+                result.add(reservation);
+            }
+        }
+        return result;
+    }
+
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public List<LineItem> getLineItemsByReservationId(Long id) {
         Optional<Reservation> reservation = reservationRepo.findById(id);
         if (reservation.isEmpty()) {
@@ -85,7 +117,8 @@ public class ReservationService {
         LocalDateTime startTime = dateOfReservation.truncatedTo(ChronoUnit.HOURS);
 
         if (!this.slotAvailable(restaurant, startTime)) {
-            throw new NotFoundException("Slot not found");
+            String msg = String.format("Slot not available for %s on %d %s %d at %d:%dHr", restaurant.getRestaurantName(), dateOfReservation.getDayOfMonth(), dateOfReservation.getMonth(), dateOfReservation.getYear(), dateOfReservation.getHour(), dateOfReservation.getMinute());
+            throw new NotFoundException(msg);
         }
 
         Reservation reservation = new Reservation();
@@ -237,5 +270,13 @@ public class ReservationService {
         }
         return availableSlots;
     }
+
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    public void setPaid(Long reservationId) {
+        Reservation reservation = getReservationById(reservationId);
+        reservation.setStatus(Status.PAID);
+        reservationRepo.saveAndFlush(reservation);
+    }
+
 
 }

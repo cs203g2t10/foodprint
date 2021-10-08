@@ -4,7 +4,6 @@ import com.stripe.exception.StripeException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -19,6 +18,7 @@ import foodprint.backend.exceptions.DeleteFailedException;
 import foodprint.backend.exceptions.InsufficientPermissionsException;
 import foodprint.backend.exceptions.MailException;
 import foodprint.backend.exceptions.NotFoundException;
+import foodprint.backend.exceptions.VaccinationValidationException;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -91,10 +91,17 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
      @ExceptionHandler(StripeException.class)
      public void handleStripeError(StripeException ex, HttpServletResponse response) throws IOException{
         response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value() ,ex.getMessage());
-     }
+    }
+
     @ExceptionHandler(MailException.class)
     public void handleMailError(MailException ex, HttpServletResponse response) throws IOException {
         response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage());
     }
+
+    @ExceptionHandler(VaccinationValidationException.class)
+    public void handleVaccinationExceptionError(VaccinationValidationException ex, HttpServletResponse response) throws IOException {
+        response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage());
+    }
+
 
 }

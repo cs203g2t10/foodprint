@@ -30,6 +30,17 @@ public class ReservationDTO {
 
     private Status status;
 
+    @Schema(defaultValue = "0.0")
+    private Double price;
+
+    public Double getPrice() {
+        return price;
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
+    }
+
     public ReservationDTO() {}
 
     public Long getReservationId() {
