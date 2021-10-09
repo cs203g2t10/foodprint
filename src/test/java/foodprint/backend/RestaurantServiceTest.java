@@ -197,6 +197,39 @@ public class RestaurantServiceTest {
         verify(repo).findById(restaurantId);
     }
 
+    @Test
+    void getCategories_CategoriesFound_ReturnListOfCategories() {
+        List<Restaurant> allRestaurants = new ArrayList<>();
+        List<String> restaurantCategories = new ArrayList<>();
+        restaurantCategories.add("Japanese");
+        restaurantCategories.add("Casual dining");
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+        allRestaurants.add(restaurant);
+
+        when(repo.findAll()).thenReturn(allRestaurants);
+
+        List<String> getCategories = restaurantService.getCategories();
+        assertNotNull(getCategories);
+        verify(repo).findAll();
+    }
+
+    @Test
+    void getRestaurants_RestaurantsRelatedToCategoriesFound_ReturnRestaurantsRelated() {
+        List<Restaurant> allRestaurants = new ArrayList<>();
+        List<String> restaurantCategories = new ArrayList<>();
+        String category = "Japanese";
+        restaurantCategories.add("Japanese");
+        restaurantCategories.add("Casual dining");
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+        allRestaurants.add(restaurant);
+
+        when(repo.findAll()).thenReturn(allRestaurants);
+        
+        List<Restaurant> getRestaurantsRelatedToCategory = restaurantService.getRestaurantsRelatedToCategory(category);
+        assertNotNull(getRestaurantsRelatedToCategory);
+        verify(repo).findAll();
+    }
+
     // @Test
     // void search_RestaurantsFound_ReturnSearchResults() {
     //     Restaurant restaurant = new Restaurant("Sushi Tei", "Desc","Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10);
