@@ -131,7 +131,7 @@ public class RestaurantService {
     }
 
     public Page<Restaurant> search(Pageable page, String query) {
-        return repo.findByRestaurantNameContains(page, query);
+        return repo.findByRestaurantNameContainsIgnoreCase(page, query);
     }
 
     /*
