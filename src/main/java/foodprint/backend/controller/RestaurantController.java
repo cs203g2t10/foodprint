@@ -131,6 +131,22 @@ public class RestaurantController {
         return searchResultsDTO;
     }
 
+    @GetMapping({"/categories"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Get a list of categories available")
+    public ResponseEntity<List<String>> getRestaurantCategories() {
+        List<String> restaurantCategories = service.getCategories();
+        return new ResponseEntity<>(restaurantCategories, HttpStatus.OK);
+    }
+
+    @GetMapping({"/categories/{category}"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Get a list of restaurants associated with selected category")
+    public ResponseEntity<List<Restaurant>> getRestaurantRelatedToCategory(@PathVariable("category") String restaurantCategory) {
+            List<Restaurant> restaurantsRelatedToCategory = service.getRestaurantsRelatedToCategory(restaurantCategory);
+            return new ResponseEntity<>(restaurantsRelatedToCategory, HttpStatus.OK);
+    }
+
     /*
     *
     * Food related mappings
@@ -424,6 +440,7 @@ public class RestaurantController {
         restaurant.setRestaurantWeekendClosingMinutes(restaurantDTO.getRestaurantWeekendClosingMinutes());
         restaurant.setRestaurantWeekendOpeningHour(restaurantDTO.getRestaurantWeekendClosingHour());
         restaurant.setRestaurantWeekendOpeningMinutes(restaurantDTO.getRestaurantWeekendOpeningMinutes());
+        restaurant.setRestaurantCategory(restaurantDTO.getRestaurantCategory());
         return restaurant;
     }
 
@@ -442,6 +459,7 @@ public class RestaurantController {
         dto.setRestaurantWeekendClosingMinutes(restaurant.getRestaurantWeekendClosingMinutes());
         dto.setRestaurantWeekendOpeningHour(restaurant.getRestaurantWeekendClosingHour());
         dto.setRestaurantWeekendOpeningMinutes(restaurant.getRestaurantWeekendOpeningMinutes());
+        dto.setRestaurantCategory(restaurant.getRestaurantCategory());
         return dto;
 
     }

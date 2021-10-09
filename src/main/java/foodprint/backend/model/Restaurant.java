@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.JoinColumn;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -85,6 +88,11 @@ public class Restaurant {
     @Column (name = "restaurantWeekendClosingMinutes")
     private Integer restaurantWeekendClosingMinutes;
 
+    @ElementCollection
+    @CollectionTable(name = "categories", joinColumns = @JoinColumn(name = "restaurantId"))
+    @Column(name = "restaurantCategory")
+    private List<String> restaurantCategory = new ArrayList<String>();
+
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
     private List<Food> food = new ArrayList<Food>();
 
@@ -114,7 +122,7 @@ public class Restaurant {
     }
 
 
-    public Restaurant(String restaurantName, String restaurantDesc, String restaurantLocation, Integer restaurantTableCapacity, Integer restaurantWeekdayOpeningHour, Integer restaurantWeekdayOpeningMinutes, Integer restaurantWeekdayClosingHour, Integer restaurantWeekdayClosingMinutes, Integer restaurantWeekendOpeningHour, Integer restaurantWeekendOpeningMinutes, Integer restaurantWeekendClosingHour, Integer restaurantWeekendClosingMinutes) {
+    public Restaurant(String restaurantName, String restaurantDesc, String restaurantLocation, Integer restaurantTableCapacity, Integer restaurantWeekdayOpeningHour, Integer restaurantWeekdayOpeningMinutes, Integer restaurantWeekdayClosingHour, Integer restaurantWeekdayClosingMinutes, Integer restaurantWeekendOpeningHour, Integer restaurantWeekendOpeningMinutes, Integer restaurantWeekendClosingHour, Integer restaurantWeekendClosingMinutes, List<String> restaurantCategory) {
         this.restaurantName = restaurantName;
         this.restaurantDesc = restaurantDesc;
         this.restaurantLocation = restaurantLocation;
@@ -127,6 +135,7 @@ public class Restaurant {
         this.restaurantWeekendOpeningMinutes = restaurantWeekendOpeningMinutes;
         this.restaurantWeekendClosingHour = restaurantWeekendClosingHour;
         this.restaurantWeekendClosingMinutes = restaurantWeekendClosingMinutes;
+        this.restaurantCategory = restaurantCategory;
     }
 
     // Mutators and Accessors
@@ -254,6 +263,13 @@ public class Restaurant {
         this.restaurantWeekendClosingMinutes = restaurantWeekendClosingMinutes;
     }
 
+    public List<String> getRestaurantCategory() {
+        return this.restaurantCategory;
+    }
+
+    public void setRestaurantCategory(List<String> restaurantCategory) {
+        this.restaurantCategory = restaurantCategory;
+    }
     
     public List<Discount> getDiscount() {
         return discount;
