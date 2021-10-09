@@ -1,5 +1,7 @@
 package foodprint.backend.dto;
 
+import java.util.List;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 
@@ -47,6 +49,7 @@ public class RestaurantDTO {
     @Schema(defaultValue = "30")
     private Integer restaurantWeekendClosingMinutes;
 
+    private List<PictureDTO> pictures;
 
     public Long getRestaurantId() {
         return restaurantId;
@@ -150,6 +153,14 @@ public class RestaurantDTO {
 
     public void setRestaurantWeekendClosingMinutes(Integer restaurantWeekendClosingMinutes) {
         this.restaurantWeekendClosingMinutes = restaurantWeekendClosingMinutes;
+    }
+
+    public List<PictureDTO> getPictures() {
+        return this.pictures;
+    }
+
+    public void setPictures(List<PictureDTO> pictures) {
+        this.pictures = pictures;
     }
 
 

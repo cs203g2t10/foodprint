@@ -72,6 +72,36 @@ public class ReservationController {
         return new ResponseEntity<>(reservationDTOs, HttpStatus.OK);
     }
 
+    // GET: Get upcoming reservation by user
+    @GetMapping({ "/upcoming" })
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Gets all the reservation(s) of a user")
+    public ResponseEntity<List<ReservationDTO>> getUserUpcomingReservations() {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        List<Reservation> reservations = reservationService.getUserUpcomingReservations(user);
+        List<ReservationDTO> reservationDTOs = new ArrayList<>();
+        for (Reservation reservation : reservations) {
+            ReservationDTO reservationDTO = this.convertToDTO(reservation);
+            reservationDTOs.add(reservationDTO);
+        }
+        return new ResponseEntity<>(reservationDTOs, HttpStatus.OK);
+    }
+
+    // GET: Get past reservation by user
+    @GetMapping({ "/past" })
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Gets all the reservation(s) of a user")
+    public ResponseEntity<List<ReservationDTO>> getUserPastReservations() {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        List<Reservation> reservations = reservationService.getUserPastReservations(user);
+        List<ReservationDTO> reservationDTOs = new ArrayList<>();
+        for (Reservation reservation : reservations) {
+            ReservationDTO reservationDTO = this.convertToDTO(reservation);
+            reservationDTOs.add(reservationDTO);
+        }
+        return new ResponseEntity<>(reservationDTOs, HttpStatus.OK);
+    }
+
     // GET: Get all reservations
     @GetMapping({ "/admin/all" })
     @ResponseStatus(code = HttpStatus.OK)

@@ -63,6 +63,32 @@ public class ReservationService {
     }
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
+    public List<Reservation> getUserUpcomingReservations(User user) {
+        List<Reservation> reservationList = reservationRepo.findByUser(user);
+        List<Reservation> result = new ArrayList<>();
+        for(Reservation reservation : reservationList) {
+            LocalDateTime date = reservation.getDate();
+            if (date.isAfter(LocalDateTime.now())) {
+                result.add(reservation);
+            }
+        }
+        return result;
+    }
+
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    public List<Reservation> getUserPastReservations(User user) {
+        List<Reservation> reservationList = reservationRepo.findByUser(user);
+        List<Reservation> result = new ArrayList<>();
+        for(Reservation reservation : reservationList) {
+            LocalDateTime date = reservation.getDate();
+            if (date.isBefore(LocalDateTime.now())) {
+                result.add(reservation);
+            }
+        }
+        return result;
+    }
+
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public List<LineItem> getLineItemsByReservationId(Long id) {
         Optional<Reservation> reservation = reservationRepo.findById(id);
         if (reservation.isEmpty()) {

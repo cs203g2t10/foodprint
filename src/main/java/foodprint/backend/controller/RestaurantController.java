@@ -1,10 +1,9 @@
 package foodprint.backend.controller;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.text.SimpleDateFormat;  
-import java.time.format.DateTimeFormatter;
 
 import javax.validation.Valid;
 // import javax.ws.rs.BadRequestException;
@@ -71,18 +70,20 @@ public class RestaurantController {
     @GetMapping({"/{restaurantId}"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Gets a single restaurant from ID")
-    public ResponseEntity<Restaurant> restaurantGet(@PathVariable("restaurantId") Long id) {
+    public ResponseEntity<RestaurantDTO> restaurantGet(@PathVariable("restaurantId") Long id) {
         Restaurant restaurant = service.get(id);
-        return new ResponseEntity<>(restaurant, HttpStatus.OK);
+        RestaurantDTO restaurantDto = convertToDTO(restaurant);
+        return new ResponseEntity<>(restaurantDto, HttpStatus.OK);
     }
 
     // GET (ALL): Get all the restaurants
     @GetMapping
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Gets all restaurants")
-    public ResponseEntity<List<Restaurant>> restaurantGetAll() {
+    public ResponseEntity<List<RestaurantDTO>> restaurantGetAll() {
         List<Restaurant> restaurants = service.getAllRestaurants();
-        return new ResponseEntity<>(restaurants, HttpStatus.OK);
+        List<RestaurantDTO> restaurantDtos = restaurants.stream().map(r -> convertToDTO(r)).collect(Collectors.toList());
+        return new ResponseEntity<>(restaurantDtos, HttpStatus.OK);
     }
 
     // POST: Create new restaurant
@@ -127,7 +128,7 @@ public class RestaurantController {
     ) {
         Direction direction = (sortDesc) ? Sort.Direction.DESC : Sort.Direction.ASC;
         Sort sorting = Sort.by(direction, sortField);
-		Pageable page = PageRequest.of(pageNum - 1, 5, sorting); // Pagination
+		Pageable page = PageRequest.of(pageNum - 1, 16, sorting); // Pagination
 		Page<Restaurant> searchResult = service.search(page, query);
         Page<RestaurantDTO> searchResultsDTO = searchResult.map(result -> convertToDTO(result));
         return searchResultsDTO;
@@ -308,7 +309,6 @@ public class RestaurantController {
             throw new NotFoundException("restaurant does not exist");
         }
         
-        // DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-mm-dd");
         LocalDate start = LocalDate.parse(startDate);
         LocalDate end = LocalDate.parse(endDate);
         if (start.isBefore(LocalDateTime.now().toLocalDate())) {
@@ -445,14 +445,16 @@ public class RestaurantController {
         dto.setRestaurantWeekendClosingMinutes(restaurant.getRestaurantWeekendClosingMinutes());
         dto.setRestaurantWeekendOpeningHour(restaurant.getRestaurantWeekendClosingHour());
         dto.setRestaurantWeekendOpeningMinutes(restaurant.getRestaurantWeekendOpeningMinutes());
+        
+        List<Picture> pictures = restaurant.getPictures();
+        List<PictureDTO> pictureDtos = new ArrayList<>();
+        dto.setPictures(pictureDtos);
+
+        for (Picture picture : pictures) {
+            PictureDTO picDto = new PictureDTO(picture.getTitle(), picture.getDescription(), picture.getUrl());
+            pictureDtos.add(picDto);
+        }
+
         return dto;
-
     }
-   
-    // @GetMapping({ "/test/email"})
-    // public String emailTest() {
-    //     emailService.sendSimpleEmail("leowyixuanlyx@gmail.com", "Test", "Test");
-    //     return "index";
-    // }
-
 }

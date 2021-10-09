@@ -1,15 +1,18 @@
 package foodprint.backend.dto;
 
 public class PictureDTO {
+
     private String title;
 
     private String description;
 
-    public PictureDTO(String title, String description) {
+    private String url;
+
+    public PictureDTO(String title, String description, String url) {
         this.title = title;
         this.description = description;
+        this.url = url;
     }
-
 
     public String getTitle() {
         return this.title;
@@ -26,5 +29,14 @@ public class PictureDTO {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    public String getUrl() {
+        return this.url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+    
     
 }

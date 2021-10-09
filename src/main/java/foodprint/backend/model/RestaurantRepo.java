@@ -17,6 +17,6 @@ public interface RestaurantRepo extends JpaRepository<Restaurant, Long> {
 
     List<Restaurant> findByRestaurantNameContainsIgnoreCase(String name);
 
-    Page<Restaurant> findByRestaurantNameContains(Pageable page, String name);
+    Page<Restaurant> findByRestaurantNameContainsIgnoreCase(Pageable page, String name);
 
 }
