@@ -102,6 +102,21 @@ public class ReservationController {
         return new ResponseEntity<>(reservationDTOs, HttpStatus.OK);
     }
 
+    // GET: lineItems by reservation id
+    @GetMapping({ "/order/{reservationId}" })
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Gets all line item for reservation")
+    public ResponseEntity<List<LineItemDTO>> getReservationOrder(@PathVariable("reservationId") Long id) {
+        Reservation reservation = reservationService.getReservationById(id);
+
+        if(reservation == null) {
+            throw new NotFoundException("reservation not found");
+        }
+
+        List<LineItemDTO> result = reservationService.getLineItemsByReservationId(id);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
     // GET: Get all reservations
     @GetMapping({ "/admin/all" })
     @ResponseStatus(code = HttpStatus.OK)
