@@ -96,7 +96,10 @@ public class RestaurantServiceTest {
     @Test
     void updateRestaurant_RestaurantFound_ReturnUpdatedRestaurant() {
         //Restaurant restaurant = new Restaurant("Sushi Tei", "Serangoon");
-        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10);
+        List<String> restaurantCategories = new ArrayList<>();
+        restaurantCategories.add("Japanese");
+        restaurantCategories.add("Casual dining");
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
         Long restaurantId = 1L;
 
         when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
@@ -112,7 +115,10 @@ public class RestaurantServiceTest {
 
     @Test
     void updateRestaurant_RestaurantNotFound_ReturnError() {
-        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10);
+        List<String> restaurantCategories = new ArrayList<>();
+        restaurantCategories.add("Japanese");
+        restaurantCategories.add("Rice");
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
         Long restaurantId = 1L;
 
         when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
@@ -128,7 +134,10 @@ public class RestaurantServiceTest {
 
     @Test
     void deleteRestaurant_RestaurantFound_Return() {
-        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10);
+        List<String> restaurantCategories = new ArrayList<>();
+        restaurantCategories.add("Japanese");
+        restaurantCategories.add("Casual dining");
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
         Long restaurantId = 1L;
         ReflectionTestUtils.setField(restaurant, "restaurantId", restaurantId);
 
@@ -187,6 +196,52 @@ public class RestaurantServiceTest {
 
         verify(repo).findById(restaurantId);
     }
+
+    @Test
+    void getCategories_CategoriesFound_ReturnListOfCategories() {
+        List<Restaurant> allRestaurants = new ArrayList<>();
+        List<String> restaurantCategories = new ArrayList<>();
+        restaurantCategories.add("Japanese");
+        restaurantCategories.add("Casual dining");
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+        allRestaurants.add(restaurant);
+
+        when(repo.findAll()).thenReturn(allRestaurants);
+
+        List<String> getCategories = restaurantService.getCategories();
+        assertNotNull(getCategories);
+        verify(repo).findAll();
+    }
+
+    @Test
+    void getRestaurants_RestaurantsRelatedToCategoriesFound_ReturnRestaurantsRelated() {
+        List<Restaurant> allRestaurants = new ArrayList<>();
+        List<String> restaurantCategories = new ArrayList<>();
+        String category = "Japanese";
+        restaurantCategories.add("Japanese");
+        restaurantCategories.add("Casual dining");
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+        allRestaurants.add(restaurant);
+
+        when(repo.findAll()).thenReturn(allRestaurants);
+        
+        List<Restaurant> getRestaurantsRelatedToCategory = restaurantService.getRestaurantsRelatedToCategory(category);
+        assertNotNull(getRestaurantsRelatedToCategory);
+        verify(repo).findAll();
+    }
+
+    // @Test
+    // void search_RestaurantsFound_ReturnSearchResults() {
+    //     Restaurant restaurant = new Restaurant("Sushi Tei", "Desc","Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10);
+    //     repo.saveAndFlush(restaurant);
+    //     List<String> sort = new ArrayList<>();
+    //     sort.add(restaurant.getRestaurantName());
+    //     Pageable page = new Pageable(1, 1, sort);
+    //     String query = "Sushi";
+    //     Page<Restaurant> result = new Page
+
+    //     when(repo.findByRestaurantNameContains(any(Pageable.class), any(String.class))).thenReturn()
+    // }
 
     //------------Food-related Testing---------------
 
@@ -463,7 +518,10 @@ public class RestaurantServiceTest {
         Long discountId = 1L;
         Long restaurantId = 1L;
         DiscountDTO discountdto = new DiscountDTO(restaurantId,discount.getDiscountDescription(), discount.getDiscountPercentage());
-        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc","Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10);
+        List<String> restaurantCategories = new ArrayList<>();
+        restaurantCategories.add("Japanese");
+        restaurantCategories.add("Casual dining");
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc","Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
         ReflectionTestUtils.setField(restaurant, "restaurantId", restaurantId);
         
         when(repo.findByRestaurantId(any(Long.class))).thenReturn(restaurant);
@@ -499,7 +557,10 @@ public class RestaurantServiceTest {
     //-------Ingredient-related testing---------
     @Test
     void getAllRestaurantIngredients_RestaurantExistAndIngredientsExist_ReturnIngredients() {
-        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10);
+        List<String> restaurantCategories = new ArrayList<>();
+        restaurantCategories.add("Japanese");
+        restaurantCategories.add("Casual dining");
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
         Long restaurantId = 1L;
         List<Ingredient> ingredients = new ArrayList<>();
         Ingredient ingredient = new Ingredient("Salmon");
@@ -531,7 +592,10 @@ public class RestaurantServiceTest {
 
     @Test
     void addRestaurantIngredient_RestaurantExist_ReturnIngredient() {
-        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10);
+        List<String> restaurantCategories = new ArrayList<>();
+        restaurantCategories.add("Japanese");
+        restaurantCategories.add("Casual dining");
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
         Long restaurantId = 1L;
         List<Ingredient> ingredients = new ArrayList<>();
         Ingredient ingredient = new Ingredient("Salmon");
@@ -568,7 +632,10 @@ public class RestaurantServiceTest {
     //--------Picture-related testing---------
     @Test
     void pictureInRestaurant_pictureExist_ReturnTrue() {
-        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10);
+        List<String> restaurantCategories = new ArrayList<>();
+        restaurantCategories.add("Japanese");
+        restaurantCategories.add("Casual dining");
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
         Long restaurantId = 1L;
         Picture pic = new Picture("image", "desc", "Path", "file", "www.file.com");
         Long pictureId = 2L;
@@ -587,7 +654,10 @@ public class RestaurantServiceTest {
 
     @Test
     void pictureInRestaurant_pictureDoNotExist_ReturnFalse() {
-        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10);
+        List<String> restaurantCategories = new ArrayList<>();
+        restaurantCategories.add("Japanese");
+        restaurantCategories.add("Rice");
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
         Long restaurantId = 1L;
         Picture pic = new Picture("image", "desc", "Path", "file", "www.file.com");
         Long pictureId = 2L;
@@ -607,7 +677,10 @@ public class RestaurantServiceTest {
 
     @Test
     void pictureInFood_FoodPicExist_ReturnTrue() {
-        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10);
+        List<String> restaurantCategories = new ArrayList<>();
+        restaurantCategories.add("Japanese");
+        restaurantCategories.add("Casual dining");
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
         Long restaurantId = 1L;
         Food food = new Food("Sashimi", 50.0, 0.0);
         Long foodId = 2L;
@@ -629,7 +702,10 @@ public class RestaurantServiceTest {
 
     @Test
     void pictureInFood_FoodPicDoNotExist_ReturnFalse() {
-        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10);
+        List<String> restaurantCategories = new ArrayList<>();
+        restaurantCategories.add("Japanese");
+        restaurantCategories.add("Casual dining");
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
         Long restaurantId = 1L;
         Food food = new Food("Sashimi", 50.0, 0.0);
         Long foodId = 2L;

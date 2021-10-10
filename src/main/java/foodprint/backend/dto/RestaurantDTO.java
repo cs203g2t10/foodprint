@@ -3,6 +3,8 @@ package foodprint.backend.dto;
 import java.util.List;
 import java.util.Objects;
 
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
@@ -73,6 +75,9 @@ public class RestaurantDTO {
     @Min(0)
     @Max(59)
     private Integer restaurantWeekendClosingMinutes;
+
+    @ArraySchema(arraySchema = @Schema(defaultValue = "[\"Japanese\", \"Rice\"]"))
+    private List<String> restaurantCategory;
 
     private List<PictureDTO> pictures;
 
@@ -209,6 +214,10 @@ public class RestaurantDTO {
         this.restaurantWeekendClosingMinutes = restaurantWeekendClosingMinutes;
     }
 
+    public List<String> getRestaurantCategory() {
+        return this.restaurantCategory;
+    }
+
     public List<PictureDTO> getPictures() {
         return this.pictures;
     }
@@ -331,4 +340,7 @@ public class RestaurantDTO {
 
 
 
+    public void setRestaurantCategory(List<String> restaurantCategory) {
+        this.restaurantCategory = restaurantCategory;
+    }
 }
