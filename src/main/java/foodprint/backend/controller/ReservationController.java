@@ -113,7 +113,12 @@ public class ReservationController {
             throw new NotFoundException("reservation not found");
         }
 
-        List<LineItemDTO> result = reservationService.getLineItemsByReservationId(id);
+        List<LineItem> lineItems = reservationService.getLineItemsByReservationId(id);
+        List<LineItemDTO> result = new ArrayList<LineItemDTO>();
+        for(LineItem lineItem : lineItems) {
+            LineItemDTO curr = new LineItemDTO(lineItem.getFood().getFoodId(), lineItem.getQuantity());
+            result.add(curr);
+        }
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 

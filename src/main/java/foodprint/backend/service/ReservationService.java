@@ -89,18 +89,12 @@ public class ReservationService {
     }
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
-    public List<LineItemDTO> getLineItemsByReservationId(Long id) {
+    public List<LineItem> getLineItemsByReservationId(Long id) {
         Optional<Reservation> reservation = reservationRepo.findById(id);
         if (reservation.isEmpty()) {
             throw new NotFoundException("Reservation not found");
         }
-        List<LineItem> lineItems = reservation.get().getLineItems();
-        List<LineItemDTO> result = new ArrayList<LineItemDTO>();
-        for(LineItem lineItem : lineItems) {
-            LineItemDTO curr = new LineItemDTO(lineItem.getFood().getFoodId(), lineItem.getQuantity());
-            result.add(curr);
-        }
-        return result;
+        return reservation.get().getLineItems();
     }
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
