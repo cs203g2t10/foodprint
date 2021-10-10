@@ -201,7 +201,7 @@ public class PictureServiceTest {
         when(pictureRepo.findById(any(Long.class))).thenReturn(Optional.empty());
 
         try {
-            Picture updatedPicture = pictureService.updatedPicture(pictureId, newPicture);
+            pictureService.updatedPicture(pictureId, newPicture);
         } catch(NotFoundException e) {
             assertEquals("Picture not found", e.getMessage());
         }

@@ -110,6 +110,9 @@ public class RestaurantService {
             currentRestaurant.setRestaurantWeekendOpeningMinutes(updatedRestaurant.getRestaurantWeekendOpeningMinutes());
         }
 
+        if (updatedRestaurant.getRestaurantCategory() != null) {
+            currentRestaurant.setRestaurantCategory(updatedRestaurant.getRestaurantCategory());
+        }
         return repo.saveAndFlush(currentRestaurant);
     }
 
@@ -134,6 +137,33 @@ public class RestaurantService {
         return repo.findByRestaurantNameContainsIgnoreCase(page, query);
     }
 
+    public List<String> getCategories() {
+        List<String> restaurantCategories = new ArrayList<>();
+        List<Restaurant> allRestaurants = repo.findAll();
+        for (Restaurant restaurant : allRestaurants) {
+            for (String category : restaurant.getRestaurantCategory()) {
+                if (!restaurantCategories.contains(category)) {
+                    restaurantCategories.add(category);
+                }
+            }
+        }
+
+        return restaurantCategories;
+    }
+
+    public List<Restaurant> getRestaurantsRelatedToCategory(String restaurantCategory) {
+        List<Restaurant> restaurantsRelatedToCategory = new ArrayList<>();
+        List<Restaurant> allRestaurants = repo.findAll();
+        for (Restaurant restaurant : allRestaurants) {
+            for (String category : restaurant.getRestaurantCategory()) {
+                if (category.equals(restaurantCategory)) {
+                    restaurantsRelatedToCategory.add(restaurant);
+                }
+            }
+        }
+        return restaurantsRelatedToCategory;
+    }
+    
     /*
     *
     * Food related methods
