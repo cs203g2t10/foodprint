@@ -312,7 +312,7 @@ public class RestaurantServiceTest {
 
         restaurantService.create(restaurant);
         restaurant.setAllFood(allFood);
-        Food updatedFood = restaurantService.updateFood(restaurantId, foodId, food);
+        restaurantService.updateFood(restaurantId, foodId, food);
 
         verify(repo).findById(restaurantId);
     }
@@ -335,7 +335,7 @@ public class RestaurantServiceTest {
         restaurantService.create(restaurant);
         restaurant.setAllFood(allFood);
         try {
-            Food updatedFood = restaurantService.updateFood(restaurantId, anotherFoodId, anotherFood);
+            restaurantService.updateFood(restaurantId, anotherFoodId, anotherFood);
         } catch(NotFoundException e) {
             assertEquals("Food not found", e.getMessage());
         }
@@ -417,7 +417,7 @@ public class RestaurantServiceTest {
 
         restaurantService.create(restaurant);
         try {
-            Food getFood = restaurantService.getFood(restaurantId, foodId);
+            restaurantService.getFood(restaurantId, foodId);
         } catch(NotFoundException e) {
             assertEquals("Food not found", e.getMessage());
         }
@@ -582,7 +582,7 @@ public class RestaurantServiceTest {
         when(repo.findById(any(Long.class))).thenReturn(Optional.empty());
 
         try {
-            List<Ingredient> getIngredients = restaurantService.getAllRestaurantIngredients(restaurantId);
+            restaurantService.getAllRestaurantIngredients(restaurantId);
         } catch(NotFoundException e) {
             assertEquals("Restaurant not found", e.getMessage());
         }
@@ -621,7 +621,7 @@ public class RestaurantServiceTest {
         when(repo.findById(any(Long.class))).thenReturn(Optional.empty());
 
         try {
-            Ingredient addIngredient = restaurantService.addRestaurantIngredient(restaurantId, ingredient);
+            restaurantService.addRestaurantIngredient(restaurantId, ingredient);
         } catch(NotFoundException e) {
             assertEquals("Restaurant not found", e.getMessage());
         }
