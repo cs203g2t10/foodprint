@@ -211,9 +211,5 @@ public class Reservation {
     public Reservation restaurant(Restaurant restaurant) {
         setRestaurant(restaurant);
         return this;
-    }
-
-
-
-
+    } 
 }

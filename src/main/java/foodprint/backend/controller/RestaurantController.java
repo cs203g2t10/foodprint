@@ -134,6 +134,22 @@ public class RestaurantController {
         return searchResultsDTO;
     }
 
+    @GetMapping({"/categories"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Get a list of categories available")
+    public ResponseEntity<List<String>> getRestaurantCategories() {
+        List<String> restaurantCategories = service.getCategories();
+        return new ResponseEntity<>(restaurantCategories, HttpStatus.OK);
+    }
+
+    @GetMapping({"/categories/{category}"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Get a list of restaurants associated with selected category")
+    public ResponseEntity<List<Restaurant>> getRestaurantRelatedToCategory(@PathVariable("category") String restaurantCategory) {
+            List<Restaurant> restaurantsRelatedToCategory = service.getRestaurantsRelatedToCategory(restaurantCategory);
+            return new ResponseEntity<>(restaurantsRelatedToCategory, HttpStatus.OK);
+    }
+
     /*
     *
     * Food related mappings
@@ -233,7 +249,8 @@ public class RestaurantController {
     @Operation(summary = "Creates a new discount using dto")
     public ResponseEntity<Discount> createDiscount(@PathVariable Long restaurantId, @RequestBody DiscountDTO discount) {
         // Restaurant restaurantOpt = service.get(restaurantId);
-        Discount savedDiscount = service.addDiscount(restaurantId, discount);
+        Discount newDiscount = new Discount(discount.getDiscountDescription(), discount.getDiscountPercentage());
+        Discount savedDiscount = service.addDiscount(restaurantId, newDiscount);
         return new ResponseEntity<>(savedDiscount, HttpStatus.CREATED);
     }
 
@@ -423,10 +440,11 @@ public class RestaurantController {
         restaurant.setRestaurantWeekdayClosingMinutes(restaurantDTO.getRestaurantWeekdayClosingMinutes());
         restaurant.setRestaurantWeekdayOpeningHour(restaurantDTO.getRestaurantWeekdayOpeningHour());
         restaurant.setRestaurantWeekdayOpeningMinutes(restaurantDTO.getRestaurantWeekdayOpeningMinutes());
-        restaurant.setRestaurantWeekendClosingHour(restaurantDTO.getRestaurantWeekendClosingMinutes());
+        restaurant.setRestaurantWeekendClosingHour(restaurantDTO.getRestaurantWeekendClosingHour());
         restaurant.setRestaurantWeekendClosingMinutes(restaurantDTO.getRestaurantWeekendClosingMinutes());
-        restaurant.setRestaurantWeekendOpeningHour(restaurantDTO.getRestaurantWeekendClosingHour());
+        restaurant.setRestaurantWeekendOpeningHour(restaurantDTO.getRestaurantWeekendOpeningHour());
         restaurant.setRestaurantWeekendOpeningMinutes(restaurantDTO.getRestaurantWeekendOpeningMinutes());
+        restaurant.setRestaurantCategory(restaurantDTO.getRestaurantCategory());
         return restaurant;
     }
 
@@ -441,10 +459,11 @@ public class RestaurantController {
         dto.setRestaurantWeekdayClosingMinutes(restaurant.getRestaurantWeekdayClosingMinutes());
         dto.setRestaurantWeekdayOpeningHour(restaurant.getRestaurantWeekdayOpeningHour());
         dto.setRestaurantWeekdayOpeningMinutes(restaurant.getRestaurantWeekdayOpeningMinutes());
-        dto.setRestaurantWeekendClosingHour(restaurant.getRestaurantWeekendClosingMinutes());
+        dto.setRestaurantWeekendClosingHour(restaurant.getRestaurantWeekendClosingHour());
         dto.setRestaurantWeekendClosingMinutes(restaurant.getRestaurantWeekendClosingMinutes());
-        dto.setRestaurantWeekendOpeningHour(restaurant.getRestaurantWeekendClosingHour());
+        dto.setRestaurantWeekendOpeningHour(restaurant.getRestaurantWeekendOpeningHour());
         dto.setRestaurantWeekendOpeningMinutes(restaurant.getRestaurantWeekendOpeningMinutes());
+        dto.setRestaurantCategory(restaurant.getRestaurantCategory());
         
         List<Picture> pictures = restaurant.getPictures();
         List<PictureDTO> pictureDtos = new ArrayList<>();
