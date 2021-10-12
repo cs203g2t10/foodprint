@@ -11,7 +11,6 @@ on:
   pull_request:
     branches:
     - '**'            # matches every branch
-    - '!production'   # excludes production since it has its own build
   workflow_dispatch: {}
 
 jobs:
