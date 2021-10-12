@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -42,10 +44,12 @@ public class UserService {
         return userRepo.saveAndFlush(user);
     }
 
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN')")
     public List<User> getAllUsers() {
         return this.userRepo.findAll();
     }
 
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN')")
     public User getUser(Long id) {
         User user = this.userRepo.findById(id).orElseThrow(() ->  new NotFoundException("User not found"));
         return user;
@@ -93,9 +97,19 @@ public class UserService {
         return this.userRepo.saveAndFlush(existingUser);
     }
 
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN')")
     public void deleteUser(Long id) {
         User existingUser = this.getUser(id);
         this.userRepo.deleteById(existingUser.getId());
+    }
+
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN')")
+    public Page<User> searchUsers(Pageable page, String emailSearch) {
+        if (emailSearch == null) {
+            return userRepo.findAll(page);
+        }
+
+        return userRepo.findByEmail(page, emailSearch);
     }
 
 }
