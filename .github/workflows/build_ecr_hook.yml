@@ -26,8 +26,6 @@
 on:
   push:
     branches: [ production ]
-  pull_request:
-    branches: [ production ]
   workflow_dispatch: {}
 
 name: Build, Push to ECR and Hook
