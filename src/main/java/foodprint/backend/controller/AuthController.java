@@ -102,13 +102,6 @@ public class AuthController {
     @Operation(summary = "Register for a new user account")
     public ResponseEntity<RegResponseDTO> register(@Valid @RequestBody RegRequestDTO request) {
         
-        Optional<User> existingUser = repo.findByEmail(request.getEmail());
-        if (existingUser.isPresent()) {
-            RegResponseDTO resp = new RegResponseDTO();
-            resp.setStatus("EMAILEXISTS");
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(resp);
-        }
-        
         User user = new User();
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());

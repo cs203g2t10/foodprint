@@ -56,7 +56,7 @@ public class AuthenticationService {
         //generate email token
         Token confirmToken = new Token(Token.EMAIL_CONFIRMATION_TOKEN, user);
 
-        tokenRepo.save(confirmToken);
+        tokenRepo.saveAndFlush(confirmToken);
         
         String emailBody = String.format(
             "Hi %s, \n\n" +    
