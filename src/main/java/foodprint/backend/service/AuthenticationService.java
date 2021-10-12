@@ -1,5 +1,7 @@
 package foodprint.backend.service;
 
+import foodprint.backend.exceptions.AlreadyExistsException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Service;
 import foodprint.backend.exceptions.MailException;
 import foodprint.backend.exceptions.RegistrationException;
 import foodprint.backend.exceptions.UserUnverifiedException;
+import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.Token;
 import foodprint.backend.model.TokenRepo;
 import foodprint.backend.model.User;
@@ -52,6 +55,14 @@ public class AuthenticationService {
         throw new BadCredentialsException("Incorrect credentials provided");
     }
 
+    public void register(User user) {
+        if (userRepo.findByEmail(user.getEmail()).isPresent()) {
+            throw new AlreadyExistsException("Registration with this email already exists!");
+        }
+        user = userRepo.saveAndFlush(user);
+        emailConfirmation(user);
+    }
+
     public void emailConfirmation(User user) {
         //generate email token
         Token confirmToken = new Token(Token.EMAIL_CONFIRMATION_TOKEN, user);
@@ -77,7 +88,7 @@ public class AuthenticationService {
     }
 
     public void confirmRegistration(String tok) {
-        Token token = tokenRepo.findByToken(tok);
+        Token token = tokenRepo.findByToken(tok).orElseThrow(() -> new NotFoundException("Specified token does not exist!"));
         User requestor = token.getRequestor();
 
         if (!token.isValid() || token.getType() != Token.EMAIL_CONFIRMATION_TOKEN) {

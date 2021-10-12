@@ -18,6 +18,7 @@ import foodprint.backend.exceptions.DeleteFailedException;
 import foodprint.backend.exceptions.InsufficientPermissionsException;
 import foodprint.backend.exceptions.MailException;
 import foodprint.backend.exceptions.NotFoundException;
+import foodprint.backend.exceptions.RegistrationException;
 import foodprint.backend.exceptions.VaccinationValidationException;
 
 import javax.servlet.http.HttpServletResponse;
@@ -103,5 +104,8 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage());
     }
 
-
+    @ExceptionHandler(RegistrationException.class)
+    public void handleVaccinationExceptionError(RegistrationException ex, HttpServletResponse response) throws IOException {
+        response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage());
+    }
 }

@@ -1,7 +1,6 @@
 package foodprint.backend.controller;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -25,7 +24,6 @@ import foodprint.backend.dto.AuthRequestDTO;
 import foodprint.backend.dto.AuthResponseDTO;
 import foodprint.backend.dto.CurrentUserDetailsDTO;
 import foodprint.backend.dto.RegRequestDTO;
-import foodprint.backend.dto.RegResponseDTO;
 import foodprint.backend.exceptions.RegistrationException;
 import foodprint.backend.exceptions.UserUnverifiedException;
 import foodprint.backend.model.User;
@@ -43,8 +41,6 @@ public class AuthController {
     private AuthenticationService authService;
 
     private UserRepo repo;
-
-    
 
     @Autowired
     public AuthController(JwtTokenUtil jwtTokenUtil, AuthenticationService authService, UserRepo userRepo) {
@@ -100,46 +96,22 @@ public class AuthController {
 
     @PostMapping("/register")
     @Operation(summary = "Register for a new user account")
-    public ResponseEntity<RegResponseDTO> register(@Valid @RequestBody RegRequestDTO request) {
-        
+    public ResponseEntity<Void> register(@Valid @RequestBody RegRequestDTO request) {
         User user = new User();
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
         user.setEmail(request.getEmail());
         user.setPassword(authService.encodePassword(request.getPassword()));
-        // user.setRoles("FP_USER");
         user.setRoles("FP_UNVERIFIED");
         user.setRegisteredOn(LocalDateTime.now());
-        user = repo.saveAndFlush(user);
-
-        RegResponseDTO resp = new RegResponseDTO();
-
-        try {
-            authService.emailConfirmation(user);
-            resp.setStatus("SUCCESS");
-            return new ResponseEntity<>(resp, HttpStatus.OK);
-        } catch (RegistrationException ex) {
-            resp.setStatus("EMAIL_ERROR");
-            return new ResponseEntity<>(resp, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
+        authService.register(user);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping("/register/confirm/{token}")
-    public ResponseEntity<RegResponseDTO> confirmEmail(@PathVariable("token") String token) {
-        RegResponseDTO resp = new RegResponseDTO();
-        try {
-
-            authService.confirmRegistration(token);
-            resp.setStatus("SUCCESS");
-            return new ResponseEntity<>(resp, HttpStatus.OK);
-
-        } catch (RegistrationException ex) {
-
-            resp.setStatus("VERIFICATION_UNSUCCESSFUL");
-            return new ResponseEntity<>(resp, HttpStatus.INTERNAL_SERVER_ERROR);
-
-        }
+    public ResponseEntity<Void> confirmEmail(@PathVariable("token") String token) {
+        authService.confirmRegistration(token);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping({"/whoami"})
