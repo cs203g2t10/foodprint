@@ -89,6 +89,12 @@ public class User implements UserDetails{
     @OneToMany(mappedBy="requestor")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<Token> token;
+    
+    @Column(name = "twoFaSecret")
+    private String twoFaSecret;
+
+    @Column(name = "twoFaSet")
+    private boolean twoFaSet;
 
     // Constructors
     public User() {}
@@ -197,9 +203,25 @@ public class User implements UserDetails{
         this.token = token;
     }
 
+    public String getTwoFaSecret() {
+        return this.twoFaSecret;
+    }
+
+    public void setTwoFaSecret(String twoFaSecret) {
+        this.twoFaSecret = twoFaSecret;
+    }
+
     @Override
     public String getPassword() {
         return this.password;
+    }
+
+    public boolean isTwoFaSet() {
+        return twoFaSet;
+    }
+
+    public void setTwoFaSet(boolean twoFaSet) {
+        this.twoFaSet = twoFaSet;
     }
 
     @Override
