@@ -291,7 +291,6 @@ public class RestaurantServiceTest {
         List<String> pictures = new ArrayList<>();
         pictures.add("picture");
         Food newFood = new Food("Sushi", 30.0, 10.0);
-        //newFood.setPicturesPath(pictures);
         FoodDTO newFoodDTO = new FoodDTO();
         List<FoodIngredientQuantityDTO> list = new ArrayList<>(); 
         newFoodDTO.setIngredientQuantityList(list);
@@ -306,7 +305,6 @@ public class RestaurantServiceTest {
         when(repo.findByRestaurantId(any(Long.class))).thenReturn(restaurant);
         when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
         when(foodRepo.saveAndFlush(any(Food.class))).thenReturn(newFood);
-        when(repo.saveAndFlush(any(Restaurant.class))).thenReturn(restaurant);
 
         restaurantService.create(restaurant);
         restaurant.setAllFood(allFood);
@@ -315,6 +313,7 @@ public class RestaurantServiceTest {
         assertNotNull(savedFood);
         verify(repo).findById(restaurantId);
         verify(repo).findByRestaurantId(restaurantId);
+        verify(foodRepo).saveAndFlush(any(Food.class));
     }
 
     @Test
