@@ -110,6 +110,9 @@ public class RestaurantService {
             currentRestaurant.setRestaurantWeekendOpeningMinutes(updatedRestaurant.getRestaurantWeekendOpeningMinutes());
         }
 
+        if (updatedRestaurant.getRestaurantCategory() != null) {
+            currentRestaurant.setRestaurantCategory(updatedRestaurant.getRestaurantCategory());
+        }
         return repo.saveAndFlush(currentRestaurant);
     }
 
@@ -131,9 +134,36 @@ public class RestaurantService {
     }
 
     public Page<Restaurant> search(Pageable page, String query) {
-        return repo.findByRestaurantNameContains(page, query);
+        return repo.findByRestaurantNameContainsIgnoreCase(page, query);
     }
 
+    public List<String> getCategories() {
+        List<String> restaurantCategories = new ArrayList<>();
+        List<Restaurant> allRestaurants = repo.findAll();
+        for (Restaurant restaurant : allRestaurants) {
+            for (String category : restaurant.getRestaurantCategory()) {
+                if (!restaurantCategories.contains(category)) {
+                    restaurantCategories.add(category);
+                }
+            }
+        }
+
+        return restaurantCategories;
+    }
+
+    public List<Restaurant> getRestaurantsRelatedToCategory(String restaurantCategory) {
+        List<Restaurant> restaurantsRelatedToCategory = new ArrayList<>();
+        List<Restaurant> allRestaurants = repo.findAll();
+        for (Restaurant restaurant : allRestaurants) {
+            for (String category : restaurant.getRestaurantCategory()) {
+                if (category.equals(restaurantCategory)) {
+                    restaurantsRelatedToCategory.add(restaurant);
+                }
+            }
+        }
+        return restaurantsRelatedToCategory;
+    }
+    
     /*
     *
     * Food related methods
@@ -247,15 +277,17 @@ public class RestaurantService {
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public void deleteDiscount(Long restaurantId, Long discountId) {
-        Restaurant restaurant = get(restaurantId);
-        List<Discount> allDiscounts = restaurant.getDiscount();
-        for (Discount discount : allDiscounts) {
-            if (discount.getDiscountId().equals(discountId)) {
+        if (discountRepo.existsById(discountId)) {
+            Discount discount = discountRepo.getById(discountId);
+            if (discount.getRestaurant().getRestaurantId().equals(restaurantId)) {
                 discountRepo.delete(discount);
                 return;
+            } else {
+                throw new NotFoundException("Discount found but not in correct restaurant");
             }
+        } else {
+            throw new NotFoundException("Discount not found");
         }
-        throw new NotFoundException("Discount not found");
     }
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
@@ -318,6 +350,35 @@ public class RestaurantService {
         for(Reservation reservation : reservations) {
             LocalDate date = reservation.getDate().toLocalDate();
             if (date.equals(LocalDateTime.now().toLocalDate())) {               
+                List<LineItem> lineItems = reservation.getLineItems();
+            
+                for (LineItem lineItem : lineItems){
+                    Food food = lineItem.getFood();
+                    Set<FoodIngredientQuantity> foodIngreQuantity = food.getFoodIngredientQuantity();
+                    for(FoodIngredientQuantity entry : foodIngreQuantity) {
+                        Ingredient currIngredient = entry.getIngredient();
+                        if (map.containsKey(currIngredient.getIngredientName())) {
+                            Integer currQuantity = map.get(currIngredient.getIngredientName());
+                            map.put(currIngredient.getIngredientName(), currQuantity + entry.getQuantity() * lineItem.getQuantity());
+                        } else {
+                            map.put(currIngredient.getIngredientName(), entry.getQuantity() * lineItem.getQuantity());
+                        }
+                    }
+                }
+            }
+        }
+
+        return map;
+    }
+
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    public HashMap<String, Integer> calculateIngredientsNeededBetween(Restaurant restaurant, LocalDate startDate, LocalDate endDate) {
+        HashMap<String, Integer> map = new HashMap<>();
+        List<Reservation> reservations = reservationRepo.findByRestaurant(restaurant);
+
+        for(Reservation reservation : reservations) {
+            LocalDate date = reservation.getDate().toLocalDate();
+            if (date.isBefore(endDate.plusDays(1)) && date.isAfter(startDate.minusDays(1))) {               
                 List<LineItem> lineItems = reservation.getLineItems();
             
                 for (LineItem lineItem : lineItems){

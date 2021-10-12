@@ -1,8 +1,12 @@
 package foodprint.backend.controller;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import javax.validation.Valid;
+// import javax.ws.rs.BadRequestException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -33,6 +37,7 @@ import foodprint.backend.dto.IngredientDTO;
 import foodprint.backend.dto.PictureDTO;
 import foodprint.backend.dto.RestaurantDTO;
 import foodprint.backend.exceptions.NotFoundException;
+import foodprint.backend.exceptions.BadRequestException;
 import foodprint.backend.model.Discount;
 import foodprint.backend.model.Food;
 import foodprint.backend.model.Ingredient;
@@ -65,18 +70,20 @@ public class RestaurantController {
     @GetMapping({"/{restaurantId}"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Gets a single restaurant from ID")
-    public ResponseEntity<Restaurant> restaurantGet(@PathVariable("restaurantId") Long id) {
+    public ResponseEntity<RestaurantDTO> restaurantGet(@PathVariable("restaurantId") Long id) {
         Restaurant restaurant = service.get(id);
-        return new ResponseEntity<>(restaurant, HttpStatus.OK);
+        RestaurantDTO restaurantDto = convertToDTO(restaurant);
+        return new ResponseEntity<>(restaurantDto, HttpStatus.OK);
     }
 
     // GET (ALL): Get all the restaurants
     @GetMapping
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Gets all restaurants")
-    public ResponseEntity<List<Restaurant>> restaurantGetAll() {
+    public ResponseEntity<List<RestaurantDTO>> restaurantGetAll() {
         List<Restaurant> restaurants = service.getAllRestaurants();
-        return new ResponseEntity<>(restaurants, HttpStatus.OK);
+        List<RestaurantDTO> restaurantDtos = restaurants.stream().map(r -> convertToDTO(r)).collect(Collectors.toList());
+        return new ResponseEntity<>(restaurantDtos, HttpStatus.OK);
     }
 
     // POST: Create new restaurant
@@ -121,10 +128,26 @@ public class RestaurantController {
     ) {
         Direction direction = (sortDesc) ? Sort.Direction.DESC : Sort.Direction.ASC;
         Sort sorting = Sort.by(direction, sortField);
-		Pageable page = PageRequest.of(pageNum - 1, 5, sorting); // Pagination
+		Pageable page = PageRequest.of(pageNum - 1, 16, sorting); // Pagination
 		Page<Restaurant> searchResult = service.search(page, query);
         Page<RestaurantDTO> searchResultsDTO = searchResult.map(result -> convertToDTO(result));
         return searchResultsDTO;
+    }
+
+    @GetMapping({"/categories"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Get a list of categories available")
+    public ResponseEntity<List<String>> getRestaurantCategories() {
+        List<String> restaurantCategories = service.getCategories();
+        return new ResponseEntity<>(restaurantCategories, HttpStatus.OK);
+    }
+
+    @GetMapping({"/categories/{category}"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Get a list of restaurants associated with selected category")
+    public ResponseEntity<List<Restaurant>> getRestaurantRelatedToCategory(@PathVariable("category") String restaurantCategory) {
+            List<Restaurant> restaurantsRelatedToCategory = service.getRestaurantsRelatedToCategory(restaurantCategory);
+            return new ResponseEntity<>(restaurantsRelatedToCategory, HttpStatus.OK);
     }
 
     /*
@@ -284,7 +307,7 @@ public class RestaurantController {
 
     @GetMapping({"/{restaurantId}/calculateIngredientsToday"})
     @ResponseStatus(code = HttpStatus.OK)
-    @Operation(summary = "Calculate ingredients")
+    @Operation(summary = "Calculate ingredients needed today")
     public ResponseEntity<Map<String, Integer>> calculateIngredientsToday (@PathVariable Long restaurantId) {
         Restaurant restaurant = service.get(restaurantId);
         if(restaurant == null)
@@ -292,6 +315,28 @@ public class RestaurantController {
         Map<String, Integer> result = service.calculateIngredientsNeededToday(restaurant);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
+
+    @GetMapping({"/{restaurantId}/calculateIngredientsBetween"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Calculate ingredients needed between start and end date (inclusive)")
+    public ResponseEntity<Map<String, Integer>> calculateIngredientsBetween (@PathVariable Long restaurantId, @RequestParam("start") String startDate, @RequestParam("end") String endDate) {
+        Restaurant restaurant = service.get(restaurantId);
+        if(restaurant == null) {
+            throw new NotFoundException("restaurant does not exist");
+        }
+        
+        LocalDate start = LocalDate.parse(startDate);
+        LocalDate end = LocalDate.parse(endDate);
+        if (start.isBefore(LocalDateTime.now().toLocalDate())) {
+            throw new BadRequestException("starting date should be after today");
+        } else if (start.isAfter(end)) {
+            throw new BadRequestException("start date should be before end date");
+        }
+        Map<String, Integer> result = service.calculateIngredientsNeededBetween(restaurant, start, end);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+   
 
     @PostMapping(path = "/{restaurantId}/uploadPicture",
                 consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
@@ -398,6 +443,7 @@ public class RestaurantController {
         restaurant.setRestaurantWeekendClosingMinutes(restaurantDTO.getRestaurantWeekendClosingMinutes());
         restaurant.setRestaurantWeekendOpeningHour(restaurantDTO.getRestaurantWeekendClosingHour());
         restaurant.setRestaurantWeekendOpeningMinutes(restaurantDTO.getRestaurantWeekendOpeningMinutes());
+        restaurant.setRestaurantCategory(restaurantDTO.getRestaurantCategory());
         return restaurant;
     }
 
@@ -416,14 +462,17 @@ public class RestaurantController {
         dto.setRestaurantWeekendClosingMinutes(restaurant.getRestaurantWeekendClosingMinutes());
         dto.setRestaurantWeekendOpeningHour(restaurant.getRestaurantWeekendClosingHour());
         dto.setRestaurantWeekendOpeningMinutes(restaurant.getRestaurantWeekendOpeningMinutes());
+        dto.setRestaurantCategory(restaurant.getRestaurantCategory());
+        
+        List<Picture> pictures = restaurant.getPictures();
+        List<PictureDTO> pictureDtos = new ArrayList<>();
+        dto.setPictures(pictureDtos);
+
+        for (Picture picture : pictures) {
+            PictureDTO picDto = new PictureDTO(picture.getTitle(), picture.getDescription(), picture.getUrl());
+            pictureDtos.add(picDto);
+        }
+
         return dto;
-
     }
-   
-    // @GetMapping({ "/test/email"})
-    // public String emailTest() {
-    //     emailService.sendSimpleEmail("leowyixuanlyx@gmail.com", "Test", "Test");
-    //     return "index";
-    // }
-
 }

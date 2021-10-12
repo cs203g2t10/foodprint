@@ -55,7 +55,7 @@ public class Reservation {
     private LocalDateTime reservedOn;
 
     public enum Status {
-        ONGOING, CANCELLED
+        PAID, ONGOING, CANCELLED
     }
     @Column(name = "status")
     @Schema(defaultValue = "ONGOING")
@@ -68,6 +68,14 @@ public class Reservation {
     @ManyToOne
     @JoinColumn(name="restaurantId")
     private Restaurant restaurant;
+
+    public Double getPrice() {
+        Double price = 0.0;
+        for (LineItem lineItem : lineItems) {
+            price += lineItem.getFood().getFoodPrice() * lineItem.getQuantity();
+        }
+        return price*100;
+    }
 
     //Constructors
     public Reservation() {}
@@ -203,7 +211,5 @@ public class Reservation {
     public Reservation restaurant(Restaurant restaurant) {
         setRestaurant(restaurant);
         return this;
-    }
-
-
+    } 
 }

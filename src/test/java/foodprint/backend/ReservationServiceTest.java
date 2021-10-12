@@ -55,11 +55,15 @@ public class ReservationServiceTest {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private List<Reservation> reservationList;
+    private List<String> restaurantCategories;
 
     @BeforeEach
     void init() {
         user = new User("bobbytan@gmail.com", "SuperSecurePassw0rd", "Bobby Tan");
-        restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10);
+        restaurantCategories = new ArrayList<>();
+        restaurantCategories.add("Japanese");
+        restaurantCategories.add("Rice");
+        restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
         restaurantId = 1L;
         lineItems = new ArrayList<LineItem>();
         reservation = new Reservation(user, LocalDateTime.now(), 5, true, LocalDateTime.now(), Status.ONGOING, lineItems, restaurant);
@@ -198,8 +202,10 @@ public class ReservationServiceTest {
 
         try {
             reservationService.create(user, req);
-        } catch (NotFoundException e) {
-            assertEquals("Slot not found", e.getMessage());
+        } catch (Exception e) {
+            LocalDateTime dateOfReservation = reservation.getDate();
+            String msg = String.format("Slot not available for %s on %d %s %d at %d:%dHr", restaurant.getRestaurantName(), dateOfReservation.getDayOfMonth(), dateOfReservation.getMonth(), dateOfReservation.getYear(), dateOfReservation.getHour(), dateOfReservation.getMinute());
+            assertEquals(msg, e.getMessage());
         }
 
         verify(restaurantService).get(restaurantId);

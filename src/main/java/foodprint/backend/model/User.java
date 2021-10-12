@@ -23,6 +23,8 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -83,6 +85,10 @@ public class User implements UserDetails{
 
     @Column(name = "vaccinationDob", nullable = true)
     private LocalDate vaccinationDob;
+    
+    @OneToMany(mappedBy="requestor")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<Token> token;
 
     // Constructors
     public User() {}
@@ -181,6 +187,14 @@ public class User implements UserDetails{
 
     public boolean isVaccinated() {
         return (this.vaccinationDob != null && this.vaccinationName != null);
+    }
+    
+    public List<Token> getToken() {
+        return this.token;
+    }
+
+    public void setToken(List<Token> token) {
+        this.token = token;
     }
 
     @Override

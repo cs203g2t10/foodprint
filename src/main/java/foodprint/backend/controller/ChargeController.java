@@ -3,6 +3,7 @@ package foodprint.backend.controller;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Charge;
 
+import foodprint.backend.service.ReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,13 +21,21 @@ import foodprint.backend.service.StripeService;
 @RestController
 @RequestMapping("/api/v1/charge")
 public class ChargeController {
-    @Autowired
+
     private StripeService paymentsService;
+    private ReservationService reservationService;
+
+    @Autowired
+    public ChargeController(StripeService paymentsService, ReservationService reservationService) {
+        this.paymentsService = paymentsService;
+        this.reservationService = reservationService;
+    }
 
     @PostMapping("/")
     public ResponseEntity<ChargeDTO> charge(@RequestBody ChargeRequest chargeRequest)
       throws StripeException {
         Charge charge = paymentsService.charge(chargeRequest);
+        reservationService.setPaid(chargeRequest.getReservationId());
         ChargeDTO chargeDTO = new ChargeDTO(charge.getId(), charge.getStatus(), charge.getBalanceTransaction());
         return new ResponseEntity<ChargeDTO>(chargeDTO, HttpStatus.CREATED);
     }
