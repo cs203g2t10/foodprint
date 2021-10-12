@@ -19,10 +19,6 @@ import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.security.core.GrantedAuthority;
@@ -31,6 +27,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table
@@ -94,7 +93,7 @@ public class User implements UserDetails{
     private String twoFaSecret;
 
     @Column(name = "twoFaSet")
-    private boolean twoFaSet;
+    private Boolean twoFaSet = false;
 
     // Constructors
     public User() {}
@@ -216,11 +215,11 @@ public class User implements UserDetails{
         return this.password;
     }
 
-    public boolean isTwoFaSet() {
+    public Boolean isTwoFaSet() {
         return twoFaSet;
     }
 
-    public void setTwoFaSet(boolean twoFaSet) {
+    public void setTwoFaSet(Boolean twoFaSet) {
         this.twoFaSet = twoFaSet;
     }
 

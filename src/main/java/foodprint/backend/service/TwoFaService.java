@@ -2,15 +2,20 @@ package foodprint.backend.service;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.security.Principal;
 import java.util.Optional;
 
 import org.jboss.aerogear.security.otp.Totp;
 import org.jboss.aerogear.security.otp.api.Base32;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+import foodprint.backend.exceptions.InvalidException;
+import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.User;
 import foodprint.backend.model.UserRepo;
 
+@Service
 public class TwoFaService {
     @Autowired
     UserRepo userRepo;
@@ -57,5 +62,62 @@ public class TwoFaService {
     public boolean validate(String secret, String token) {
         Totp otp = new Totp(secret);
         return otp.verify(token);
+    }
+
+    public String setup(Principal principal) {
+        String email = principal.getName();
+        User user = userRepo.findByEmail(email).orElseThrow(() ->  new NotFoundException("User not found"));
+
+        if (user.isTwoFaSet()) {
+            throw new InvalidException("2FA already enabled.");
+        }
+
+        String secret = generateSecret();
+        user.setTwoFaSecret(secret);
+        userRepo.saveAndFlush(user);
+        
+        String qrUrl = generateQRUrl(email, secret);
+        return qrUrl;
+    }
+
+    public void confirm(String token, Principal principal) {
+        String email = principal.getName();
+        User user = userRepo.findByEmail(email).orElseThrow(() ->  new NotFoundException("User not found"));
+        String twoFaSecret = user.getTwoFaSecret();
+        
+
+        if (twoFaSecret == null || twoFaSecret.equals("")) {
+            throw new InvalidException("Something went wrong, please try again.");
+        }
+
+        boolean setupOtpOk = validate(twoFaSecret, token);
+
+        if (!setupOtpOk) {
+            // user.setTwoFaSecret(null);
+            throw new InvalidException("Incorrect OTP entered, please restart the setup.");
+        }
+
+        user.setTwoFaSet(true);
+        userRepo.saveAndFlush(user);
+    }
+
+    public void disable(String token, Principal principal) {
+        String email = principal.getName();
+        User user = userRepo.findByEmail(email).orElseThrow(() ->  new NotFoundException("User not found"));
+
+        String twoFaSecret = user.getTwoFaSecret();
+        if (twoFaSecret == null || twoFaSecret.equals("")) {
+            throw new InvalidException("Something went wrong, please try again.");
+        }
+
+        boolean disableOtpOk = validate(twoFaSecret, token);
+
+        if (!disableOtpOk) {
+            throw new InvalidException("Incorrect OTP entered, please restart the disabling process.");
+        }
+
+        user.setTwoFaSecret(null);
+        user.setTwoFaSet(false);
+        userRepo.saveAndFlush(user);
     }
 }
