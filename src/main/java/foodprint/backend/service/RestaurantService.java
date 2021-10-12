@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.time.LocalDateTime;
 
-import com.stripe.param.CreditNoteCreateParams.Line;
+//import com.stripe.param.CreditNoteCreateParams.Line;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,7 +12,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import foodprint.backend.dto.DiscountDTO;
 import foodprint.backend.dto.FoodDTO;
 import foodprint.backend.dto.FoodIngredientQuantityDTO;
 import foodprint.backend.exceptions.DeleteFailedException;
@@ -264,7 +263,7 @@ public class RestaurantService {
     // }
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
-    public Discount addDiscount(Long restaurantId, DiscountDTO discount) {
+    public Discount addDiscount(Long restaurantId, Discount discount) {
         Restaurant restaurant = repo.findByRestaurantId(restaurantId);
         Discount Discount = new Discount();
         Discount.restaurant(restaurant)

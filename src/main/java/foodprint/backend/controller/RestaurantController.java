@@ -249,7 +249,8 @@ public class RestaurantController {
     @Operation(summary = "Creates a new discount using dto")
     public ResponseEntity<Discount> createDiscount(@PathVariable Long restaurantId, @RequestBody DiscountDTO discount) {
         // Restaurant restaurantOpt = service.get(restaurantId);
-        Discount savedDiscount = service.addDiscount(restaurantId, discount);
+        Discount newDiscount = new Discount(discount.getDiscountDescription(), discount.getDiscountPercentage());
+        Discount savedDiscount = service.addDiscount(restaurantId, newDiscount);
         return new ResponseEntity<>(savedDiscount, HttpStatus.CREATED);
     }
 
@@ -439,9 +440,9 @@ public class RestaurantController {
         restaurant.setRestaurantWeekdayClosingMinutes(restaurantDTO.getRestaurantWeekdayClosingMinutes());
         restaurant.setRestaurantWeekdayOpeningHour(restaurantDTO.getRestaurantWeekdayOpeningHour());
         restaurant.setRestaurantWeekdayOpeningMinutes(restaurantDTO.getRestaurantWeekdayOpeningMinutes());
-        restaurant.setRestaurantWeekendClosingHour(restaurantDTO.getRestaurantWeekendClosingMinutes());
+        restaurant.setRestaurantWeekendClosingHour(restaurantDTO.getRestaurantWeekendClosingHour());
         restaurant.setRestaurantWeekendClosingMinutes(restaurantDTO.getRestaurantWeekendClosingMinutes());
-        restaurant.setRestaurantWeekendOpeningHour(restaurantDTO.getRestaurantWeekendClosingHour());
+        restaurant.setRestaurantWeekendOpeningHour(restaurantDTO.getRestaurantWeekendOpeningHour());
         restaurant.setRestaurantWeekendOpeningMinutes(restaurantDTO.getRestaurantWeekendOpeningMinutes());
         restaurant.setRestaurantCategory(restaurantDTO.getRestaurantCategory());
         return restaurant;
@@ -458,9 +459,9 @@ public class RestaurantController {
         dto.setRestaurantWeekdayClosingMinutes(restaurant.getRestaurantWeekdayClosingMinutes());
         dto.setRestaurantWeekdayOpeningHour(restaurant.getRestaurantWeekdayOpeningHour());
         dto.setRestaurantWeekdayOpeningMinutes(restaurant.getRestaurantWeekdayOpeningMinutes());
-        dto.setRestaurantWeekendClosingHour(restaurant.getRestaurantWeekendClosingMinutes());
+        dto.setRestaurantWeekendClosingHour(restaurant.getRestaurantWeekendClosingHour());
         dto.setRestaurantWeekendClosingMinutes(restaurant.getRestaurantWeekendClosingMinutes());
-        dto.setRestaurantWeekendOpeningHour(restaurant.getRestaurantWeekendClosingHour());
+        dto.setRestaurantWeekendOpeningHour(restaurant.getRestaurantWeekendOpeningHour());
         dto.setRestaurantWeekendOpeningMinutes(restaurant.getRestaurantWeekendOpeningMinutes());
         dto.setRestaurantCategory(restaurant.getRestaurantCategory());
         
