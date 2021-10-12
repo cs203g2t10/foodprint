@@ -1,9 +1,8 @@
 package foodprint.backend;
 
-import foodprint.backend.dto.DiscountDTO;
 import foodprint.backend.dto.FoodDTO;
 import foodprint.backend.dto.FoodIngredientQuantityDTO;
-
+import foodprint.backend.exceptions.DeleteFailedException;
 import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.Discount;
 import foodprint.backend.model.DiscountRepo;
@@ -166,6 +165,28 @@ public class RestaurantServiceTest {
         }
 
         verify(repo).findById(restaurantId);
+    }
+
+    @Test
+    void deleteRestaurant_RestaurantFoundButUnableToDelete_ReturnError() {
+        List<String> restaurantCategories = new ArrayList<>();
+        restaurantCategories.add("Japanese");
+        restaurantCategories.add("Casual dining");
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+        Long restaurantId = 1L;
+        ReflectionTestUtils.setField(restaurant, "restaurantId", restaurantId);
+
+        when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
+        doNothing().when(repo).delete(any(Restaurant.class));
+
+        try {
+            restaurantService.delete(restaurantId);
+        } catch(DeleteFailedException e) {
+            assertEquals("Restaurant could not be deleted", e.getMessage());
+        }
+
+        verify(repo, times(2)).findById(restaurantId);
+        verify(repo).delete(restaurant);
     }
 
     @Test
@@ -425,19 +446,40 @@ public class RestaurantServiceTest {
         verify(foodRepo).findById(foodId);
     }
 
+    @Test
+    void getFood_FoodExistInWrongRestaurant_ReturnError() {
+        Food food = new Food("Sashimi", 50.0, 0.0);
+        List<String> restaurantCategories = new ArrayList<>();
+        restaurantCategories.add("Japanese");
+        restaurantCategories.add("Casual dining");
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc","Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+        Long foodId = 1L;
+        Long restaurantId = 1L;
+        ReflectionTestUtils.setField(restaurant, "restaurantId", restaurantId);
+        ReflectionTestUtils.setField(food, "foodId", foodId);
+
+        when(foodRepo.findById(any(Long.class))).thenReturn(Optional.of(food));
+
+        food.setRestaurant(restaurant);
+        try {
+            restaurantService.getFood(2L, foodId);
+        } catch(NotFoundException e) {
+            assertEquals("Food found but in incorrect restaurant", e.getMessage());
+        }
+        verify(foodRepo).findById(foodId);
+    }
 
     //----------Discount-related Testing-----------
     @Test
     void addDiscount_newDiscount_ReturnSavedDiscount() {
         Restaurant restaurant = new Restaurant("Sushi Tei", "Serangoon");
         Long restaurantId = 1L;
-        DiscountDTO discountdto = new DiscountDTO(restaurantId, "1 For 1", 50);
         Discount discount = new Discount("1 For 1", 50);
 
         when (repo.findByRestaurantId(any(Long.class))).thenReturn(restaurant);
         when (discountRepo.saveAndFlush(any(Discount.class))).thenReturn(discount);
 
-        Discount savedDiscount = restaurantService.addDiscount(restaurantId, discountdto);
+        Discount savedDiscount = restaurantService.addDiscount(restaurantId, discount);
 
         assertNotNull(savedDiscount);
         verify(repo).findByRestaurantId(restaurantId);
@@ -450,14 +492,13 @@ public class RestaurantServiceTest {
         Long restaurantId = 1L;
         Long discountId = 2L;
         Discount discount = new Discount("1 For 1", 30);
-        DiscountDTO discountdto = new DiscountDTO(restaurantId, "1 for 1", 30);
         ReflectionTestUtils.setField(restaurant, "restaurantId", restaurantId);
         ReflectionTestUtils.setField(discount, "discountId", discountId);
 
         when(repo.findByRestaurantId(any(Long.class))).thenReturn(restaurant);
         when(discountRepo.saveAndFlush(any(Discount.class))).thenReturn(discount);
 
-        restaurantService.addDiscount(restaurantId, discountdto);
+        restaurantService.addDiscount(restaurantId, discount);
         Discount updatedDiscount = restaurantService.updateDiscount(restaurantId, discountId, discount);
 
         assertNotNull(updatedDiscount);
@@ -517,7 +558,6 @@ public class RestaurantServiceTest {
         Discount discount = new Discount("1 For 1", 50);
         Long discountId = 1L;
         Long restaurantId = 1L;
-        DiscountDTO discountdto = new DiscountDTO(restaurantId,discount.getDiscountDescription(), discount.getDiscountPercentage());
         List<String> restaurantCategories = new ArrayList<>();
         restaurantCategories.add("Japanese");
         restaurantCategories.add("Casual dining");
@@ -528,7 +568,7 @@ public class RestaurantServiceTest {
         when(discountRepo.existsById(any(Long.class))).thenReturn(true);
         when(discountRepo.getById(any(Long.class))).thenReturn(discount);
 
-        restaurantService.addDiscount(restaurantId, discountdto);
+        restaurantService.addDiscount(restaurantId, discount);
         discount.setRestaurant(restaurant);
         restaurantService.deleteDiscount(restaurantId, discountId);
 
@@ -552,6 +592,34 @@ public class RestaurantServiceTest {
         }
 
         verify(discountRepo).existsById(discountId);
+    }
+
+    @Test
+    void deleteDiscount_DiscountFoundInWrongRestaurant_ReturnError() {
+        Discount discount = new Discount("1 For 1", 50);
+        Long discountId = 1L;
+        Long restaurantId = 1L;
+        List<String> restaurantCategories = new ArrayList<>();
+        restaurantCategories.add("Japanese");
+        restaurantCategories.add("Casual dining");
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc","Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+        Restaurant anotherRestaurant = new Restaurant("Sushi Tei", "Desc","Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+        ReflectionTestUtils.setField(restaurant, "restaurantId", restaurantId);
+        ReflectionTestUtils.setField(anotherRestaurant,"restaurantId", 2L);
+        ReflectionTestUtils.setField(discount, "discountId", discountId);
+
+        when(discountRepo.existsById(any(Long.class))).thenReturn(true);
+        when(discountRepo.getById(any(Long.class))).thenReturn(discount);
+
+        discount.setRestaurant(restaurant);
+        try {
+            restaurantService.deleteDiscount(2L, discountId);
+        } catch(NotFoundException e) {
+            assertEquals("Discount found but not in correct restaurant", e.getMessage());
+        }
+
+        verify(discountRepo).existsById(discountId);
+        verify(discountRepo).getById(discountId);
     }
 
     //-------Ingredient-related testing---------

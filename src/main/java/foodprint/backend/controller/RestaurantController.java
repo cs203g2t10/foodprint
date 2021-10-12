@@ -249,7 +249,8 @@ public class RestaurantController {
     @Operation(summary = "Creates a new discount using dto")
     public ResponseEntity<Discount> createDiscount(@PathVariable Long restaurantId, @RequestBody DiscountDTO discount) {
         // Restaurant restaurantOpt = service.get(restaurantId);
-        Discount savedDiscount = service.addDiscount(restaurantId, discount);
+        Discount newDiscount = new Discount(discount.getDiscountDescription(), discount.getDiscountPercentage());
+        Discount savedDiscount = service.addDiscount(restaurantId, newDiscount);
         return new ResponseEntity<>(savedDiscount, HttpStatus.CREATED);
     }
 
