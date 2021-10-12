@@ -41,9 +41,11 @@ public class UserService {
 
     public User createUser(User user) {
         Optional<User> existingUserByEmail = userRepo.findByEmail(user.getEmail());
-        Optional<User> existingUserById = userRepo.findById(user.getId());
-        if (existingUserById.isPresent()) {
-            throw new AlreadyExistsException("User with the same ID already exists");
+        if (user.getId() != null) {
+            Optional<User> existingUserById = userRepo.findById(user.getId());
+            if (existingUserById.isPresent()) {
+                throw new AlreadyExistsException("User with the same ID already exists");
+            }
         }
         if (existingUserByEmail.isPresent()) {
             throw new AlreadyExistsException("User with the same email already exists");
