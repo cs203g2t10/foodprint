@@ -150,17 +150,14 @@ public class UserService {
     }
 
     public void checkPasswordReset(String tok) {
-        Token token = tokenRepo.findByToken(tok);
-        if (token == null) {
-            throw new NotFoundException("Token not found");
-        }
+        Token token = tokenRepo.findByToken(tok).orElseThrow(() -> new NotFoundException("The specified token was not found"));
         if (!token.isValid() || token.getType() != Token.PASSWORD_RESET_REQUEST_TOKEN) {
             throw new InvalidException("Token invalid");
         }
     }
 
     public void doPasswordReset(String tok, String password) {
-        Token token = tokenRepo.findByToken(tok);
+        Token token = tokenRepo.findByToken(tok).orElseThrow(() -> new NotFoundException("The specified token was not found"));
         if (token == null) {
             throw new NotFoundException("Token not found");
         }

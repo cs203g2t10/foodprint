@@ -1,6 +1,7 @@
 package foodprint.backend.controller;
 
 
+
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,8 +76,8 @@ public class UserController {
     @Operation(summary = "Gets all users on Foodprint")
     public ResponseEntity<Page<User>> getAllUsers(
         @RequestParam(value="emailContains", required = false) String emailQuery,
-        @RequestParam(value="page", defaultValue="1") Integer pageNumber,
-        @RequestParam(value="sortBy", defaultValue="email") String sortByField,
+        @RequestParam(value="page", defaultValue="0") Integer pageNumber,
+        @RequestParam(value="sortBy", defaultValue="id") String sortByField,
         @RequestParam(value="sortDesc", defaultValue="false") Boolean sortDesc
     ) {
         Direction direction = (sortDesc) ? Direction.DESC : Direction.ASC;
