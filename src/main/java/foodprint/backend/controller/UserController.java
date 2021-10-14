@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import foodprint.backend.dto.UpdateUserDTO;
 import foodprint.backend.dto.RequestResetPwdDTO;
 import foodprint.backend.dto.ResetPwdDTO;
+import foodprint.backend.exceptions.BadRequestException;
 import foodprint.backend.exceptions.InvalidException;
 import foodprint.backend.exceptions.MailException;
 import foodprint.backend.exceptions.NotFoundException;
@@ -112,6 +114,10 @@ public class UserController {
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Deletes a user on Foodprint")
     public ResponseEntity<User> deleteUser(@PathVariable("id") Long id) {
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (currentUser.getId() == id) {
+            throw new BadRequestException("You cannot delete yourself.");
+        }
         userService.deleteUser(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
