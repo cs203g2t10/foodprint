@@ -109,7 +109,7 @@ public class RestaurantService {
             currentRestaurant.setRestaurantWeekendOpeningMinutes(updatedRestaurant.getRestaurantWeekendOpeningMinutes());
         }
 
-        if (updatedRestaurant.getRestaurantCategory() != null) {
+        if (updatedRestaurant.getRestaurantCategory() != null && !updatedRestaurant.getRestaurantCategory().isEmpty()) {
             currentRestaurant.setRestaurantCategory(updatedRestaurant.getRestaurantCategory());
         }
         return repo.saveAndFlush(currentRestaurant);
