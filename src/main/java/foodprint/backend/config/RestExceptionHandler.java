@@ -14,6 +14,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import foodprint.backend.exceptions.AlreadyExistsException;
+import foodprint.backend.exceptions.BadRequestException;
 import foodprint.backend.exceptions.DeleteFailedException;
 import foodprint.backend.exceptions.InsufficientPermissionsException;
 import foodprint.backend.exceptions.MailException;
@@ -89,7 +90,12 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         response.sendError(HttpStatus.CONFLICT.value(), ex.getMessage());
     }
 
-     @ExceptionHandler(StripeException.class)
+    @ExceptionHandler(BadRequestException.class)
+    public void handleBadRequestException(BadRequestException ex, HttpServletResponse response) throws IOException {
+        response.sendError(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+    }
+
+    @ExceptionHandler(StripeException.class)
      public void handleStripeError(StripeException ex, HttpServletResponse response) throws IOException{
         response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value() ,ex.getMessage());
     }
@@ -105,7 +111,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(RegistrationException.class)
-    public void handleVaccinationExceptionError(RegistrationException ex, HttpServletResponse response) throws IOException {
+    public void handleRegistrationException(RegistrationException ex, HttpServletResponse response) throws IOException {
         response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage());
     }
 }
