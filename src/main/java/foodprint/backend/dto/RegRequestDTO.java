@@ -17,7 +17,7 @@ public class RegRequestDTO {
     @Schema(defaultValue="SuperSecurePassw0rd")
     @NotEmpty
     @Size(min = 8, max = 60)
-    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$", message = "must have one letter, one number and at least 8 characters")
+    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$", message = "Must have 1 letter, 1 number and at least 8 characters")
     private String password;
 
     @Schema(defaultValue="Bobby")
