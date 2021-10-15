@@ -1,17 +1,21 @@
 package foodprint.backend.service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import foodprint.backend.exceptions.AlreadyExistsException;
+import foodprint.backend.exceptions.BadRequestException;
 import foodprint.backend.exceptions.InvalidException;
 import foodprint.backend.exceptions.MailException;
 import foodprint.backend.exceptions.NotFoundException;
@@ -96,7 +100,21 @@ public class UserService {
             existingUser.setPassword(encodedPassword);
         }
         if (updatedUser.getRoles() != null) {
-            existingUser.setRoles(updatedUser.getRoles().replace(" ", ""));
+            String[] roles = updatedUser.getRoles().split(",");
+            Set<String> filteredRoles = new HashSet<>();
+            
+            for (String role : roles) {
+                role = role.strip();
+                if (role.equals("FP_ADMIN") || role.equals("FP_MANAGER") || role.equals("FP_USER") || role.equals("FP_UNVERIFIED")) {
+                    filteredRoles.add(role);
+                }
+            }
+
+            if (filteredRoles.size() == 0) {
+                throw new BadRequestException("No roles specified");
+            }
+
+            existingUser.setRoles(String.join(",", filteredRoles));
         }
 
         if (updatedUser.getVaccinationDob() != null) {

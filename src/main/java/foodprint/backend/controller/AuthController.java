@@ -24,7 +24,6 @@ import foodprint.backend.dto.AuthRequestDTO;
 import foodprint.backend.dto.AuthResponseDTO;
 import foodprint.backend.dto.CurrentUserDetailsDTO;
 import foodprint.backend.dto.RegRequestDTO;
-import foodprint.backend.exceptions.RegistrationException;
 import foodprint.backend.exceptions.UserUnverifiedException;
 import foodprint.backend.model.User;
 import foodprint.backend.model.UserRepo;
@@ -123,6 +122,10 @@ public class AuthController {
         currentUserDetails.setFirstName(currentUser.getFirstName());
         currentUserDetails.setLastName(currentUser.getLastName());
         currentUserDetails.setUserId(currentUser.getId());
+        currentUserDetails.setIs2FAEnabled(false);
+        currentUserDetails.setVaccinationName(currentUser.getVaccinationName());
+        currentUserDetails.setVaccinationDob(currentUser.getVaccinationDob());
+        currentUserDetails.setUserRoles(currentUser.getRoles().split(","));
 		return new ResponseEntity<>(currentUserDetails, HttpStatus.OK);
 	}
 }

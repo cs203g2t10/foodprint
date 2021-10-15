@@ -35,6 +35,7 @@ public class JwtTokenUtil {
                 .setHeaderParam("userId", user.getId())
                 .setHeaderParam("userFname", user.getFirstName())
                 .setHeaderParam("userLname", user.getLastName())
+                .setHeaderParam("userAuthorities", user.getRoles().split(","))
                 .setExpiration(Date.from(LocalDateTime.now().plus(7, ChronoUnit.DAYS).toInstant(ZoneOffset.UTC)))
                 .signWith(SignatureAlgorithm.HS512, jwtSecret)
                 .compact();
