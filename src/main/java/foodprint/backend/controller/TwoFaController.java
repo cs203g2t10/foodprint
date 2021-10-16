@@ -38,7 +38,7 @@ public class TwoFaController {
         try {
             return new ResponseEntity<>(twoFaService.setup(principal), HttpStatus.OK);
         } catch (InvalidException e) {
-            return new ResponseEntity<>("2FA already enabled", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("2FA already enabled.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

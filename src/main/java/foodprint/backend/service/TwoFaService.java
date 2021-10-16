@@ -21,6 +21,7 @@ public class TwoFaService {
     UserRepo userRepo;
 
     public static String QR_PREFIX = "https://chart.googleapis.com/chart?chs=200x200&chld=M%%7C0&cht=qr&chl=";
+    public int TOKEN_LENGTH = 6;
 
     public boolean checkEmailHas2FA(String email) {
 
@@ -84,7 +85,14 @@ public class TwoFaService {
         String email = principal.getName();
         User user = userRepo.findByEmail(email).orElseThrow(() ->  new NotFoundException("User not found"));
         String twoFaSecret = user.getTwoFaSecret();
+
+        if (!validToken(token)) {
+            throw new InvalidException("Incorrect token format.");
+        }
         
+        if (user.isTwoFaSet()) {
+            throw new InvalidException("2FA already enabled.");
+        }
 
         if (twoFaSecret == null || twoFaSecret.equals("")) {
             throw new InvalidException("Something went wrong, please try again.");
@@ -93,7 +101,6 @@ public class TwoFaService {
         boolean setupOtpOk = validate(twoFaSecret, token);
 
         if (!setupOtpOk) {
-            // user.setTwoFaSecret(null);
             throw new InvalidException("Incorrect OTP entered, please restart the setup.");
         }
 
@@ -104,10 +111,14 @@ public class TwoFaService {
     public void disable(String token, Principal principal) {
         String email = principal.getName();
         User user = userRepo.findByEmail(email).orElseThrow(() ->  new NotFoundException("User not found"));
-
         String twoFaSecret = user.getTwoFaSecret();
-        if (twoFaSecret == null || twoFaSecret.equals("")) {
-            throw new InvalidException("Something went wrong, please try again.");
+
+        if (!validToken(token)) {
+            throw new InvalidException("Incorrect token format.");
+        }
+
+        if (!user.isTwoFaSet()) {
+            throw new InvalidException("2FA not yet set.");
         }
 
         boolean disableOtpOk = validate(twoFaSecret, token);
@@ -119,5 +130,12 @@ public class TwoFaService {
         user.setTwoFaSecret(null);
         user.setTwoFaSet(false);
         userRepo.saveAndFlush(user);
+    }
+
+    public boolean validToken(String token) {
+        if (token.length() != TOKEN_LENGTH || !token.matches("[0-9]+")) {
+            return false;
+        }
+        return true;
     }
 }
