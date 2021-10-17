@@ -395,7 +395,6 @@ public class RestaurantController {
         return new ResponseEntity<>(service.saveFoodPicture(restaurantId, foodId, title, description, file), HttpStatus.CREATED);
     }
 
-    //TODO fix the nesting (make DTO??)
     @GetMapping({"/{restaurantId}/food/{foodId}/picture/{pictureId}/"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Get a picture of a restaurant's food by using restaurant id, picture id and food id")
