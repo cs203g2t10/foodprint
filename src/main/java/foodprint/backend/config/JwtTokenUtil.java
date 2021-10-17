@@ -1,12 +1,6 @@
 package foodprint.backend.config;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.SignatureException;
-import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -28,7 +22,7 @@ public class JwtTokenUtil {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public String generateAccessToken(User user) {
-        return Jwts.builder()
+         JwtBuilder token = Jwts.builder()
                 .setSubject(user.getUsername())
                 .setIssuer(jwtIssuer)
                 .setIssuedAt(new Date())
@@ -37,8 +31,11 @@ public class JwtTokenUtil {
                 .setHeaderParam("userLname", user.getLastName())
                 .setHeaderParam("userAuthorities", user.getRoles().split(","))
                 .setExpiration(Date.from(LocalDateTime.now().plus(7, ChronoUnit.DAYS).toInstant(ZoneOffset.UTC)))
-                .signWith(SignatureAlgorithm.HS512, jwtSecret)
-                .compact();
+                .signWith(SignatureAlgorithm.HS512, jwtSecret);
+         if (user.getRoles().contains("FP_MANAGER")) {
+            token.setHeaderParam("restaurantId", user.getRestaurant().getRestaurantId());
+         }
+         return token.compact();
     }
 
     public String getUserId(String token) {
