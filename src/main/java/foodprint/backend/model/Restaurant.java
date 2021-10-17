@@ -123,7 +123,7 @@ public class Restaurant {
     private List<Food> food = new ArrayList<Food>();
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.MERGE)
-    private List<RestaurantManager> restaurantManagers;
+    private List<User> restaurantManagers;
 
     @JsonIgnore
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
@@ -165,7 +165,7 @@ public class Restaurant {
     }
 
 
-    public Restaurant(Long restaurantId, String restaurantName, String restaurantDesc, String restaurantLocation, Integer restaurantPriceRange, Integer restaurantTableCapacity, Integer restaurantWeekdayOpeningHour, Integer restaurantWeekdayOpeningMinutes, Integer restaurantWeekdayClosingHour, Integer restaurantWeekdayClosingMinutes, Integer restaurantWeekendOpeningHour, Integer restaurantWeekendOpeningMinutes, Integer restaurantWeekendClosingHour, Integer restaurantWeekendClosingMinutes, List<Food> food, List<RestaurantManager> restaurantManagers, List<Discount> discount, List<Reservation> reservations, List<Ingredient> ingredients, List<Picture> pictures) {
+    public Restaurant(Long restaurantId, String restaurantName, String restaurantDesc, String restaurantLocation, Integer restaurantPriceRange, Integer restaurantTableCapacity, Integer restaurantWeekdayOpeningHour, Integer restaurantWeekdayOpeningMinutes, Integer restaurantWeekdayClosingHour, Integer restaurantWeekdayClosingMinutes, Integer restaurantWeekendOpeningHour, Integer restaurantWeekendOpeningMinutes, Integer restaurantWeekendClosingHour, Integer restaurantWeekendClosingMinutes, List<Food> food, List<User> restaurantManagers, List<Discount> discount, List<Reservation> reservations, List<Ingredient> ingredients, List<Picture> pictures) {
         this.restaurantId = restaurantId;
         this.restaurantName = restaurantName;
         this.restaurantDesc = restaurantDesc;
@@ -316,11 +316,11 @@ public class Restaurant {
         this.food = food;
     }
 
-    public List<RestaurantManager> getRestaurantManagers() {
+    public List<User> getRestaurantManagers() {
         return this.restaurantManagers;
     }
 
-    public void setRestaurantManagers(List<RestaurantManager> restaurantManagers) {
+    public void setRestaurantManagers(List<User> restaurantManagers) {
         this.restaurantManagers = restaurantManagers;
     }
 
@@ -431,7 +431,7 @@ public class Restaurant {
         return this;
     }
 
-    public Restaurant restaurantManagers(List<RestaurantManager> restaurantManagers) {
+    public Restaurant restaurantManagers(List<User> restaurantManagers) {
         setRestaurantManagers(restaurantManagers);
         return this;
     }

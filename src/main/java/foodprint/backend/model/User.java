@@ -8,14 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -94,6 +87,10 @@ public class User implements UserDetails{
 
     @Column(name = "twoFaSet")
     private Boolean twoFaSet = false;
+
+    @ManyToOne
+    @JoinColumn(name="restaurantId", nullable = true)
+    private Restaurant restaurant;
 
     // Constructors
     public User() {}
@@ -221,6 +218,14 @@ public class User implements UserDetails{
 
     public void setTwoFaSet(Boolean twoFaSet) {
         this.twoFaSet = twoFaSet;
+    }
+
+    public Restaurant getRestaurant() {
+        return restaurant;
+    }
+
+    public void setRestaurant(Restaurant restaurant) {
+        this.restaurant = restaurant;
     }
 
     @Override
