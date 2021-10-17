@@ -124,6 +124,10 @@ public class UserService {
             existingUser.setVaccinationName(updatedUser.getVaccinationName());
         }
 
+        if (updatedUser.getRestaurant() != null) {
+            existingUser.setRestaurant(updatedUser.getRestaurant());
+        }
+
         return this.userRepo.saveAndFlush(existingUser);
     }
 

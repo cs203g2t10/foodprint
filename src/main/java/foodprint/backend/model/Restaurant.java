@@ -123,6 +123,7 @@ public class Restaurant {
     private List<Food> food = new ArrayList<Food>();
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.MERGE)
+    @JsonIgnore
     private List<User> restaurantManagers;
 
     @JsonIgnore

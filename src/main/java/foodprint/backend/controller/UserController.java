@@ -4,6 +4,9 @@ package foodprint.backend.controller;
 
 import javax.validation.Valid;
 
+import foodprint.backend.dto.ManagerRequestDTO;
+import foodprint.backend.model.Restaurant;
+import foodprint.backend.service.RestaurantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -40,9 +43,12 @@ public class UserController {
 
     private UserService userService;
 
+    private RestaurantService restaurantService;
+
     @Autowired
-    UserController(UserService userService) {
+    UserController(UserService userService, RestaurantService restaurantService) {
         this.userService = userService;
+        this.restaurantService = restaurantService;
     }
 
     // POST: Create the user
@@ -119,6 +125,20 @@ public class UserController {
             throw new BadRequestException("You cannot delete yourself.");
         }
         userService.deleteUser(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    // POST: Make an existing user a Manager
+    @PostMapping({"/manager"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Makes an existing user manager")
+    public ResponseEntity<User> makeManager(@RequestBody ManagerRequestDTO requestDTO) {
+        User user = userService.getUser(requestDTO.getUserId());
+        Restaurant restaurant = restaurantService.get(requestDTO.getRestaurantId());
+        User updatedUser = new User();
+        updatedUser.setRestaurant(restaurant);
+        updatedUser.setRoles(user.getRoles() + ", FP_MANAGER");
+        userService.updateUser(user.getId(), user, updatedUser);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
