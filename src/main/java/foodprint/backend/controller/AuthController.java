@@ -54,9 +54,9 @@ public class AuthController {
         return new ResponseEntity<>(authService.check2faSet(email), HttpStatus.OK);
     }
 
-    @PostMapping("/login/{token}")
+    @PostMapping("/login")
     @Operation(summary = "Using the credentials, get a JWT authorization token")
-    public ResponseEntity<AuthResponseDTO> login(@Valid @RequestBody AuthRequestDTO req, @PathVariable("token") String token) {
+    public ResponseEntity<AuthResponseDTO> login(@Valid @RequestBody AuthRequestDTO req) {
         try {
 
             Authentication authenticate = authService.authenticate(
@@ -66,7 +66,7 @@ public class AuthController {
             );
             
             User user = (User) authenticate.getPrincipal();
-            authService.checkValidToken(token, user);
+            authService.checkValidToken(req.getToken(), user);
             user.setLastLogin(LocalDateTime.now());
             repo.save(user);
 
