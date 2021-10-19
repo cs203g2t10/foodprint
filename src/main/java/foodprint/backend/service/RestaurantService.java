@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 //import com.stripe.param.CreditNoteCreateParams.Line;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -44,8 +45,6 @@ public class RestaurantService {
     private PictureService pictureService;
 
     private ReservationRepo reservationRepo;
-
-
 
     public RestaurantService(RestaurantRepo repo, FoodRepo foodRepo, DiscountRepo discountRepo, IngredientRepo ingredientRepo, PictureService pictureService, ReservationRepo reservationRepo) {
         this.repo = repo;
@@ -311,11 +310,10 @@ public class RestaurantService {
     }
 
     /*
-    *
     * Ingredient related methods
-    *
     */
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public List<Ingredient> getAllRestaurantIngredients(Long restaurantId) {
         Restaurant restaurant = get(restaurantId);
         if (restaurant == null) {
@@ -324,7 +322,44 @@ public class RestaurantService {
         return restaurant.getIngredients();
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
+    public Page<Ingredient> getRestaurantIngredients(Long restaurantId, Integer pageNumber) {
+        Restaurant restaurant = get(restaurantId);
+        if (restaurant == null) {
+            throw new NotFoundException("Restaurant does not exist");
+        }
+        Pageable pageReq = PageRequest.of(pageNumber, 10);
+        return ingredientRepo.findByRestaurantRestaurantId(pageReq, restaurantId);
+    }
+
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
+    public Ingredient updateIngredient(Long restaurantId, Long ingredientId, Ingredient updatedIngredient) {
+
+        Ingredient originalIngredient = ingredientRepo.findById(ingredientId).orElseThrow(
+            () -> new NotFoundException("Ingredient requested could not be found")
+        );
+
+        if (originalIngredient.getRestaurant().getRestaurantId() != restaurantId) {
+            throw new NotFoundException("Ingredient requested could not be found at this restaurant");
+        }
+
+        if (updatedIngredient.getIngredientName() != null) {
+            originalIngredient.setIngredientName(updatedIngredient.getIngredientName());
+        }
+
+        if (updatedIngredient.getIngredientDesc() != null) {
+            originalIngredient.setIngredientDesc(updatedIngredient.getIngredientDesc());
+        }
+
+        if (updatedIngredient.getUnits() != null) {
+            originalIngredient.setUnits(updatedIngredient.getUnits());
+        }
+
+        originalIngredient = ingredientRepo.saveAndFlush(originalIngredient);
+        return originalIngredient;
+    }
+
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public Ingredient addRestaurantIngredient(Long restaurantId, Ingredient newIngredient) {
         Restaurant restaurant = get(restaurantId);
         if (restaurant == null) {
@@ -339,9 +374,21 @@ public class RestaurantService {
         return newIngredient;
     }
   
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
+    public void deleteRestaurantIngredient(Long restaurantId, Long ingredientId) {
 
+        Ingredient originalIngredient = ingredientRepo.findById(ingredientId).orElseThrow(
+            () -> new NotFoundException("Ingredient requested could not be found")
+        );
 
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+        if (originalIngredient.getRestaurant().getRestaurantId() != restaurantId) {
+            throw new NotFoundException("Ingredient requested could not be found at this restaurant");
+        }
+
+        ingredientRepo.delete(originalIngredient);
+    }
+
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public HashMap<String, Integer> calculateIngredientsNeededToday(Restaurant restaurant) {
         HashMap<String, Integer> map = new HashMap<>();
         List<Reservation> reservations = reservationRepo.findByRestaurant(restaurant);
@@ -370,7 +417,7 @@ public class RestaurantService {
         return map;
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public HashMap<String, Integer> calculateIngredientsNeededBetween(Restaurant restaurant, LocalDate startDate, LocalDate endDate) {
         HashMap<String, Integer> map = new HashMap<>();
         List<Reservation> reservations = reservationRepo.findByRestaurant(restaurant);
@@ -408,6 +455,7 @@ public class RestaurantService {
         repo.saveAndFlush(restaurant);
         return picture;
     }
+
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Picture saveFoodPicture(Long restaurantId, Long foodId, String title, String description, MultipartFile file) {
         Picture picture = pictureService.savePicture(title, description, file);
