@@ -299,8 +299,8 @@ public class RestaurantServiceTest {
         allFood.add(newFood);
         FoodIngredientQuantityDTO ingredients = new FoodIngredientQuantityDTO();
         ReflectionTestUtils.setField(restaurant, "restaurantId", restaurantId);
-        ReflectionTestUtils.setField(ingredient, "ingredientId", 1);
-        ReflectionTestUtils.setField(ingredients, "ingredientId", 1);
+        ReflectionTestUtils.setField(ingredient, "ingredientId", 1L);
+        ReflectionTestUtils.setField(ingredients, "ingredientId", 1L);
         
         when(repo.findByRestaurantId(any(Long.class))).thenReturn(restaurant);
         when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
