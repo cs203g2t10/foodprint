@@ -8,20 +8,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -31,6 +20,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table
@@ -89,6 +81,16 @@ public class User implements UserDetails{
     @OneToMany(mappedBy="requestor")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<Token> token;
+    
+    @Column(name = "twoFaSecret")
+    private String twoFaSecret;
+
+    @Column(name = "twoFaSet")
+    private Boolean twoFaSet = false;
+
+    @ManyToOne
+    @JoinColumn(name="restaurantId", nullable = true)
+    private Restaurant restaurant;
 
     // Constructors
     public User() {}
@@ -197,9 +199,33 @@ public class User implements UserDetails{
         this.token = token;
     }
 
+    public String getTwoFaSecret() {
+        return this.twoFaSecret;
+    }
+
+    public void setTwoFaSecret(String twoFaSecret) {
+        this.twoFaSecret = twoFaSecret;
+    }
+
     @Override
     public String getPassword() {
         return this.password;
+    }
+
+    public Boolean isTwoFaSet() {
+        return twoFaSet;
+    }
+
+    public void setTwoFaSet(Boolean twoFaSet) {
+        this.twoFaSet = twoFaSet;
+    }
+
+    public Restaurant getRestaurant() {
+        return restaurant;
+    }
+
+    public void setRestaurant(Restaurant restaurant) {
+        this.restaurant = restaurant;
     }
 
     @Override

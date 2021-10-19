@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import foodprint.backend.dto.ChargeDTO;
 import foodprint.backend.dto.ChargeRequest;
-import foodprint.backend.dto.ChargeRequest.Currency;
 import foodprint.backend.service.StripeService;
 
 @RestController

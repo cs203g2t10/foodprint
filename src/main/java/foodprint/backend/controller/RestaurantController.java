@@ -285,27 +285,54 @@ public class RestaurantController {
 
     /*
     *
-    *
+    * Ingredients related mappings
+    * 
     */
 
-    //POST: Creates new ingredient for restaurant
+    // POST: Creates new ingredient for restaurant
     @PostMapping("/{restaurantId}/ingredient")
     @ResponseStatus(code = HttpStatus.CREATED)
     @Operation(summary = "Creates a new ingredient for restaurant")
     public ResponseEntity<Ingredient> createRestaurantIngredient(@PathVariable Long restaurantId, @RequestBody IngredientDTO ingredientDTO) {
-        Ingredient newIngredient = service.addRestaurantIngredient(restaurantId, new Ingredient(ingredientDTO.getIngredientName()));
+        Ingredient newIngredient = new Ingredient(ingredientDTO.getIngredientName());
+        newIngredient.setIngredientDesc(ingredientDTO.getIngredientDesc());
+        newIngredient.setUnits(ingredientDTO.getUnits());
+        newIngredient = service.addRestaurantIngredient(restaurantId, newIngredient);
         return new ResponseEntity<>(newIngredient, HttpStatus.CREATED);
     }
 
-    //GET: Get all ingredients for restaurant
-    @GetMapping("/{restaurantId}/AllIngredients")
+    // GET: Get all ingredients for restaurant
+    @GetMapping("/{restaurantId}/ingredient")
     @ResponseStatus(code = HttpStatus.OK)
-    @Operation(summary = "Gets all restaurant ingredients")
-    public ResponseEntity<List<Ingredient>> restaurantGetAllIngredients(@PathVariable Long restaurantId) {
-        List<Ingredient> ingredients = service.getAllRestaurantIngredients(restaurantId);
+    @Operation(summary = "Gets all restaurant's ingredients")
+    public ResponseEntity<Page<Ingredient>> restaurantGetAllIngredients(
+        @PathVariable Long restaurantId, 
+        @RequestParam(value = "p", defaultValue = "0", required = false) Integer pageNumber
+    ) {
+        Page<Ingredient> ingredients = service.getRestaurantIngredients(restaurantId, pageNumber);
         return new ResponseEntity<>(ingredients, HttpStatus.OK);
     }
 
+    // PATCH: Modify an ingredient for a restaurant
+    @PatchMapping("/{restaurantId}/ingredient/{ingredientId}")
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Modify an ingredient")
+    public ResponseEntity<Ingredient> modifyRestaurantIngredient(@PathVariable Long restaurantId, @PathVariable Long ingredientId, @RequestBody IngredientDTO ingredientDto) {
+        Ingredient modifiedIngredient = new Ingredient(ingredientDto.getIngredientName());
+        modifiedIngredient.setIngredientDesc(ingredientDto.getIngredientDesc());
+        modifiedIngredient.setUnits(ingredientDto.getUnits());
+        modifiedIngredient = service.updateIngredient(restaurantId, ingredientId, modifiedIngredient);
+        return new ResponseEntity<>(modifiedIngredient, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{restaurantId}/ingredient/{ingredientId}")
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Delete an existing ingredient")
+    public ResponseEntity<Ingredient> deleteRestaurantIngredient(@PathVariable Long restaurantId, @PathVariable Long ingredientId) {
+        service.deleteRestaurantIngredient(restaurantId, ingredientId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+    
     @GetMapping({"/{restaurantId}/calculateIngredientsToday"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Calculate ingredients needed today")
@@ -395,7 +422,6 @@ public class RestaurantController {
         return new ResponseEntity<>(service.saveFoodPicture(restaurantId, foodId, title, description, file), HttpStatus.CREATED);
     }
 
-    //TODO fix the nesting (make DTO??)
     @GetMapping({"/{restaurantId}/food/{foodId}/picture/{pictureId}/"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Get a picture of a restaurant's food by using restaurant id, picture id and food id")

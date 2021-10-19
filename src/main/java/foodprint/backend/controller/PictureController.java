@@ -47,7 +47,6 @@ public class PictureController {
         return new ResponseEntity<>(service.getPictureById(id), HttpStatus.OK);
     }
 
-    //TODO Pathing, integration and testing
     @PostMapping(
             path = "",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
@@ -66,5 +65,4 @@ public class PictureController {
         return service.downloadPictureImage(id);
     }
 
-    //TODO create a delete mapping
 }

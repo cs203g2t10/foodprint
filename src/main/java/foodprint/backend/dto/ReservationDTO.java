@@ -17,6 +17,9 @@ public class ReservationDTO {
     @Schema(defaultValue = "Sushi Tei")
     private String restaurantName;
 
+    @Schema(defaultValue = "")
+    private String imageUrl;
+
     @Schema(defaultValue = "2021-12-25T17:21:29.142Z")
     private LocalDateTime date;
 
@@ -49,6 +52,14 @@ public class ReservationDTO {
 
     public void setReservationId(Long reservationId) {
         this.reservationId = reservationId;
+    }
+
+    public String getImageUrl() {
+        return this.imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public LocalDateTime getDate() {

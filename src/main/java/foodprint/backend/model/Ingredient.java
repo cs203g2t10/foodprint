@@ -29,7 +29,7 @@ public class Ingredient {
     @Column(name = "ingredientId")
     @Schema(defaultValue="1")
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private Integer ingredientId;
+    private Long ingredientId;
 
     @Column(name = "ingredientName")
     @Schema(defaultValue = "Salmon")
@@ -73,7 +73,7 @@ public class Ingredient {
         this.restaurant = restaurant;
     }
 
-    public Integer getIngredientId() {
+    public Long getIngredientId() {
         return this.ingredientId;
     }
 

@@ -5,12 +5,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class FoodIngredientQuantityDTO {
 
     @Schema(defaultValue = "1")
-    private Integer ingredientId;
+    private Long ingredientId;
 
     @Schema(defaultValue = "1")
     private Integer quantity;
 
-    public Integer getIngredientId() {
+    public Long getIngredientId() {
         return ingredientId;
     }
 
@@ -18,7 +18,7 @@ public class FoodIngredientQuantityDTO {
         return quantity;
     }
 
-    public void setIngredientId(Integer ingredientId) {
+    public void setIngredientId(Long ingredientId) {
         this.ingredientId = ingredientId;
     }
 

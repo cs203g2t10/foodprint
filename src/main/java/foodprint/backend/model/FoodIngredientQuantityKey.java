@@ -10,7 +10,7 @@ public class FoodIngredientQuantityKey implements Serializable{
     private Long foodId;
     
     @Column(name = "ingredientId")
-    private Integer ingredientId;
+    private Long ingredientId;
 
     @Override
     public int hashCode() {
@@ -19,7 +19,6 @@ public class FoodIngredientQuantityKey implements Serializable{
 
     @Override
     public boolean equals(Object obj) {
-        // TODO Auto-generated method stub
         return super.equals(obj);
     }
 
@@ -31,11 +30,11 @@ public class FoodIngredientQuantityKey implements Serializable{
         this.foodId = foodId;
     }
 
-    public Integer getIngredientId() {
+    public Long getIngredientId() {
         return ingredientId;
     }
 
-    public void setIngredientId(Integer ingredientId) {
+    public void setIngredientId(Long ingredientId) {
         this.ingredientId = ingredientId;
     }
 }
