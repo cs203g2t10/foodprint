@@ -1,6 +1,7 @@
 package foodprint.backend.service;
 
 import foodprint.backend.exceptions.AlreadyExistsException;
+import foodprint.backend.exceptions.InvalidException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -22,6 +23,8 @@ import foodprint.backend.model.UserRepo;
 @Service
 public class AuthenticationService {
 
+    private static final String emlRegex = "^([_a-zA-Z0-9-]+(\\.[_a-zA-Z0-9-]+)*@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*(\\.[a-zA-Z]{1,6}))?$";
+
     private UserDetailsService userDetailsService;
     
     private PasswordEncoder passwordEncoder;
@@ -32,13 +35,16 @@ public class AuthenticationService {
 
     private UserRepo userRepo;
 
+    private TwoFaService twoFaService;
+
     @Autowired
-    AuthenticationService(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder, TokenRepo tokenRepo, EmailService emailService, UserRepo userRepo) {
+    AuthenticationService(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder, TokenRepo tokenRepo, EmailService emailService, UserRepo userRepo, TwoFaService twoFaService) {
         this.userDetailsService = userDetailsService;
         this.passwordEncoder = passwordEncoder;
         this.tokenRepo = tokenRepo;
         this.emailService = emailService;
         this.userRepo = userRepo;
+        this.twoFaService = twoFaService;
     }
 
     public Authentication authenticate(UsernamePasswordAuthenticationToken token) {
@@ -105,9 +111,30 @@ public class AuthenticationService {
         tokenRepo.saveAndFlush(token);
     }
 
- 
+    public Boolean check2faSet(String email) {
+        if (!email.matches(emlRegex)) {
+            throw new InvalidException("Invalid email format.");
+        }
+        User user = userRepo.findByEmail(email).orElseThrow(() ->  new NotFoundException("User not found"));
+        return user.isTwoFaSet();
+    }
 
     public String encodePassword(String password) {
         return passwordEncoder.encode(password);
+    }
+
+    public void checkValidToken(String token, User user) {
+        if (!user.isTwoFaSet()) { //if user doesn't have 2fa set, dont check for valid token (token should be null)
+            return;
+        }
+        if (!twoFaService.validToken(token)) {
+            throw new InvalidException("Invalid token format.");
+        }
+        String twoFaSecret = user.getTwoFaSecret();
+        Boolean OtpOk = twoFaService.validate(twoFaSecret, token);
+
+        if (!OtpOk) {
+            throw new InvalidException("Incorrect OTP entered.");
+        }
     }
 }

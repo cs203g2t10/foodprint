@@ -3,6 +3,7 @@ package foodprint.backend.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
 
 public class AuthRequestDTO {
     
@@ -13,6 +14,8 @@ public class AuthRequestDTO {
     @Schema(defaultValue="SuperSecurePassw0rd")
     @NotEmpty
     private String password;
+
+    private String token;
 
     public String getEmail() {
         return email;
@@ -29,5 +32,14 @@ public class AuthRequestDTO {
     public void setPassword(String password) {
         this.password = password;
     }
+
+    public String getToken() {
+        return this.token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
 
 }
