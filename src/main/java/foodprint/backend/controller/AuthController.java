@@ -24,6 +24,7 @@ import foodprint.backend.dto.AuthRequestDTO;
 import foodprint.backend.dto.AuthResponseDTO;
 import foodprint.backend.dto.CurrentUserDetailsDTO;
 import foodprint.backend.dto.RegRequestDTO;
+import foodprint.backend.exceptions.InvalidException;
 import foodprint.backend.exceptions.UserUnverifiedException;
 import foodprint.backend.model.User;
 import foodprint.backend.model.UserRepo;
@@ -48,9 +49,14 @@ public class AuthController {
         this.repo = userRepo;
     }
 
-    @PostMapping("/login")
+    @GetMapping("/login/{email}")
+    public ResponseEntity<Boolean> check2fa(String email) {
+        return new ResponseEntity<>(authService.check2faSet(email), HttpStatus.OK);
+    }
+
+    @PostMapping("/login/{token}")
     @Operation(summary = "Using the credentials, get a JWT authorization token")
-    public ResponseEntity<AuthResponseDTO> login(@Valid @RequestBody AuthRequestDTO req) {
+    public ResponseEntity<AuthResponseDTO> login(@Valid @RequestBody AuthRequestDTO req, @PathVariable("token") String token) {
         try {
 
             Authentication authenticate = authService.authenticate(
@@ -58,8 +64,9 @@ public class AuthController {
                     req.getEmail(), req.getPassword()
                 )
             );
-
+            
             User user = (User) authenticate.getPrincipal();
+            authService.checkValidToken(token, user);
             user.setLastLogin(LocalDateTime.now());
             repo.save(user);
 
@@ -90,6 +97,10 @@ public class AuthController {
             authService.emailConfirmation(repo.findByEmail(req.getEmail()).get());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseBody);
             
+        } catch (InvalidException ex) {
+            AuthResponseDTO responseBody = new AuthResponseDTO();
+            responseBody.setStatus("INCORRECT OTP");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseBody);
         }
     }
 
@@ -113,11 +124,11 @@ public class AuthController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @GetMapping({"/whoami"})
-	@ResponseStatus(code = HttpStatus.OK)
-	public ResponseEntity<CurrentUserDetailsDTO> currentUserDetails() {
-		User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		CurrentUserDetailsDTO currentUserDetails = new CurrentUserDetailsDTO();
+    @GetMapping({ "/whoami" })
+    @ResponseStatus(code = HttpStatus.OK)
+    public ResponseEntity<CurrentUserDetailsDTO> currentUserDetails() {
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        CurrentUserDetailsDTO currentUserDetails = new CurrentUserDetailsDTO();
         currentUserDetails.setEmail(currentUser.getEmail());
         currentUserDetails.setFirstName(currentUser.getFirstName());
         currentUserDetails.setLastName(currentUser.getLastName());
@@ -126,6 +137,6 @@ public class AuthController {
         currentUserDetails.setVaccinationName(currentUser.getVaccinationName());
         currentUserDetails.setVaccinationDob(currentUser.getVaccinationDob());
         currentUserDetails.setUserRoles(currentUser.getRoles().split(","));
-		return new ResponseEntity<>(currentUserDetails, HttpStatus.OK);
-	}
+        return new ResponseEntity<>(currentUserDetails, HttpStatus.OK);
+    }
 }

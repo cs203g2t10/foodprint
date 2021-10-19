@@ -70,7 +70,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET, "/api/v1/restaurant/*/food", "/api/v1/restaurant/*", "/api/v1/restaurant")
                 .permitAll()
 
-                .antMatchers("/api/v1/auth/login", "/api/v1/auth/register", "/api/v1/user", "/api/v1/user/auth/**",
+                .antMatchers("/api/v1/auth/login/**", "/api/v1/auth/register", "/api/v1/user", "/api/v1/user/auth/**",
                         "/api/v1/auth/register/confirm/*")
                 .permitAll()
 
