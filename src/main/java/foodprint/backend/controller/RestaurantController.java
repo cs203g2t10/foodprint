@@ -301,16 +301,25 @@ public class RestaurantController {
         return new ResponseEntity<>(newIngredient, HttpStatus.CREATED);
     }
 
-    // GET: Get all ingredients for restaurant
+    // GET: Get paged ingredients for restaurant
     @GetMapping("/{restaurantId}/ingredient")
     @ResponseStatus(code = HttpStatus.OK)
-    @Operation(summary = "Gets all restaurant's ingredients")
-    public ResponseEntity<Page<Ingredient>> restaurantGetAllIngredients(
+    @Operation(summary = "Gets paged restaurant's ingredients")
+    public ResponseEntity<Page<Ingredient>> restaurantGetIngredientsPaged(
         @PathVariable Long restaurantId, 
         @RequestParam(value = "p", defaultValue = "0", required = false) Integer pageNumber
     ) {
         Page<Ingredient> ingredients = service.getRestaurantIngredients(restaurantId, pageNumber);
         return new ResponseEntity<>(ingredients, HttpStatus.OK);
+    }
+
+    // GET: Get all ingredients for restaurant
+    @GetMapping("/{restaurantId}/ingredient/all")
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Gets all the restaurant ingredients")
+    public ResponseEntity<List<Ingredient>> restaurantGetIngredientsAll(@PathVariable Long restaurantId) {
+        List<Ingredient> allIngredients = service.getAllRestaurantIngredients(restaurantId);
+        return new ResponseEntity<>(allIngredients, HttpStatus.OK);
     }
 
     // PATCH: Modify an ingredient for a restaurant
