@@ -124,7 +124,7 @@ public class AuthenticationService {
     }
 
     public void checkValidToken(String token, User user) {
-        if (!user.isTwoFaSet()) { //if user doesn't have 2fa set, dont check for valid token (token should be null)
+        if (user.isTwoFaSet() == null || !user.isTwoFaSet()) { //if user doesn't have 2fa set, dont check for valid token (token should be null)
             return;
         }
         if (!twoFaService.validToken(token)) {

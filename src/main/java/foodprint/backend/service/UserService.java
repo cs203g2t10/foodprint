@@ -70,6 +70,10 @@ public class UserService {
         return user;
     }
 
+    public User unprotectedGetUser(Long id) {
+        return getUser(id);
+    }
+
     public User updateUser(Long id, User updatedUser) {
         String email = updatedUser.getEmail();
         User existingUser = this.getUser(id);
