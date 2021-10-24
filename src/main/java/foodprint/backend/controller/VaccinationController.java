@@ -44,7 +44,7 @@ public class VaccinationController {
         @RequestParam("file") MultipartFile file
     ) {
 
-        User currentUser = userService.getUser(userId);
+        User currentUser = userService.unprotectedGetUser(userId);
 
         try {
             String vaccineCertString = new String(file.getBytes());
@@ -55,7 +55,7 @@ public class VaccinationController {
             return new ResponseEntity<VaccinationResponseDTO>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         
-        currentUser = userService.getUser(userId);
+        currentUser = userService.unprotectedGetUser(userId);
         if (currentUser.isVaccinated()) {
             return new ResponseEntity<VaccinationResponseDTO>(new VaccinationResponseDTO("Vaccinated", "Vaccination certified for " + currentUser.getVaccinationName()), HttpStatus.OK);
         } else {
