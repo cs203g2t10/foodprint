@@ -2,11 +2,12 @@ package foodprint.backend.controller;
 
 
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javax.validation.Valid;
 
-import foodprint.backend.dto.ManagerRequestDTO;
-import foodprint.backend.model.Restaurant;
-import foodprint.backend.service.RestaurantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,14 +27,20 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import foodprint.backend.dto.UpdateUserDTO;
+import foodprint.backend.dto.ManagerRequestDTO;
+import foodprint.backend.dto.PictureDTO;
 import foodprint.backend.dto.RequestResetPwdDTO;
 import foodprint.backend.dto.ResetPwdDTO;
+import foodprint.backend.dto.RestaurantDTO;
+import foodprint.backend.dto.UpdateUserDTO;
 import foodprint.backend.exceptions.BadRequestException;
 import foodprint.backend.exceptions.InvalidException;
 import foodprint.backend.exceptions.MailException;
 import foodprint.backend.exceptions.NotFoundException;
+import foodprint.backend.model.Picture;
+import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.User;
+import foodprint.backend.service.RestaurantService;
 import foodprint.backend.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 
@@ -203,5 +210,60 @@ public class UserController {
         } catch (NotFoundException e) {
             return new ResponseEntity<>("Token not found", HttpStatus.NOT_FOUND);
         }
+    }
+
+    @PostMapping({ "favourite/{restaurantId}"})
+    public ResponseEntity<Restaurant> favouriteRestaurant(@PathVariable("restaurantId") Long restaurantId) {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return new ResponseEntity<>(userService.addFavouriteRestaurant(user, restaurantId), HttpStatus.OK);
+    }
+
+    @GetMapping({"favouriteRestaurants"})
+    public ResponseEntity<List<RestaurantDTO>> getAllFavouriteRestaurants() {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        List<Restaurant> restaurants = userService.getAllFavourites(user);
+        List<RestaurantDTO> restaurantDtos = restaurants.stream().map(r -> convertToDTO(r)).collect(Collectors.toList());
+        return new ResponseEntity<>(restaurantDtos, HttpStatus.OK);
+    }
+
+    @DeleteMapping({"favourite/{restaurantId}"})
+    public ResponseEntity<Restaurant> deleteFavouriteRestaurant(@PathVariable("restaurantId") Long restaurantId) {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        userService.deleteFavouriteRestaurant(user, restaurantId);
+        try {
+            userService.getFavourite(user, restaurantId);
+        } catch (NotFoundException ex) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    public RestaurantDTO convertToDTO(Restaurant restaurant) {
+        RestaurantDTO dto = new RestaurantDTO();
+        dto.setRestaurantId(restaurant.getRestaurantId());
+        dto.setRestaurantName(restaurant.getRestaurantName());
+        dto.setRestaurantLocation(restaurant.getRestaurantLocation());
+        dto.setRestaurantDesc(restaurant.getRestaurantDesc());
+        dto.setRestaurantTableCapacity(restaurant.getRestaurantTableCapacity());
+        dto.setRestaurantWeekdayClosingHour(restaurant.getRestaurantWeekdayClosingHour());
+        dto.setRestaurantWeekdayClosingMinutes(restaurant.getRestaurantWeekdayClosingMinutes());
+        dto.setRestaurantWeekdayOpeningHour(restaurant.getRestaurantWeekdayOpeningHour());
+        dto.setRestaurantWeekdayOpeningMinutes(restaurant.getRestaurantWeekdayOpeningMinutes());
+        dto.setRestaurantWeekendClosingHour(restaurant.getRestaurantWeekendClosingHour());
+        dto.setRestaurantWeekendClosingMinutes(restaurant.getRestaurantWeekendClosingMinutes());
+        dto.setRestaurantWeekendOpeningHour(restaurant.getRestaurantWeekendOpeningHour());
+        dto.setRestaurantWeekendOpeningMinutes(restaurant.getRestaurantWeekendOpeningMinutes());
+        dto.setRestaurantCategory(restaurant.getRestaurantCategory());
+        
+        List<Picture> pictures = restaurant.getPictures();
+        List<PictureDTO> pictureDtos = new ArrayList<>();
+        dto.setPictures(pictureDtos);
+
+        for (Picture picture : pictures) {
+            PictureDTO picDto = new PictureDTO(picture.getTitle(), picture.getDescription(), picture.getUrl());
+            pictureDtos.add(picDto);
+        }
+
+        return dto;
     }
 }

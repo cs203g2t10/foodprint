@@ -7,12 +7,12 @@ import java.util.Objects;
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
-import javax.persistence.JoinColumn;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.Max;
@@ -23,6 +23,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -117,6 +119,7 @@ public class Restaurant {
     @ElementCollection
     @CollectionTable(name = "categories", joinColumns = @JoinColumn(name = "restaurantId"))
     @Column(name = "restaurantCategory")
+    @LazyCollection(LazyCollectionOption.FALSE)
     private List<String> restaurantCategory = new ArrayList<String>();
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
@@ -139,6 +142,7 @@ public class Restaurant {
     private List<Ingredient> ingredients;
 
     @OneToMany
+    @LazyCollection(LazyCollectionOption.FALSE)
     private List<Picture> pictures;
 
     protected Restaurant () { }
@@ -465,7 +469,7 @@ public class Restaurant {
             return false;
         }
         Restaurant restaurant = (Restaurant) o;
-        return Objects.equals(restaurantId, restaurant.restaurantId) && Objects.equals(restaurantName, restaurant.restaurantName) && Objects.equals(restaurantDesc, restaurant.restaurantDesc) && Objects.equals(restaurantLocation, restaurant.restaurantLocation) && Objects.equals(restaurantPriceRange, restaurant.restaurantPriceRange) && Objects.equals(restaurantTableCapacity, restaurant.restaurantTableCapacity) && Objects.equals(restaurantWeekdayOpeningHour, restaurant.restaurantWeekdayOpeningHour) && Objects.equals(restaurantWeekdayOpeningMinutes, restaurant.restaurantWeekdayOpeningMinutes) && Objects.equals(restaurantWeekdayClosingHour, restaurant.restaurantWeekdayClosingHour) && Objects.equals(restaurantWeekdayClosingMinutes, restaurant.restaurantWeekdayClosingMinutes) && Objects.equals(restaurantWeekendOpeningHour, restaurant.restaurantWeekendOpeningHour) && Objects.equals(restaurantWeekendOpeningMinutes, restaurant.restaurantWeekendOpeningMinutes) && Objects.equals(restaurantWeekendClosingHour, restaurant.restaurantWeekendClosingHour) && Objects.equals(restaurantWeekendClosingMinutes, restaurant.restaurantWeekendClosingMinutes) && Objects.equals(food, restaurant.food) && Objects.equals(restaurantManagers, restaurant.restaurantManagers) && Objects.equals(discount, restaurant.discount) && Objects.equals(reservations, restaurant.reservations) && Objects.equals(ingredients, restaurant.ingredients) && Objects.equals(pictures, restaurant.pictures);
+        return Objects.equals(restaurantId, restaurant.restaurantId) && Objects.equals(restaurantName, restaurant.restaurantName) && Objects.equals(restaurantDesc, restaurant.restaurantDesc) /* && Objects.equals(restaurantLocation, restaurant.restaurantLocation) && Objects.equals(restaurantPriceRange, restaurant.restaurantPriceRange) && Objects.equals(restaurantTableCapacity, restaurant.restaurantTableCapacity) && Objects.equals(restaurantWeekdayOpeningHour, restaurant.restaurantWeekdayOpeningHour) && Objects.equals(restaurantWeekdayOpeningMinutes, restaurant.restaurantWeekdayOpeningMinutes) && Objects.equals(restaurantWeekdayClosingHour, restaurant.restaurantWeekdayClosingHour) && Objects.equals(restaurantWeekdayClosingMinutes, restaurant.restaurantWeekdayClosingMinutes) && Objects.equals(restaurantWeekendOpeningHour, restaurant.restaurantWeekendOpeningHour) && Objects.equals(restaurantWeekendOpeningMinutes, restaurant.restaurantWeekendOpeningMinutes) && Objects.equals(restaurantWeekendClosingHour, restaurant.restaurantWeekendClosingHour) && Objects.equals(restaurantWeekendClosingMinutes, restaurant.restaurantWeekendClosingMinutes) && Objects.equals(food, restaurant.food) && Objects.equals(restaurantManagers, restaurant.restaurantManagers) && Objects.equals(discount, restaurant.discount) && Objects.equals(reservations, restaurant.reservations) && Objects.equals(ingredients, restaurant.ingredients) && Objects.equals(pictures, restaurant.pictures) */;
     }
 
     @Override
