@@ -74,7 +74,12 @@ public class Reservation {
         for (LineItem lineItem : lineItems) {
             price += lineItem.getFood().getFoodPrice() * lineItem.getQuantity();
         }
-        return price*100;
+        price = price * 100;
+        for (Discount discount : restaurant.getDiscount()) {
+            price = price * ((double)discount.getDiscountPercentage() / 100);
+        }
+        
+        return price;
     }
 
     //Constructors
