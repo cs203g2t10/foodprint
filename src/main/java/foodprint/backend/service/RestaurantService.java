@@ -355,9 +355,8 @@ public class RestaurantService {
                 FoodIngredientQuantity fiq = foodIngredientQuantityRepo.findById(key).orElseGet(() -> {
                     return new FoodIngredientQuantity(originalFood, ingredientRepo.getById(dto.getIngredientId()), dto.getQuantity());
                 });
+                fiq.setQuantity(dto.getQuantity());
 
-                // System.out.println("THE ID IS : " + dto.getIngredientId());
-                // FoodIngredientQuantity fiq = new FoodIngredientQuantity(originalFood, ingredientRepo.getById(dto.getIngredientId()), dto.getQuantity());
                 foodIngredientQuantities.add(fiq);
             }
             originalFood.setFoodIngredientQuantity(foodIngredientQuantities);
