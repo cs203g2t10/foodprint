@@ -95,12 +95,11 @@ public class User implements UserDetails{
     @JoinColumn(name="restaurantId", nullable = true)
     private Restaurant restaurant;
 
-    @JsonIgnore
-    @ManyToMany(mappedBy = "users")
+    @ManyToMany
     @LazyCollection(LazyCollectionOption.FALSE)
+    @JoinTable(name = "user_favouriterestaurants", joinColumns ={ @JoinColumn(name = "user_id")}, inverseJoinColumns ={ @JoinColumn(name = "restaurant_id")} )
     private Set<Restaurant> favouriteRestaurants = new HashSet<>();
-
-    // Constructors
+    
     public User() {}
 
     public User(String email, String password, String name) {
@@ -244,7 +243,7 @@ public class User implements UserDetails{
         this.favouriteRestaurants = favouriteRestaurants;
     }
 
-    
+
 
 
     @Override
