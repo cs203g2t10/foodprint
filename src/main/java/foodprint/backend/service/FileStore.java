@@ -27,6 +27,13 @@ public class FileStore {
         this.amazonS3 = amazonS3;
     }
 
+    /**
+     * Uploads a file to with the given path and filename to S3
+     * @param path
+     * @param fileName
+     * @param optionalMetaData
+     * @param inputStream
+     */
     public void upload(String path,
                        String fileName,
                        Optional<Map<String, String>> optionalMetaData,
@@ -49,6 +56,12 @@ public class FileStore {
         
     }
 
+    /**
+     * Gets the contents of the file to serve it to the user
+     * @param path
+     * @param key
+     * @return byte array containing the raw bytes of the file
+     */
     public byte[] download(String path, String key) {
         try {
             S3Object object = amazonS3.getObject(path, key);

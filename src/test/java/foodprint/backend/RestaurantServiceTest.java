@@ -267,24 +267,6 @@ public class RestaurantServiceTest {
     //------------Food-related Testing---------------
 
     @Test
-    void getAllFood_FoodExist_ReturnAllFood() {
-        Restaurant restaurant = new Restaurant("Sushi Tei","Serangoon");
-        Long restaurantId = 1L;
-        ReflectionTestUtils.setField(restaurant, "restaurantId", restaurantId);
-        Food food = new Food("Sushi", 30.0, 5.0);
-        List<Food> allFood = new ArrayList<>();
-        allFood.add(food);
-
-        when(repo.findByRestaurantId(any(Long.class))).thenReturn(restaurant);
-
-        restaurant.setAllFood(allFood);
-        List<Food> everything = restaurantService.getAllFood(restaurantId);
-
-        assertNotNull(everything);
-        verify(repo).findByRestaurantId(restaurantId);
-    }
-
-    @Test
     void addFood_newFood_ReturnSavedFood() {
         Restaurant restaurant = new Restaurant("Sushi Tei", "Serangoon");
         Long restaurantId = 1L;

@@ -12,9 +12,12 @@ import org.springframework.stereotype.Repository;
 public interface TokenRepo extends JpaRepository<Token, Long> {
 
     Optional<Token> findByToken(String token);
+
     List<Token> findByRequestor(User user);
+
     Page<Token> findByRequestor(Pageable page, User user);
 
     void deleteByToken(String token);
+    
 }
 

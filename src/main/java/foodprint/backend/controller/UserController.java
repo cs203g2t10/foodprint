@@ -5,6 +5,7 @@ package foodprint.backend.controller;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Set;
 
 import javax.validation.Valid;
 
@@ -221,7 +222,7 @@ public class UserController {
     @GetMapping({"favouriteRestaurants"})
     public ResponseEntity<List<RestaurantDTO>> getAllFavouriteRestaurants() {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        List<Restaurant> restaurants = userService.getAllFavourites(user);
+        Set<Restaurant> restaurants = userService.getAllFavourites(user);
         List<RestaurantDTO> restaurantDtos = restaurants.stream().map(r -> convertToDTO(r)).collect(Collectors.toList());
         return new ResponseEntity<>(restaurantDtos, HttpStatus.OK);
     }

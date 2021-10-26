@@ -66,11 +66,22 @@ public class RestaurantService {
         return restaurants;
     }
 
+    /**
+     * Gets a restaurant of a given ID
+     * @param id
+     * @return
+     */
     public Restaurant get(Long id) {
         Optional<Restaurant> restaurant = repo.findById(id);
         return restaurant.orElseThrow(() -> new NotFoundException("Restaurant not found"));
     }
 
+    /**
+     * Updates only changed fields of a given food
+     * @param id
+     * @param updatedRestaurant
+     * @return
+     */
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Restaurant update(Long id, Restaurant updatedRestaurant) {
 
@@ -120,12 +131,22 @@ public class RestaurantService {
         return repo.saveAndFlush(currentRestaurant);
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    /**
+     * Creates a new restaurant
+     * @param restaurant
+     * @return
+     */
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN')")
     public Restaurant create(Restaurant restaurant) {
         return repo.saveAndFlush(restaurant);
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    
+    /**
+     * Deletes a restaurant
+     * @param id
+     */
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN')")
     public void delete(Long id) {
         Restaurant restaurant = this.get(id);
         repo.delete(restaurant);
@@ -137,10 +158,20 @@ public class RestaurantService {
         }
     }
 
+    /**
+     * Searches for a restaurant, given the name and paging information
+     * @param page
+     * @param query
+     * @return
+     */
     public Page<Restaurant> search(Pageable page, String query) {
         return repo.findByRestaurantNameContainsIgnoreCase(page, query);
     }
 
+    /**
+     * Gets all available categories 
+     * @return
+     */
     public List<String> getCategories() {
         List<String> restaurantCategories = new ArrayList<>();
         List<Restaurant> allRestaurants = repo.findAll();
@@ -155,6 +186,12 @@ public class RestaurantService {
         return restaurantCategories;
     }
 
+    
+    /**
+     * Gets all restaurants belonging to a category
+     * @param restaurantCategory
+     * @return
+     */
     public List<Restaurant> getRestaurantsRelatedToCategory(String restaurantCategory) {
         List<Restaurant> restaurantsRelatedToCategory = new ArrayList<>();
         List<Restaurant> allRestaurants = repo.findAll();
@@ -174,6 +211,12 @@ public class RestaurantService {
     *
     */
 
+    /**
+     * Adds a food to a given restaurant
+     * @param restaurantId
+     * @param foodDTO
+     * @return
+     */
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Food addFood(Long restaurantId, FoodDTO foodDTO) {
         Restaurant restaurant = repo.findByRestaurantId(restaurantId);
@@ -208,11 +251,12 @@ public class RestaurantService {
         return savedFood;
     }
 
-    public List<Food> getAllFood(Long restaurantId) {
-        Restaurant restaurant = repo.findByRestaurantId(restaurantId);
-        return restaurant.getAllFood();
-    }
-
+    /**
+     * Gets a food of the restaurant
+     * @param restaurantId
+     * @param foodId
+     * @return
+     */
     public Food getFood(Long restaurantId, Long foodId) {
         Optional<Food> foodOpt = foodRepo.findById(foodId);
         Food food = foodOpt.orElseThrow(() -> new NotFoundException("Food not found"));
@@ -222,6 +266,11 @@ public class RestaurantService {
         return food;
     }
 
+    /**
+     * Deletes the food of a given restaurant id
+     * @param restaurantId
+     * @param foodId
+     */
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public void deleteFood(Long restaurantId, Long foodId) {
         Restaurant restaurant = get(restaurantId);
@@ -235,6 +284,13 @@ public class RestaurantService {
         throw new NotFoundException("Food not found");
     }
 
+    /**
+     * Updates the food of a given restaurant, ignores fields that are null
+     * @param restaurantId
+     * @param foodId
+     * @param updatedFood
+     * @return
+     */
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Food updateFood(Long restaurantId, Long foodId, Food updatedFood) {
         Food originalFood = foodRepo.findById(foodId).orElseThrow(
@@ -263,6 +319,7 @@ public class RestaurantService {
         if (updatedFood.getFoodIngredientQuantity() != null) {
             originalFood.setFoodIngredientQuantity(updatedFood.getFoodIngredientQuantity());
         }
+        
         originalFood = foodRepo.saveAndFlush(originalFood);
         return originalFood;
     }
@@ -309,21 +366,29 @@ public class RestaurantService {
         return foodRepo.saveAndFlush(originalFood);
     }
     
+    /**
+     * Searches for a given food
+     * @param page
+     * @param query
+     * @return
+     */
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Page<Food> searchFood(Pageable page, String query) {
         return foodRepo.findByFoodNameContains(page,query);
     }
+
     /*
     *
     * Discount related methods
     *
     */
 
-    // public List<Discount> getDiscounts(Long restaurantId) {
-    //     Optional<Discount> discount = discountRepo.findById(discountId);
-    //     return discount;
-    // }
-
+    /**
+     * Adds discounts to a given restaurant
+     * @param restaurantId
+     * @param discount
+     * @return
+     */
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Discount addDiscount(Long restaurantId, Discount discount) {
         Restaurant restaurant = repo.findByRestaurantId(restaurantId);
@@ -336,6 +401,11 @@ public class RestaurantService {
         return savedDiscount;
     }
 
+    /**
+     * Deletes discount of a given restaurant
+     * @param restaurantId
+     * @param discountId
+     */
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public void deleteDiscount(Long restaurantId, Long discountId) {
         if (discountRepo.existsById(discountId)) {
@@ -351,6 +421,13 @@ public class RestaurantService {
         }
     }
 
+    /**
+     * Updates the discount of a given restaurant, only change fields that are changed
+     * @param restaurantId
+     * @param discountId
+     * @param updatedDiscount
+     * @return
+     */
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Discount updateDiscount(Long restaurantId, Long discountId, Discount updatedDiscount) {
         Discount originalDiscount = discountRepo.findById(discountId).orElseThrow(() -> new NotFoundException("Discount could not be found"));
@@ -369,6 +446,11 @@ public class RestaurantService {
         return originalDiscount;
     }
 
+    /**
+     * Gets a discount by discount ID
+     * @param discountId
+     * @return
+     */
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Discount getDiscount(Long discountId) {
         Optional<Discount> discount = discountRepo.findById(discountId);
@@ -379,6 +461,11 @@ public class RestaurantService {
     * Ingredient related methods
     */
 
+    /**
+     * Gets all the restaurant ingredients
+     * @param restaurantId
+     * @return
+     */
     @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public List<Ingredient> getAllRestaurantIngredients(Long restaurantId) {
         Restaurant restaurant = get(restaurantId);
@@ -388,6 +475,12 @@ public class RestaurantService {
         return restaurant.getIngredients();
     }
 
+    /**
+     * Gets all the restaurants ingredient
+     * @param restaurantId
+     * @param pageNumber
+     * @return
+     */
     @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public Page<Ingredient> getRestaurantIngredients(Long restaurantId, Integer pageNumber) {
         Restaurant restaurant = get(restaurantId);
@@ -398,6 +491,13 @@ public class RestaurantService {
         return ingredientRepo.findByRestaurantRestaurantId(pageReq, restaurantId);
     }
 
+    /**
+     * Updates an ingredient with a given ID
+     * @param restaurantId
+     * @param ingredientId
+     * @param updatedIngredient
+     * @return
+     */
     @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public Ingredient updateIngredient(Long restaurantId, Long ingredientId, Ingredient updatedIngredient) {
 
@@ -425,6 +525,12 @@ public class RestaurantService {
         return originalIngredient;
     }
 
+    /**
+     * Adds an ingredient to the restaurant
+     * @param restaurantId
+     * @param newIngredient
+     * @return
+     */
     @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public Ingredient addRestaurantIngredient(Long restaurantId, Ingredient newIngredient) {
         Restaurant restaurant = get(restaurantId);
@@ -440,6 +546,11 @@ public class RestaurantService {
         return newIngredient;
     }
   
+    /**
+     * Deletes an ingredient of a given restaurant
+     * @param restaurantId
+     * @param ingredientId
+     */
     @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public void deleteRestaurantIngredient(Long restaurantId, Long ingredientId) {
 
@@ -454,33 +565,14 @@ public class RestaurantService {
         ingredientRepo.delete(originalIngredient);
     }
 
+    /**
+     * Calculates the ingredients needed for today
+     * @param restaurant
+     * @return
+     */
     @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public HashMap<String, Integer> calculateIngredientsNeededToday(Restaurant restaurant) {
-        HashMap<String, Integer> map = new HashMap<>();
-        List<Reservation> reservations = reservationRepo.findByRestaurant(restaurant);
-
-        for(Reservation reservation : reservations) {
-            LocalDate date = reservation.getDate().toLocalDate();
-            if (date.equals(LocalDateTime.now().toLocalDate())) {               
-                List<LineItem> lineItems = reservation.getLineItems();
-            
-                for (LineItem lineItem : lineItems){
-                    Food food = lineItem.getFood();
-                    Set<FoodIngredientQuantity> foodIngreQuantity = food.getFoodIngredientQuantity();
-                    for(FoodIngredientQuantity entry : foodIngreQuantity) {
-                        Ingredient currIngredient = entry.getIngredient();
-                        if (map.containsKey(currIngredient.getIngredientName())) {
-                            Integer currQuantity = map.get(currIngredient.getIngredientName());
-                            map.put(currIngredient.getIngredientName(), currQuantity + entry.getQuantity() * lineItem.getQuantity());
-                        } else {
-                            map.put(currIngredient.getIngredientName(), entry.getQuantity() * lineItem.getQuantity());
-                        }
-                    }
-                }
-            }
-        }
-
-        return map;
+        return calculateIngredientsNeededBetween(restaurant, LocalDate.now(), LocalDate.now());
     }
 
     @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
@@ -512,7 +604,15 @@ public class RestaurantService {
         return map;
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    /**
+     * Saves picture of a given restaurant
+     * @param restaurantId
+     * @param title
+     * @param description
+     * @param file
+     * @return
+     */
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public Picture savePicture(Long restaurantId, String title, String description, MultipartFile file) {
         Picture picture = pictureService.savePicture(title, description, file);
         Restaurant restaurant = get(restaurantId);
@@ -522,6 +622,15 @@ public class RestaurantService {
         return picture;
     }
 
+    /**
+     * Swets the picture of a given food
+     * @param restaurantId
+     * @param foodId
+     * @param title
+     * @param description
+     * @param file
+     * @return
+     */
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Picture saveFoodPicture(Long restaurantId, Long foodId, String title, String description, MultipartFile file) {
         Picture picture = pictureService.savePicture(title, description, file);
@@ -532,6 +641,12 @@ public class RestaurantService {
         return picture;
     }
 
+    /**
+     * Checks if a given picture is found in restaurant
+     * @param restaurantId
+     * @param pictureId
+     * @return
+     */
     public Boolean pictureInRestaurant(Long restaurantId, Long pictureId) {
         Restaurant restaurant = get(restaurantId);
         List<Picture> restaurantPics = restaurant.getPictures();
@@ -543,6 +658,13 @@ public class RestaurantService {
         return false;
     }
 
+    /**
+     * Checks if a given picture is found in the food
+     * @param restaurantId
+     * @param foodId
+     * @param pictureId
+     * @return
+     */
     public Boolean pictureInFood(Long restaurantId, Long foodId, Long pictureId) {
         Food food = getFood(restaurantId, foodId);
         List<Picture> foodPics = food.getPictures();

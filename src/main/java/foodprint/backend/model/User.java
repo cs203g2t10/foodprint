@@ -96,9 +96,9 @@ public class User implements UserDetails{
     private Restaurant restaurant;
 
     @JsonIgnore
-    @OneToMany
+    @ManyToMany(mappedBy = "users")
     @LazyCollection(LazyCollectionOption.FALSE)
-    private List<Restaurant> favouriteRestaurants;
+    private Set<Restaurant> favouriteRestaurants = new HashSet<>();
 
     // Constructors
     public User() {}
@@ -236,13 +236,15 @@ public class User implements UserDetails{
         this.restaurant = restaurant;
     }
 
-    public List<Restaurant> getFavouriteRestaurants() {
+    public Set<Restaurant> getFavouriteRestaurants() {
         return this.favouriteRestaurants;
     }
 
-    public void setFavouriteRestaurants(List<Restaurant> favouriteRestaurants) {
+    public void setFavouriteRestaurants(Set<Restaurant> favouriteRestaurants) {
         this.favouriteRestaurants = favouriteRestaurants;
     }
+
+    
 
 
     @Override
