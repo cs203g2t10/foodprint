@@ -217,6 +217,7 @@ public class ReservationController {
             lineItemDto.setFoodId(lineItem.getFood().getFoodId());
             lineItemDto.setFoodName(lineItem.getFood().getFoodName());
             lineItemDto.setQuantity(lineItem.getQuantity());
+            lineItemDto.setPictures(lineItem.getFood().getPictures());
             lineItemDtos.add(lineItemDto);
         }
 
