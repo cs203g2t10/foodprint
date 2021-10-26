@@ -13,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import foodprint.backend.dto.EditFoodDTO;
 import foodprint.backend.dto.FoodDTO;
 import foodprint.backend.dto.FoodIngredientQuantityDTO;
 import foodprint.backend.exceptions.DeleteFailedException;
@@ -30,6 +31,8 @@ import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.RestaurantRepo;
 import foodprint.backend.model.IngredientRepo;
 import foodprint.backend.model.FoodIngredientQuantity;
+import foodprint.backend.model.FoodIngredientQuantityKey;
+import foodprint.backend.model.FoodIngredientQuantityRepo;
 
 @Service
 public class RestaurantService {
@@ -46,13 +49,16 @@ public class RestaurantService {
 
     private ReservationRepo reservationRepo;
 
-    public RestaurantService(RestaurantRepo repo, FoodRepo foodRepo, DiscountRepo discountRepo, IngredientRepo ingredientRepo, PictureService pictureService, ReservationRepo reservationRepo) {
+    private FoodIngredientQuantityRepo foodIngredientQuantityRepo;
+
+    public RestaurantService(RestaurantRepo repo, FoodRepo foodRepo, DiscountRepo discountRepo, IngredientRepo ingredientRepo, PictureService pictureService, ReservationRepo reservationRepo, FoodIngredientQuantityRepo foodIngredientQuantityRepo) {
         this.repo = repo;
         this.foodRepo = foodRepo;
         this.discountRepo = discountRepo;
         this.ingredientRepo = ingredientRepo;
         this.pictureService = pictureService;
         this.reservationRepo = reservationRepo;
+        this.foodIngredientQuantityRepo = foodIngredientQuantityRepo;
     }
     
     public List<Restaurant> getAllRestaurants() {
@@ -259,6 +265,48 @@ public class RestaurantService {
         }
         originalFood = foodRepo.saveAndFlush(originalFood);
         return originalFood;
+    }
+
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    public Food editFood(Long restaurantId, Long foodId, EditFoodDTO foodDTO) {
+        final Food originalFood = foodRepo.findById(foodId).orElseThrow(
+             () -> new NotFoundException("Food requested could not be found")
+        );
+        if (originalFood.getRestaurant().getRestaurantId() != restaurantId) {
+            throw new NotFoundException("Food requested could not be found at this restaurant");
+        }
+
+        if (foodDTO.getFoodName() != null) {
+            originalFood.setFoodName(foodDTO.getFoodName()); 
+        }
+
+        if (foodDTO.getFoodDesc() != null) {
+            originalFood.setFoodDesc(foodDTO.getFoodDesc());
+        }
+
+        if (foodDTO.getFoodPrice() != null) {
+            originalFood.setFoodPrice(foodDTO.getFoodPrice());
+        }
+
+        if (foodDTO.getFoodIngredientQuantity() != null) {
+
+            Set<FoodIngredientQuantityDTO> foodIngredientQuantityDTOs = foodDTO.getFoodIngredientQuantity();
+            Set<FoodIngredientQuantity> foodIngredientQuantities = new HashSet<>();
+
+            for (FoodIngredientQuantityDTO dto: foodIngredientQuantityDTOs) {
+                FoodIngredientQuantityKey key = new FoodIngredientQuantityKey(foodId, dto.getIngredientId());
+                
+                FoodIngredientQuantity fiq = foodIngredientQuantityRepo.findById(key).orElseGet(() -> {
+                    return new FoodIngredientQuantity(originalFood, ingredientRepo.getById(dto.getIngredientId()), dto.getQuantity());
+                });
+
+                // System.out.println("THE ID IS : " + dto.getIngredientId());
+                // FoodIngredientQuantity fiq = new FoodIngredientQuantity(originalFood, ingredientRepo.getById(dto.getIngredientId()), dto.getQuantity());
+                foodIngredientQuantities.add(fiq);
+            }
+            originalFood.setFoodIngredientQuantity(foodIngredientQuantities);
+        }
+        return foodRepo.saveAndFlush(originalFood);
     }
     
     @PreAuthorize("hasAnyAuthority('FP_USER')")
