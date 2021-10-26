@@ -231,19 +231,34 @@ public class RestaurantService {
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Food updateFood(Long restaurantId, Long foodId, Food updatedFood) {
-        Restaurant restaurant = get(restaurantId);
-        List<Food> allFood = restaurant.getAllFood();
-        for (Food food : allFood) {
-            if (food.getFoodId().equals(foodId)) {
-                food.setFoodName(updatedFood.getFoodName());
-                food.setFoodDesc(updatedFood.getFoodDesc());
-                food.setFoodDiscount(updatedFood.getFoodDiscount());
-                food.setFoodPrice(updatedFood.getFoodPrice());
-                food = foodRepo.saveAndFlush(food);
-                return food;
-            }
+        Food originalFood = foodRepo.findById(foodId).orElseThrow(
+             () -> new NotFoundException("Food requested could not be found")
+        );
+        if (originalFood.getRestaurant().getRestaurantId() != restaurantId) {
+            throw new NotFoundException("Food requested could not be found at this restaurant");
         }
-        throw new NotFoundException("Food not found");
+
+        if (updatedFood.getFoodName() != null) {
+            originalFood.setFoodName(updatedFood.getFoodName()); 
+        }
+
+        if (updatedFood.getFoodDesc() != null) {
+            originalFood.setFoodDesc(updatedFood.getFoodDesc());
+        }
+
+        if (updatedFood.getFoodDiscount() != null) {
+            originalFood.setFoodDiscount(updatedFood.getFoodDiscount());
+        }
+
+        if (updatedFood.getFoodPrice() != null) {
+            originalFood.setFoodPrice(updatedFood.getFoodPrice());
+        }
+
+        if (updatedFood.getFoodIngredientQuantity() != null) {
+            originalFood.setFoodIngredientQuantity(updatedFood.getFoodIngredientQuantity());
+        }
+        originalFood = foodRepo.saveAndFlush(originalFood);
+        return originalFood;
     }
     
     @PreAuthorize("hasAnyAuthority('FP_USER')")

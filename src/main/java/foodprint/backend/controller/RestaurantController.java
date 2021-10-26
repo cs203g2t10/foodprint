@@ -201,7 +201,7 @@ public class RestaurantController {
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @PutMapping({"/{restaurantId}/food/{foodId}"})
+    @PatchMapping({"/{restaurantId}/food/{foodId}"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Updates an existing food item")
     public ResponseEntity<Food> updateRestaurantFood(
