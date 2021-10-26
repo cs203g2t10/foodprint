@@ -257,6 +257,7 @@ public class RestaurantService {
         if (updatedFood.getFoodIngredientQuantity() != null) {
             originalFood.setFoodIngredientQuantity(updatedFood.getFoodIngredientQuantity());
         }
+        
         originalFood = foodRepo.saveAndFlush(originalFood);
         return originalFood;
     }

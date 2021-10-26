@@ -210,7 +210,7 @@ public class UserService {
 
     public Restaurant addFavouriteRestaurant(User user, Long restaurantId) {
         Restaurant restaurant = getRestaurantById(restaurantId);
-        List<Restaurant> favouriteRestaurants = new ArrayList<Restaurant>();
+        Set<Restaurant> favouriteRestaurants = new HashSet<Restaurant>();
         if (user.getFavouriteRestaurants() == null) {
             favouriteRestaurants.add(restaurant);
         } else {
@@ -225,12 +225,12 @@ public class UserService {
         return restaurant;
     }
 
-    public List<Restaurant> getAllFavourites(User user) {
+    public Set<Restaurant> getAllFavourites(User user) {
         return user.getFavouriteRestaurants();
     }
 
     public Restaurant getFavourite(User user, Long restaurantId) {
-        List<Restaurant> favouriteRestaurants = getAllFavourites(user);
+        Set<Restaurant> favouriteRestaurants = getAllFavourites(user);
         Restaurant restaurant = getRestaurantById(restaurantId);
         if (favouriteRestaurants == null || !favouriteRestaurants.contains(restaurant)) {
             throw new NotFoundException("Favourite restaurant not found.");
@@ -240,7 +240,7 @@ public class UserService {
 
     public void deleteFavouriteRestaurant(User user, Long restaurantId) {
         Restaurant restaurant = getRestaurantById(restaurantId);
-        List<Restaurant> favouriteRestaurants = user.getFavouriteRestaurants();
+        Set<Restaurant> favouriteRestaurants = user.getFavouriteRestaurants();
         if (favouriteRestaurants == null || !favouriteRestaurants.contains(restaurant)) {
             throw new NotFoundException("Favourite restaurant not found.");
         } else {
