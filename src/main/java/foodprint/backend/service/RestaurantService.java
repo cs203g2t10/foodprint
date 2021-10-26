@@ -253,6 +253,10 @@ public class RestaurantService {
         if (updatedFood.getFoodPrice() != null) {
             originalFood.setFoodPrice(updatedFood.getFoodPrice());
         }
+
+        if (updatedFood.getFoodIngredientQuantity() != null) {
+            originalFood.setFoodIngredientQuantity(updatedFood.getFoodIngredientQuantity());
+        }
         originalFood = foodRepo.saveAndFlush(originalFood);
         return originalFood;
     }
