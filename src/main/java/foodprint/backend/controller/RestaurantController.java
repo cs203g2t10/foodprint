@@ -201,7 +201,7 @@ public class RestaurantController {
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @PutMapping({"/{restaurantId}/food/{foodId}"})
+    @PatchMapping({"/{restaurantId}/food/{foodId}"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Updates an existing food item")
     public ResponseEntity<Food> updateRestaurantFood(
@@ -269,18 +269,16 @@ public class RestaurantController {
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    //PUT: Update Discount
-    @PutMapping({"/{restaurantId}/discount/{discountId}"})
+    @PatchMapping({"/{restaurantId}/discount/{discountId}"})
     @ResponseStatus(code = HttpStatus.OK)
-    @Operation(summary = "Updates an existing discount")
-    public ResponseEntity<Discount> updateDiscount(
+    @Operation(summary = "Updates an existing restaurant, only changed fields need to be set")
+    public ResponseEntity<Discount> updateRestaurantDiscount(
         @PathVariable("restaurantId") Long restaurantId,
         @PathVariable("discountId") Long discountId,
-        @RequestBody DiscountDTO updatedDiscount
+        @RequestBody Discount updatedDiscount
     ) {
-        Discount discount = new Discount(updatedDiscount.getDiscountDescription(), updatedDiscount.getDiscountPercentage());
-        Discount savedDiscount = service.updateDiscount(restaurantId, discountId, discount);
-        return new ResponseEntity<>(savedDiscount, HttpStatus.OK);
+        Discount discount = service.updateDiscount(restaurantId, discountId, updatedDiscount);
+        return new ResponseEntity<>(discount, HttpStatus.OK);
     }
 
     /*
