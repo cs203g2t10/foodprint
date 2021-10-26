@@ -231,12 +231,7 @@ public class UserController {
     public ResponseEntity<Restaurant> deleteFavouriteRestaurant(@PathVariable("restaurantId") Long restaurantId) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         userService.deleteFavouriteRestaurant(user, restaurantId);
-        try {
-            userService.getFavourite(user, restaurantId);
-        } catch (NotFoundException ex) {
-            return new ResponseEntity<>(HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     public RestaurantDTO convertToDTO(Restaurant restaurant) {

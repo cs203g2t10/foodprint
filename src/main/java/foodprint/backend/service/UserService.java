@@ -211,14 +211,11 @@ public class UserService {
     public Restaurant addFavouriteRestaurant(User user, Long restaurantId) {
         Restaurant restaurant = getRestaurantById(restaurantId);
         Set<Restaurant> favouriteRestaurants = new HashSet<Restaurant>();
-        if (user.getFavouriteRestaurants() == null) {
-            favouriteRestaurants.add(restaurant);
-        } else {
+        if (user.getFavouriteRestaurants() != null) {
             favouriteRestaurants = user.getFavouriteRestaurants();
-            if (favouriteRestaurants.contains(restaurant)) {
-                throw new AlreadyExistsException("Favourite restaurant already exists.");
-            }
-            favouriteRestaurants.add(restaurant);
+        }
+        if (!favouriteRestaurants.add(restaurant)) {
+            throw new AlreadyExistsException("Favourite restaurant already exists.");
         }
         user.setFavouriteRestaurants(favouriteRestaurants);
         userRepo.saveAndFlush(user);
@@ -229,23 +226,13 @@ public class UserService {
         return user.getFavouriteRestaurants();
     }
 
-    public Restaurant getFavourite(User user, Long restaurantId) {
-        Set<Restaurant> favouriteRestaurants = getAllFavourites(user);
-        Restaurant restaurant = getRestaurantById(restaurantId);
-        if (favouriteRestaurants == null || !favouriteRestaurants.contains(restaurant)) {
-            throw new NotFoundException("Favourite restaurant not found.");
-        }
-        return restaurant;
-    }
-
     public void deleteFavouriteRestaurant(User user, Long restaurantId) {
         Restaurant restaurant = getRestaurantById(restaurantId);
         Set<Restaurant> favouriteRestaurants = user.getFavouriteRestaurants();
         if (favouriteRestaurants == null || !favouriteRestaurants.contains(restaurant)) {
             throw new NotFoundException("Favourite restaurant not found.");
-        } else {
-            favouriteRestaurants.remove(restaurant);
-        }
+        } 
+        favouriteRestaurants.remove(restaurant);
         user.setFavouriteRestaurants(favouriteRestaurants);
         userRepo.saveAndFlush(user);
     }
