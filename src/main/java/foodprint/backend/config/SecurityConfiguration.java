@@ -67,7 +67,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         http.authorizeRequests()
 
                 // Our public endpoints
-                .antMatchers(HttpMethod.GET, "/api/v1/restaurant/*/food", "/api/v1/restaurant/*", "/api/v1/restaurant")
+                .antMatchers(HttpMethod.GET, "/api/v1/restaurant/*/food", "/api/v1/restaurant/*", "/api/v1/restaurant", "/api/v1/restaurant/categories/**")
                 .permitAll()
 
                 .antMatchers("/api/v1/auth/login/**", "/api/v1/auth/register", "/api/v1/user", "/api/v1/user/auth/**",

@@ -1,6 +1,7 @@
 package foodprint.backend.model;
 
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -103,7 +104,7 @@ public class Ingredient {
 
     public List<String> getPicturesPath() {
         if (picturesPath == null) {
-            return null;
+            return new ArrayList<String>();
         }
 
         String[] arr = picturesPath.split(",");

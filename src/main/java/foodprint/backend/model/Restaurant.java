@@ -1,8 +1,10 @@
 package foodprint.backend.model;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
@@ -13,7 +15,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -144,6 +148,12 @@ public class Restaurant {
     @OneToMany
     @LazyCollection(LazyCollectionOption.FALSE)
     private List<Picture> pictures;
+
+    @ManyToMany
+    @JoinTable(name = "user_favouriterestaurants", joinColumns = @JoinColumn(name = "restaurant_id"), inverseJoinColumns = @JoinColumn(name = "user_id") )
+    private Set<Restaurant> users = new HashSet<>();
+
+
 
     protected Restaurant () { }
 
@@ -459,6 +469,14 @@ public class Restaurant {
     public Restaurant pictures(List<Picture> pictures) {
         setPictures(pictures);
         return this;
+    }
+
+    public Set<Restaurant> getUsers() {
+        return users;
+    }
+
+    public void setUsers(Set<Restaurant> users) {
+        this.users = users;
     }
 
     @Override
