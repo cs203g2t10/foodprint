@@ -495,13 +495,15 @@ public class RestaurantServiceTest {
         ReflectionTestUtils.setField(discount, "discountId", discountId);
 
         when(repo.findByRestaurantId(any(Long.class))).thenReturn(restaurant);
+        when(discountRepo.findById(any(Long.class))).thenReturn(Optional.of(discount));
         when(discountRepo.saveAndFlush(any(Discount.class))).thenReturn(discount);
 
         restaurantService.addDiscount(restaurantId, discount);
+        discount.setRestaurant(restaurant);
         Discount updatedDiscount = restaurantService.updateDiscount(restaurantId, discountId, discount);
 
         assertNotNull(updatedDiscount);
-        verify(repo, times(2)).findByRestaurantId(restaurantId);
+        verify(discountRepo).findById(discountId);
         verify(discountRepo).saveAndFlush(discount);
     }
 
@@ -521,6 +523,29 @@ public class RestaurantServiceTest {
         }
 
         verify(repo).findByRestaurantId(restaurantId);
+    }
+
+    @Test
+    void updateDiscount_DiscountExistButInWrongRestaurant_ReturnError() {
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Serangoon");
+        Long discountId = 1L;
+        Long restaurantId = 2L;
+        Discount discount = new Discount("1 For 1", 30);
+
+        when(repo.findByRestaurantId(any(Long.class))).thenReturn(restaurant);
+        when(discountRepo.findById(any(Long.class))).thenReturn(Optional.of(discount));
+
+        restaurantService.addDiscount(restaurantId, discount);
+        discount.setRestaurant(restaurant);
+
+        try {
+            restaurantService.updateDiscount(4L, discountId, discount);
+        } catch (NotFoundException e) {
+            assertEquals("Discount found but in incorrect restaurant", e.getMessage());
+        }
+
+        verify(repo).findByRestaurantId(restaurantId);
+        verify(discountRepo).findById(discountId);
     }
 
     @Test
