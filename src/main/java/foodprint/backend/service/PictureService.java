@@ -25,8 +25,6 @@ import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.Picture;
 import foodprint.backend.model.PictureRepo;
 
-
-//TODO Authorities
 @Service
 public class PictureService  {
     private final FileStore fileStore;
@@ -45,10 +43,12 @@ public class PictureService  {
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Picture savePicture(String title, String description, MultipartFile file) {
-        //check if the file is empty
+
+        // Check if the file is empty
         if (file.isEmpty()) {
             throw new IllegalStateException("Cannot upload empty file");
         }
+
         //Check if the file is an image
         if (!Arrays.asList(IMAGE_PNG.getMimeType(),
                 IMAGE_BMP.getMimeType(),
@@ -56,11 +56,13 @@ public class PictureService  {
                 IMAGE_JPEG.getMimeType()).contains(file.getContentType())) {
             throw new IllegalStateException("FIle uploaded is not an image");
         }
-        //get file metadata
+
+        // Get file metadata
         Map<String, String> metadata = new HashMap<>();
         metadata.put("Content-Type", file.getContentType());
         metadata.put("Content-Length", String.valueOf(file.getSize()));
-        //Save Image in S3 and then save Picture in the database
+        
+        // Upload image to Amazon S3
         UUID uuid = UUID.randomUUID();
         String path = String.format("%s/%s", BucketName.PICTURE_IMAGE.getBucketName(), uuid);
         String fileName = String.format("%s", file.getOriginalFilename());
@@ -69,14 +71,10 @@ public class PictureService  {
         } catch (IOException e) {
             throw new IllegalStateException("Failed to upload file", e);
         }
-        // Picture Picture = Picture.builder()
-        //         .description(description)
-        //         .title(title)
-        //         .imagePath(path)
-        //         .imageFileName(fileName)
-        //         .build();
         path = String.format("%s", uuid);
         String url = String.format("%s%s/%s", "https://foodprint-amazon-storage.s3.ap-southeast-1.amazonaws.com/", path, fileName.replace(" ", "+"));
+        
+        // Save picture in database
         Picture picture = new Picture(title, description, path, fileName, url);
         repository.saveAndFlush(picture);
         return picture;

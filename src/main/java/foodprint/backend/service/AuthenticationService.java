@@ -47,6 +47,12 @@ public class AuthenticationService {
         this.twoFaService = twoFaService;
     }
 
+    
+    /**
+     * Validates the authentication token (username and password)
+     * @param token
+     * @return
+     */
     public Authentication authenticate(UsernamePasswordAuthenticationToken token) {
 
         User user = (User) userDetailsService.loadUserByUsername((String) token.getPrincipal());
@@ -61,6 +67,10 @@ public class AuthenticationService {
         throw new BadCredentialsException("Incorrect credentials provided");
     }
 
+    /**
+     * Registers a given user and triggers a confirmation email send
+     * @param user
+     */
     public void register(User user) {
         if (userRepo.findByEmail(user.getEmail()).isPresent()) {
             throw new AlreadyExistsException("Registration with this email already exists!");
@@ -69,6 +79,10 @@ public class AuthenticationService {
         emailConfirmation(user);
     }
 
+    /**
+     * Sends a confirmation email for a given user's registration
+     * @param user
+     */
     public void emailConfirmation(User user) {
         //generate email token
         Token confirmToken = new Token(Token.EMAIL_CONFIRMATION_TOKEN, user);
@@ -93,6 +107,10 @@ public class AuthenticationService {
         }
     }
 
+    /**
+     * Confirms a registration for a given token
+     * @param tok
+     */
     public void confirmRegistration(String tok) {
         Token token = tokenRepo.findByToken(tok).orElseThrow(() -> new NotFoundException("Specified token does not exist!"));
         User requestor = token.getRequestor();
@@ -111,6 +129,11 @@ public class AuthenticationService {
         tokenRepo.saveAndFlush(token);
     }
 
+    /**
+     * Checks if 2FA is set for a given user
+     * @param email
+     * @return
+     */
     public Boolean check2faSet(String email) {
         if (!email.matches(emlRegex)) {
             throw new InvalidException("Invalid email format.");
@@ -119,10 +142,20 @@ public class AuthenticationService {
         return user.isTwoFaSet();
     }
 
+    /**
+     * Encodes the password into the Bcrypt form
+     * @param password
+     * @return
+     */
     public String encodePassword(String password) {
         return passwordEncoder.encode(password);
     }
 
+    /**
+     * Checks if the token is valid for a given user
+     * @param token
+     * @param user
+     */
     public void checkValidToken(String token, User user) {
         if (user.isTwoFaSet() == null || !user.isTwoFaSet()) { //if user doesn't have 2fa set, dont check for valid token (token should be null)
             return;

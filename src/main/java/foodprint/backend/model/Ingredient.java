@@ -24,6 +24,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Table
 
 public class Ingredient {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ingredientId")
@@ -61,7 +62,6 @@ public class Ingredient {
 
     public Ingredient (String ingredientName) {
         this.ingredientName = ingredientName;
-        // this.ingredientPrice = ingredientPrice;
     }
 
     // Mutators and Accessors
@@ -92,14 +92,6 @@ public class Ingredient {
     public void setIngredientDesc(String ingredientDesc) {
         this.ingredientDesc = ingredientDesc;
     }
-
-    // public Double getIngredientPrice() {
-    //     return this.ingredientPrice;
-    // }
-
-    // public void setIngredientPrice(Double ingredientPrice) {
-    //     this.ingredientPrice = ingredientPrice;
-    // }
 
     public String getUnits() {
         return this.units;
