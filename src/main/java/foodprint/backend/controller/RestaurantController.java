@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import foodprint.backend.dto.DiscountDTO;
+import foodprint.backend.dto.EditFoodDTO;
 import foodprint.backend.dto.FoodDTO;
 import foodprint.backend.dto.IngredientDTO;
 import foodprint.backend.dto.PictureDTO;
@@ -207,9 +208,9 @@ public class RestaurantController {
     public ResponseEntity<Food> updateRestaurantFood(
         @PathVariable("restaurantId") Long restaurantId,
         @PathVariable("foodId") Long foodId,
-        @RequestBody Food updatedFood
+        @RequestBody EditFoodDTO updatedFood
     ) {
-        Food food = service.updateFood(restaurantId, foodId, updatedFood);
+        Food food = service.editFood(restaurantId, foodId, updatedFood);
         return new ResponseEntity<>(food, HttpStatus.OK);
     }
 

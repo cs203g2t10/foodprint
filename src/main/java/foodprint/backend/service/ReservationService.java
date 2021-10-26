@@ -38,6 +38,12 @@ public class ReservationService {
         this.restaurantService = restaurantService;
     }
 
+    /**
+     * Checks if a slot is available for a given date and time.
+     * @param restaurant
+     * @param date
+     * @return boolean value
+     */
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public boolean slotAvailable(Restaurant restaurant, LocalDateTime date) {
         // assumes that duration of slot is 1 hour
@@ -50,18 +56,34 @@ public class ReservationService {
         }
     }
 
+
+    /**
+     * Gets a reservation by its database ID
+     * @param id
+     * @return
+     */
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Reservation getReservationById(Long id) {
         Optional<Reservation> reservation = reservationRepo.findById(id);
         return reservation.orElseThrow(() -> new NotFoundException("Reservation not found"));
     }
 
+    /**
+     * Gets all reservations made by a particular user
+     * @param user
+     * @return
+     */
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public List<Reservation> getAllReservationByUser(User user) {
         List<Reservation> reservationList = reservationRepo.findByUser(user);
         return reservationList;
     }
 
+    /**
+     * Gets all upcoming reservations for a given user
+     * @param user
+     * @return
+     */
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public List<Reservation> getUserUpcomingReservations(User user) {
         List<Reservation> reservationList = reservationRepo.findByUser(user);
@@ -75,6 +97,11 @@ public class ReservationService {
         return result;
     }
 
+    /**
+     * Gets all past reservations for a given user
+     * @param user
+     * @return
+     */
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public List<Reservation> getUserPastReservations(User user) {
         List<Reservation> reservationList = reservationRepo.findByUser(user);
@@ -88,6 +115,12 @@ public class ReservationService {
         return result;
     }
 
+
+    /**
+     * Gets all the 
+     * @param id
+     * @return
+     */
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public List<LineItem> getLineItemsByReservationId(Long id) {
         Optional<Reservation> reservation = reservationRepo.findById(id);

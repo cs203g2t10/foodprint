@@ -22,6 +22,15 @@ public class FoodIngredientQuantityKey implements Serializable{
         return super.equals(obj);
     }
 
+    public FoodIngredientQuantityKey() {
+
+    }
+
+    public FoodIngredientQuantityKey(Long foodId, Long ingredientId) {
+        this.foodId = foodId;
+        this.ingredientId = ingredientId;
+    }
+
     public Long getFoodId() {
         return foodId;
     }

@@ -7,7 +7,11 @@ import java.util.List;
 
 @Repository
 public interface LineItemRepo extends JpaRepository<LineItem, Long> {
+    
     List<LineItem> findByLineItemId(Long lineItemId);
+
     List<LineItem> findByFood(Food food);
+
     List<LineItem> findByReservation(Reservation reservation);
+
 }
