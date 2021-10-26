@@ -108,12 +108,7 @@ public class ReservationController {
     @Operation(summary = "Gets all line item for reservation")
     public ResponseEntity<List<LineItemDTO>> getReservationOrder(@PathVariable("reservationId") Long id) {
         Reservation reservation = reservationService.getReservationById(id);
-
-        if(reservation == null) {
-            throw new NotFoundException("reservation not found");
-        }
-
-        List<LineItem> lineItems = reservationService.getLineItemsByReservationId(id);
+        List<LineItem> lineItems = reservation.getLineItems();
         List<LineItemDTO> result = new ArrayList<LineItemDTO>();
         for(LineItem lineItem : lineItems) {
             LineItemDTO curr = new LineItemDTO(lineItem.getFood().getFoodId(), lineItem.getQuantity());

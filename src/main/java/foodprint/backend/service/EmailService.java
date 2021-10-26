@@ -56,12 +56,26 @@ public class EmailService {
         return mailSender;
     }
 
+    
+    /**
+     * Wrapper function for sending an email to a Foodprint user
+     * @param recipient
+     * @param subject
+     * @param content
+     */
     public void sendSimpleEmail(User recipient, String subject, String content) {
         String email = recipient.getEmail();
         sendSimpleEmail(email, subject, content);
     }
 
-    public void sendSimpleEmail(String recipientEmail, String subject, String content) {
+    
+    /**
+     * Actual function for sending emails
+     * @param recipientEmail
+     * @param subject
+     * @param content
+     */
+    private void sendSimpleEmail(String recipientEmail, String subject, String content) {
 
         if (javaMailSender() == null) {
             logger.info("Mail sender is null, cannot continue...");

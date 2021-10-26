@@ -10,8 +10,11 @@ import java.util.Set;
 
 import javax.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.security.core.GrantedAuthority;
@@ -91,6 +94,11 @@ public class User implements UserDetails{
     @ManyToOne
     @JoinColumn(name="restaurantId", nullable = true)
     private Restaurant restaurant;
+
+    @JsonIgnore
+    @ManyToMany(mappedBy = "users")
+    @LazyCollection(LazyCollectionOption.FALSE)
+    private Set<Restaurant> favouriteRestaurants = new HashSet<>();
 
     // Constructors
     public User() {}
@@ -227,6 +235,17 @@ public class User implements UserDetails{
     public void setRestaurant(Restaurant restaurant) {
         this.restaurant = restaurant;
     }
+
+    public Set<Restaurant> getFavouriteRestaurants() {
+        return this.favouriteRestaurants;
+    }
+
+    public void setFavouriteRestaurants(Set<Restaurant> favouriteRestaurants) {
+        this.favouriteRestaurants = favouriteRestaurants;
+    }
+
+    
+
 
     @Override
     @Schema(hidden=true)

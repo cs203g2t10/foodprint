@@ -18,6 +18,8 @@ import foodprint.backend.exceptions.BadRequestException;
 import foodprint.backend.exceptions.InvalidException;
 import foodprint.backend.exceptions.MailException;
 import foodprint.backend.exceptions.NotFoundException;
+import foodprint.backend.model.Restaurant;
+import foodprint.backend.model.RestaurantRepo;
 import foodprint.backend.model.Token;
 import foodprint.backend.model.TokenRepo;
 import foodprint.backend.model.User;
@@ -34,12 +36,16 @@ public class UserService {
 
     private EmailService emailService;
 
+    private RestaurantRepo restaurantRepo;
+
     @Autowired
-    UserService(UserRepo repo, PasswordEncoder passwordEncoder, TokenRepo tokenRepo, EmailService emailService) {
+    UserService(UserRepo repo, PasswordEncoder passwordEncoder, TokenRepo tokenRepo, EmailService emailService,
+            RestaurantRepo restaurantRepo) {
         this.userRepo = repo;
         this.passwordEncoder = passwordEncoder;
         this.tokenRepo = tokenRepo;
         this.emailService = emailService;
+        this.restaurantRepo = restaurantRepo;
     }
 
     public User createUser(User user) {
@@ -66,7 +72,7 @@ public class UserService {
 
     @PreAuthorize("hasAnyAuthority('FP_ADMIN')")
     public User getUser(Long id) {
-        User user = this.userRepo.findById(id).orElseThrow(() ->  new NotFoundException("User not found"));
+        User user = this.userRepo.findById(id).orElseThrow(() -> new NotFoundException("User not found"));
         return user;
     }
 
@@ -84,9 +90,9 @@ public class UserService {
         existingUser = updateUser(id, existingUser, updatedUser);
         return existingUser;
     }
-    
+
     @PreAuthorize("hasAnyAuthority('FP_ADMIN') OR #existingUser.email == authentication.name")
-    public User updateUser(Long id, @Param("existingUser") User existingUser,  User updatedUser) {
+    public User updateUser(Long id, @Param("existingUser") User existingUser, User updatedUser) {
 
         if (updatedUser.getEmail() != null) {
             existingUser.setEmail(updatedUser.getEmail());
@@ -105,10 +111,11 @@ public class UserService {
         if (updatedUser.getRoles() != null) {
             String[] roles = updatedUser.getRoles().split(",");
             Set<String> filteredRoles = new HashSet<>();
-            
+
             for (String role : roles) {
                 role = role.strip();
-                if (role.equals("FP_ADMIN") || role.equals("FP_MANAGER") || role.equals("FP_USER") || role.equals("FP_UNVERIFIED")) {
+                if (role.equals("FP_ADMIN") || role.equals("FP_MANAGER") || role.equals("FP_USER")
+                        || role.equals("FP_UNVERIFIED")) {
                     filteredRoles.add(role);
                 }
             }
@@ -149,7 +156,7 @@ public class UserService {
 
         return userRepo.findByEmail(page, emailSearch);
     }
-    
+
     // --------------------------- PASSWORD RESET ---------------------------------
 
     public void requestPasswordReset(String email) {
@@ -159,14 +166,10 @@ public class UserService {
         tokenRepo.save(token);
 
         // Craft and send the email
-        String emailBody = String.format(
-            "Hi %s, \n\n" +    
-            "You have requested for a password reset! Please use this link to set a new password http://foodprint.works/resetpassword?token=%s \n\n" +
-            "This verification token will expire in 48 hours. You can safely ignore this email if you did not request for it. \n\n" +
-            "Regards,\nFoodprint Support",
-            user.getFirstName(),
-            token.getToken()
-        );
+        String emailBody = String.format("Hi %s, \n\n"
+                + "You have requested for a password reset! Please use this link to set a new password http://foodprint.works/resetpassword?token=%s \n\n"
+                + "This verification token will expire in 48 hours. You can safely ignore this email if you did not request for it. \n\n"
+                + "Regards,\nFoodprint Support", user.getFirstName(), token.getToken());
 
         try {
             emailService.sendSimpleEmail(user, "Foodprint Password Reset", emailBody);
@@ -177,14 +180,16 @@ public class UserService {
     }
 
     public void checkPasswordReset(String tok) {
-        Token token = tokenRepo.findByToken(tok).orElseThrow(() -> new NotFoundException("The specified token was not found"));
+        Token token = tokenRepo.findByToken(tok)
+                .orElseThrow(() -> new NotFoundException("The specified token was not found"));
         if (!token.isValid() || token.getType() != Token.PASSWORD_RESET_REQUEST_TOKEN) {
             throw new InvalidException("Token invalid");
         }
     }
 
     public void doPasswordReset(String tok, String password) {
-        Token token = tokenRepo.findByToken(tok).orElseThrow(() -> new NotFoundException("The specified token was not found"));
+        Token token = tokenRepo.findByToken(tok)
+                .orElseThrow(() -> new NotFoundException("The specified token was not found"));
         if (token == null) {
             throw new NotFoundException("Token not found");
         }
@@ -202,4 +207,50 @@ public class UserService {
         userRepo.save(user);
     }
 
+    public Restaurant addFavouriteRestaurant(User user, Long restaurantId) {
+        Restaurant restaurant = getRestaurantById(restaurantId);
+        Set<Restaurant> favouriteRestaurants = new HashSet<Restaurant>();
+        if (user.getFavouriteRestaurants() == null) {
+            favouriteRestaurants.add(restaurant);
+        } else {
+            favouriteRestaurants = user.getFavouriteRestaurants();
+            if (favouriteRestaurants.contains(restaurant)) {
+                throw new AlreadyExistsException("Favourite restaurant already exists.");
+            }
+            favouriteRestaurants.add(restaurant);
+        }
+        user.setFavouriteRestaurants(favouriteRestaurants);
+        userRepo.saveAndFlush(user);
+        return restaurant;
+    }
+
+    public Set<Restaurant> getAllFavourites(User user) {
+        return user.getFavouriteRestaurants();
+    }
+
+    public Restaurant getFavourite(User user, Long restaurantId) {
+        Set<Restaurant> favouriteRestaurants = getAllFavourites(user);
+        Restaurant restaurant = getRestaurantById(restaurantId);
+        if (favouriteRestaurants == null || !favouriteRestaurants.contains(restaurant)) {
+            throw new NotFoundException("Favourite restaurant not found.");
+        }
+        return restaurant;
+    }
+
+    public void deleteFavouriteRestaurant(User user, Long restaurantId) {
+        Restaurant restaurant = getRestaurantById(restaurantId);
+        Set<Restaurant> favouriteRestaurants = user.getFavouriteRestaurants();
+        if (favouriteRestaurants == null || !favouriteRestaurants.contains(restaurant)) {
+            throw new NotFoundException("Favourite restaurant not found.");
+        } else {
+            favouriteRestaurants.remove(restaurant);
+        }
+        user.setFavouriteRestaurants(favouriteRestaurants);
+        userRepo.saveAndFlush(user);
+    }
+
+    public Restaurant getRestaurantById(Long restaurantId) {
+        return restaurantRepo.findById(restaurantId)
+                .orElseThrow(() -> new NotFoundException("Restaurant not found"));
+    }
 }

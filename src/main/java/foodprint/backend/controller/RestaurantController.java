@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import foodprint.backend.dto.DiscountDTO;
+import foodprint.backend.dto.EditFoodDTO;
 import foodprint.backend.dto.FoodDTO;
 import foodprint.backend.dto.IngredientDTO;
 import foodprint.backend.dto.PictureDTO;
@@ -201,15 +202,15 @@ public class RestaurantController {
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @PutMapping({"/{restaurantId}/food/{foodId}"})
+    @PatchMapping({"/{restaurantId}/food/{foodId}"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Updates an existing food item")
     public ResponseEntity<Food> updateRestaurantFood(
         @PathVariable("restaurantId") Long restaurantId,
         @PathVariable("foodId") Long foodId,
-        @RequestBody Food updatedFood
+        @RequestBody EditFoodDTO updatedFood
     ) {
-        Food food = service.updateFood(restaurantId, foodId, updatedFood);
+        Food food = service.editFood(restaurantId, foodId, updatedFood);
         return new ResponseEntity<>(food, HttpStatus.OK);
     }
 
@@ -269,18 +270,16 @@ public class RestaurantController {
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    //PUT: Update Discount
-    @PutMapping({"/{restaurantId}/discount/{discountId}"})
+    @PatchMapping({"/{restaurantId}/discount/{discountId}"})
     @ResponseStatus(code = HttpStatus.OK)
-    @Operation(summary = "Updates an existing discount")
-    public ResponseEntity<Discount> updateDiscount(
+    @Operation(summary = "Updates an existing restaurant, only changed fields need to be set")
+    public ResponseEntity<Discount> updateRestaurantDiscount(
         @PathVariable("restaurantId") Long restaurantId,
         @PathVariable("discountId") Long discountId,
-        @RequestBody DiscountDTO updatedDiscount
+        @RequestBody Discount updatedDiscount
     ) {
-        Discount discount = new Discount(updatedDiscount.getDiscountDescription(), updatedDiscount.getDiscountPercentage());
-        Discount savedDiscount = service.updateDiscount(restaurantId, discountId, discount);
-        return new ResponseEntity<>(savedDiscount, HttpStatus.OK);
+        Discount discount = service.updateDiscount(restaurantId, discountId, updatedDiscount);
+        return new ResponseEntity<>(discount, HttpStatus.OK);
     }
 
     /*
@@ -301,16 +300,25 @@ public class RestaurantController {
         return new ResponseEntity<>(newIngredient, HttpStatus.CREATED);
     }
 
-    // GET: Get all ingredients for restaurant
+    // GET: Get paged ingredients for restaurant
     @GetMapping("/{restaurantId}/ingredient")
     @ResponseStatus(code = HttpStatus.OK)
-    @Operation(summary = "Gets all restaurant's ingredients")
-    public ResponseEntity<Page<Ingredient>> restaurantGetAllIngredients(
+    @Operation(summary = "Gets paged restaurant's ingredients")
+    public ResponseEntity<Page<Ingredient>> restaurantGetIngredientsPaged(
         @PathVariable Long restaurantId, 
         @RequestParam(value = "p", defaultValue = "0", required = false) Integer pageNumber
     ) {
         Page<Ingredient> ingredients = service.getRestaurantIngredients(restaurantId, pageNumber);
         return new ResponseEntity<>(ingredients, HttpStatus.OK);
+    }
+
+    // GET: Get all ingredients for restaurant
+    @GetMapping("/{restaurantId}/ingredient/all")
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Gets all the restaurant ingredients")
+    public ResponseEntity<List<Ingredient>> restaurantGetIngredientsAll(@PathVariable Long restaurantId) {
+        List<Ingredient> allIngredients = service.getAllRestaurantIngredients(restaurantId);
+        return new ResponseEntity<>(allIngredients, HttpStatus.OK);
     }
 
     // PATCH: Modify an ingredient for a restaurant

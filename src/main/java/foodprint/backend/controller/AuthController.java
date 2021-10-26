@@ -50,7 +50,7 @@ public class AuthController {
     }
 
     @GetMapping("/login/{email}")
-    public ResponseEntity<Boolean> check2fa(String email) {
+    public ResponseEntity<Boolean> check2fa(@PathVariable("email") String email) {
         return new ResponseEntity<>(authService.check2faSet(email), HttpStatus.OK);
     }
 

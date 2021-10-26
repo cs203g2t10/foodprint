@@ -1,6 +1,7 @@
 package foodprint.backend.model;
 
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -24,6 +25,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Table
 
 public class Ingredient {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ingredientId")
@@ -61,7 +63,6 @@ public class Ingredient {
 
     public Ingredient (String ingredientName) {
         this.ingredientName = ingredientName;
-        // this.ingredientPrice = ingredientPrice;
     }
 
     // Mutators and Accessors
@@ -93,14 +94,6 @@ public class Ingredient {
         this.ingredientDesc = ingredientDesc;
     }
 
-    // public Double getIngredientPrice() {
-    //     return this.ingredientPrice;
-    // }
-
-    // public void setIngredientPrice(Double ingredientPrice) {
-    //     this.ingredientPrice = ingredientPrice;
-    // }
-
     public String getUnits() {
         return this.units;
     }
@@ -111,7 +104,7 @@ public class Ingredient {
 
     public List<String> getPicturesPath() {
         if (picturesPath == null) {
-            return null;
+            return new ArrayList<String>();
         }
 
         String[] arr = picturesPath.split(",");
