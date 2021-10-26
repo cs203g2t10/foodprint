@@ -207,7 +207,7 @@ public class UserService {
         userRepo.save(user);
     }
 
-    public Restaurant addFavouriteRestaurant(User user, Long restaurantId) {
+    public void addFavouriteRestaurant(User user, Long restaurantId) {
         Restaurant restaurant = getRestaurantById(restaurantId);
         Set<Restaurant> favouriteRestaurants = new HashSet<Restaurant>();
         if (user.getFavouriteRestaurants() != null) {
@@ -218,11 +218,6 @@ public class UserService {
         }
         user.setFavouriteRestaurants(favouriteRestaurants);
         userRepo.saveAndFlush(user);
-        return restaurant;
-    }
-
-    public Set<Restaurant> getAllFavourites(User user) {
-        return user.getFavouriteRestaurants();
     }
 
     public void deleteFavouriteRestaurant(User user, Long restaurantId) {
