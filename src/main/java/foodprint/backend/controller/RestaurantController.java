@@ -372,6 +372,35 @@ public class RestaurantController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
+    @GetMapping({"/{restaurantId}/calculateFoodToday"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Calculate food needed today")
+    public ResponseEntity<Map<String, Integer>> calculateFoodToday (@PathVariable Long restaurantId) {
+        Restaurant restaurant = service.get(restaurantId);
+        if(restaurant == null)
+            throw new NotFoundException("restaurant does not exist");
+        Map<String, Integer> result = service.calculateFoodNeededToday(restaurant);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @GetMapping({"/{restaurantId}/calculateFoodBetween"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Calculate food needed between")
+    public ResponseEntity<Map<String, Integer>> calculateFoodBetween(@PathVariable Long restaurantId, @RequestParam("start") String startDate, @RequestParam("end") String endDate) {
+        Restaurant restaurant = service.get(restaurantId);
+        if(restaurant == null)
+            throw new NotFoundException("restaurant does not exist");
+        
+        LocalDate start = LocalDate.parse(startDate);
+        LocalDate end = LocalDate.parse(endDate);
+        if (start.isBefore(LocalDateTime.now().toLocalDate())) {
+            throw new BadRequestException("starting date should be after today");
+        } else if (start.isAfter(end)) {
+            throw new BadRequestException("start date should be before end date");
+        }
+        Map<String, Integer> result = service.calculateFoodNeededBetween(restaurant, start, end);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
    
 
     @PostMapping(path = "/{restaurantId}/uploadPicture",
