@@ -48,6 +48,7 @@ public class UserService {
         this.restaurantRepo = restaurantRepo;
     }
 
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN')")
     public User createUser(User user) {
         Optional<User> existingUserByEmail = userRepo.findByEmail(user.getEmail());
         if (user.getId() != null) {
