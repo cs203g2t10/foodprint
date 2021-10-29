@@ -270,7 +270,7 @@ public class RestaurantService {
      * @param restaurantId
      * @param foodId
      */
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public void deleteFood(Long restaurantId, Long foodId) {
         Restaurant restaurant = get(restaurantId);
         List<Food> allFood = restaurant.getAllFood();
@@ -290,7 +290,7 @@ public class RestaurantService {
      * @param updatedFood
      * @return
      */
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public Food updateFood(Long restaurantId, Long foodId, Food updatedFood) {
         Food originalFood = foodRepo.findById(foodId).orElseThrow(
              () -> new NotFoundException("Food requested could not be found")
@@ -323,7 +323,7 @@ public class RestaurantService {
         return originalFood;
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public Food editFood(Long restaurantId, Long foodId, EditFoodDTO foodDTO) {
         final Food originalFood = foodRepo.findById(foodId).orElseThrow(
              () -> new NotFoundException("Food requested could not be found")
