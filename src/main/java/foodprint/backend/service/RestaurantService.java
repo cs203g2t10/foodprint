@@ -376,17 +376,6 @@ public class RestaurantService {
     }
 
     /**
-     * Calculate food needed today
-     * @param restaurant
-     * @return
-     */
-
-    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
-    public HashMap<String, Integer> calculateFoodNeededToday(Restaurant restaurant) {
-        return calculateIngredientsNeededBetween(restaurant, LocalDate.now(), LocalDate.now());
-    }
-
-    /**
      * Calculate food between dates
      * @param restaurant
      * @param startDate
@@ -403,7 +392,6 @@ public class RestaurantService {
             if (date.isBefore(endDate.plusDays(1)) && date.isAfter(startDate.minusDays(1))) {               
                 List<LineItem> lineItems = reservation.getLineItems();
                 for (LineItem lineItem : lineItems){
-                    System.out.println(lineItem.getFood().getFoodName());
                     map.put(lineItem.getFood().getFoodName(), lineItem.getQuantity());
                 }
             }
@@ -600,14 +588,12 @@ public class RestaurantService {
     }
 
     /**
-     * Calculates the ingredients needed for today
+     * Calculates the ingredients needed between 2 days
      * @param restaurant
+     * @param startDate
+     * @param endDate
      * @return
      */
-    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
-    public HashMap<String, Integer> calculateIngredientsNeededToday(Restaurant restaurant) {
-        return calculateIngredientsNeededBetween(restaurant, LocalDate.now().minusDays(1), LocalDate.now().plusDays(1));
-    }
 
     @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public HashMap<String, Integer> calculateIngredientsNeededBetween(Restaurant restaurant, LocalDate startDate, LocalDate endDate) {

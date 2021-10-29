@@ -340,17 +340,6 @@ public class RestaurantController {
         service.deleteRestaurantIngredient(restaurantId, ingredientId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
-    
-    @GetMapping({"/{restaurantId}/calculateIngredientsToday"})
-    @ResponseStatus(code = HttpStatus.OK)
-    @Operation(summary = "Calculate ingredients needed today")
-    public ResponseEntity<Map<String, Integer>> calculateIngredientsToday (@PathVariable Long restaurantId) {
-        Restaurant restaurant = service.get(restaurantId);
-        if(restaurant == null)
-            throw new NotFoundException("restaurant does not exist");
-        Map<String, Integer> result = service.calculateIngredientsNeededToday(restaurant);
-        return new ResponseEntity<>(result, HttpStatus.OK);
-    }
 
     @GetMapping({"/{restaurantId}/calculateIngredientsBetween"})
     @ResponseStatus(code = HttpStatus.OK)
@@ -369,17 +358,6 @@ public class RestaurantController {
             throw new BadRequestException("start date should be before end date");
         }
         Map<String, Integer> result = service.calculateIngredientsNeededBetween(restaurant, start, end);
-        return new ResponseEntity<>(result, HttpStatus.OK);
-    }
-
-    @GetMapping({"/{restaurantId}/calculateFoodToday"})
-    @ResponseStatus(code = HttpStatus.OK)
-    @Operation(summary = "Calculate food needed today")
-    public ResponseEntity<Map<String, Integer>> calculateFoodToday (@PathVariable Long restaurantId) {
-        Restaurant restaurant = service.get(restaurantId);
-        if(restaurant == null)
-            throw new NotFoundException("restaurant does not exist");
-        Map<String, Integer> result = service.calculateFoodNeededToday(restaurant);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
