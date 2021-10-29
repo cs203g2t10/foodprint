@@ -86,9 +86,6 @@ public class VaccinationService {
             throw new VaccinationValidationException("Vaccination certificate invalid: " + vaccReason);
 
         }
-
-
-        
     }
 
 }

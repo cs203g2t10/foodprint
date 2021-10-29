@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import foodprint.backend.dto.DiscountDTO;
+import foodprint.backend.dto.EditFoodDTO;
 import foodprint.backend.dto.FoodDTO;
 import foodprint.backend.dto.IngredientDTO;
 import foodprint.backend.dto.PictureDTO;
@@ -207,9 +208,9 @@ public class RestaurantController {
     public ResponseEntity<Food> updateRestaurantFood(
         @PathVariable("restaurantId") Long restaurantId,
         @PathVariable("foodId") Long foodId,
-        @RequestBody Food updatedFood
+        @RequestBody EditFoodDTO updatedFood
     ) {
-        Food food = service.updateFood(restaurantId, foodId, updatedFood);
+        Food food = service.editFood(restaurantId, foodId, updatedFood);
         return new ResponseEntity<>(food, HttpStatus.OK);
     }
 
@@ -339,17 +340,6 @@ public class RestaurantController {
         service.deleteRestaurantIngredient(restaurantId, ingredientId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
-    
-    @GetMapping({"/{restaurantId}/calculateIngredientsToday"})
-    @ResponseStatus(code = HttpStatus.OK)
-    @Operation(summary = "Calculate ingredients needed today")
-    public ResponseEntity<Map<String, Integer>> calculateIngredientsToday (@PathVariable Long restaurantId) {
-        Restaurant restaurant = service.get(restaurantId);
-        if(restaurant == null)
-            throw new NotFoundException("restaurant does not exist");
-        Map<String, Integer> result = service.calculateIngredientsNeededToday(restaurant);
-        return new ResponseEntity<>(result, HttpStatus.OK);
-    }
 
     @GetMapping({"/{restaurantId}/calculateIngredientsBetween"})
     @ResponseStatus(code = HttpStatus.OK)
@@ -371,6 +361,24 @@ public class RestaurantController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
+    @GetMapping({"/{restaurantId}/calculateFoodBetween"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Calculate food needed between")
+    public ResponseEntity<Map<String, Integer>> calculateFoodBetween(@PathVariable Long restaurantId, @RequestParam("start") String startDate, @RequestParam("end") String endDate) {
+        Restaurant restaurant = service.get(restaurantId);
+        if(restaurant == null)
+            throw new NotFoundException("restaurant does not exist");
+        
+        LocalDate start = LocalDate.parse(startDate);
+        LocalDate end = LocalDate.parse(endDate);
+        if (start.isBefore(LocalDateTime.now().toLocalDate())) {
+            throw new BadRequestException("starting date should be after today");
+        } else if (start.isAfter(end)) {
+            throw new BadRequestException("start date should be before end date");
+        }
+        Map<String, Integer> result = service.calculateFoodNeededBetween(restaurant, start, end);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
    
 
     @PostMapping(path = "/{restaurantId}/uploadPicture",

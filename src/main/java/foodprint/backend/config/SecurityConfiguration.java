@@ -5,8 +5,10 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -31,6 +33,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private UserRepo userRepo;
     private JwtTokenFilter jwtTokenFilter;
+    private BypassSecurityFilter bypassSecurityFilter;
+
+    @Value("${security.bypass}")
+    private boolean SECURITY_BYPASSED;
 
     @Bean
     public PasswordEncoder encoder() {
@@ -38,9 +44,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     }
 
     @Autowired
-    public SecurityConfiguration(UserRepo userRepo, JwtTokenFilter jwtTokenFilter) {
+    public SecurityConfiguration(UserRepo userRepo, JwtTokenFilter jwtTokenFilter, @Lazy BypassSecurityFilter bypassSecurityFilter) {
         this.userRepo = userRepo;
         this.jwtTokenFilter = jwtTokenFilter;
+        this.bypassSecurityFilter = bypassSecurityFilter;
     }
 
     @Override
@@ -63,26 +70,48 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage());
         }).and();
 
-        // Set permissions on endpoints
-        http.authorizeRequests()
+        if (SECURITY_BYPASSED) {
 
-                // Our public endpoints
-                .antMatchers(HttpMethod.GET, "/api/v1/restaurant/*/food", "/api/v1/restaurant/*", "/api/v1/restaurant", "/api/v1/restaurant/categories/**")
-                .permitAll()
+            http.authorizeRequests()
+                .anyRequest()
+                .permitAll();
 
-                .antMatchers("/api/v1/auth/login/**", "/api/v1/auth/register", "/api/v1/user", "/api/v1/user/auth/**",
-                        "/api/v1/auth/register/confirm/*")
-                .permitAll()
+            http.addFilterBefore(bypassSecurityFilter, UsernamePasswordAuthenticationFilter.class);
 
-                .antMatchers("/swagger/**", "/swagger-ui/**", "/swagger-ui/index.html", "/v3/api-docs/**",
-                        "/h2-console/**", "/favicon.ico")
-                .permitAll()
+        } else {
 
-                // Our private endpoints
-                .anyRequest().authenticated().and();
+            // Set permissions on endpoints
+            http.authorizeRequests()
 
-        // Add JWT token filter
-        http.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
+            // Our public endpoints
+            .antMatchers(HttpMethod.GET,
+                    "/api/v1/restaurant/*/food",
+                    "/api/v1/restaurant/*",
+                    "/api/v1/restaurant",
+                    "/api/v1/restaurant/categories/**")
+            .permitAll()
+
+            .antMatchers("/api/v1/auth/login/**",
+                    "/api/v1/auth/register",
+                    "/api/v1/user",
+                    "/api/v1/user/auth/**",
+                    "/api/v1/auth/register/confirm/*")
+            .permitAll()
+
+            .antMatchers("/swagger/**",
+                    "/swagger-ui/**",
+                    "/swagger-ui/index.html",
+                    "/v3/api-docs/**",
+                    "/h2-console/**",
+                    "/favicon.ico")
+            .permitAll()
+
+            // Our private endpoints
+            .anyRequest().authenticated().and();
+
+            // Add JWT token filter
+            http.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
+        }
     }
 
     @Bean
