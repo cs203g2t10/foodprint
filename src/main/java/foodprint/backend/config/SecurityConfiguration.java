@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -72,6 +71,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
         if (SECURITY_BYPASSED) {
 
+            System.out.println("SECURITY IS BYPASSED!!!");
+
             http.authorizeRequests()
                 .anyRequest()
                 .permitAll();
@@ -93,6 +94,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
             .antMatchers("/api/v1/auth/login/**",
                     "/api/v1/auth/register",
+                    "/api/v1/auth/checkUser2FA/**",
                     "/api/v1/user",
                     "/api/v1/user/auth/**",
                     "/api/v1/auth/register/confirm/*")
@@ -127,8 +129,4 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         return source;
     }
 
-    @Bean
-    AuthenticationProvider authProvider() {
-        return new AuthProvider();
-    }
 }
