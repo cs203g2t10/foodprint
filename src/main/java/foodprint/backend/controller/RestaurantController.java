@@ -475,6 +475,7 @@ public class RestaurantController {
         Restaurant restaurant = new Restaurant(restaurantDTO.getRestaurantName(), restaurantDTO.getRestaurantLocation());
         restaurant.setRestaurantDesc(restaurantDTO.getRestaurantDesc());
         restaurant.setRestaurantTableCapacity(restaurantDTO.getRestaurantTableCapacity());
+        restaurant.setRestaurantPriceRange(restaurantDTO.getRestaurantPriceRange());
         restaurant.setRestaurantWeekdayClosingHour(restaurantDTO.getRestaurantWeekdayClosingHour());
         restaurant.setRestaurantWeekdayClosingMinutes(restaurantDTO.getRestaurantWeekdayClosingMinutes());
         restaurant.setRestaurantWeekdayOpeningHour(restaurantDTO.getRestaurantWeekdayOpeningHour());
@@ -494,6 +495,7 @@ public class RestaurantController {
         dto.setRestaurantLocation(restaurant.getRestaurantLocation());
         dto.setRestaurantDesc(restaurant.getRestaurantDesc());
         dto.setRestaurantTableCapacity(restaurant.getRestaurantTableCapacity());
+        dto.setRestaurantPriceRange(restaurant.getRestaurantPriceRange());
         dto.setRestaurantWeekdayClosingHour(restaurant.getRestaurantWeekdayClosingHour());
         dto.setRestaurantWeekdayClosingMinutes(restaurant.getRestaurantWeekdayClosingMinutes());
         dto.setRestaurantWeekdayOpeningHour(restaurant.getRestaurantWeekdayOpeningHour());
@@ -504,18 +506,14 @@ public class RestaurantController {
         dto.setRestaurantWeekendOpeningMinutes(restaurant.getRestaurantWeekendOpeningMinutes());
         dto.setRestaurantCategory(restaurant.getRestaurantCategory());
         
-        List<Picture> pictures = restaurant.getPictures();
-        List<PictureDTO> pictureDtos = new ArrayList<>();
-        dto.setPictures(pictureDtos);
+        Picture picture = restaurant.getPicture();
+        PictureDTO picDto = new PictureDTO(picture.getTitle(), picture.getDescription(), picture.getUrl());
+
+        dto.setPicture(picDto);
 
         List<Discount> discounts = restaurant.getDiscount();
         List<DiscountDTO> discountDTOs = new ArrayList<>();
         dto.setDiscounts(discountDTOs);
-
-        for (Picture picture : pictures) {
-            PictureDTO picDto = new PictureDTO(picture.getTitle(), picture.getDescription(), picture.getUrl());
-            pictureDtos.add(picDto);
-        }
 
         for (Discount discount : discounts) {
             DiscountDTO discDTO = new DiscountDTO(discount.getRestaurant().getRestaurantId(), discount.getDiscountDescription(), discount.getDiscountPercentage());
