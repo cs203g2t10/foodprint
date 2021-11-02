@@ -54,18 +54,11 @@ import io.swagger.v3.oas.annotations.Operation;
 public class RestaurantController {
     
     private RestaurantService service;
-	// private EmailService emailService;
 
     @Autowired
     RestaurantController(RestaurantService service) {
         this.service = service;
     }
-
-    // @Autowired
-    // RestaurantController(RestaurantService service, EmailService emailService) {
-    //     this.service = service;
-    //     this.emailService = emailService;
-    // }
 
     // GET: Get the restaurant
     @GetMapping({"/{restaurantId}"})
@@ -145,10 +138,15 @@ public class RestaurantController {
 
     @GetMapping({"/categories/{category}"})
     @ResponseStatus(code = HttpStatus.OK)
-    @Operation(summary = "Get a list of restaurants associated with selected category")
-    public ResponseEntity<List<Restaurant>> getRestaurantRelatedToCategory(@PathVariable("category") String restaurantCategory) {
+    @Operation(summary = "Get a list of restaurant DTOs associated with selected category")
+    public ResponseEntity<List<RestaurantDTO>> getRestaurantRelatedToCategory(@PathVariable("category") String restaurantCategory) {
+            List<RestaurantDTO> restaurantDTOs = new ArrayList<>();
             List<Restaurant> restaurantsRelatedToCategory = service.getRestaurantsRelatedToCategory(restaurantCategory);
-            return new ResponseEntity<>(restaurantsRelatedToCategory, HttpStatus.OK);
+            for (Restaurant restaurant : restaurantsRelatedToCategory) {
+                RestaurantDTO resDTO = this.convertToDTO(restaurant);
+                restaurantDTOs.add(resDTO);
+            }
+            return new ResponseEntity<>(restaurantDTOs, HttpStatus.OK);
     }
 
     /*
