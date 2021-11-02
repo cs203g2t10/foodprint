@@ -19,7 +19,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import foodprint.backend.config.BucketName;
 import foodprint.backend.exceptions.DeleteFailedException;
 import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.Picture;
@@ -36,12 +35,13 @@ public class PictureService  {
         this.repository = repository;
     }
 
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Picture get(Long id) {
         Optional<Picture> picture = repository.findById(id);
         return picture.orElseThrow(() -> new NotFoundException("Picture not found"));
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public Picture savePicture(String title, String description, MultipartFile file) {
 
         // Check if the file is empty
@@ -64,7 +64,7 @@ public class PictureService  {
         
         // Upload image to Amazon S3
         UUID uuid = UUID.randomUUID();
-        String path = String.format("%s/%s", BucketName.PICTURE_IMAGE.getBucketName(), uuid);
+        String path = String.format("foodprint-amazon-storage/%s", uuid);
         String fileName = String.format("%s", file.getOriginalFilename());
         try {
             fileStore.upload(path, fileName, Optional.of(metadata), file.getInputStream());
@@ -104,7 +104,7 @@ public class PictureService  {
         return url;
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public void deletePicture(Long id) {
         Picture picture = get(id);
         repository.delete(picture);
@@ -116,7 +116,7 @@ public class PictureService  {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public Picture updatedPicture(Long pictureId, Picture newPicture) {
         Picture oldPicture = get(pictureId);
         oldPicture.setDescription(newPicture.getDescription());

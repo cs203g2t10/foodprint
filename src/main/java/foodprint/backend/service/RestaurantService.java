@@ -1,6 +1,7 @@
 package foodprint.backend.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 //import com.stripe.param.CreditNoteCreateParams.Line;
@@ -81,7 +82,7 @@ public class RestaurantService {
      * @param updatedRestaurant
      * @return
      */
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public Restaurant update(Long id, Restaurant updatedRestaurant) {
 
         Restaurant currentRestaurant = this.get(id);
@@ -135,7 +136,7 @@ public class RestaurantService {
      * @param restaurant
      * @return
      */
-    @PreAuthorize("hasAnyAuthority('FP_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public Restaurant create(Restaurant restaurant) {
         return repo.saveAndFlush(restaurant);
     }
@@ -145,7 +146,7 @@ public class RestaurantService {
      * Deletes a restaurant
      * @param id
      */
-    @PreAuthorize("hasAnyAuthority('FP_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public void delete(Long id) {
         Restaurant restaurant = this.get(id);
         repo.delete(restaurant);
@@ -216,7 +217,7 @@ public class RestaurantService {
      * @param foodDTO
      * @return
      */
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public Food addFood(Long restaurantId, FoodDTO foodDTO) {
         Restaurant restaurant = repo.findByRestaurantId(restaurantId);
 
@@ -270,7 +271,7 @@ public class RestaurantService {
      * @param restaurantId
      * @param foodId
      */
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public void deleteFood(Long restaurantId, Long foodId) {
         Restaurant restaurant = get(restaurantId);
         List<Food> allFood = restaurant.getAllFood();
@@ -290,7 +291,7 @@ public class RestaurantService {
      * @param updatedFood
      * @return
      */
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public Food updateFood(Long restaurantId, Long foodId, Food updatedFood) {
         Food originalFood = foodRepo.findById(foodId).orElseThrow(
              () -> new NotFoundException("Food requested could not be found")
@@ -323,7 +324,7 @@ public class RestaurantService {
         return originalFood;
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public Food editFood(Long restaurantId, Long foodId, EditFoodDTO foodDTO) {
         final Food originalFood = foodRepo.findById(foodId).orElseThrow(
              () -> new NotFoundException("Food requested could not be found")
@@ -370,9 +371,35 @@ public class RestaurantService {
      * @param query
      * @return
      */
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Page<Food> searchFood(Pageable page, String query) {
         return foodRepo.findByFoodNameContains(page,query);
+    }
+
+    /**
+     * Calculate food between dates
+     * @param restaurant
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER', 'FP_ADMIN')")
+    public HashMap<String, Integer> calculateFoodNeededBetween(Restaurant restaurant, LocalDate startDate, LocalDate endDate) {
+
+        HashMap<String, Integer> map = new HashMap<>();
+        LocalDateTime start = startDate.minusDays(1).atTime(0, 0);
+        LocalDateTime end = endDate.plusDays(1).atTime(0,0);
+        List<Reservation> reservations = reservationRepo.findByRestaurantAndDateBetween(restaurant, start, end);
+
+        for(Reservation reservation : reservations) {
+            List<LineItem> lineItems = reservation.getLineItems();
+            for (LineItem lineItem : lineItems){
+                String foodName = lineItem.getFood().getFoodName();
+                Integer currentAmt = map.getOrDefault(foodName, 0);
+                map.put(lineItem.getFood().getFoodName(), currentAmt + lineItem.getQuantity());
+            }
+        }
+
+        return map;
     }
 
     /*
@@ -387,7 +414,7 @@ public class RestaurantService {
      * @param discount
      * @return
      */
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public Discount addDiscount(Long restaurantId, Discount discount) {
         Restaurant restaurant = repo.findByRestaurantId(restaurantId);
         Discount Discount = new Discount();
@@ -404,7 +431,7 @@ public class RestaurantService {
      * @param restaurantId
      * @param discountId
      */
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public void deleteDiscount(Long restaurantId, Long discountId) {
         if (discountRepo.existsById(discountId)) {
             Discount discount = discountRepo.getById(discountId);
@@ -426,7 +453,7 @@ public class RestaurantService {
      * @param updatedDiscount
      * @return
      */
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public Discount updateDiscount(Long restaurantId, Long discountId, Discount updatedDiscount) {
         Discount originalDiscount = discountRepo.findById(discountId).orElseThrow(() -> new NotFoundException("Discount could not be found"));
         if (originalDiscount.getRestaurant().getRestaurantId() != restaurantId) {
@@ -449,7 +476,7 @@ public class RestaurantService {
      * @param discountId
      * @return
      */
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    @PreAuthorize("hasAnyAuthority('FP_USER', 'FP_MANAGER', 'FP_ADMIN')")
     public Discount getDiscount(Long discountId) {
         Optional<Discount> discount = discountRepo.findById(discountId);
         return discount.orElseThrow(() -> new NotFoundException("Discount not found"));
@@ -564,38 +591,35 @@ public class RestaurantService {
     }
 
     /**
-     * Calculates the ingredients needed for today
+     * Calculates the ingredients needed between 2 days
      * @param restaurant
+     * @param startDate
+     * @param endDate
      * @return
      */
-    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
-    public HashMap<String, Integer> calculateIngredientsNeededToday(Restaurant restaurant) {
-        return calculateIngredientsNeededBetween(restaurant, LocalDate.now(), LocalDate.now());
-    }
 
-    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER', 'FP_ADMIN')")
     public HashMap<String, Integer> calculateIngredientsNeededBetween(Restaurant restaurant, LocalDate startDate, LocalDate endDate) {
+        
         HashMap<String, Integer> map = new HashMap<>();
-        List<Reservation> reservations = reservationRepo.findByRestaurant(restaurant);
+        LocalDateTime start = startDate.minusDays(1).atTime(0, 0);
+        LocalDateTime end = endDate.plusDays(1).atTime(0,0);
+        List<Reservation> reservations = reservationRepo.findByRestaurantAndDateBetween(restaurant, start, end);
 
         for(Reservation reservation : reservations) {
-            LocalDate date = reservation.getDate().toLocalDate();
-            if (date.isBefore(endDate.plusDays(1)) && date.isAfter(startDate.minusDays(1))) {               
-                List<LineItem> lineItems = reservation.getLineItems();
-            
-                for (LineItem lineItem : lineItems){
-                    Food food = lineItem.getFood();
-                    Set<FoodIngredientQuantity> foodIngreQuantity = food.getFoodIngredientQuantity();
-                    for(FoodIngredientQuantity entry : foodIngreQuantity) {
-                        Ingredient currIngredient = entry.getIngredient();
-                        if (map.containsKey(currIngredient.getIngredientName())) {
-                            Integer currQuantity = map.get(currIngredient.getIngredientName());
-                            map.put(currIngredient.getIngredientName(), currQuantity + entry.getQuantity() * lineItem.getQuantity());
-                        } else {
-                            map.put(currIngredient.getIngredientName(), entry.getQuantity() * lineItem.getQuantity());
-                        }
-                    }
+            List<LineItem> lineItems = reservation.getLineItems();
+        
+            for (LineItem lineItem : lineItems){
+                Food food = lineItem.getFood();
+
+                Set<FoodIngredientQuantity> foodIngreQuantity = food.getFoodIngredientQuantity();
+                
+                for(FoodIngredientQuantity entry : foodIngreQuantity) {
+                    Ingredient currIngredient = entry.getIngredient();
+                    Integer currQty = map.getOrDefault(currIngredient.getIngredientName(), 0);
+                    map.put(currIngredient.getIngredientName(), currQty + entry.getQuantity() * lineItem.getQuantity());
                 }
+
             }
         }
 
@@ -629,7 +653,7 @@ public class RestaurantService {
      * @param file
      * @return
      */
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public Picture saveFoodPicture(Long restaurantId, Long foodId, String title, String description, MultipartFile file) {
         Picture picture = pictureService.savePicture(title, description, file);
         Food food = getFood(restaurantId, foodId);
@@ -674,7 +698,6 @@ public class RestaurantService {
         return false;
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public String getFoodPictureById(Long restaurantId, Long foodId, Long pictureId ) {
         if (!pictureInFood(restaurantId, foodId, pictureId)) {
             throw new NotFoundException("Picture not found in restaurant");
@@ -682,7 +705,6 @@ public class RestaurantService {
         return pictureService.getPictureById(pictureId);
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public String getPictureById(Long restaurantId, Long pictureId) {
         if (!pictureInRestaurant(restaurantId, pictureId)) {
             throw new NotFoundException("Picture not found in restaurant");
@@ -690,7 +712,7 @@ public class RestaurantService {
         return pictureService.getPictureById(pictureId);
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public void deletePicture(Long restaurantId, Long pictureId) {
         if (!pictureInRestaurant(restaurantId, pictureId)) { //check if pic id is in restaurant list
             throw new NotFoundException("Picture not found in restaurant");
@@ -705,7 +727,7 @@ public class RestaurantService {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public void deleteFoodPicture(Long restaurantId, Long foodId, Long pictureId) {
         if (!pictureInFood(restaurantId, foodId, pictureId)) {
             throw new NotFoundException("Picture not found in restaurant");
@@ -720,7 +742,7 @@ public class RestaurantService {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public Picture updatePictureInformation(Long restaurantId, Long pictureId, Picture picture) {
         if (!pictureInRestaurant(restaurantId, pictureId)) { //check if pic id is in restaurant list
             throw new NotFoundException("Picture not found in restaurant");
@@ -728,7 +750,7 @@ public class RestaurantService {
         return pictureService.updatedPicture(pictureId, picture);
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public Picture updateFoodPictureInformation(Long restaurantId, Long foodId, Long pictureId, Picture picture) {
         if (!pictureInFood(restaurantId, foodId, pictureId)) {
             throw new NotFoundException("Picture not found in restaurant");

@@ -1,10 +1,8 @@
 package foodprint.backend.model;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
@@ -15,9 +13,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
-import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -29,10 +25,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
+import org.hibernate.validator.constraints.Length;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-
 
 @Entity
 @Table
@@ -50,10 +46,13 @@ public class Restaurant {
     @Column(name = "restaurantName")
     @Schema(defaultValue="Sushi Tei")
     @NotEmpty
+    @Length(min = 1, max = 40)
     private String restaurantName;
 
     @Column(name = "restaurantDesc")
     @Schema(defaultValue="Japanese restaurant")
+    @NotEmpty
+    @Length(min = 1)
     private String restaurantDesc;
 
     @Column(name = "restaurantLocation")
@@ -124,6 +123,8 @@ public class Restaurant {
     @CollectionTable(name = "categories", joinColumns = @JoinColumn(name = "restaurantId"))
     @Column(name = "restaurantCategory")
     @LazyCollection(LazyCollectionOption.FALSE)
+    @NotEmpty
+    @Length(min=1)
     private List<String> restaurantCategory = new ArrayList<String>();
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
@@ -148,12 +149,6 @@ public class Restaurant {
     @OneToMany
     @LazyCollection(LazyCollectionOption.FALSE)
     private List<Picture> pictures;
-
-    @ManyToMany
-    @JoinTable(name = "user_favouriterestaurants", joinColumns = @JoinColumn(name = "restaurant_id"), inverseJoinColumns = @JoinColumn(name = "user_id") )
-    private Set<Restaurant> users = new HashSet<>();
-
-
 
     protected Restaurant () { }
 
@@ -471,14 +466,6 @@ public class Restaurant {
         return this;
     }
 
-    public Set<Restaurant> getUsers() {
-        return users;
-    }
-
-    public void setUsers(Set<Restaurant> users) {
-        this.users = users;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (o == this)
@@ -492,7 +479,7 @@ public class Restaurant {
 
     @Override
     public int hashCode() {
-        return Objects.hash(restaurantId, restaurantName, restaurantDesc, restaurantLocation, restaurantPriceRange, restaurantTableCapacity, restaurantWeekdayOpeningHour, restaurantWeekdayOpeningMinutes, restaurantWeekdayClosingHour, restaurantWeekdayClosingMinutes, restaurantWeekendOpeningHour, restaurantWeekendOpeningMinutes, restaurantWeekendClosingHour, restaurantWeekendClosingMinutes, food, restaurantManagers, discount, reservations, ingredients, pictures);
+        return Objects.hash(restaurantId, restaurantName, restaurantDesc/* , restaurantLocation, restaurantPriceRange, restaurantTableCapacity, restaurantWeekdayOpeningHour, restaurantWeekdayOpeningMinutes, restaurantWeekdayClosingHour, restaurantWeekdayClosingMinutes, restaurantWeekendOpeningHour, restaurantWeekendOpeningMinutes, restaurantWeekendClosingHour, restaurantWeekendClosingMinutes, food, restaurantManagers, discount, reservations, ingredients, pictures */);
     }
 
     @Override

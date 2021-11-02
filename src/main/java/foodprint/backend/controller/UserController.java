@@ -34,6 +34,7 @@ import foodprint.backend.dto.RequestResetPwdDTO;
 import foodprint.backend.dto.ResetPwdDTO;
 import foodprint.backend.dto.RestaurantDTO;
 import foodprint.backend.dto.UpdateUserDTO;
+import foodprint.backend.exceptions.AlreadyExistsException;
 import foodprint.backend.exceptions.BadRequestException;
 import foodprint.backend.exceptions.InvalidException;
 import foodprint.backend.exceptions.MailException;
@@ -214,29 +215,35 @@ public class UserController {
     }
 
     @PostMapping({ "favourite/{restaurantId}"})
-    public ResponseEntity<Restaurant> favouriteRestaurant(@PathVariable("restaurantId") Long restaurantId) {
+    public ResponseEntity<String> favouriteRestaurant(@PathVariable("restaurantId") Long restaurantId) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return new ResponseEntity<>(userService.addFavouriteRestaurant(user, restaurantId), HttpStatus.OK);
+        try {
+            userService.addFavouriteRestaurant(user, restaurantId);
+            return new ResponseEntity<>("Restaurant successfully favourited.", HttpStatus.OK);
+        } catch (AlreadyExistsException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
     }
 
     @GetMapping({"favouriteRestaurants"})
     public ResponseEntity<List<RestaurantDTO>> getAllFavouriteRestaurants() {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Set<Restaurant> restaurants = userService.getAllFavourites(user);
+        Set<Restaurant> restaurants = user.getFavouriteRestaurants();
         List<RestaurantDTO> restaurantDtos = restaurants.stream().map(r -> convertToDTO(r)).collect(Collectors.toList());
         return new ResponseEntity<>(restaurantDtos, HttpStatus.OK);
     }
 
     @DeleteMapping({"favourite/{restaurantId}"})
-    public ResponseEntity<Restaurant> deleteFavouriteRestaurant(@PathVariable("restaurantId") Long restaurantId) {
+    public ResponseEntity<String> deleteFavouriteRestaurant(@PathVariable("restaurantId") Long restaurantId) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        userService.deleteFavouriteRestaurant(user, restaurantId);
         try {
-            userService.getFavourite(user, restaurantId);
-        } catch (NotFoundException ex) {
-            return new ResponseEntity<>(HttpStatus.OK);
+            userService.deleteFavouriteRestaurant(user, restaurantId);
+            return new ResponseEntity<>("Favourite restaurant successfully removed.", HttpStatus.OK);
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     public RestaurantDTO convertToDTO(Restaurant restaurant) {

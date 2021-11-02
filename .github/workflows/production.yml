@@ -1,0 +1,68 @@
+
+# This workflow will
+# - Build the latest version of the project in the current branch
+# - Push to Amazon ECR
+# - Push to ECR public
+# - Trigger the webhook for automated deployment
+
+on:
+  push:
+    branches: [ production ]
+  workflow_dispatch: {}
+
+name: Build, Push to ECR and Hook
+
+jobs:  
+  deploy:
+    name: Build and Push to ECR
+    runs-on: [self-hosted, linux, ARM64]
+    environment: production
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+         
+    - name: Get short SHA
+      id: sha
+      run: echo "::set-output name=sha7::$(echo ${GITHUB_SHA} | cut -c1-7)"
+  
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-southeast-1
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+      
+    - name: Copy application.properties file
+      run: cp application.properties target/application.properties
+
+    - name: Build and Push to ECR public
+      id: build-and-push
+      uses: wenlianggg/ecr-public-action-arm64@ver1
+      with:
+        dockerfile: Dockerfile
+        context: .
+        create_repo: fprint-backend
+        tags: |
+          public.ecr.aws/g1n2x3c2/fprint-backend:latest
+          public.ecr.aws/g1n2x3c2/fprint-backend:${{ steps.sha.outputs.sha7 }}
+
+  webhook:
+    name: Trigger Automated Deployment via Webhook
+    runs-on: ubuntu-latest
+    needs: [deploy]
+    environment: production
+    steps:
+    - name: Webhook
+      uses: joelwmale/webhook-action@master
+      with:
+        url: ${{ secrets.WEBHOOK_URL }}
+        headers: '{"repository": "cs203g2t10/foodprint"}'
+        body: '{"event": "deployment", "repository": "cs203g2t10/foodprint"}'

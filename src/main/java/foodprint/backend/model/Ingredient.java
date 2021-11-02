@@ -15,9 +15,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import org.hibernate.validator.constraints.Length;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -35,10 +38,14 @@ public class Ingredient {
 
     @Column(name = "ingredientName")
     @Schema(defaultValue = "Salmon")
+    @NotEmpty
+    @Length(min = 1, max = 40)
     private String ingredientName;
 
     @Column(name = "ingredientDesc")
     @Schema(defaultValue = "Sashimi grade salmon")
+    @NotEmpty
+    @Length(min = 1)
     private String ingredientDesc;
 
     @Column(name = "picturesPath")

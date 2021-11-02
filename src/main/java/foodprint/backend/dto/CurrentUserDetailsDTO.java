@@ -19,7 +19,7 @@ public class CurrentUserDetailsDTO {
     private String lastName;
 
     @Schema(defaultValue="false")
-    private Boolean is2FAEnabled;
+    private Boolean twoFaSet;
 
     @Schema(defaultValue="BOBBY TAN")
     private String vaccinationName;
@@ -61,16 +61,16 @@ public class CurrentUserDetailsDTO {
         this.lastName = lastName;
     }
 
-    public Boolean isIs2FAEnabled() {
-        return this.is2FAEnabled;
+    public Boolean isTwoFaSet() {
+        return this.twoFaSet;
     }
 
-    public Boolean getIs2FAEnabled() {
-        return this.is2FAEnabled;
+    public Boolean getTwoFaSet() {
+        return this.twoFaSet;
     }
 
-    public void setIs2FAEnabled(Boolean is2FAEnabled) {
-        this.is2FAEnabled = is2FAEnabled;
+    public void setTwoFaSet(Boolean twoFaSet) {
+        this.twoFaSet = twoFaSet;
     }
 
     public Boolean isVaccinated() {

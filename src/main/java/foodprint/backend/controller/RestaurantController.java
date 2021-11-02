@@ -54,18 +54,11 @@ import io.swagger.v3.oas.annotations.Operation;
 public class RestaurantController {
     
     private RestaurantService service;
-	// private EmailService emailService;
 
     @Autowired
     RestaurantController(RestaurantService service) {
         this.service = service;
     }
-
-    // @Autowired
-    // RestaurantController(RestaurantService service, EmailService emailService) {
-    //     this.service = service;
-    //     this.emailService = emailService;
-    // }
 
     // GET: Get the restaurant
     @GetMapping({"/{restaurantId}"})
@@ -145,10 +138,15 @@ public class RestaurantController {
 
     @GetMapping({"/categories/{category}"})
     @ResponseStatus(code = HttpStatus.OK)
-    @Operation(summary = "Get a list of restaurants associated with selected category")
-    public ResponseEntity<List<Restaurant>> getRestaurantRelatedToCategory(@PathVariable("category") String restaurantCategory) {
+    @Operation(summary = "Get a list of restaurant DTOs associated with selected category")
+    public ResponseEntity<List<RestaurantDTO>> getRestaurantRelatedToCategory(@PathVariable("category") String restaurantCategory) {
+            List<RestaurantDTO> restaurantDTOs = new ArrayList<>();
             List<Restaurant> restaurantsRelatedToCategory = service.getRestaurantsRelatedToCategory(restaurantCategory);
-            return new ResponseEntity<>(restaurantsRelatedToCategory, HttpStatus.OK);
+            for (Restaurant restaurant : restaurantsRelatedToCategory) {
+                RestaurantDTO resDTO = this.convertToDTO(restaurant);
+                restaurantDTOs.add(resDTO);
+            }
+            return new ResponseEntity<>(restaurantDTOs, HttpStatus.OK);
     }
 
     /*
@@ -160,7 +158,7 @@ public class RestaurantController {
     @PostMapping({"/{restaurantId}/food"})
     @ResponseStatus(code = HttpStatus.CREATED)
     @Operation(summary = "Creates a new food instance within a restaurant")
-    public ResponseEntity<Food> addRestaurantFood(@PathVariable("restaurantId") Long restaurantId, @RequestBody FoodDTO food) {
+    public ResponseEntity<Food> addRestaurantFood(@PathVariable("restaurantId") Long restaurantId, @RequestBody @Valid FoodDTO food) {
         Restaurant restaurant = service.get(restaurantId);
         if(restaurant == null)
             throw new NotFoundException("restaurant does not exist");
@@ -208,7 +206,7 @@ public class RestaurantController {
     public ResponseEntity<Food> updateRestaurantFood(
         @PathVariable("restaurantId") Long restaurantId,
         @PathVariable("foodId") Long foodId,
-        @RequestBody EditFoodDTO updatedFood
+        @RequestBody @Valid EditFoodDTO updatedFood
     ) {
         Food food = service.editFood(restaurantId, foodId, updatedFood);
         return new ResponseEntity<>(food, HttpStatus.OK);
@@ -248,7 +246,7 @@ public class RestaurantController {
     @PostMapping("/{restaurantId}/discount")
     @ResponseStatus(code = HttpStatus.CREATED)
     @Operation(summary = "Creates a new discount using dto")
-    public ResponseEntity<Discount> createDiscount(@PathVariable Long restaurantId, @RequestBody DiscountDTO discount) {
+    public ResponseEntity<Discount> createDiscount(@PathVariable Long restaurantId, @RequestBody @Valid DiscountDTO discount) {
         // Restaurant restaurantOpt = service.get(restaurantId);
         Discount newDiscount = new Discount(discount.getDiscountDescription(), discount.getDiscountPercentage());
         Discount savedDiscount = service.addDiscount(restaurantId, newDiscount);
@@ -292,7 +290,7 @@ public class RestaurantController {
     @PostMapping("/{restaurantId}/ingredient")
     @ResponseStatus(code = HttpStatus.CREATED)
     @Operation(summary = "Creates a new ingredient for restaurant")
-    public ResponseEntity<Ingredient> createRestaurantIngredient(@PathVariable Long restaurantId, @RequestBody IngredientDTO ingredientDTO) {
+    public ResponseEntity<Ingredient> createRestaurantIngredient(@PathVariable Long restaurantId, @RequestBody @Valid IngredientDTO ingredientDTO) {
         Ingredient newIngredient = new Ingredient(ingredientDTO.getIngredientName());
         newIngredient.setIngredientDesc(ingredientDTO.getIngredientDesc());
         newIngredient.setUnits(ingredientDTO.getUnits());
@@ -325,7 +323,7 @@ public class RestaurantController {
     @PatchMapping("/{restaurantId}/ingredient/{ingredientId}")
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Modify an ingredient")
-    public ResponseEntity<Ingredient> modifyRestaurantIngredient(@PathVariable Long restaurantId, @PathVariable Long ingredientId, @RequestBody IngredientDTO ingredientDto) {
+    public ResponseEntity<Ingredient> modifyRestaurantIngredient(@PathVariable Long restaurantId, @PathVariable Long ingredientId, @RequestBody @Valid IngredientDTO ingredientDto) {
         Ingredient modifiedIngredient = new Ingredient(ingredientDto.getIngredientName());
         modifiedIngredient.setIngredientDesc(ingredientDto.getIngredientDesc());
         modifiedIngredient.setUnits(ingredientDto.getUnits());
@@ -339,17 +337,6 @@ public class RestaurantController {
     public ResponseEntity<Ingredient> deleteRestaurantIngredient(@PathVariable Long restaurantId, @PathVariable Long ingredientId) {
         service.deleteRestaurantIngredient(restaurantId, ingredientId);
         return new ResponseEntity<>(HttpStatus.OK);
-    }
-    
-    @GetMapping({"/{restaurantId}/calculateIngredientsToday"})
-    @ResponseStatus(code = HttpStatus.OK)
-    @Operation(summary = "Calculate ingredients needed today")
-    public ResponseEntity<Map<String, Integer>> calculateIngredientsToday (@PathVariable Long restaurantId) {
-        Restaurant restaurant = service.get(restaurantId);
-        if(restaurant == null)
-            throw new NotFoundException("restaurant does not exist");
-        Map<String, Integer> result = service.calculateIngredientsNeededToday(restaurant);
-        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @GetMapping({"/{restaurantId}/calculateIngredientsBetween"})
@@ -372,6 +359,24 @@ public class RestaurantController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
+    @GetMapping({"/{restaurantId}/calculateFoodBetween"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Calculate food needed between")
+    public ResponseEntity<Map<String, Integer>> calculateFoodBetween(@PathVariable Long restaurantId, @RequestParam("start") String startDate, @RequestParam("end") String endDate) {
+        Restaurant restaurant = service.get(restaurantId);
+        if(restaurant == null)
+            throw new NotFoundException("restaurant does not exist");
+        
+        LocalDate start = LocalDate.parse(startDate);
+        LocalDate end = LocalDate.parse(endDate);
+        if (start.isBefore(LocalDateTime.now().toLocalDate())) {
+            throw new BadRequestException("starting date should be after today");
+        } else if (start.isAfter(end)) {
+            throw new BadRequestException("start date should be before end date");
+        }
+        Map<String, Integer> result = service.calculateFoodNeededBetween(restaurant, start, end);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
    
 
     @PostMapping(path = "/{restaurantId}/uploadPicture",
@@ -503,9 +508,18 @@ public class RestaurantController {
         List<PictureDTO> pictureDtos = new ArrayList<>();
         dto.setPictures(pictureDtos);
 
+        List<Discount> discounts = restaurant.getDiscount();
+        List<DiscountDTO> discountDTOs = new ArrayList<>();
+        dto.setDiscounts(discountDTOs);
+
         for (Picture picture : pictures) {
             PictureDTO picDto = new PictureDTO(picture.getTitle(), picture.getDescription(), picture.getUrl());
             pictureDtos.add(picDto);
+        }
+
+        for (Discount discount : discounts) {
+            DiscountDTO discDTO = new DiscountDTO(discount.getRestaurant().getRestaurantId(), discount.getDiscountDescription(), discount.getDiscountPercentage());
+            discountDTOs.add(discDTO);
         }
 
         return dto;

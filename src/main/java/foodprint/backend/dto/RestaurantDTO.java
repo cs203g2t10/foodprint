@@ -7,6 +7,10 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 
+import com.stripe.model.Discount;
+
+import org.hibernate.validator.constraints.Length;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public class RestaurantDTO {
@@ -15,12 +19,15 @@ public class RestaurantDTO {
     
     @Schema(defaultValue="Sushi Tei")
     @NotEmpty
+    @Length(min = 1, max = 40)
     private String restaurantName;
 
     @Schema(defaultValue="Serangoon")
     private String restaurantLocation;
 
     @Schema(defaultValue="Japanese restaurant")
+    @Length(min = 1)
+    @NotEmpty
     private String restaurantDesc;
 
     @Schema(defaultValue="3")
@@ -74,14 +81,18 @@ public class RestaurantDTO {
     @Max(59)
     private Integer restaurantWeekendClosingMinutes;
 
+    @NotEmpty
+    @Length(min=1)
     private List<String> restaurantCategory;
 
     private List<PictureDTO> pictures;
 
+    private List<DiscountDTO> discounts;
+
     public RestaurantDTO() {
     }
 
-    public RestaurantDTO(Long restaurantId, String restaurantName, String restaurantLocation, String restaurantDesc, Integer restaurantPriceRange, Integer restaurantTableCapacity, Integer restaurantWeekdayOpeningHour, Integer restaurantWeekdayOpeningMinutes, Integer restaurantWeekdayClosingHour, Integer restaurantWeekdayClosingMinutes, Integer restaurantWeekendOpeningHour, Integer restaurantWeekendOpeningMinutes, Integer restaurantWeekendClosingHour, Integer restaurantWeekendClosingMinutes, List<PictureDTO> pictures) {
+    public RestaurantDTO(Long restaurantId, String restaurantName, String restaurantLocation, String restaurantDesc, Integer restaurantPriceRange, Integer restaurantTableCapacity, Integer restaurantWeekdayOpeningHour, Integer restaurantWeekdayOpeningMinutes, Integer restaurantWeekdayClosingHour, Integer restaurantWeekdayClosingMinutes, Integer restaurantWeekendOpeningHour, Integer restaurantWeekendOpeningMinutes, Integer restaurantWeekendClosingHour, Integer restaurantWeekendClosingMinutes, List<PictureDTO> pictures, List<DiscountDTO> discounts) {
         this.restaurantId = restaurantId;
         this.restaurantName = restaurantName;
         this.restaurantLocation = restaurantLocation;
@@ -97,6 +108,7 @@ public class RestaurantDTO {
         this.restaurantWeekendClosingHour = restaurantWeekendClosingHour;
         this.restaurantWeekendClosingMinutes = restaurantWeekendClosingMinutes;
         this.pictures = pictures;
+        this.discounts = discounts;
     }
 
     public Long getRestaurantId() {
@@ -223,6 +235,14 @@ public class RestaurantDTO {
         this.pictures = pictures;
     }
 
+    public List<DiscountDTO> getDiscounts() {
+        return this.discounts;
+    }
+
+    public void setDiscounts(List<DiscountDTO> discounts) {
+        this.discounts = discounts;
+    }
+
     public RestaurantDTO restaurantId(Long restaurantId) {
         setRestaurantId(restaurantId);
         return this;
@@ -295,6 +315,11 @@ public class RestaurantDTO {
 
     public RestaurantDTO pictures(List<PictureDTO> pictures) {
         setPictures(pictures);
+        return this;
+    }
+
+    public RestaurantDTO discounts(List<DiscountDTO> discounts) {
+        setDiscounts(discounts);
         return this;
     }
 
