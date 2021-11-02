@@ -54,12 +54,12 @@ public class Reservation {
     @Column(name = "reservedOn")
     private LocalDateTime reservedOn;
 
-    public enum Status {
+    public enum ReservationStatus {
         PAID, ONGOING, CANCELLED
     }
     @Column(name = "status")
     @Schema(defaultValue = "ONGOING")
-    private Status status;
+    private ReservationStatus status;
 
     @OneToMany(mappedBy = "reservation", cascade=CascadeType.ALL, orphanRemoval = true)
     private List<LineItem> lineItems;
@@ -85,7 +85,7 @@ public class Reservation {
     //Constructors
     public Reservation() {}
 
-    public Reservation(User user, LocalDateTime date, Integer pax, Boolean isVaccinated, LocalDateTime reservedOn, Status status, List<LineItem> lineItems, Restaurant restaurant) {
+    public Reservation(User user, LocalDateTime date, Integer pax, Boolean isVaccinated, LocalDateTime reservedOn, ReservationStatus status, List<LineItem> lineItems, Restaurant restaurant) {
         this.user = user;
         this.date = date;
         this.pax = pax;
@@ -96,7 +96,7 @@ public class Reservation {
         this.restaurant = restaurant;
     }
 
-    public Reservation(User user, LocalDateTime date, Integer pax, Boolean isVaccinated, LocalDateTime reservedOn, Status status, Restaurant restaurant) {
+    public Reservation(User user, LocalDateTime date, Integer pax, Boolean isVaccinated, LocalDateTime reservedOn, ReservationStatus status, Restaurant restaurant) {
         this.user = user;
         this.date = date;
         this.pax = pax;
@@ -154,11 +154,11 @@ public class Reservation {
         this.reservedOn = reservedOn;
     }
 
-    public Status getStatus() {
+    public ReservationStatus getStatus() {
         return this.status;
     }
 
-    public void setStatus(Status status) {
+    public void setStatus(ReservationStatus status) {
         this.status = status;
     }
 
@@ -203,7 +203,7 @@ public class Reservation {
         return this;
     }
 
-    public Reservation status(Status status) {
+    public Reservation status(ReservationStatus status) {
         setStatus(status);
         return this;
     }
