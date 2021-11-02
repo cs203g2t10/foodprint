@@ -35,12 +35,13 @@ public class PictureService  {
         this.repository = repository;
     }
 
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Picture get(Long id) {
         Optional<Picture> picture = repository.findById(id);
         return picture.orElseThrow(() -> new NotFoundException("Picture not found"));
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public Picture savePicture(String title, String description, MultipartFile file) {
 
         // Check if the file is empty
@@ -103,7 +104,7 @@ public class PictureService  {
         return url;
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public void deletePicture(Long id) {
         Picture picture = get(id);
         repository.delete(picture);
@@ -115,7 +116,7 @@ public class PictureService  {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public Picture updatedPicture(Long pictureId, Picture newPicture) {
         Picture oldPicture = get(pictureId);
         oldPicture.setDescription(newPicture.getDescription());
