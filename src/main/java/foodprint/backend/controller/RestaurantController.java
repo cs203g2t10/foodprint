@@ -506,18 +506,14 @@ public class RestaurantController {
         dto.setRestaurantWeekendOpeningMinutes(restaurant.getRestaurantWeekendOpeningMinutes());
         dto.setRestaurantCategory(restaurant.getRestaurantCategory());
         
-        List<Picture> pictures = restaurant.getPictures();
-        List<PictureDTO> pictureDtos = new ArrayList<>();
-        dto.setPictures(pictureDtos);
+        Picture picture = restaurant.getPicture();
+        PictureDTO picDto = new PictureDTO(picture.getTitle(), picture.getDescription(), picture.getUrl());
+
+        dto.setPicture(picDto);
 
         List<Discount> discounts = restaurant.getDiscount();
         List<DiscountDTO> discountDTOs = new ArrayList<>();
         dto.setDiscounts(discountDTOs);
-
-        for (Picture picture : pictures) {
-            PictureDTO picDto = new PictureDTO(picture.getTitle(), picture.getDescription(), picture.getUrl());
-            pictureDtos.add(picDto);
-        }
 
         for (Discount discount : discounts) {
             DiscountDTO discDTO = new DiscountDTO(discount.getRestaurant().getRestaurantId(), discount.getDiscountDescription(), discount.getDiscountPercentage());
