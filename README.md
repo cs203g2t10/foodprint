@@ -3,7 +3,7 @@ CS203 Collaborative Software Development Project
 
 [![Java CI with Maven](https://github.com/cs203g2t10/foodprint/actions/workflows/build_only.yml/badge.svg)](https://github.com/cs203g2t10/foodprint/actions/workflows/build_only.yml)
 
-[![Build, Push to ECR and Hook](https://github.com/cs203g2t10/foodprint/actions/workflows/build_ecr_hook.yml/badge.svg?branch=production)](https://github.com/cs203g2t10/foodprint/actions/workflows/build_ecr_hook.yml)
+[![Build, Push to ECR and Hook](https://github.com/cs203g2t10/foodprint/actions/workflows/production.yml/badge.svg?branch=production)](https://github.com/cs203g2t10/foodprint/actions/workflows/production.yml)
 
 ## Problem Statement
 Problem Statement

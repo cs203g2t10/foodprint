@@ -19,7 +19,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import foodprint.backend.config.BucketName;
 import foodprint.backend.exceptions.DeleteFailedException;
 import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.Picture;
@@ -64,7 +63,7 @@ public class PictureService  {
         
         // Upload image to Amazon S3
         UUID uuid = UUID.randomUUID();
-        String path = String.format("%s/%s", BucketName.PICTURE_IMAGE.getBucketName(), uuid);
+        String path = String.format("foodprint-amazon-storage/%s", uuid);
         String fileName = String.format("%s", file.getOriginalFilename());
         try {
             fileStore.upload(path, fileName, Optional.of(metadata), file.getInputStream());

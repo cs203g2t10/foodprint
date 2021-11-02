@@ -52,6 +52,7 @@ public class ReservationServiceTest {
     private Food food;
     private Long foodId;
     private LineItem lineItem;
+    private LineItemDTO lineItemDTO;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private List<Reservation> reservationList;
@@ -72,6 +73,7 @@ public class ReservationServiceTest {
         foodId = 1L;
         lineItem = new LineItem(food, reservation, 1);
         lineItems.add(lineItem);
+        lineItemDTO = new LineItemDTO(foodId, 1);
         startTime = reservation.getDate();
         endTime = startTime.plusHours(1);
         reservationList = new ArrayList<>();
@@ -170,7 +172,6 @@ public class ReservationServiceTest {
 
     @Test
     void createReservation_SlotAvailable_ReturnReservation() {
-        LineItemDTO lineItemDTO = new LineItemDTO(foodId, 1);
         List<LineItemDTO> lineItemDTOs = new ArrayList<>();
         lineItemDTOs.add(lineItemDTO);
         CreateReservationDTO req = new CreateReservationDTO(LocalDateTime.now(), 5, true, lineItemDTOs, restaurantId, Status.ONGOING);
@@ -189,7 +190,6 @@ public class ReservationServiceTest {
 
     @Test
     void createReservation_SlotNotAvailable_ReturnException() {
-        LineItemDTO lineItemDTO = new LineItemDTO(foodId, 1);
         List<LineItemDTO> lineItemDTOs = new ArrayList<>();
         lineItemDTOs.add(lineItemDTO);
         CreateReservationDTO req = new CreateReservationDTO(LocalDateTime.now(), 5, true, lineItemDTOs, restaurantId, Status.ONGOING);
