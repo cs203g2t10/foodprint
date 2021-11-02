@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -37,6 +38,9 @@ public class BypassSecurityFilter extends OncePerRequestFilter {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    @Value("${security.bypass}")
+    private boolean SECURITY_BYPASSED;
+
     @Autowired
     public BypassSecurityFilter(UserRepo userRepo, PasswordEncoder encoder) {
         this.userRepo = userRepo;
@@ -46,6 +50,12 @@ public class BypassSecurityFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
+
+        if (!SECURITY_BYPASSED) {
+            // skip the filter if the security is not bypassed
+            chain.doFilter(request, response);
+            return;
+        }
 
         User createdUser = userRepo.findByEmail("bobbytan@bypass.com").orElse(null);
                 

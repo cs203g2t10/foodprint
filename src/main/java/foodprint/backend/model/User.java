@@ -10,7 +10,6 @@ import java.util.Set;
 
 import javax.persistence.*;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.hibernate.annotations.LazyCollection;
@@ -221,7 +220,7 @@ public class User implements UserDetails {
     }
 
     public Boolean isTwoFaSet() {
-        return twoFaSet;
+        return (twoFaSet == null) ? false : twoFaSet;
     }
 
     public void setTwoFaSet(Boolean twoFaSet) {

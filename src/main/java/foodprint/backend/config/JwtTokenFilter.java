@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,6 +30,9 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    @Value("${security.bypass}")
+    private boolean SECURITY_BYPASSED;
+
     @Autowired
     public JwtTokenFilter(JwtTokenUtil jwtTokenUtil, UserRepo userRepo) {
         this.jwtTokenUtil = jwtTokenUtil;
@@ -40,6 +44,13 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain chain)
             throws ServletException, IOException {
+
+        if (SECURITY_BYPASSED) {
+            // skip this filter if security is bypassed
+            chain.doFilter(request, response);
+            return;
+        }
+
         // Get authorization header and validate
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 

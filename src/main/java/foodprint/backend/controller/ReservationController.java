@@ -4,7 +4,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -198,36 +200,29 @@ public class ReservationController {
                 HttpStatus.OK);
     }
 
-    // Reservation to CreatedReservationDTO
-    public ReservationDTO convertToDTO(Reservation reservation) {
-        ReservationDTO reservationDTO = new ReservationDTO();
-        reservationDTO.setDate(reservation.getDate());
-        reservationDTO.setIsVaccinated(reservation.getIsVaccinated());
-        reservationDTO.setRestaurantName(reservation.getRestaurant().getRestaurantName());
-        reservationDTO.setImageUrl(reservation.getRestaurant().getPictures().get(0).getUrl());
-        reservationDTO.setRestaurantId(reservation.getRestaurant().getRestaurantId());
-        reservationDTO.setPax(reservation.getPax());
-        reservationDTO.setReservationId(reservation.getReservationId());
-        reservationDTO.setStatus(reservation.getStatus());
-        reservationDTO.setPrice(reservation.getPrice());
+
+    private ReservationDTO convertToDTO(Reservation reservation) {
+        ModelMapper mapper = new ModelMapper();
+        
+        ReservationDTO dto = mapper.map(reservation, ReservationDTO.class);
+        dto.setImageUrl(reservation.getRestaurant().getPictures().get(0).getUrl());
 
         List<NamedLineItemDTO> lineItemDtos = new ArrayList<>();
         for (LineItem lineItem : reservation.getLineItems()) {
-            NamedLineItemDTO lineItemDto = new NamedLineItemDTO();
-            lineItemDto.setFoodId(lineItem.getFood().getFoodId());
-            lineItemDto.setFoodName(lineItem.getFood().getFoodName());
-            lineItemDto.setQuantity(lineItem.getQuantity());
+            NamedLineItemDTO lineItemDto = mapper.map(lineItem, NamedLineItemDTO.class);
             lineItemDto.setPictures(lineItem.getFood().getPictures());
             lineItemDtos.add(lineItemDto);
         }
 
-        reservationDTO.setLineItems(lineItemDtos);
-        return reservationDTO;
+        dto.setLineItems(lineItemDtos);
+        
+        return dto;
     }
 
-    // CreateReservationDTO to Reservation
-    public Reservation convertToEntity(CreateReservationDTO dto) {
-        Reservation reservation = new Reservation();
+    private Reservation convertToEntity(CreateReservationDTO dto) {
+        ModelMapper mapper = new ModelMapper();
+
+        Reservation reservation = mapper.map(dto, Reservation.class);
         Restaurant restaurant = restaurantService.get(dto.getRestaurantId());
         Long restaurantId = restaurant.getRestaurantId();
 
@@ -237,7 +232,9 @@ public class ReservationController {
         reservation.setStatus(dto.getStatus());
 
         if (dto.getLineItems() != null) {
-            HashMap<Food, Integer> lineItemsHashMap = new HashMap<>();
+
+            Map<Food, Integer> lineItemsHashMap = new HashMap<>();
+
             for (LineItemDTO lineItemDTO : dto.getLineItems()) {
                 Food food = restaurantService.getFood(restaurantId, lineItemDTO.getFoodId());
                 if (lineItemsHashMap.containsKey(food)) {
@@ -246,12 +243,16 @@ public class ReservationController {
                     lineItemsHashMap.put(food, lineItemDTO.getQuantity());
                 }
             }
+
             List<LineItem> savedLineItems = new ArrayList<>();
+
             for (Food key : lineItemsHashMap.keySet()) {
                 LineItem savedLineItem = new LineItem(key, reservation, lineItemsHashMap.get(key));
                 savedLineItems.add(savedLineItem);
             }
+
             reservation.setLineItems(savedLineItems);
+
         } else {
             reservation.setLineItems(null);
         }
