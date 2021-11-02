@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.List;
 import java.util.ArrayList;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -39,10 +40,19 @@ public class PictureServiceTest {
     @InjectMocks
     PictureService pictureService;
 
+    private Picture picture;
+    private Long pictureId;
+    private Picture newPicture;
+    
+    @BeforeEach
+    void init() {
+        picture = new Picture("image", "desc", "Path", "file", "www.file.com");
+        pictureId = 1L;
+        newPicture = new Picture("anotherimage", "desc", "Path", "file", "www.file.com");
+    }
+
     @Test
     void getPictureById_PictureFound_ReturnPicture() {
-        Picture picture = new Picture("image", "desc", "Path", "file", "www.file.com");
-        Long pictureId = 2L;
         ReflectionTestUtils.setField(picture, "pictureId", pictureId);
 
         when(pictureRepo.findById(any(Long.class))).thenReturn(Optional.of(picture));
@@ -54,8 +64,6 @@ public class PictureServiceTest {
 
     @Test
     void getPicture_PictureNotFound_ReturnError() {
-        Long pictureId = 1L;
-
         when(pictureRepo.findById(any(Long.class))).thenReturn(Optional.empty());
 
         try {
@@ -67,29 +75,9 @@ public class PictureServiceTest {
         verify(pictureRepo).findById(pictureId);
     }
 
-    //Integration testing
-    // @Test
-    // void savePicture_FileNotEmptyAndAnImage_FileUploaded_ReturnPicture() {
-    //     String title = "title";
-    //     String description = "desc";
-    //     try {
-    //         InputStream inputstream = new FileInputStream("c:\\data\\input-text.txt");
-    //         MockMultipartFile file = new MockMultipartFile("name", "originalFilename", IMAGE_PNG.getMimeType(), inputstream);
-    //         Picture picture = new Picture("image", "desc", "Path", "file", "www.file.com");
-       
-    //         when(pictureRepo.saveAndFlush(any(Picture.class))).thenReturn(picture);
-    //         fileStore.upload(path, fileName, Optional.of(metadata), file.getInputStream());
-
-    //         Picture savedPicture = pictureService.savePicture(title, description, file);
-    //     } catch(IOException e) {
-    //         throw new IllegalStateException("Failed to upload file", e);
-    //     }
-    // }
-
     @Test
     void getAllPictures_PicturesFound_ReturnPictureList() {
         List<Picture> pictureList = new ArrayList<>();
-        Picture picture = new Picture("image", "desc", "Path", "file", "www.file.com");
         pictureList.add(picture);
 
         when(pictureRepo.findAll()).thenReturn(pictureList);
@@ -101,8 +89,6 @@ public class PictureServiceTest {
 
     @Test
     void getPictureById_PictureFound_ReturnStringUrl() {
-        Picture picture = new Picture("image", "desc", "Path", "file", "www.file.com");
-        Long pictureId = 1L;
         ReflectionTestUtils.setField(picture, "pictureId", pictureId);
 
         when(pictureRepo.findById(any(Long.class))).thenReturn(Optional.of(picture));
@@ -114,8 +100,6 @@ public class PictureServiceTest {
 
     @Test
     void getPictureById_PictureNotFound_ReturnError() {
-        Long pictureId = 1L;
-
         when(pictureRepo.findById(any(Long.class))).thenReturn(Optional.empty());
 
         try {
@@ -129,8 +113,6 @@ public class PictureServiceTest {
 
     @Test
     void deletePicture_PictureFoundAndDeleted_Return() {
-        Picture picture = new Picture("image", "desc", "Path", "file", "www.file.com");
-        Long pictureId = 1L;
         ReflectionTestUtils.setField(picture, "pictureId", pictureId);
 
         doNothing().when(pictureRepo).delete(picture);
@@ -144,8 +126,6 @@ public class PictureServiceTest {
 
     @Test
     void deletePicture_PictureNotFound_ReturnError() {
-        Long pictureId = 1L;
-
         when(pictureRepo.findById(any(Long.class))).thenReturn(Optional.empty());
 
         try {
@@ -159,9 +139,6 @@ public class PictureServiceTest {
 
     @Test
     void deletePicture_PictureFoundButNotDeleted_ReturnError() {
-        Picture picture = new Picture("image", "desc", "Path", "file", "www.file.com");
-        Long pictureId = 1L;
-
         when(pictureRepo.findById(any(Long.class))).thenReturn(Optional.of(picture));
         doNothing().when(pictureRepo).delete(any(Picture.class));
 
@@ -178,10 +155,7 @@ public class PictureServiceTest {
 
     @Test
     void updatePicture_PictureFoundAndUpdatedSuccessfully_ReturnPicture() {
-        Picture picture = new Picture("image", "desc", "Path", "file", "www.file.com");
-        Long pictureId = 1L;
         ReflectionTestUtils.setField(picture, "pictureId", pictureId);
-        Picture newPicture = new Picture("anotherimage", "desc", "Path", "file", "www.file.com");
 
         when(pictureRepo.findById(any(Long.class))).thenReturn(Optional.of(picture));
         when(pictureRepo.saveAndFlush(any(Picture.class))).thenReturn(picture);
@@ -195,9 +169,6 @@ public class PictureServiceTest {
 
     @Test
     void updatePicture_PictureNotFound_ReturnError() {
-        Long pictureId = 1L;
-        Picture newPicture = new Picture("anotherimage", "desc", "Path", "file", "www.file.com");
-
         when(pictureRepo.findById(any(Long.class))).thenReturn(Optional.empty());
 
         try {

@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,16 +34,24 @@ public class UserServiceTest {
 
     @InjectMocks
     private UserService userService;
+
+    private User user;
+    private Long userId;
+
+    @BeforeEach
+    void init() {
+        user = new User("bobbytan@gmail.com", "SuperSecurePassw0rd", "Bobby Tan");
+        userId = 1L;
+    }
     
     @Test
     void addUser_NewEmail_ReturnUser() {
-        User user = new User("bobbytan@gmail.com", "SuperSecurePassw0rd", "Bobby Tan");
         when(users.findByEmail(any(String.class))).thenReturn(Optional.empty());
         when(users.saveAndFlush(any(User.class))).thenReturn(user);
         when(passwordEncoder.encode("SuperSecurePassw0rd")).thenReturn("$2a$12$uaTxLl9sPzGbIozqCB0wcuKjmmsZNW2mswGw5VRdsU4XFWs9Se7Uq");
 
         User savedUser = userService.createUser(user);
-        
+
         assertNotNull(savedUser);
         verify(users).findByEmail(user.getEmail());
         verify(passwordEncoder).encode("SuperSecurePassw0rd");
@@ -51,7 +60,6 @@ public class UserServiceTest {
 
     @Test
     void addUser_SameEmail_ReturnException() {
-        User user = new User("bobbytan@gmail.com", "SuperSecurePassw0rd", "Bobby Tan");
         when(users.findByEmail(any(String.class))).thenReturn(Optional.of(user));
 
         try {
@@ -71,7 +79,6 @@ public class UserServiceTest {
 
     @Test
     void getUser_NonExistentId_ReturnException() {
-        Long userId = 1L;
         when(users.findById(any(Long.class))).thenReturn(Optional.empty());
 
         try {
@@ -85,8 +92,6 @@ public class UserServiceTest {
 
     @Test
     void getUser_ExistingId_ReturnUser() {
-        User user = new User("bobbytan@gmail.com", "SuperSecurePassw0rd", "Bobby Tan");
-        Long userId = 1L;
         when(users.findById(any(Long.class))).thenReturn(Optional.of(user));
 
         userService.getUser(userId);
@@ -96,8 +101,6 @@ public class UserServiceTest {
 
     @Test
     void updateUser_NotFound_ReturnException(){
-        User user = new User("bobbytan@gmail.com", "SuperSecurePassw0rd", "Bobby Tan");
-        Long userId = 1L;
         when(users.findById(any(Long.class))).thenReturn(Optional.empty());
 
         try {
@@ -111,8 +114,6 @@ public class UserServiceTest {
 
     @Test
     void updateUser_SameEmail_ReturnUser() {
-        User user = new User("bobbytan@gmail.com", "SuperSecurePassw0rd", "Bobby Tan");
-        Long userId = 1L;
         when(users.findById(any(Long.class))).thenReturn(Optional.of(user));
         when(users.findByEmail(any(String.class))).thenReturn(Optional.of(user));
         when(users.saveAndFlush(any(User.class))).thenReturn(user);
@@ -127,8 +128,6 @@ public class UserServiceTest {
     
     @Test
     void updateUser_NewEmail_ReturnUser() {
-        User user = new User("bobbytan@gmail.com", "SuperSecurePassw0rd", "Bobby Tan");
-        Long userId = 1L;
         when(users.findByEmail(any(String.class))).thenReturn(Optional.empty());
         when(users.findById(any(Long.class))).thenReturn(Optional.of(user));
         when(passwordEncoder.encode("SuperSecurePassw0rd")).thenReturn("$2a$12$uaTxLl9sPzGbIozqCB0wcuKjmmsZNW2mswGw5VRdsU4XFWs9Se7Uq");
@@ -145,7 +144,6 @@ public class UserServiceTest {
 
     @Test
     void deleteUser_UserDoesNotExist_ReturnException() {
-        Long userId = 1L;
         when(users.findById(any(Long.class))).thenReturn(Optional.empty());
 
         try {
@@ -158,8 +156,6 @@ public class UserServiceTest {
 
     @Test
     void deleteUser_UsertExists_Success() {
-        User user = new User("bobbytan@gmail.com", "SuperSecurePassw0rd", "Bobby Tan");
-        Long userId = 1L;
         when(users.findById(any(Long.class))).thenReturn(Optional.of(user));
 
         userService.deleteUser(userId);
