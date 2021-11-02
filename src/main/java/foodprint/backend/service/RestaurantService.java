@@ -97,6 +97,10 @@ public class RestaurantService {
             currentRestaurant.setRestaurantName(updatedRestaurant.getRestaurantName());
         }
 
+        if (updatedRestaurant.getRestaurantPriceRange() != null ) {
+            currentRestaurant.setRestaurantPriceRange(updatedRestaurant.getRestaurantPriceRange());
+        }
+
         if (updatedRestaurant.getRestaurantTableCapacity() != null) {
             currentRestaurant.setRestaurantTableCapacity(updatedRestaurant.getRestaurantTableCapacity());
         }
