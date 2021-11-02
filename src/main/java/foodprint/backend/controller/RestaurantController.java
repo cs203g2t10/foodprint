@@ -248,7 +248,7 @@ public class RestaurantController {
     @PostMapping("/{restaurantId}/discount")
     @ResponseStatus(code = HttpStatus.CREATED)
     @Operation(summary = "Creates a new discount using dto")
-    public ResponseEntity<Discount> createDiscount(@PathVariable Long restaurantId, @RequestBody DiscountDTO discount) {
+    public ResponseEntity<Discount> createDiscount(@PathVariable Long restaurantId, @RequestBody @Valid DiscountDTO discount) {
         // Restaurant restaurantOpt = service.get(restaurantId);
         Discount newDiscount = new Discount(discount.getDiscountDescription(), discount.getDiscountPercentage());
         Discount savedDiscount = service.addDiscount(restaurantId, newDiscount);

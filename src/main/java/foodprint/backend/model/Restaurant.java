@@ -30,7 +30,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-
 @Entity
 @Table
 @EnableTransactionManagement
