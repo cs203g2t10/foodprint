@@ -50,16 +50,16 @@ public class UserService {
 
     @PreAuthorize("hasAnyAuthority('FP_ADMIN')")
     public User createUser(User user) {
-        Optional<User> existingUserByEmail = userRepo.findByEmail(user.getEmail());
-        if (user.getId() != null) {
-            Optional<User> existingUserById = userRepo.findById(user.getId());
-            if (existingUserById.isPresent()) {
-                throw new AlreadyExistsException("User with the same ID already exists");
-            }
-        }
-        if (existingUserByEmail.isPresent()) {
+        userRepo.findByEmail(user.getEmail()).ifPresent((duplicateUser) -> {
             throw new AlreadyExistsException("User with the same email already exists");
+        });
+
+        if (user.getId() != null) {
+            userRepo.findById(user.getId()).ifPresent((duplicateUser) -> {
+                throw new AlreadyExistsException("User with the same ID already exists");
+            });
         }
+
         String plaintextPassword = user.getPassword();
         String encodedPassword = passwordEncoder.encode(plaintextPassword);
         user.setPassword(encodedPassword);

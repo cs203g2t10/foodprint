@@ -237,11 +237,8 @@ public class ReservationController {
 
             for (LineItemDTO lineItemDTO : dto.getLineItems()) {
                 Food food = restaurantService.getFood(restaurantId, lineItemDTO.getFoodId());
-                if (lineItemsHashMap.containsKey(food)) {
-                    lineItemsHashMap.put(food, lineItemDTO.getQuantity() + lineItemsHashMap.get(food));
-                } else {
-                    lineItemsHashMap.put(food, lineItemDTO.getQuantity());
-                }
+                int amount = lineItemsHashMap.getOrDefault(food, 0);
+                lineItemsHashMap.put(food, amount + lineItemDTO.getQuantity());
             }
 
             List<LineItem> savedLineItems = new ArrayList<>();
