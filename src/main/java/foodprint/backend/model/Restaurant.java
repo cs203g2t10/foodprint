@@ -25,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
+import org.hibernate.validator.constraints.Length;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -46,10 +47,13 @@ public class Restaurant {
     @Column(name = "restaurantName")
     @Schema(defaultValue="Sushi Tei")
     @NotEmpty
+    @Length(min = 1, max = 40)
     private String restaurantName;
 
     @Column(name = "restaurantDesc")
     @Schema(defaultValue="Japanese restaurant")
+    @NotEmpty
+    @Length(min = 1)
     private String restaurantDesc;
 
     @Column(name = "restaurantLocation")

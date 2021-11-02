@@ -7,6 +7,8 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 
+import org.hibernate.validator.constraints.Length;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public class RestaurantDTO {
@@ -15,12 +17,15 @@ public class RestaurantDTO {
     
     @Schema(defaultValue="Sushi Tei")
     @NotEmpty
+    @Length(min = 1, max = 40)
     private String restaurantName;
 
     @Schema(defaultValue="Serangoon")
     private String restaurantLocation;
 
     @Schema(defaultValue="Japanese restaurant")
+    @Length(min = 1)
+    @NotEmpty
     private String restaurantDesc;
 
     @Schema(defaultValue="3")
