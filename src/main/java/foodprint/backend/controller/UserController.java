@@ -263,14 +263,9 @@ public class UserController {
         dto.setRestaurantWeekendOpeningMinutes(restaurant.getRestaurantWeekendOpeningMinutes());
         dto.setRestaurantCategory(restaurant.getRestaurantCategory());
         
-        List<Picture> pictures = restaurant.getPictures();
-        List<PictureDTO> pictureDtos = new ArrayList<>();
-        dto.setPictures(pictureDtos);
-
-        for (Picture picture : pictures) {
-            PictureDTO picDto = new PictureDTO(picture.getTitle(), picture.getDescription(), picture.getUrl());
-            pictureDtos.add(picDto);
-        }
+        Picture picture = restaurant.getPicture();
+        PictureDTO picDto = new PictureDTO(picture.getTitle(), picture.getDescription(), picture.getUrl());
+        dto.setPicture(picDto);
 
         return dto;
     }

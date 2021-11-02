@@ -205,7 +205,7 @@ public class ReservationController {
         ModelMapper mapper = new ModelMapper();
         
         ReservationDTO dto = mapper.map(reservation, ReservationDTO.class);
-        dto.setImageUrl(reservation.getRestaurant().getPictures().get(0).getUrl());
+        dto.setImageUrl(reservation.getRestaurant().getPicture().getUrl());
 
         List<NamedLineItemDTO> lineItemDtos = new ArrayList<>();
         for (LineItem lineItem : reservation.getLineItems()) {
