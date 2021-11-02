@@ -561,6 +561,53 @@ public class RestaurantServiceTest {
     }
 
     @Test
+    void updateRestaurantIngredient_IngredientFoundInCorrectRestaurantAndUpdated_ReturnIngredient() {
+        when(ingredientRepo.findById(any(Long.class))).thenReturn(Optional.of(ingredient));
+        when(ingredientRepo.saveAndFlush(any(Ingredient.class))).thenReturn(ingredient);
+
+        restaurantService.create(restaurant);
+        ingredient.setRestaurant(restaurant);
+
+        Ingredient updateIngredient = restaurantService.updateIngredient(restaurantId, ingredientId, ingredient);
+
+        assertNotNull(updateIngredient);
+        verify(ingredientRepo).findById(ingredientId);
+        verify(ingredientRepo).saveAndFlush(ingredient);
+    }
+
+    @Test
+    void updateRestaurantIngredient_IngredientNotFound_ReturnError() {
+        when(ingredientRepo.findById(any(Long.class))).thenReturn(Optional.empty());
+        
+        restaurantService.create(restaurant);
+        try {
+            restaurantService.updateIngredient(restaurantId, ingredientId, ingredient);
+        } catch (NotFoundException e) {
+            assertEquals("Ingredient requested could not be found", e.getMessage());
+        }
+
+        verify(ingredientRepo).findById(ingredientId);
+    }
+
+    @Test
+    void updateRestaurantIngredient_IngredientFoundInWrongRestaurant_ReturnError() {
+        when(ingredientRepo.findById(any(Long.class))).thenReturn(Optional.of(ingredient));
+        Restaurant anotherRestaurant = new Restaurant("Sushi Tei", "Desc","Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+        Long anotherRestaurantId = 2L;
+        ReflectionTestUtils.setField(anotherRestaurant, "restaurantId", anotherRestaurantId);
+        
+        restaurantService.create(restaurant);
+        ingredient.setRestaurant(restaurant);
+        try {
+            restaurantService.updateIngredient(anotherRestaurantId, ingredientId, ingredient);
+        } catch (NotFoundException e) {
+            assertEquals("Ingredient requested could not be found at this restaurant", e.getMessage());
+        }
+
+        verify(ingredientRepo).findById(ingredientId);
+    }
+
+    @Test
     void addRestaurantIngredient_RestaurantExist_ReturnIngredient() {
         when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
         when(ingredientRepo.saveAndFlush(any(Ingredient.class))).thenReturn(ingredient);
