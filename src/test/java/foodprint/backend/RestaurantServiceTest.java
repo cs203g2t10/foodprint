@@ -128,14 +128,12 @@ public class RestaurantServiceTest {
         discountId = 1L;
         pic = new Picture("image", "desc", "Path", "file", "www.file.com");
         pictureId = 2L;
-        picList = new ArrayList<>();
-        picList.add(pic);
         food.setRestaurant(restaurant);
         food.setPictures(picList);
         restaurant.setIngredients(ingredients);
         discount.setRestaurant(restaurant);
         restaurant.setAllFood(allFood);
-        restaurant.setPictures(picList);
+        restaurant.setPicture(pic);
         ReflectionTestUtils.setField(restaurant, "restaurantId", restaurantId);
         ReflectionTestUtils.setField(ingredient, "ingredientId", ingredientId);
         ReflectionTestUtils.setField(food, "foodId", foodId);

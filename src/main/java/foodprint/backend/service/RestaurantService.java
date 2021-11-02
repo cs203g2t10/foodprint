@@ -624,7 +624,7 @@ public class RestaurantService {
     }
 
     /**
-     * Saves picture of a given restaurant
+     * Sets picture of a given restaurant
      * @param restaurantId
      * @param title
      * @param description
@@ -635,8 +635,7 @@ public class RestaurantService {
     public Picture savePicture(Long restaurantId, String title, String description, MultipartFile file) {
         Picture picture = pictureService.savePicture(title, description, file);
         Restaurant restaurant = get(restaurantId);
-        List<Picture> picList = restaurant.getPictures();
-        picList.add(picture);
+        restaurant.setPicture(picture);
         repo.saveAndFlush(restaurant);
         return picture;
     }
@@ -661,18 +660,16 @@ public class RestaurantService {
     }
 
     /**
-     * Checks if a given picture is found in restaurant
+     * Checks if a given picture belongs to the restaurant
      * @param restaurantId
      * @param pictureId
      * @return
      */
     public Boolean pictureInRestaurant(Long restaurantId, Long pictureId) {
         Restaurant restaurant = get(restaurantId);
-        List<Picture> restaurantPics = restaurant.getPictures();
-        for (Picture p: restaurantPics) {
-            if (p.getId().equals(pictureId)) {
-                return true;
-            }
+        Picture restaurantPic = restaurant.getPicture();
+        if (restaurantPic.getId().equals(pictureId)) {
+            return true;
         }
         return false;
     }
@@ -715,10 +712,7 @@ public class RestaurantService {
             throw new NotFoundException("Picture not found in restaurant");
         } else {
             Restaurant restaurant = get(restaurantId);
-            List<Picture> pictures = restaurant.getPictures();
-            Picture picture = pictureService.get(pictureId);
-            pictures.remove(picture);
-            restaurant.setPictures(pictures);
+            restaurant.setPicture(null);
             repo.saveAndFlush(restaurant);
             pictureService.deletePicture(pictureId); 
         }

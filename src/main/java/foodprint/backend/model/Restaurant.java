@@ -14,6 +14,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -119,6 +120,9 @@ public class Restaurant {
     @Max(59)
     private Integer restaurantWeekendClosingMinutes;
 
+    @OneToOne(optional = true)/* (mappedBy = "restaurant") */
+    private Picture picture;
+
     @ElementCollection
     @CollectionTable(name = "categories", joinColumns = @JoinColumn(name = "restaurantId"))
     @Column(name = "restaurantCategory")
@@ -146,10 +150,7 @@ public class Restaurant {
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
     private List<Ingredient> ingredients;
 
-    @OneToMany
-    @LazyCollection(LazyCollectionOption.FALSE)
-    private List<Picture> pictures;
-
+   
     protected Restaurant () { }
 
     public Restaurant (String restaurantName, String restaurantLocation) {
@@ -175,7 +176,7 @@ public class Restaurant {
     }
 
 
-    public Restaurant(Long restaurantId, String restaurantName, String restaurantDesc, String restaurantLocation, Integer restaurantPriceRange, Integer restaurantTableCapacity, Integer restaurantWeekdayOpeningHour, Integer restaurantWeekdayOpeningMinutes, Integer restaurantWeekdayClosingHour, Integer restaurantWeekdayClosingMinutes, Integer restaurantWeekendOpeningHour, Integer restaurantWeekendOpeningMinutes, Integer restaurantWeekendClosingHour, Integer restaurantWeekendClosingMinutes, List<Food> food, List<User> restaurantManagers, List<Discount> discount, List<Reservation> reservations, List<Ingredient> ingredients, List<Picture> pictures) {
+    public Restaurant(Long restaurantId, String restaurantName, String restaurantDesc, String restaurantLocation, Integer restaurantPriceRange, Integer restaurantTableCapacity, Integer restaurantWeekdayOpeningHour, Integer restaurantWeekdayOpeningMinutes, Integer restaurantWeekdayClosingHour, Integer restaurantWeekdayClosingMinutes, Integer restaurantWeekendOpeningHour, Integer restaurantWeekendOpeningMinutes, Integer restaurantWeekendClosingHour, Integer restaurantWeekendClosingMinutes, List<Food> food, List<User> restaurantManagers, List<Discount> discount, List<Reservation> reservations, List<Ingredient> ingredients, Picture picture) {
         this.restaurantId = restaurantId;
         this.restaurantName = restaurantName;
         this.restaurantDesc = restaurantDesc;
@@ -195,7 +196,7 @@ public class Restaurant {
         this.discount = discount;
         this.reservations = reservations;
         this.ingredients = ingredients;
-        this.pictures = pictures;
+        this.picture = picture;
     }
 
     public Long getRestaurantId() {
@@ -358,12 +359,12 @@ public class Restaurant {
         this.ingredients = ingredients;
     }
 
-    public List<Picture> getPictures() {
-        return this.pictures;
+    public Picture getPicture() {
+        return this.picture;
     }
 
-    public void setPictures(List<Picture> pictures) {
-        this.pictures = pictures;
+    public void setPicture(Picture picture) {
+        this.picture = picture;
     }
 
     public Restaurant restaurantId(Long restaurantId) {
@@ -461,8 +462,8 @@ public class Restaurant {
         return this;
     }
 
-    public Restaurant pictures(List<Picture> pictures) {
-        setPictures(pictures);
+    public Restaurant picture(Picture picture) {
+        setPicture(picture);
         return this;
     }
 
@@ -504,7 +505,7 @@ public class Restaurant {
             ", discount='" + getDiscount() + "'" +
             ", reservations='" + getReservations() + "'" +
             ", ingredients='" + getIngredients() + "'" +
-            ", pictures='" + getPictures() + "'" +
+            ", pictures='" + getPicture() + "'" +
             "}";
     }
 

@@ -204,7 +204,7 @@ public class ReservationController {
         reservationDTO.setDate(reservation.getDate());
         reservationDTO.setIsVaccinated(reservation.getIsVaccinated());
         reservationDTO.setRestaurantName(reservation.getRestaurant().getRestaurantName());
-        reservationDTO.setImageUrl(reservation.getRestaurant().getPictures().get(0).getUrl());
+        reservationDTO.setImageUrl(reservation.getRestaurant().getPicture().getUrl());
         reservationDTO.setRestaurantId(reservation.getRestaurant().getRestaurantId());
         reservationDTO.setPax(reservation.getPax());
         reservationDTO.setReservationId(reservation.getReservationId());
