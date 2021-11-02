@@ -210,7 +210,7 @@ public class ReservationController {
         List<NamedLineItemDTO> lineItemDtos = new ArrayList<>();
         for (LineItem lineItem : reservation.getLineItems()) {
             NamedLineItemDTO lineItemDto = mapper.map(lineItem, NamedLineItemDTO.class);
-            lineItemDto.setPictures(lineItem.getFood().getPictures());
+            lineItemDto.setPicture(lineItem.getFood().getPicture());
             lineItemDtos.add(lineItemDto);
         }
 

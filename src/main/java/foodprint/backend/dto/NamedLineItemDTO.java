@@ -1,7 +1,5 @@
 package foodprint.backend.dto;
 
-import java.util.List;
-
 import foodprint.backend.model.Picture;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -16,7 +14,7 @@ public class NamedLineItemDTO {
     @Schema(defaultValue = "1")
     private Integer quantity;
 
-    private List<Picture> pictures;
+    private Picture picture;
 
     public Long getFoodId() {
         return this.foodId;
@@ -42,12 +40,12 @@ public class NamedLineItemDTO {
         this.quantity = quantity;
     }
 
-    public List<Picture> getPictures() {
-        return pictures;
+    public Picture getPicture() {
+        return picture;
     }
 
-    public void setPictures(List<Picture> pictures) {
-        this.pictures = pictures;
+    public void setPicture(Picture picture) {
+        this.picture = picture;
     }
 
 }

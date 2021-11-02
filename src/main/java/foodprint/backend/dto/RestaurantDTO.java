@@ -354,7 +354,7 @@ public class RestaurantDTO {
             ", restaurantWeekendOpeningMinutes='" + getRestaurantWeekendOpeningMinutes() + "'" +
             ", restaurantWeekendClosingHour='" + getRestaurantWeekendClosingHour() + "'" +
             ", restaurantWeekendClosingMinutes='" + getRestaurantWeekendClosingMinutes() + "'" +
-            ", pictures='" + getPicture() + "'" +
+            ", picture='" + getPicture() + "'" +
             "}";
     }
 
