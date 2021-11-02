@@ -93,8 +93,8 @@ public class RestaurantService {
         if (updatedRestaurant.getRestaurantName() != null) {
             currentRestaurant.setRestaurantName(updatedRestaurant.getRestaurantName());
         }
-        if (updatedRestaurant.getRestaurantName() != null) {
-            currentRestaurant.setRestaurantName(updatedRestaurant.getRestaurantName());
+        if (updatedRestaurant.getRestaurantLocation() != null) {
+            currentRestaurant.setRestaurantLocation(updatedRestaurant.getRestaurantLocation());
         }
 
         if (updatedRestaurant.getRestaurantPriceRange() != null ) {
