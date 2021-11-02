@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,10 +31,17 @@ public class AuthenticationServiceTest {
     @InjectMocks
     private AuthenticationService authenticationService;
 
+    private User user;
+    private UsernamePasswordAuthenticationToken token;
+
+    @BeforeEach
+    void init() {
+        user = new User("bobbytan@gmail.com", "SuperSecurePassw0rd", "Bobby Tan");
+        token = new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword());
+    }
+
     @Test
     void authenticateUser_CorrectCredentials_ReturnAuthentication() {
-        User user = new User("bobbytan@gmail.com", "SuperSecurePassw0rd", "Bobby Tan");
-        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword());
         when(userDetailsService.loadUserByUsername(any(String.class))).thenReturn(user);
         when(passwordEncoder.matches(any(String.class), any(String.class))).thenReturn(true);
 
@@ -45,8 +53,6 @@ public class AuthenticationServiceTest {
 
     @Test
     void authenticateUser_WrongCredentials_ReturnException() {
-        User user = new User("bobbytan@gmail.com", "SuperSecurePassw0rd", "Bobby Tan");
-        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword());
         when(userDetailsService.loadUserByUsername(any(String.class))).thenReturn(user);
         when(passwordEncoder.matches(any(String.class), any(String.class))).thenReturn(false);
 

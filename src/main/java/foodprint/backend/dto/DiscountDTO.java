@@ -1,5 +1,9 @@
 package foodprint.backend.dto;
 
+import javax.validation.constraints.NotEmpty;
+
+import org.hibernate.validator.constraints.Length;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public class DiscountDTO {
@@ -8,9 +12,12 @@ public class DiscountDTO {
     private Long restaurantId;
 
     @Schema(defaultValue="1for1")
+    @NotEmpty
+    @Length(min = 1)
     private String discountDescription;
 
     @Schema(defaultValue="50")
+    @NotEmpty
     private Integer discountPercentage;
 
     public DiscountDTO(Long restaurantId, String discountDescription, Integer discountPercentage) {

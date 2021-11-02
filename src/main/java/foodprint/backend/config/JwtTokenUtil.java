@@ -3,6 +3,7 @@ package foodprint.backend.config;
 import io.jsonwebtoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import foodprint.backend.model.User;
@@ -16,9 +17,10 @@ import java.util.Date;
 @Component
 public class JwtTokenUtil {
 
-    private final String jwtSecret = "zdtlD3JK56m6wTTgsNFhqzjqP";
-    private final String jwtIssuer = "foodprint.io";
+    @Value("${FOODPRINT_JWT_KEY}")
+    private String jwtSecret;
 
+    private final String jwtIssuer = "foodprint.io";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public String generateAccessToken(User user) {

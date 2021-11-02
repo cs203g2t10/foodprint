@@ -160,7 +160,7 @@ public class RestaurantController {
     @PostMapping({"/{restaurantId}/food"})
     @ResponseStatus(code = HttpStatus.CREATED)
     @Operation(summary = "Creates a new food instance within a restaurant")
-    public ResponseEntity<Food> addRestaurantFood(@PathVariable("restaurantId") Long restaurantId, @RequestBody FoodDTO food) {
+    public ResponseEntity<Food> addRestaurantFood(@PathVariable("restaurantId") Long restaurantId, @RequestBody @Valid FoodDTO food) {
         Restaurant restaurant = service.get(restaurantId);
         if(restaurant == null)
             throw new NotFoundException("restaurant does not exist");
@@ -208,7 +208,7 @@ public class RestaurantController {
     public ResponseEntity<Food> updateRestaurantFood(
         @PathVariable("restaurantId") Long restaurantId,
         @PathVariable("foodId") Long foodId,
-        @RequestBody EditFoodDTO updatedFood
+        @RequestBody @Valid EditFoodDTO updatedFood
     ) {
         Food food = service.editFood(restaurantId, foodId, updatedFood);
         return new ResponseEntity<>(food, HttpStatus.OK);
@@ -248,7 +248,7 @@ public class RestaurantController {
     @PostMapping("/{restaurantId}/discount")
     @ResponseStatus(code = HttpStatus.CREATED)
     @Operation(summary = "Creates a new discount using dto")
-    public ResponseEntity<Discount> createDiscount(@PathVariable Long restaurantId, @RequestBody DiscountDTO discount) {
+    public ResponseEntity<Discount> createDiscount(@PathVariable Long restaurantId, @RequestBody @Valid DiscountDTO discount) {
         // Restaurant restaurantOpt = service.get(restaurantId);
         Discount newDiscount = new Discount(discount.getDiscountDescription(), discount.getDiscountPercentage());
         Discount savedDiscount = service.addDiscount(restaurantId, newDiscount);

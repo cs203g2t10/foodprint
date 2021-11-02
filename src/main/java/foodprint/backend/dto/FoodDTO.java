@@ -2,13 +2,21 @@ package foodprint.backend.dto;
 
 import java.util.*;
 
+import javax.validation.constraints.NotEmpty;
+
+import org.hibernate.validator.constraints.Length;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public class FoodDTO {
     @Schema(defaultValue = "sushi")
+    @NotEmpty
+    @Length(min = 1, max = 40)
     private String foodName;
 
     @Schema(defaultValue = "sashimi")
+    @Length(min = 1)
+    @NotEmpty
     private String foodDesc;
 
     @Schema(defaultValue = "10")
