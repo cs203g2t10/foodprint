@@ -475,6 +475,7 @@ public class RestaurantController {
         Restaurant restaurant = new Restaurant(restaurantDTO.getRestaurantName(), restaurantDTO.getRestaurantLocation());
         restaurant.setRestaurantDesc(restaurantDTO.getRestaurantDesc());
         restaurant.setRestaurantTableCapacity(restaurantDTO.getRestaurantTableCapacity());
+        restaurant.setRestaurantPriceRange(restaurantDTO.getRestaurantPriceRange());
         restaurant.setRestaurantWeekdayClosingHour(restaurantDTO.getRestaurantWeekdayClosingHour());
         restaurant.setRestaurantWeekdayClosingMinutes(restaurantDTO.getRestaurantWeekdayClosingMinutes());
         restaurant.setRestaurantWeekdayOpeningHour(restaurantDTO.getRestaurantWeekdayOpeningHour());
@@ -494,6 +495,7 @@ public class RestaurantController {
         dto.setRestaurantLocation(restaurant.getRestaurantLocation());
         dto.setRestaurantDesc(restaurant.getRestaurantDesc());
         dto.setRestaurantTableCapacity(restaurant.getRestaurantTableCapacity());
+        dto.setRestaurantPriceRange(restaurant.getRestaurantPriceRange());
         dto.setRestaurantWeekdayClosingHour(restaurant.getRestaurantWeekdayClosingHour());
         dto.setRestaurantWeekdayClosingMinutes(restaurant.getRestaurantWeekdayClosingMinutes());
         dto.setRestaurantWeekdayOpeningHour(restaurant.getRestaurantWeekdayOpeningHour());
