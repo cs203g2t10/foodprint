@@ -226,7 +226,7 @@ public class RestaurantService {
         Restaurant restaurant = repo.findByRestaurantId(restaurantId);
 
         Food newFood = new Food(foodDTO.getFoodName(), foodDTO.getFoodPrice(), 0.00);
-        newFood.setPictures(new ArrayList<Picture>());
+        newFood.setPicture(null);
 
         List<Ingredient> ingredients = getAllRestaurantIngredients(restaurantId);
         Set<FoodIngredientQuantity> foodIngredientQuantity = new HashSet<>();
@@ -660,8 +660,7 @@ public class RestaurantService {
     public Picture saveFoodPicture(Long restaurantId, Long foodId, String title, String description, MultipartFile file) {
         Picture picture = pictureService.savePicture(title, description, file);
         Food food = getFood(restaurantId, foodId);
-        List<Picture> picList = food.getPictures();
-        picList.add(picture);
+        food.setPicture(picture);
         foodRepo.saveAndFlush(food);
         return picture;
     }
@@ -690,11 +689,9 @@ public class RestaurantService {
      */
     public Boolean pictureInFood(Long restaurantId, Long foodId, Long pictureId) {
         Food food = getFood(restaurantId, foodId);
-        List<Picture> foodPics = food.getPictures();
-        for (Picture p: foodPics) {
-            if (p.getId().equals(pictureId)) {
-                return true;
-            }
+        Picture picture = food.getPicture();
+        if (picture.getId().equals(pictureId)) {
+            return true;
         }
         return false;
     }
@@ -731,10 +728,7 @@ public class RestaurantService {
             throw new NotFoundException("Picture not found in restaurant");
         } else {
             Food food = getFood(restaurantId, foodId);
-            List<Picture> pictures = food.getPictures();
-            Picture picture = pictureService.get(pictureId);
-            pictures.remove(picture);
-            food.setPictures(pictures);
+            food.setPicture(null);
             foodRepo.saveAndFlush(food);
             pictureService.deletePicture(pictureId); 
         }

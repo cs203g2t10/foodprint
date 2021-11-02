@@ -129,7 +129,7 @@ public class RestaurantServiceTest {
         pic = new Picture("image", "desc", "Path", "file", "www.file.com");
         pictureId = 2L;
         food.setRestaurant(restaurant);
-        food.setPictures(picList);
+        food.setPicture(pic);
         restaurant.setIngredients(ingredients);
         discount.setRestaurant(restaurant);
         restaurant.setAllFood(allFood);
