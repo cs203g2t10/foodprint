@@ -1,6 +1,6 @@
 package foodprint.backend.dto;
 
-import foodprint.backend.model.Reservation.Status;
+import foodprint.backend.model.Reservation.ReservationStatus;
 
 import java.util.List;
 import java.time.LocalDateTime;
@@ -23,9 +23,9 @@ public class CreateReservationDTO {
     private Long restaurantId;
 
     @Schema(defaultValue = "ONGOING")
-    private Status status = Status.ONGOING;
+    private ReservationStatus status = ReservationStatus.ONGOING;
 
-    public CreateReservationDTO(LocalDateTime date, Integer pax, Boolean isVaccinated, List<LineItemDTO> lineItems, Long restaurantId, Status status) {
+    public CreateReservationDTO(LocalDateTime date, Integer pax, Boolean isVaccinated, List<LineItemDTO> lineItems, Long restaurantId, ReservationStatus status) {
         this.date = date;
         this.pax = pax;
         this.isVaccinated = isVaccinated;
@@ -76,11 +76,11 @@ public class CreateReservationDTO {
         this.restaurantId = restaurantId;
     }
 
-    public Status getStatus() {
+    public ReservationStatus getStatus() {
         return status;
     }
 
-    public void setStatus(Status status) {
+    public void setStatus(ReservationStatus status) {
         this.status = status;
     }
 
