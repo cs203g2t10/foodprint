@@ -50,7 +50,8 @@ public class AuthController {
         this.repo = userRepo;
     }
 
-    @GetMapping("/login/{email}")
+    @GetMapping("/checkUser2FA/{email}")
+    @Operation(summary = "Using a user's email, check if the user has 2 factor authentication currently enabled")
     public ResponseEntity<Boolean> check2fa(@PathVariable("email") String email) {
         return new ResponseEntity<>(authService.check2faSet(email), HttpStatus.OK);
     }
