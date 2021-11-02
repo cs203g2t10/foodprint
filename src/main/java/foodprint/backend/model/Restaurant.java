@@ -123,8 +123,6 @@ public class Restaurant {
     @CollectionTable(name = "categories", joinColumns = @JoinColumn(name = "restaurantId"))
     @Column(name = "restaurantCategory")
     @LazyCollection(LazyCollectionOption.FALSE)
-    @NotEmpty
-    @Length(min=1)
     private List<String> restaurantCategory = new ArrayList<String>();
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)

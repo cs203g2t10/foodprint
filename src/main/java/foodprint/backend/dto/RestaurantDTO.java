@@ -81,8 +81,6 @@ public class RestaurantDTO {
     @Max(59)
     private Integer restaurantWeekendClosingMinutes;
 
-    @NotEmpty
-    @Length(min=1)
     private List<String> restaurantCategory;
 
     private List<PictureDTO> pictures;
@@ -359,8 +357,6 @@ public class RestaurantDTO {
             ", pictures='" + getPictures() + "'" +
             "}";
     }
-
-
 
     public void setRestaurantCategory(List<String> restaurantCategory) {
         this.restaurantCategory = restaurantCategory;
