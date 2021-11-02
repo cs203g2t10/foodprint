@@ -587,6 +587,47 @@ public class RestaurantServiceTest {
         verify(repo).findById(restaurantId);
     }
 
+    @Test
+    void deleteRestaurantIngredient_IngredientFoundInCorrectRestaurantAndDeleted_Return() {
+        when(ingredientRepo.findById(any(Long.class))).thenReturn(Optional.of(ingredient));
+        doNothing().when(ingredientRepo).delete(any(Ingredient.class));
+
+        ingredient.setRestaurant(restaurant);
+        restaurantService.deleteRestaurantIngredient(restaurantId, ingredientId);
+        verify(ingredientRepo).findById(ingredientId);
+        verify(ingredientRepo).delete(ingredient);
+    }
+
+    @Test
+    void deleteRestaurantIngredient_IngredientNotFound_ReturnError() {
+        when(ingredientRepo.findById(any(Long.class))).thenReturn(Optional.empty());
+
+        try {
+            restaurantService.deleteRestaurantIngredient(restaurantId, ingredientId);
+        } catch (NotFoundException e) {
+            assertEquals("Ingredient requested could not be found", e.getMessage());
+        }
+
+        verify(ingredientRepo).findById(ingredientId);
+    }
+
+    @Test
+    void deleteRestaurantIngredient_IngredientNotFoundInCorrectRestaurant_ReturnError() {
+        when(ingredientRepo.findById(any(Long.class))).thenReturn(Optional.of(ingredient));
+
+        Restaurant anotherRestaurant = new Restaurant("Sushi Tei", "Desc","Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+        Long anotherRestaurantId = 2L;
+        ReflectionTestUtils.setField(anotherRestaurant,"restaurantId", anotherRestaurantId);
+        ingredient.setRestaurant(restaurant);
+        try {
+            restaurantService.deleteRestaurantIngredient(anotherRestaurantId, ingredientId);
+        } catch (NotFoundException e) {
+            assertEquals("Ingredient requested could not be found at this restaurant", e.getMessage());
+        }
+
+        verify(ingredientRepo).findById(ingredientId);
+    }
+
     //--------Picture-related testing---------
     @Test
     void pictureInRestaurant_pictureExist_ReturnTrue() {
