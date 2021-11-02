@@ -12,6 +12,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
 
@@ -65,8 +66,8 @@ public class Food {
     @OneToMany(mappedBy = "food", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<LineItem> lineItems;
 
-    @OneToMany
-    private List<Picture> pictures;
+    @OneToOne(optional = true)
+    private Picture picture;
 
     public Food() {}
 
@@ -142,14 +143,18 @@ public class Food {
     public Set<FoodIngredientQuantity> getFoodIngredientQuantity() {
         return this.foodIngredientQuantity;
     }
-    public List<Picture> getPictures() {
-        return pictures;
+    
+    public void setFoodId(Long foodId) {
+        this.foodId = foodId;
     }
 
-    public void setPictures(List<Picture> pictures) {
-        this.pictures = pictures;
+    public Picture getPicture() {
+        return this.picture;
     }
 
+    public void setPicture(Picture picture) {
+        this.picture = picture;
+    }
     
 
 }

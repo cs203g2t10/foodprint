@@ -131,7 +131,7 @@ public class RestaurantServiceTest {
         picList = new ArrayList<>();
         picList.add(pic);
         food.setRestaurant(restaurant);
-        food.setPictures(picList);
+        food.setPicture(pic);
         restaurant.setIngredients(ingredients);
         discount.setRestaurant(restaurant);
         restaurant.setAllFood(allFood);

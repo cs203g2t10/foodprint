@@ -503,7 +503,7 @@ public class Restaurant {
             ", discount='" + getDiscount() + "'" +
             ", reservations='" + getReservations() + "'" +
             ", ingredients='" + getIngredients() + "'" +
-            ", pictures='" + getPicture() + "'" +
+            ", picture='" + getPicture() + "'" +
             "}";
     }
 
