@@ -292,7 +292,7 @@ public class RestaurantController {
     @PostMapping("/{restaurantId}/ingredient")
     @ResponseStatus(code = HttpStatus.CREATED)
     @Operation(summary = "Creates a new ingredient for restaurant")
-    public ResponseEntity<Ingredient> createRestaurantIngredient(@PathVariable Long restaurantId, @RequestBody IngredientDTO ingredientDTO) {
+    public ResponseEntity<Ingredient> createRestaurantIngredient(@PathVariable Long restaurantId, @RequestBody @Valid IngredientDTO ingredientDTO) {
         Ingredient newIngredient = new Ingredient(ingredientDTO.getIngredientName());
         newIngredient.setIngredientDesc(ingredientDTO.getIngredientDesc());
         newIngredient.setUnits(ingredientDTO.getUnits());
@@ -325,7 +325,7 @@ public class RestaurantController {
     @PatchMapping("/{restaurantId}/ingredient/{ingredientId}")
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Modify an ingredient")
-    public ResponseEntity<Ingredient> modifyRestaurantIngredient(@PathVariable Long restaurantId, @PathVariable Long ingredientId, @RequestBody IngredientDTO ingredientDto) {
+    public ResponseEntity<Ingredient> modifyRestaurantIngredient(@PathVariable Long restaurantId, @PathVariable Long ingredientId, @RequestBody @Valid IngredientDTO ingredientDto) {
         Ingredient modifiedIngredient = new Ingredient(ingredientDto.getIngredientName());
         modifiedIngredient.setIngredientDesc(ingredientDto.getIngredientDesc());
         modifiedIngredient.setUnits(ingredientDto.getUnits());
@@ -510,9 +510,18 @@ public class RestaurantController {
         List<PictureDTO> pictureDtos = new ArrayList<>();
         dto.setPictures(pictureDtos);
 
+        List<Discount> discounts = restaurant.getDiscount();
+        List<DiscountDTO> discountDTOs = new ArrayList<>();
+        dto.setDiscounts(discountDTOs);
+
         for (Picture picture : pictures) {
             PictureDTO picDto = new PictureDTO(picture.getTitle(), picture.getDescription(), picture.getUrl());
             pictureDtos.add(picDto);
+        }
+
+        for (Discount discount : discounts) {
+            DiscountDTO discDTO = new DiscountDTO(discount.getRestaurant().getRestaurantId(), discount.getDiscountDescription(), discount.getDiscountPercentage());
+            discountDTOs.add(discDTO);
         }
 
         return dto;
