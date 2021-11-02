@@ -2,6 +2,7 @@ package foodprint.backend.controller;
 
 import java.time.LocalDateTime;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -129,14 +130,8 @@ public class AuthController {
     @ResponseStatus(code = HttpStatus.OK)
     public ResponseEntity<CurrentUserDetailsDTO> currentUserDetails() {
         User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        CurrentUserDetailsDTO currentUserDetails = new CurrentUserDetailsDTO();
-        currentUserDetails.setEmail(currentUser.getEmail());
-        currentUserDetails.setFirstName(currentUser.getFirstName());
-        currentUserDetails.setLastName(currentUser.getLastName());
-        currentUserDetails.setUserId(currentUser.getId());
-        currentUserDetails.setIs2FAEnabled(false);
-        currentUserDetails.setVaccinationName(currentUser.getVaccinationName());
-        currentUserDetails.setVaccinationDob(currentUser.getVaccinationDob());
+        ModelMapper mapper = new ModelMapper();
+        CurrentUserDetailsDTO currentUserDetails = mapper.map(currentUser, CurrentUserDetailsDTO.class);
         currentUserDetails.setUserRoles(currentUser.getRoles().split(","));
         return new ResponseEntity<>(currentUserDetails, HttpStatus.OK);
     }

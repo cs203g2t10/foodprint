@@ -1,6 +1,6 @@
 package foodprint.backend.dto;
 
-import foodprint.backend.model.Reservation.Status;
+import foodprint.backend.model.Reservation.ReservationStatus;
 
 import java.util.List;
 import java.time.LocalDateTime;
@@ -31,7 +31,7 @@ public class ReservationDTO {
 
     private List<NamedLineItemDTO> lineItems;
 
-    private Status status;
+    private ReservationStatus status;
 
     @Schema(defaultValue = "0.0")
     private Double price;
@@ -114,11 +114,11 @@ public class ReservationDTO {
         this.restaurantName = restaurantName;
     }
 
-    public Status getStatus() {
+    public ReservationStatus getStatus() {
         return status;
     }
 
-    public void setStatus(Status status) {
+    public void setStatus(ReservationStatus status) {
         this.status = status;
     }
 }

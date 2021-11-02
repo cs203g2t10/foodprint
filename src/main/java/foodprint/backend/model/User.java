@@ -220,7 +220,7 @@ public class User implements UserDetails {
     }
 
     public Boolean isTwoFaSet() {
-        return twoFaSet;
+        return (twoFaSet == null) ? false : twoFaSet;
     }
 
     public void setTwoFaSet(Boolean twoFaSet) {
