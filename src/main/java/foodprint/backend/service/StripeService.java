@@ -12,7 +12,6 @@ import com.stripe.model.Charge;
 import com.stripe.param.ChargeCreateParams;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-//import org.springframework.web.bind.annotation.RequestMapping;
 
 import foodprint.backend.dto.ChargeRequest;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,7 +33,8 @@ public class StripeService {
     public Charge charge(ChargeRequest chargeRequest)
       throws AuthenticationException, InvalidRequestException,
         ApiConnectionException, CardException, ApiException, StripeException {
-         String token = chargeRequest.getStripeToken();
+
+        String token = chargeRequest.getStripeToken();
         ChargeCreateParams params =
                 ChargeCreateParams.builder()
                 .setAmount(chargeRequest.getAmount())
@@ -44,5 +44,6 @@ public class StripeService {
                 .build();
         Charge charge = Charge.create(params);
         return charge;
+
     }
 }

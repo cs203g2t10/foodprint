@@ -1,6 +1,7 @@
 package foodprint.backend.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 //import com.stripe.param.CreditNoteCreateParams.Line;
@@ -381,20 +382,23 @@ public class RestaurantService {
      * @param endDate
      * @return
      */
-    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER', 'FP_ADMIN')")
     public HashMap<String, Integer> calculateFoodNeededBetween(Restaurant restaurant, LocalDate startDate, LocalDate endDate) {
+
         HashMap<String, Integer> map = new HashMap<>();
-        List<Reservation> reservations = reservationRepo.findByRestaurant(restaurant);
+        LocalDateTime start = startDate.minusDays(1).atTime(0, 0);
+        LocalDateTime end = endDate.plusDays(1).atTime(0,0);
+        List<Reservation> reservations = reservationRepo.findByRestaurantAndDateBetween(restaurant, start, end);
 
         for(Reservation reservation : reservations) {
-            LocalDate date = reservation.getDate().toLocalDate();
-            if (date.isBefore(endDate.plusDays(1)) && date.isAfter(startDate.minusDays(1))) {               
-                List<LineItem> lineItems = reservation.getLineItems();
-                for (LineItem lineItem : lineItems){
-                    map.put(lineItem.getFood().getFoodName(), lineItem.getQuantity());
-                }
+            List<LineItem> lineItems = reservation.getLineItems();
+            for (LineItem lineItem : lineItems){
+                String foodName = lineItem.getFood().getFoodName();
+                Integer currentAmt = map.getOrDefault(foodName, 0);
+                map.put(lineItem.getFood().getFoodName(), currentAmt + lineItem.getQuantity());
             }
         }
+
         return map;
     }
 
@@ -594,29 +598,28 @@ public class RestaurantService {
      * @return
      */
 
-    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER', 'FP_ADMIN')")
     public HashMap<String, Integer> calculateIngredientsNeededBetween(Restaurant restaurant, LocalDate startDate, LocalDate endDate) {
+        
         HashMap<String, Integer> map = new HashMap<>();
-        List<Reservation> reservations = reservationRepo.findByRestaurant(restaurant);
+        LocalDateTime start = startDate.minusDays(1).atTime(0, 0);
+        LocalDateTime end = endDate.plusDays(1).atTime(0,0);
+        List<Reservation> reservations = reservationRepo.findByRestaurantAndDateBetween(restaurant, start, end);
 
         for(Reservation reservation : reservations) {
-            LocalDate date = reservation.getDate().toLocalDate();
-            if (date.isBefore(endDate.plusDays(1)) && date.isAfter(startDate.minusDays(1))) {               
-                List<LineItem> lineItems = reservation.getLineItems();
-            
-                for (LineItem lineItem : lineItems){
-                    Food food = lineItem.getFood();
-                    Set<FoodIngredientQuantity> foodIngreQuantity = food.getFoodIngredientQuantity();
-                    for(FoodIngredientQuantity entry : foodIngreQuantity) {
-                        Ingredient currIngredient = entry.getIngredient();
-                        if (map.containsKey(currIngredient.getIngredientName())) {
-                            Integer currQuantity = map.get(currIngredient.getIngredientName());
-                            map.put(currIngredient.getIngredientName(), currQuantity + entry.getQuantity() * lineItem.getQuantity());
-                        } else {
-                            map.put(currIngredient.getIngredientName(), entry.getQuantity() * lineItem.getQuantity());
-                        }
-                    }
+            List<LineItem> lineItems = reservation.getLineItems();
+        
+            for (LineItem lineItem : lineItems){
+                Food food = lineItem.getFood();
+
+                Set<FoodIngredientQuantity> foodIngreQuantity = food.getFoodIngredientQuantity();
+                
+                for(FoodIngredientQuantity entry : foodIngreQuantity) {
+                    Ingredient currIngredient = entry.getIngredient();
+                    Integer currQty = map.getOrDefault(currIngredient.getIngredientName(), 0);
+                    map.put(currIngredient.getIngredientName(), currQty + entry.getQuantity() * lineItem.getQuantity());
                 }
+
             }
         }
 

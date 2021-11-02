@@ -19,7 +19,7 @@ import foodprint.backend.model.RestaurantRepo;
 import foodprint.backend.model.User;
 import foodprint.backend.service.PictureService;
 import foodprint.backend.service.RestaurantService;
-import foodprint.backend.model.Reservation.Status;
+import foodprint.backend.model.Reservation.ReservationStatus;
 import foodprint.backend.model.LineItem;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -104,7 +104,7 @@ public class RestaurantServiceTest {
         restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
         restaurantId = 1L;
         lineItems = new ArrayList<LineItem>();
-        reservation = new Reservation(user, LocalDateTime.now(), 5, true, LocalDateTime.now(), Status.ONGOING, lineItems, restaurant);
+        reservation = new Reservation(user, LocalDateTime.now(), 5, true, LocalDateTime.now(), ReservationStatus.ONGOING, lineItems, restaurant);
         reservationId = 1L;
         ingredientsDTOList = new ArrayList<>();
         food = new Food("sashimi", 10.0, 0.0);
