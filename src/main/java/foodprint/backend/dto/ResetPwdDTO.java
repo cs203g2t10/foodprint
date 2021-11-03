@@ -11,7 +11,7 @@ public class ResetPwdDTO {
     @Schema(defaultValue="NewSuperSecurePassw0rd")
     @NotEmpty
     @Size(min = 8, max = 60)
-    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$", message = "must have 1 letter, 1 number and at least 8 characters")
+    @Pattern(regexp = "(?=^.{8,}$)(?=.*\\d)(?=.*[a-zA-Z])(?!.*\\s)[0-9a-zA-Z*$-+?_&=!%{}/'.]*$", message = "must have 1 letter, 1 number and at least 8 characters")
     private String password;
 
     public ResetPwdDTO() {}
