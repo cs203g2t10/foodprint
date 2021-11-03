@@ -193,8 +193,6 @@ public class RestaurantServiceTest {
 
     @Test
     void deleteRestaurant_RestaurantFound_Return() {
-        ReflectionTestUtils.setField(restaurant, "restaurantId", restaurantId);
-
         doNothing().when(repo).delete(any(Restaurant.class));
         when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant)).thenReturn(Optional.empty());
 
@@ -221,8 +219,6 @@ public class RestaurantServiceTest {
 
     @Test
     void deleteRestaurant_RestaurantFoundButUnableToDelete_ReturnError() {
-        ReflectionTestUtils.setField(restaurant, "restaurantId", restaurantId);
-
         when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
         doNothing().when(repo).delete(any(Restaurant.class));
 
@@ -641,6 +637,7 @@ public class RestaurantServiceTest {
 
         ingredient.setRestaurant(restaurant);
         restaurantService.deleteRestaurantIngredient(restaurantId, ingredientId);
+
         verify(ingredientRepo).findById(ingredientId);
         verify(ingredientRepo).delete(ingredient);
     }
@@ -666,6 +663,7 @@ public class RestaurantServiceTest {
         Long anotherRestaurantId = 2L;
         ReflectionTestUtils.setField(anotherRestaurant,"restaurantId", anotherRestaurantId);
         ingredient.setRestaurant(restaurant);
+        
         try {
             restaurantService.deleteRestaurantIngredient(anotherRestaurantId, ingredientId);
         } catch (NotFoundException e) {
