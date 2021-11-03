@@ -507,9 +507,10 @@ public class RestaurantController {
         dto.setRestaurantCategory(restaurant.getRestaurantCategory());
         
         Picture picture = restaurant.getPicture();
-        PictureDTO picDto = new PictureDTO(picture.getTitle(), picture.getDescription(), picture.getUrl());
-
-        dto.setPicture(picDto);
+        if (picture != null) {
+            PictureDTO picDto = new PictureDTO(picture.getTitle(), picture.getDescription(), picture.getUrl());
+            dto.setPicture(picDto);
+        }
 
         List<Discount> discounts = restaurant.getDiscount();
         List<DiscountDTO> discountDTOs = new ArrayList<>();
