@@ -93,8 +93,12 @@ public class RestaurantService {
         if (updatedRestaurant.getRestaurantName() != null) {
             currentRestaurant.setRestaurantName(updatedRestaurant.getRestaurantName());
         }
-        if (updatedRestaurant.getRestaurantName() != null) {
-            currentRestaurant.setRestaurantName(updatedRestaurant.getRestaurantName());
+        if (updatedRestaurant.getRestaurantLocation() != null) {
+            currentRestaurant.setRestaurantLocation(updatedRestaurant.getRestaurantLocation());
+        }
+
+        if (updatedRestaurant.getRestaurantPriceRange() != null ) {
+            currentRestaurant.setRestaurantPriceRange(updatedRestaurant.getRestaurantPriceRange());
         }
 
         if (updatedRestaurant.getRestaurantTableCapacity() != null) {
@@ -222,7 +226,7 @@ public class RestaurantService {
         Restaurant restaurant = repo.findByRestaurantId(restaurantId);
 
         Food newFood = new Food(foodDTO.getFoodName(), foodDTO.getFoodPrice(), 0.00);
-        newFood.setPictures(new ArrayList<Picture>());
+        newFood.setPicture(null);
 
         List<Ingredient> ingredients = getAllRestaurantIngredients(restaurantId);
         Set<FoodIngredientQuantity> foodIngredientQuantity = new HashSet<>();
@@ -627,7 +631,7 @@ public class RestaurantService {
     }
 
     /**
-     * Saves picture of a given restaurant
+     * Sets picture of a given restaurant
      * @param restaurantId
      * @param title
      * @param description
@@ -638,8 +642,7 @@ public class RestaurantService {
     public Picture savePicture(Long restaurantId, String title, String description, MultipartFile file) {
         Picture picture = pictureService.savePicture(title, description, file);
         Restaurant restaurant = get(restaurantId);
-        List<Picture> picList = restaurant.getPictures();
-        picList.add(picture);
+        restaurant.setPicture(picture);
         repo.saveAndFlush(restaurant);
         return picture;
     }
@@ -657,25 +660,22 @@ public class RestaurantService {
     public Picture saveFoodPicture(Long restaurantId, Long foodId, String title, String description, MultipartFile file) {
         Picture picture = pictureService.savePicture(title, description, file);
         Food food = getFood(restaurantId, foodId);
-        List<Picture> picList = food.getPictures();
-        picList.add(picture);
+        food.setPicture(picture);
         foodRepo.saveAndFlush(food);
         return picture;
     }
 
     /**
-     * Checks if a given picture is found in restaurant
+     * Checks if a given picture belongs to the restaurant
      * @param restaurantId
      * @param pictureId
      * @return
      */
     public Boolean pictureInRestaurant(Long restaurantId, Long pictureId) {
         Restaurant restaurant = get(restaurantId);
-        List<Picture> restaurantPics = restaurant.getPictures();
-        for (Picture p: restaurantPics) {
-            if (p.getId().equals(pictureId)) {
-                return true;
-            }
+        Picture restaurantPic = restaurant.getPicture();
+        if (restaurantPic.getId().equals(pictureId)) {
+            return true;
         }
         return false;
     }
@@ -689,11 +689,9 @@ public class RestaurantService {
      */
     public Boolean pictureInFood(Long restaurantId, Long foodId, Long pictureId) {
         Food food = getFood(restaurantId, foodId);
-        List<Picture> foodPics = food.getPictures();
-        for (Picture p: foodPics) {
-            if (p.getId().equals(pictureId)) {
-                return true;
-            }
+        Picture picture = food.getPicture();
+        if (picture.getId().equals(pictureId)) {
+            return true;
         }
         return false;
     }
@@ -718,10 +716,7 @@ public class RestaurantService {
             throw new NotFoundException("Picture not found in restaurant");
         } else {
             Restaurant restaurant = get(restaurantId);
-            List<Picture> pictures = restaurant.getPictures();
-            Picture picture = pictureService.get(pictureId);
-            pictures.remove(picture);
-            restaurant.setPictures(pictures);
+            restaurant.setPicture(null);
             repo.saveAndFlush(restaurant);
             pictureService.deletePicture(pictureId); 
         }
@@ -733,10 +728,7 @@ public class RestaurantService {
             throw new NotFoundException("Picture not found in restaurant");
         } else {
             Food food = getFood(restaurantId, foodId);
-            List<Picture> pictures = food.getPictures();
-            Picture picture = pictureService.get(pictureId);
-            pictures.remove(picture);
-            food.setPictures(pictures);
+            food.setPicture(null);
             foodRepo.saveAndFlush(food);
             pictureService.deletePicture(pictureId); 
         }

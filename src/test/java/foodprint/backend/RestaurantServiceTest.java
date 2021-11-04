@@ -131,11 +131,11 @@ public class RestaurantServiceTest {
         picList = new ArrayList<>();
         picList.add(pic);
         food.setRestaurant(restaurant);
-        food.setPictures(picList);
+        food.setPicture(pic);
         restaurant.setIngredients(ingredients);
         discount.setRestaurant(restaurant);
         restaurant.setAllFood(allFood);
-        restaurant.setPictures(picList);
+        restaurant.setPicture(pic);
         ReflectionTestUtils.setField(restaurant, "restaurantId", restaurantId);
         ReflectionTestUtils.setField(ingredient, "ingredientId", ingredientId);
         ReflectionTestUtils.setField(food, "foodId", foodId);
@@ -193,8 +193,6 @@ public class RestaurantServiceTest {
 
     @Test
     void deleteRestaurant_RestaurantFound_Return() {
-        ReflectionTestUtils.setField(restaurant, "restaurantId", restaurantId);
-
         doNothing().when(repo).delete(any(Restaurant.class));
         when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant)).thenReturn(Optional.empty());
 
@@ -221,8 +219,6 @@ public class RestaurantServiceTest {
 
     @Test
     void deleteRestaurant_RestaurantFoundButUnableToDelete_ReturnError() {
-        ReflectionTestUtils.setField(restaurant, "restaurantId", restaurantId);
-
         when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
         doNothing().when(repo).delete(any(Restaurant.class));
 
@@ -561,6 +557,53 @@ public class RestaurantServiceTest {
     }
 
     @Test
+    void updateRestaurantIngredient_IngredientFoundInCorrectRestaurantAndUpdated_ReturnIngredient() {
+        when(ingredientRepo.findById(any(Long.class))).thenReturn(Optional.of(ingredient));
+        when(ingredientRepo.saveAndFlush(any(Ingredient.class))).thenReturn(ingredient);
+
+        restaurantService.create(restaurant);
+        ingredient.setRestaurant(restaurant);
+
+        Ingredient updateIngredient = restaurantService.updateIngredient(restaurantId, ingredientId, ingredient);
+
+        assertNotNull(updateIngredient);
+        verify(ingredientRepo).findById(ingredientId);
+        verify(ingredientRepo).saveAndFlush(ingredient);
+    }
+
+    @Test
+    void updateRestaurantIngredient_IngredientNotFound_ReturnError() {
+        when(ingredientRepo.findById(any(Long.class))).thenReturn(Optional.empty());
+        
+        restaurantService.create(restaurant);
+        try {
+            restaurantService.updateIngredient(restaurantId, ingredientId, ingredient);
+        } catch (NotFoundException e) {
+            assertEquals("Ingredient requested could not be found", e.getMessage());
+        }
+
+        verify(ingredientRepo).findById(ingredientId);
+    }
+
+    @Test
+    void updateRestaurantIngredient_IngredientFoundInWrongRestaurant_ReturnError() {
+        when(ingredientRepo.findById(any(Long.class))).thenReturn(Optional.of(ingredient));
+        Restaurant anotherRestaurant = new Restaurant("Sushi Tei", "Desc","Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+        Long anotherRestaurantId = 2L;
+        ReflectionTestUtils.setField(anotherRestaurant, "restaurantId", anotherRestaurantId);
+        
+        restaurantService.create(restaurant);
+        ingredient.setRestaurant(restaurant);
+        try {
+            restaurantService.updateIngredient(anotherRestaurantId, ingredientId, ingredient);
+        } catch (NotFoundException e) {
+            assertEquals("Ingredient requested could not be found at this restaurant", e.getMessage());
+        }
+
+        verify(ingredientRepo).findById(ingredientId);
+    }
+
+    @Test
     void addRestaurantIngredient_RestaurantExist_ReturnIngredient() {
         when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
         when(ingredientRepo.saveAndFlush(any(Ingredient.class))).thenReturn(ingredient);
@@ -585,6 +628,49 @@ public class RestaurantServiceTest {
         }
 
         verify(repo).findById(restaurantId);
+    }
+
+    @Test
+    void deleteRestaurantIngredient_IngredientFoundInCorrectRestaurantAndDeleted_Return() {
+        when(ingredientRepo.findById(any(Long.class))).thenReturn(Optional.of(ingredient));
+        doNothing().when(ingredientRepo).delete(any(Ingredient.class));
+
+        ingredient.setRestaurant(restaurant);
+        restaurantService.deleteRestaurantIngredient(restaurantId, ingredientId);
+
+        verify(ingredientRepo).findById(ingredientId);
+        verify(ingredientRepo).delete(ingredient);
+    }
+
+    @Test
+    void deleteRestaurantIngredient_IngredientNotFound_ReturnError() {
+        when(ingredientRepo.findById(any(Long.class))).thenReturn(Optional.empty());
+
+        try {
+            restaurantService.deleteRestaurantIngredient(restaurantId, ingredientId);
+        } catch (NotFoundException e) {
+            assertEquals("Ingredient requested could not be found", e.getMessage());
+        }
+
+        verify(ingredientRepo).findById(ingredientId);
+    }
+
+    @Test
+    void deleteRestaurantIngredient_IngredientNotFoundInCorrectRestaurant_ReturnError() {
+        when(ingredientRepo.findById(any(Long.class))).thenReturn(Optional.of(ingredient));
+
+        Restaurant anotherRestaurant = new Restaurant("Sushi Tei", "Desc","Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+        Long anotherRestaurantId = 2L;
+        ReflectionTestUtils.setField(anotherRestaurant,"restaurantId", anotherRestaurantId);
+        ingredient.setRestaurant(restaurant);
+        
+        try {
+            restaurantService.deleteRestaurantIngredient(anotherRestaurantId, ingredientId);
+        } catch (NotFoundException e) {
+            assertEquals("Ingredient requested could not be found at this restaurant", e.getMessage());
+        }
+
+        verify(ingredientRepo).findById(ingredientId);
     }
 
     //--------Picture-related testing---------
