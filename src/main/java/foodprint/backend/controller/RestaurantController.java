@@ -34,6 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
 import foodprint.backend.dto.DiscountDTO;
 import foodprint.backend.dto.EditFoodDTO;
 import foodprint.backend.dto.FoodDTO;
+import foodprint.backend.dto.IngredientCalculationDTO;
 import foodprint.backend.dto.IngredientDTO;
 import foodprint.backend.dto.PictureDTO;
 import foodprint.backend.dto.RestaurantDTO;
@@ -342,7 +343,7 @@ public class RestaurantController {
     @GetMapping({"/{restaurantId}/calculateIngredientsBetween"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Calculate ingredients needed between start and end date (inclusive)")
-    public ResponseEntity<Map<String, Integer>> calculateIngredientsBetween (@PathVariable Long restaurantId, @RequestParam("start") String startDate, @RequestParam("end") String endDate) {
+    public ResponseEntity<List<IngredientCalculationDTO>> calculateIngredientsBetween (@PathVariable Long restaurantId, @RequestParam("start") String startDate, @RequestParam("end") String endDate) {
         Restaurant restaurant = service.get(restaurantId);
         if(restaurant == null) {
             throw new NotFoundException("restaurant does not exist");
@@ -355,7 +356,15 @@ public class RestaurantController {
         } else if (start.isAfter(end)) {
             throw new BadRequestException("start date should be before end date");
         }
-        Map<String, Integer> result = service.calculateIngredientsNeededBetween(restaurant, start, end);
+
+        Map<Ingredient, Integer> ingredientQuantity = service.calculateIngredientsNeededBetween(restaurant, start, end);
+        List<IngredientCalculationDTO> result = new ArrayList<>();
+
+        Set<Ingredient> ingredientSet = ingredientQuantity.keySet();
+        for(Ingredient ingredient : ingredientSet) {
+            result.add(new IngredientCalculationDTO(ingredient.getIngredientName(), ingredientQuantity.get(ingredient), ingredient.getUnits()));
+        }
+
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 

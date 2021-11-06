@@ -603,9 +603,9 @@ public class RestaurantService {
      */
 
     @PreAuthorize("hasAnyAuthority('FP_MANAGER', 'FP_ADMIN')")
-    public HashMap<String, Integer> calculateIngredientsNeededBetween(Restaurant restaurant, LocalDate startDate, LocalDate endDate) {
+    public HashMap<Ingredient, Integer> calculateIngredientsNeededBetween(Restaurant restaurant, LocalDate startDate, LocalDate endDate) {
         
-        HashMap<String, Integer> map = new HashMap<>();
+        HashMap<Ingredient, Integer> map = new HashMap<>();
         LocalDateTime start = startDate.minusDays(1).atTime(0, 0);
         LocalDateTime end = endDate.plusDays(1).atTime(0,0);
         List<Reservation> reservations = reservationRepo.findByRestaurantAndDateBetween(restaurant, start, end);
@@ -621,7 +621,7 @@ public class RestaurantService {
                 for(FoodIngredientQuantity entry : foodIngreQuantity) {
                     Ingredient currIngredient = entry.getIngredient();
                     Integer currQty = map.getOrDefault(currIngredient.getIngredientName(), 0);
-                    map.put(currIngredient.getIngredientName(), currQty + entry.getQuantity() * lineItem.getQuantity());
+                    map.put(currIngredient, currQty + entry.getQuantity() * lineItem.getQuantity());
                 }
 
             }
