@@ -9,7 +9,6 @@ import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import foodprint.backend.dto.CreateReservationDTO;
@@ -21,7 +20,6 @@ import foodprint.backend.model.Reservation;
 import foodprint.backend.model.ReservationRepo;
 import foodprint.backend.model.User;
 import foodprint.backend.model.Reservation.ReservationStatus;
-import foodprint.backend.exceptions.InsufficientPermissionsException;
 import foodprint.backend.exceptions.NotFoundException;
 
 import java.time.DayOfWeek;
@@ -64,14 +62,7 @@ public class ReservationService {
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Reservation getReservationById(Long id) {
         Optional<Reservation> reservation = reservationRepo.findById(id);
-        if (reservation.isEmpty()) {
-            throw new NotFoundException("Reservation not found");
-        }
-        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (currentUser != reservation.get().getUser()) {
-            throw new InsufficientPermissionsException("Not authorised to view reservation of another user");
-        }
-        return reservation.get();
+        return reservation.orElseThrow(() -> new NotFoundException("Reservation not found"));
     }
 
     /**
@@ -81,10 +72,6 @@ public class ReservationService {
      */
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public List<Reservation> getAllReservationByUser(User user) {
-        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (currentUser != user) {
-            throw new InsufficientPermissionsException("Not authorised to view reservations of another user");
-        }
         return reservationRepo.findByUser(user);
     }
 
@@ -95,10 +82,6 @@ public class ReservationService {
      */
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public List<Reservation> getUserUpcomingReservations(User user) {
-        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (currentUser != user) {
-            throw new InsufficientPermissionsException("Not authorised to view upcoming reservations of another user");
-        }
         List<Reservation> reservationList = reservationRepo.findByUser(user);
         List<Reservation> result = new ArrayList<>();
         for(Reservation reservation : reservationList) {
@@ -117,10 +100,6 @@ public class ReservationService {
      */
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public List<Reservation> getUserPastReservations(User user) {
-        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (currentUser != user) {
-            throw new InsufficientPermissionsException("Not authorised to view past reservations of another user");
-        }
         List<Reservation> reservationList = reservationRepo.findByUser(user);
         List<Reservation> result = new ArrayList<>();
         for(Reservation reservation : reservationList) {
@@ -140,14 +119,9 @@ public class ReservationService {
      */
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public List<LineItem> getLineItemsByReservationId(Long id) {
-        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Optional<Reservation> reservation = reservationRepo.findById(id);
         if (reservation.isEmpty()) {
             throw new NotFoundException("Reservation not found");
-        }
-
-        if (reservation.get().getUser() != currentUser) {
-            throw new InsufficientPermissionsException("Not authorised to view line items of another user");
         }
         return reservation.get().getLineItems();
     }
