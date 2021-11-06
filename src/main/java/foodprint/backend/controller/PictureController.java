@@ -31,15 +31,6 @@ public class PictureController {
         this.service = service;
     }
 
-
-    // @GetMapping({"/pictures/all"})
-    // @ResponseStatus(code = HttpStatus.OK)
-    // @Operation(summary = "Gets all the pictures")
-    // public ResponseEntity<List<Picture>> getPictures() {
-    //     return new ResponseEntity<>(service.getAllPictures(), HttpStatus.OK);
-    // }
-
-
     @GetMapping({"/{pictureId}"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Get a picture by its id")
