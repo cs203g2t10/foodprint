@@ -174,10 +174,6 @@ public class User implements UserDetails {
         this.reservations = reservations;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public String getVaccinationName() {
         return this.vaccinationName;
     }

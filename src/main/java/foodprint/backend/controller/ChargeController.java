@@ -35,6 +35,6 @@ public class ChargeController {
         Charge charge = paymentsService.charge(chargeRequest);
         reservationService.setPaid(chargeRequest.getReservationId());
         ChargeDTO chargeDTO = new ChargeDTO(charge.getId(), charge.getStatus(), charge.getBalanceTransaction());
-        return new ResponseEntity<ChargeDTO>(chargeDTO, HttpStatus.CREATED);
+        return new ResponseEntity<>(chargeDTO, HttpStatus.CREATED);
     }
 }

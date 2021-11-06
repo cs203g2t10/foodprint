@@ -52,6 +52,7 @@ import io.swagger.v3.oas.annotations.Operation;
 public class RestaurantController {
     
     private RestaurantService service;
+    private final String restaurantNotFound = "restaurant does not exist";
 
     @Autowired
     RestaurantController(RestaurantService service) {
@@ -116,14 +117,13 @@ public class RestaurantController {
         @RequestParam("q") String query, 
         @RequestParam(name = "p", defaultValue = "1") int pageNum,
         @RequestParam(name = "sortBy", defaultValue = "restaurantName") String sortField,
-        @RequestParam(name = "sortDesc", defaultValue ="false") Boolean sortDesc
+        @RequestParam(name = "sortDesc", defaultValue ="false") boolean sortDesc
     ) {
         Direction direction = (sortDesc) ? Sort.Direction.DESC : Sort.Direction.ASC;
         Sort sorting = Sort.by(direction, sortField);
 		Pageable page = PageRequest.of(pageNum - 1, 16, sorting); // Pagination
 		Page<Restaurant> searchResult = service.search(page, query);
-        Page<RestaurantDTO> searchResultsDTO = searchResult.map(result -> convertToDTO(result));
-        return searchResultsDTO;
+        return searchResult.map(result -> convertToDTO(result));
     }
 
     @GetMapping({"/categories"})
@@ -159,7 +159,7 @@ public class RestaurantController {
     public ResponseEntity<Food> addRestaurantFood(@PathVariable("restaurantId") Long restaurantId, @RequestBody @Valid FoodDTO food) {
         Restaurant restaurant = service.get(restaurantId);
         if(restaurant == null)
-            throw new NotFoundException("restaurant does not exist");
+            throw new NotFoundException(restaurantNotFound);
 
         Food savedFood = service.addFood(restaurantId, food);
 
@@ -342,7 +342,7 @@ public class RestaurantController {
     public ResponseEntity<List<IngredientCalculationDTO>> calculateIngredientsBetween (@PathVariable Long restaurantId, @RequestParam("start") String startDate, @RequestParam("end") String endDate) {
         Restaurant restaurant = service.get(restaurantId);
         if(restaurant == null) {
-            throw new NotFoundException("restaurant does not exist");
+            throw new NotFoundException(restaurantNotFound);
         }
         
         LocalDate start = LocalDate.parse(startDate);
@@ -370,7 +370,7 @@ public class RestaurantController {
     public ResponseEntity<Map<String, Integer>> calculateFoodBetween(@PathVariable Long restaurantId, @RequestParam("start") String startDate, @RequestParam("end") String endDate) {
         Restaurant restaurant = service.get(restaurantId);
         if(restaurant == null)
-            throw new NotFoundException("restaurant does not exist");
+            throw new NotFoundException(restaurantNotFound);
         
         LocalDate start = LocalDate.parse(startDate);
         LocalDate end = LocalDate.parse(endDate);

@@ -34,7 +34,7 @@ public class TwoFaController {
     }
     
     @GetMapping({"/enable"})
-    public ResponseEntity<String> twofactor_enable(Principal principal) {
+    public ResponseEntity<String> twoFactorEnable(Principal principal) {
         try {
             return new ResponseEntity<>(twoFaService.setup(principal), HttpStatus.OK);
         } catch (InvalidException e) {
@@ -45,7 +45,7 @@ public class TwoFaController {
     
 
     @PostMapping({ "/confirm/{token}"})
-    public ResponseEntity<String> twofactor_confirm(@PathVariable("token") String token, Principal principal) {
+    public ResponseEntity<String> twoFactorConfirm(@PathVariable("token") String token, Principal principal) {
         try {
             twoFaService.confirm(token, principal);
             return new ResponseEntity<>("2FA successfully enabled.", HttpStatus.OK);
@@ -56,7 +56,7 @@ public class TwoFaController {
     }
 
     @PostMapping("/disable/{token}")
-    public ResponseEntity<String> twofactor_disable(@PathVariable("token") String token, Principal principal) {
+    public ResponseEntity<String> twoFactorDisable(@PathVariable("token") String token, Principal principal) {
         try {
             twoFaService.disable(token, principal);
             return new ResponseEntity<>("2FA successfully disabled.", HttpStatus.OK);

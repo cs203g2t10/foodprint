@@ -101,10 +101,6 @@ public class Token {
         return this.id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public int getType() {
         return this.type;
     }

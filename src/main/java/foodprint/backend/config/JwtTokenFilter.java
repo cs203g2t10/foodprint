@@ -31,7 +31,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     private final Logger loggr = LoggerFactory.getLogger(this.getClass());
 
     @Value("${security.bypass}")
-    private boolean SECURITY_BYPASSED;
+    private boolean securityBypassed;
 
     @Autowired
     public JwtTokenFilter(JwtTokenUtil jwtTokenUtil, UserRepo userRepo) {
@@ -45,7 +45,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                                     FilterChain chain)
             throws ServletException, IOException {
 
-        if (SECURITY_BYPASSED) {
+        if (securityBypassed) {
             // skip this filter if security is bypassed
             chain.doFilter(request, response);
             return;

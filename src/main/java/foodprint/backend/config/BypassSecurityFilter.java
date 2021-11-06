@@ -38,7 +38,7 @@ public class BypassSecurityFilter extends OncePerRequestFilter {
     private final Logger loggr = LoggerFactory.getLogger(this.getClass());
 
     @Value("${security.bypass}")
-    private boolean SECURITY_BYPASSED;
+    private boolean securityBypassed;
 
     @Autowired
     public BypassSecurityFilter(UserRepo userRepo, PasswordEncoder encoder) {
@@ -50,7 +50,7 @@ public class BypassSecurityFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
-        if (!SECURITY_BYPASSED) {
+        if (!securityBypassed) {
             // skip the filter if the security is not bypassed
             chain.doFilter(request, response);
             return;

@@ -83,7 +83,7 @@ public class UserController {
         @RequestParam(value="emailContains", required = false) String emailQuery,
         @RequestParam(value="page", defaultValue="0") Integer pageNumber,
         @RequestParam(value="sortBy", defaultValue="id") String sortByField,
-        @RequestParam(value="sortDesc", defaultValue="false") Boolean sortDesc
+        @RequestParam(value="sortDesc", defaultValue="false") boolean sortDesc
     ) {
         Direction direction = (sortDesc) ? Direction.DESC : Direction.ASC;
         Pageable pageDetails = PageRequest.of(pageNumber, 10, direction, sortByField);
@@ -96,7 +96,7 @@ public class UserController {
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Updates a user based on Foodprint")
     public ResponseEntity<UpdateUserDTO> updateUser(@PathVariable("id") Long id, @RequestBody @Valid UpdateUserDTO updatedUserDto) {
-        User updatedUser = convertToEntity(id, updatedUserDto);
+        User updatedUser = convertToEntity(updatedUserDto);
         User currentUser = userService.getUser(id);
         updatedUser = userService.updateUser(id, currentUser, updatedUser);
         updatedUserDto = convertToDto(updatedUser);
@@ -140,7 +140,7 @@ public class UserController {
     }
 
     // Conversion from DTO to actual entity
-    private User convertToEntity(Long id, UpdateUserDTO dto) {
+    private User convertToEntity(UpdateUserDTO dto) {
         User user = new User();
         user.setEmail(dto.getEmail());
         user.setFirstName(dto.getFirstName());
@@ -219,7 +219,7 @@ public class UserController {
     public ResponseEntity<List<RestaurantDTO>> getAllFavouriteRestaurants() {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Set<Restaurant> restaurants = user.getFavouriteRestaurants();
-        List<RestaurantDTO> restaurantDtos = restaurants.stream().map(r -> convertToDTO(r)).collect(Collectors.toList());
+        List<RestaurantDTO> restaurantDtos = restaurants.stream().map(r -> convertResToDTO(r)).collect(Collectors.toList());
         return new ResponseEntity<>(restaurantDtos, HttpStatus.OK);
     }
 
@@ -234,7 +234,7 @@ public class UserController {
         }
     }
 
-    public RestaurantDTO convertToDTO(Restaurant restaurant) {
+    public RestaurantDTO convertResToDTO(Restaurant restaurant) {
         RestaurantDTO dto = new RestaurantDTO();
         dto.setRestaurantId(restaurant.getRestaurantId());
         dto.setRestaurantName(restaurant.getRestaurantName());
