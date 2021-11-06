@@ -7,13 +7,14 @@ import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.Discount;
 import foodprint.backend.model.DiscountRepo;
 import foodprint.backend.model.Food;
-
+import foodprint.backend.model.FoodIngredientQuantity;
 import foodprint.backend.model.FoodRepo;
 import foodprint.backend.model.Ingredient;
 import foodprint.backend.model.IngredientRepo;
 import foodprint.backend.model.Picture;
 import foodprint.backend.model.PictureRepo;
 import foodprint.backend.model.Reservation;
+import foodprint.backend.model.ReservationRepo;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.RestaurantRepo;
 import foodprint.backend.model.User;
@@ -33,9 +34,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -63,6 +68,9 @@ public class RestaurantServiceTest {
 
     @Mock 
     private PictureRepo pictureRepo;
+
+    @Mock
+    private ReservationRepo reservationRepo;
 
     @InjectMocks
     private RestaurantService restaurantService;
@@ -95,6 +103,13 @@ public class RestaurantServiceTest {
     private List<Picture> picList;
     private Long pictureId;
     private List<FoodIngredientQuantityDTO> ingredientsDTOList;
+    private LocalDateTime start;
+    private LocalDate startDate;
+    private LocalDateTime end;
+    private LocalDate endDate;
+    private HashMap<String, Integer> map;
+    private Set<FoodIngredientQuantity> foodIngreQuantitySet;
+    private FoodIngredientQuantity foodIngredientQuantity;
 
     @BeforeEach
     void init() {
@@ -136,6 +151,17 @@ public class RestaurantServiceTest {
         discount.setRestaurant(restaurant);
         restaurant.setAllFood(allFood);
         restaurant.setPicture(pic);
+        map = new HashMap<>();
+        reservationList = new ArrayList<>();
+        reservation = new Reservation(user, LocalDateTime.now(), 5, true, LocalDateTime.now(), ReservationStatus.ONGOING, lineItems, restaurant);
+        reservationList.add(reservation);
+        startDate = LocalDate.now();
+        endDate = LocalDate.now().plusDays(2);
+        start = startDate.minusDays(1).atTime(0, 0);
+        end = endDate.plusDays(1).atTime(0,0);
+        foodIngreQuantitySet = new HashSet<>();
+        foodIngredientQuantity = new FoodIngredientQuantity(food, ingredient, 1);
+        foodIngreQuantitySet.add(foodIngredientQuantity);
         ReflectionTestUtils.setField(restaurant, "restaurantId", restaurantId);
         ReflectionTestUtils.setField(ingredient, "ingredientId", ingredientId);
         ReflectionTestUtils.setField(food, "foodId", foodId);
@@ -406,6 +432,16 @@ public class RestaurantServiceTest {
         verify(foodRepo).findById(foodId);
     }
 
+    @Test
+    void calculateFoodNeededBetween_Successful_ReturnMap() {
+        when(reservationRepo.findByRestaurantAndDateBetween(any(Restaurant.class), any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(reservationList);
+
+        HashMap<String, Integer> foodMap = restaurantService.calculateFoodNeededBetween(restaurant, startDate, endDate);
+        
+        assertNotNull(foodMap);
+        verify(reservationRepo).findByRestaurantAndDateBetween(restaurant, start, end);
+    }
+
     //----------Discount-related Testing-----------
     @Test
     void addDiscount_newDiscount_ReturnSavedDiscount() {
@@ -671,6 +707,16 @@ public class RestaurantServiceTest {
         }
 
         verify(ingredientRepo).findById(ingredientId);
+    }
+
+    @Test
+    void calculateIngredientsNeededBetween_Successful_ReturnMap() {
+        when(reservationRepo.findByRestaurantAndDateBetween(any(Restaurant.class), any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(reservationList);
+
+        HashMap<String, Integer> ingredientMap = restaurantService.calculateIngredientsNeededBetween(restaurant, startDate, endDate);
+
+        assertNotNull(ingredientMap);
+        verify(reservationRepo).findByRestaurantAndDateBetween(restaurant, start, end);
     }
 
     //--------Picture-related testing---------
