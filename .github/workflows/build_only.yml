@@ -27,5 +27,10 @@ jobs:
         java-version: '11'
         distribution: 'adopt'
         cache: maven
+    - name: Get branch name
+      id: branch-name
+      uses: tj-actions/branch-names@v5
     - name: Build with Maven
       run: mvn -B package --file pom.xml
+    - name: Run Test Cases with Maven
+      run: mvn clean verify sonar:sonar -Dsonar.login=${{ secrets.SONAR_LOGIN }} -Dsonar.projectKey=foodprint-${{ steps.branch-name.outputs.current_branch }}
