@@ -86,14 +86,6 @@ public class PictureService  {
     }
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
-    public List<Picture> getAllPictures() {
-        List<Picture> pictures = new ArrayList<>();
-        repository.findAll().forEach(pictures::add);
-        return 
-        pictures;
-    }
-
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public String getPictureById(Long id) {
         Optional<Picture> picture = repository.findById(id);
         if (picture.isEmpty()) {
