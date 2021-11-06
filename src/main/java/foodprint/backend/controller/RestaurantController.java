@@ -52,7 +52,7 @@ import io.swagger.v3.oas.annotations.Operation;
 public class RestaurantController {
     
     private RestaurantService service;
-    private final String restaurantNotFound = "restaurant does not exist";
+    private static final String restaurantNotFound = "restaurant does not exist";
 
     @Autowired
     RestaurantController(RestaurantService service) {

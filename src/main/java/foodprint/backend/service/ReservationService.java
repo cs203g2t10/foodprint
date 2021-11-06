@@ -3,6 +3,7 @@ package foodprint.backend.service;
 import java.util.Optional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -49,11 +50,7 @@ public class ReservationService {
         // assumes that duration of slot is 1 hour
         LocalDateTime endTime = date.plusHours(1);
         List<Reservation> reservations = reservationRepo.findByRestaurantAndDateBetween(restaurant, date, endTime);
-        if (reservations.size() < restaurant.getRestaurantTableCapacity()) {
-            return true;
-        } else {
-            return false;
-        }
+        return reservations.size() < restaurant.getRestaurantTableCapacity();
     }
 
 
@@ -75,8 +72,7 @@ public class ReservationService {
      */
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public List<Reservation> getAllReservationByUser(User user) {
-        List<Reservation> reservationList = reservationRepo.findByUser(user);
-        return reservationList;
+        return reservationRepo.findByUser(user);
     }
 
     /**
@@ -132,8 +128,7 @@ public class ReservationService {
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public List<Reservation> getAllReservationSlots() {
-        List<Reservation> reservationList = reservationRepo.findAll();
-        return reservationList;
+        return reservationRepo.findAll();
     }
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
@@ -176,8 +171,8 @@ public class ReservationService {
 
         // Just to save
         List<LineItem> savedLineItems = new ArrayList<>();
-        for (Food key : lineItemsHashMap.keySet()) {
-            LineItem savedLineItem = new LineItem(key, reservation, lineItemsHashMap.get(key));
+        for (Map.Entry<Food, Integer> entry : lineItemsHashMap.entrySet()) {
+            LineItem savedLineItem = new LineItem(entry.getKey(), reservation, entry.getValue());
             savedLineItems.add(savedLineItem);
         }
 
@@ -232,7 +227,6 @@ public class ReservationService {
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public void delete(Reservation reservation) {
         reservationRepo.delete(reservation);
-        return;
     }
 
     public List<LocalDateTime> getAllAvailableSlotsByDateAndRestaurant(Long restaurantId, String date) {

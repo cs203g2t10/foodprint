@@ -133,8 +133,7 @@ public class ReservationController {
     // POST: Create a new reservation (DTO)
     @PostMapping
     @Operation(summary = "For users to create a new reservation slot")
-    @Nullable
-    public ResponseEntity<ReservationDTO> createReservationDTO(@RequestBody CreateReservationDTO req) {
+    public ResponseEntity<ReservationDTO> createReservationDTO(@RequestBody @Nullable CreateReservationDTO req) {
         User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         try {
             var reservation = reservationService.create(currentUser, req);
