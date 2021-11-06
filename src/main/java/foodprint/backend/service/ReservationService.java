@@ -3,11 +3,13 @@ package foodprint.backend.service;
 import java.util.Optional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import foodprint.backend.dto.CreateReservationDTO;
@@ -19,6 +21,7 @@ import foodprint.backend.model.Reservation;
 import foodprint.backend.model.ReservationRepo;
 import foodprint.backend.model.User;
 import foodprint.backend.model.Reservation.ReservationStatus;
+import foodprint.backend.exceptions.InsufficientPermissionsException;
 import foodprint.backend.exceptions.NotFoundException;
 
 import java.time.DayOfWeek;
@@ -39,21 +42,17 @@ public class ReservationService {
     }
 
     /**
-     * Checks if a slot is available for a given date and time.
+     * Checks if a slot is available for a given date and time
      * @param restaurant
      * @param date
-     * @return boolean value
+     * @return
      */
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public boolean slotAvailable(Restaurant restaurant, LocalDateTime date) {
         // assumes that duration of slot is 1 hour
         LocalDateTime endTime = date.plusHours(1);
         List<Reservation> reservations = reservationRepo.findByRestaurantAndDateBetween(restaurant, date, endTime);
-        if (reservations.size() < restaurant.getRestaurantTableCapacity()) {
-            return true;
-        } else {
-            return false;
-        }
+        return reservations.size() < restaurant.getRestaurantTableCapacity();
     }
 
 
@@ -65,7 +64,14 @@ public class ReservationService {
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Reservation getReservationById(Long id) {
         Optional<Reservation> reservation = reservationRepo.findById(id);
-        return reservation.orElseThrow(() -> new NotFoundException("Reservation not found"));
+        if (reservation.isEmpty()) {
+            throw new NotFoundException("Reservation not found");
+        }
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (currentUser != reservation.get().getUser()) {
+            throw new InsufficientPermissionsException("Not authorised to view reservation of another user");
+        }
+        return reservation.get();
     }
 
     /**
@@ -75,8 +81,11 @@ public class ReservationService {
      */
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public List<Reservation> getAllReservationByUser(User user) {
-        List<Reservation> reservationList = reservationRepo.findByUser(user);
-        return reservationList;
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (currentUser != user) {
+            throw new InsufficientPermissionsException("Not authorised to view reservations of another user");
+        }
+        return reservationRepo.findByUser(user);
     }
 
     /**
@@ -86,6 +95,10 @@ public class ReservationService {
      */
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public List<Reservation> getUserUpcomingReservations(User user) {
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (currentUser != user) {
+            throw new InsufficientPermissionsException("Not authorised to view upcoming reservations of another user");
+        }
         List<Reservation> reservationList = reservationRepo.findByUser(user);
         List<Reservation> result = new ArrayList<>();
         for(Reservation reservation : reservationList) {
@@ -104,6 +117,10 @@ public class ReservationService {
      */
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public List<Reservation> getUserPastReservations(User user) {
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (currentUser != user) {
+            throw new InsufficientPermissionsException("Not authorised to view past reservations of another user");
+        }
         List<Reservation> reservationList = reservationRepo.findByUser(user);
         List<Reservation> result = new ArrayList<>();
         for(Reservation reservation : reservationList) {
@@ -117,29 +134,32 @@ public class ReservationService {
 
 
     /**
-     * Gets all the 
+     * Gets all line items under a reservation
      * @param id
      * @return
      */
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public List<LineItem> getLineItemsByReservationId(Long id) {
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Optional<Reservation> reservation = reservationRepo.findById(id);
         if (reservation.isEmpty()) {
             throw new NotFoundException("Reservation not found");
         }
+
+        if (reservation.get().getUser() != currentUser) {
+            throw new InsufficientPermissionsException("Not authorised to view line items of another user");
+        }
         return reservation.get().getLineItems();
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN')")
     public List<Reservation> getAllReservationSlots() {
-        List<Reservation> reservationList = reservationRepo.findAll();
-        return reservationList;
+        return reservationRepo.findAll();
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public List<Reservation> getAllReservationByRestaurant(Restaurant restaurant) {
-        List<Reservation> reservationList = reservationRepo.findByRestaurant(restaurant);
-        return reservationList;
+        return reservationRepo.findByRestaurant(restaurant);
     }
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
@@ -177,8 +197,8 @@ public class ReservationService {
 
         // Just to save
         List<LineItem> savedLineItems = new ArrayList<>();
-        for (Food key : lineItemsHashMap.keySet()) {
-            LineItem savedLineItem = new LineItem(key, reservation, lineItemsHashMap.get(key));
+        for (Map.Entry<Food, Integer> entry : lineItemsHashMap.entrySet()) {
+            LineItem savedLineItem = new LineItem(entry.getKey(), reservation, entry.getValue());
             savedLineItems.add(savedLineItem);
         }
 
@@ -233,11 +253,10 @@ public class ReservationService {
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public void delete(Reservation reservation) {
         reservationRepo.delete(reservation);
-        return;
     }
 
     public List<LocalDateTime> getAllAvailableSlotsByDateAndRestaurant(Long restaurantId, String date) {
-        List<LocalDateTime> availableSlots = new ArrayList<LocalDateTime>();
+        List<LocalDateTime> availableSlots = new ArrayList<>();
         Restaurant restaurant = restaurantService.get(restaurantId);
 
         LocalDate localDate = LocalDate.parse(date);

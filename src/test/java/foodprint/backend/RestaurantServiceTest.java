@@ -34,6 +34,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -436,7 +437,7 @@ public class RestaurantServiceTest {
     void calculateFoodNeededBetween_Successful_ReturnMap() {
         when(reservationRepo.findByRestaurantAndDateBetween(any(Restaurant.class), any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(reservationList);
 
-        HashMap<String, Integer> foodMap = restaurantService.calculateFoodNeededBetween(restaurant, startDate, endDate);
+        Map<String, Integer> foodMap = restaurantService.calculateFoodNeededBetween(restaurant, startDate, endDate);
         
         assertNotNull(foodMap);
         verify(reservationRepo).findByRestaurantAndDateBetween(restaurant, start, end);
@@ -713,52 +714,10 @@ public class RestaurantServiceTest {
     void calculateIngredientsNeededBetween_Successful_ReturnMap() {
         when(reservationRepo.findByRestaurantAndDateBetween(any(Restaurant.class), any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(reservationList);
 
-        HashMap<String, Integer> ingredientMap = restaurantService.calculateIngredientsNeededBetween(restaurant, startDate, endDate);
+        Map<Ingredient, Integer> ingredientMap = restaurantService.calculateIngredientsNeededBetween(restaurant, startDate, endDate);
 
         assertNotNull(ingredientMap);
         verify(reservationRepo).findByRestaurantAndDateBetween(restaurant, start, end);
     }
 
-    //--------Picture-related testing---------
-    @Test
-    void pictureInRestaurant_pictureExist_ReturnTrue() {
-        when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
-
-        Boolean pictureExist = restaurantService.pictureInRestaurant(restaurantId, pictureId);
-
-        assertTrue(pictureExist);
-        verify(repo).findById(restaurantId);
-    }
-
-    @Test
-    void pictureInRestaurant_pictureDoNotExist_ReturnFalse() {
-        Long anotherPictureId = 3L;
-
-        when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
-
-        Boolean pictureDoNotExist = restaurantService.pictureInRestaurant(restaurantId, anotherPictureId);
-
-        assertFalse(pictureDoNotExist);
-        verify(repo).findById(restaurantId);
-    }
-
-    @Test
-    void pictureInFood_FoodPicExist_ReturnTrue() {
-        when(foodRepo.findById(any(Long.class))).thenReturn(Optional.of(food));
-
-        Boolean foodExist = restaurantService.pictureInFood(restaurantId, foodId, pictureId);
-        assertTrue(foodExist);
-        verify(foodRepo).findById(foodId);
-    }
-
-    @Test
-    void pictureInFood_FoodPicDoNotExist_ReturnFalse() {
-        Long anotherPictureId = 4L;
-
-        when(foodRepo.findById(any(Long.class))).thenReturn(Optional.of(food));
-
-        Boolean foodPicDoNotExist = restaurantService.pictureInFood(restaurantId, foodId, anotherPictureId);
-        assertFalse(foodPicDoNotExist);
-        verify(foodRepo).findById(foodId);
-    }
 }

@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -111,7 +113,7 @@ public class ReservationController {
     public ResponseEntity<List<LineItemDTO>> getReservationOrder(@PathVariable("reservationId") Long id) {
         Reservation reservation = reservationService.getReservationById(id);
         List<LineItem> lineItems = reservation.getLineItems();
-        List<LineItemDTO> result = new ArrayList<LineItemDTO>();
+        List<LineItemDTO> result = new ArrayList<>();
         for(LineItem lineItem : lineItems) {
             LineItemDTO curr = new LineItemDTO(lineItem.getFood().getFoodId(), lineItem.getQuantity());
             result.add(curr);
@@ -131,7 +133,7 @@ public class ReservationController {
     // POST: Create a new reservation (DTO)
     @PostMapping
     @Operation(summary = "For users to create a new reservation slot")
-    public ResponseEntity<ReservationDTO> createReservationDTO(@RequestBody CreateReservationDTO req) {
+    public ResponseEntity<ReservationDTO> createReservationDTO(@RequestBody @Nullable CreateReservationDTO req) {
         User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         try {
             var reservation = reservationService.create(currentUser, req);
@@ -243,8 +245,8 @@ public class ReservationController {
 
             List<LineItem> savedLineItems = new ArrayList<>();
 
-            for (Food key : lineItemsHashMap.keySet()) {
-                LineItem savedLineItem = new LineItem(key, reservation, lineItemsHashMap.get(key));
+            for (Map.Entry<Food, Integer> entry : lineItemsHashMap.entrySet()) {
+                LineItem savedLineItem = new LineItem(entry.getKey(), reservation, entry.getValue());
                 savedLineItems.add(savedLineItem);
             }
 

@@ -44,8 +44,6 @@ public class ReservationDTO {
         this.price = price;
     }
 
-    public ReservationDTO() {}
-
     public Long getReservationId() {
         return this.reservationId;
     }

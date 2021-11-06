@@ -7,7 +7,6 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 
-import com.stripe.model.Discount;
 
 import org.hibernate.validator.constraints.Length;
 

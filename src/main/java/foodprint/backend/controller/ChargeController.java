@@ -7,7 +7,6 @@ import foodprint.backend.service.ReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-//import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,6 +35,6 @@ public class ChargeController {
         Charge charge = paymentsService.charge(chargeRequest);
         reservationService.setPaid(chargeRequest.getReservationId());
         ChargeDTO chargeDTO = new ChargeDTO(charge.getId(), charge.getStatus(), charge.getBalanceTransaction());
-        return new ResponseEntity<ChargeDTO>(chargeDTO, HttpStatus.CREATED);
+        return new ResponseEntity<>(chargeDTO, HttpStatus.CREATED);
     }
 }

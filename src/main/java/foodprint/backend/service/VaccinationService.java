@@ -13,6 +13,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.LocalDate;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,7 +28,7 @@ import foodprint.backend.model.User;
 public class VaccinationService {
     
     private UserService userService;
-
+    private static Logger loggr = LoggerFactory.getLogger(VaccinationService.class);
     private static final String url = "https://oa.foodprint.works/";
 
     @Autowired
@@ -52,6 +55,8 @@ public class VaccinationService {
         } catch (IOException e) {
             throw new VaccinationValidationException("Unable to validate vaccination status.");
         } catch (InterruptedException e) {
+            loggr.error("Unable to validate vaccination status due to server error.");
+            Thread.currentThread().interrupt();
             throw new VaccinationValidationException("Unable to validate vaccination status due to server error.");
         }
 

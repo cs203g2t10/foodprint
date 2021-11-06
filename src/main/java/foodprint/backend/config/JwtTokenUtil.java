@@ -20,8 +20,8 @@ public class JwtTokenUtil {
     @Value("${FOODPRINT_JWT_KEY}")
     private String jwtSecret;
 
-    private final String jwtIssuer = "foodprint.io";
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static final String jwtIssuer = "foodprint.io";
+    private final Logger loggr = LoggerFactory.getLogger(this.getClass());
 
     public String generateAccessToken(User user) {
          JwtBuilder token = Jwts.builder()
@@ -72,15 +72,15 @@ public class JwtTokenUtil {
             Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token);
             return true;
         } catch (SignatureException ex) {
-            logger.error("Invalid JWT signature - {}", ex.getMessage());
+            loggr.error("Invalid JWT signature - {}", ex.getMessage());
         } catch (MalformedJwtException ex) {
-            logger.error("Invalid JWT token - {}", ex.getMessage());
+            loggr.error("Invalid JWT token - {}", ex.getMessage());
         } catch (ExpiredJwtException ex) {
-            logger.error("Expired JWT token - {}", ex.getMessage());
+            loggr.error("Expired JWT token - {}", ex.getMessage());
         } catch (UnsupportedJwtException ex) {
-            logger.error("Unsupported JWT token - {}", ex.getMessage());
+            loggr.error("Unsupported JWT token - {}", ex.getMessage());
         } catch (IllegalArgumentException ex) {
-            logger.error("JWT claims string is empty - {}", ex.getMessage());
+            loggr.error("JWT claims string is empty - {}", ex.getMessage());
         }
         return false;
     }

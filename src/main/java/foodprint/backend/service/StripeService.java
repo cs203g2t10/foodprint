@@ -1,11 +1,6 @@
 package foodprint.backend.service;
 
 import com.stripe.Stripe;
-import com.stripe.exception.ApiConnectionException;
-import com.stripe.exception.ApiException;
-import com.stripe.exception.AuthenticationException;
-import com.stripe.exception.CardException;
-import com.stripe.exception.InvalidRequestException;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Charge;
 
@@ -31,8 +26,7 @@ public class StripeService {
      }
     
     public Charge charge(ChargeRequest chargeRequest)
-      throws AuthenticationException, InvalidRequestException,
-        ApiConnectionException, CardException, ApiException, StripeException {
+      throws StripeException {
 
         String token = chargeRequest.getStripeToken();
         ChargeCreateParams params =
@@ -42,8 +36,7 @@ public class StripeService {
                 .setDescription(chargeRequest.getDescription())
                 .setSource(token)
                 .build();
-        Charge charge = Charge.create(params);
-        return charge;
+        return Charge.create(params);
 
     }
 }

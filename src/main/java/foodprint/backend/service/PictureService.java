@@ -81,16 +81,8 @@ public class PictureService  {
     }
 
     public byte[] downloadPictureImage(Long id) {
-        Picture picture = repository.findById(id).get();
+        Picture picture = repository.findById(id).orElseThrow(() -> new NotFoundException("Image with this ID was not found"));
         return fileStore.download(picture.getImagePath(), picture.getImageFileName());
-    }
-
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
-    public List<Picture> getAllPictures() {
-        List<Picture> pictures = new ArrayList<>();
-        repository.findAll().forEach(pictures::add);
-        return 
-        pictures;
     }
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
@@ -100,8 +92,7 @@ public class PictureService  {
             throw new NotFoundException("Picture not found.");
         }
         
-        String url = String.format("%s%s/%s", "https://foodprint-amazon-storage.s3.ap-southeast-1.amazonaws.com/", picture.get().getImagePath(), picture.get().getImageFileName().replace(" ", "+"));
-        return url;
+        return String.format("%s%s/%s", "https://foodprint-amazon-storage.s3.ap-southeast-1.amazonaws.com/", picture.get().getImagePath(), picture.get().getImageFileName().replace(" ", "+"));
     }
 
     @PreAuthorize("hasAnyAuthority('FP_MANAGER')")

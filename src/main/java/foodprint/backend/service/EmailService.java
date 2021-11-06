@@ -36,7 +36,7 @@ public class EmailService {
     @Value("${FOODPRINT_EMAIL_PASSWORD}")
     private String emailPassword;
 
-    private Logger logger = LoggerFactory.getLogger(EmailService.class);
+    private Logger loggr = LoggerFactory.getLogger(EmailService.class);
 
     public JavaMailSender javaMailSender() {
 
@@ -78,7 +78,7 @@ public class EmailService {
     private void sendSimpleEmail(String recipientEmail, String subject, String content) {
 
         if (javaMailSender() == null) {
-            logger.info("Mail sender is null, cannot continue...");
+            loggr.info("Mail sender is null, cannot continue...");
         }
         
         SimpleMailMessage message = new SimpleMailMessage();
@@ -91,16 +91,16 @@ public class EmailService {
         try {
             javaMailSender().send(message);
         } catch (MailParseException e) {
-            logger.info("An error occurred while parsing email content");
+            loggr.info("An error occurred while parsing email content");
             throw new MailException("An error occurred while parsing email content");
         } catch (MailAuthenticationException e) {
-            logger.info("An error occurred while authenticating mail server credentials"); 
+            loggr.info("An error occurred while authenticating mail server credentials"); 
             throw new MailException("An error occurred while authenticating mail server credentials");
         } catch (MailSendException e) {
-            logger.info("An error occurred while trying to send the email");
+            loggr.info("An error occurred while trying to send the email");
             throw new MailException("An error occurred while trying to send the email");
         } catch (NullPointerException e) {
-            logger.info("Mail sender was uninitialized or null");
+            loggr.info("Mail sender was uninitialized or null");
             throw new MailException("Mail sender was uninitialized or null");
         }
     }

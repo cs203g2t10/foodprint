@@ -2,7 +2,6 @@ package foodprint.backend.config;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.List;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -36,10 +35,10 @@ public class BypassSecurityFilter extends OncePerRequestFilter {
 
     private final UserRepo userRepo;
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger loggr = LoggerFactory.getLogger(this.getClass());
 
     @Value("${security.bypass}")
-    private boolean SECURITY_BYPASSED;
+    private boolean securityBypassed;
 
     @Autowired
     public BypassSecurityFilter(UserRepo userRepo, PasswordEncoder encoder) {
@@ -51,7 +50,7 @@ public class BypassSecurityFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
-        if (!SECURITY_BYPASSED) {
+        if (!securityBypassed) {
             // skip the filter if the security is not bypassed
             chain.doFilter(request, response);
             return;
@@ -70,12 +69,11 @@ public class BypassSecurityFilter extends OncePerRequestFilter {
         }
 
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-            createdUser, null,
-            createdUser == null ? List.of() : createdUser.getAuthorities()
+            createdUser, null, createdUser.getAuthorities()
         );
 
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-        logger.info("Auth OK - Email: {}: - Authorities: {}", createdUser.getUsername(), createdUser.getAuthorities());
+        loggr.info("Auth OK - Email: {}: - Authorities: {}", createdUser.getUsername(), createdUser.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
         chain.doFilter(request, response);
     }

@@ -75,17 +75,17 @@ public class PictureServiceTest {
         verify(pictureRepo).findById(pictureId);
     }
 
-    @Test
-    void getAllPictures_PicturesFound_ReturnPictureList() {
-        List<Picture> pictureList = new ArrayList<>();
-        pictureList.add(picture);
+    // @Test
+    // void getAllPictures_PicturesFound_ReturnPictureList() {
+    //     List<Picture> pictureList = new ArrayList<>();
+    //     pictureList.add(picture);
 
-        when(pictureRepo.findAll()).thenReturn(pictureList);
+    //     when(pictureRepo.findAll()).thenReturn(pictureList);
 
-        List<Picture> getAllPictures = pictureService.getAllPictures();
-        assertNotNull(getAllPictures);
-        verify(pictureRepo).findAll();
-    }
+    //     List<Picture> getAllPictures = pictureService.getAllPictures();
+    //     assertNotNull(getAllPictures);
+    //     verify(pictureRepo).findAll();
+    // }
 
     @Test
     void getPictureById_PictureFound_ReturnStringUrl() {

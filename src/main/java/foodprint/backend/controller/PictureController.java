@@ -32,12 +32,12 @@ public class PictureController {
     }
 
 
-    @GetMapping({"/pictures/all"})
-    @ResponseStatus(code = HttpStatus.OK)
-    @Operation(summary = "Gets all the pictures")
-    public ResponseEntity<List<Picture>> getPictures() {
-        return new ResponseEntity<>(service.getAllPictures(), HttpStatus.OK);
-    }
+    // @GetMapping({"/pictures/all"})
+    // @ResponseStatus(code = HttpStatus.OK)
+    // @Operation(summary = "Gets all the pictures")
+    // public ResponseEntity<List<Picture>> getPictures() {
+    //     return new ResponseEntity<>(service.getAllPictures(), HttpStatus.OK);
+    // }
 
 
     @GetMapping({"/{pictureId}"})

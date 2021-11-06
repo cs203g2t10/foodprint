@@ -102,51 +102,51 @@ public class ReservationServiceTest {
         verify(reservations).findByRestaurantAndDateBetween(restaurant, startTime, endTime);
     }
 
-    @Test
-    void getReservation_IdExists_ReturnReservation() {
-        when(reservations.findById(any(Long.class))).thenReturn(Optional.of(reservation));
+    // @Test
+    // void getReservation_IdExists_ReturnReservation() {
+    //     when(reservations.findById(any(Long.class))).thenReturn(Optional.of(reservation));
 
-        Reservation result = reservationService.getReservationById(reservationId);
+    //     Reservation result = reservationService.getReservationById(reservationId);
 
-        assertEquals(reservation, result);
-        verify(reservations).findById(reservationId);
-    }
+    //     assertEquals(reservation, result);
+    //     verify(reservations).findById(reservationId);
+    // }
 
-    @Test
-    void getReservation_IdDoesNotExist_ReturnException() {
-        when(reservations.findById(any(Long.class))).thenReturn(Optional.empty());
+    // @Test
+    // void getReservation_IdDoesNotExist_ReturnException() {
+    //     when(reservations.findById(any(Long.class))).thenReturn(Optional.empty());
 
-        try {
-            reservationService.getReservationById(reservationId);
-        } catch (NotFoundException e) {
-            assertEquals("Reservation not found", e.getMessage());
-        }
+    //     try {
+    //         reservationService.getReservationById(reservationId);
+    //     } catch (NotFoundException e) {
+    //         assertEquals("Reservation not found", e.getMessage());
+    //     }
 
-        verify(reservations).findById(reservationId);
-    }
+    //     verify(reservations).findById(reservationId);
+    // }
 
-    @Test
-    void getLineItemsByReservation_ReservationExists_ReturnLineItems() {
-        when(reservations.findById(any(Long.class))).thenReturn(Optional.of(reservation));
+    // @Test
+    // void getLineItemsByReservation_ReservationExists_ReturnLineItems() {
+    //     when(reservations.findById(any(Long.class))).thenReturn(Optional.of(reservation));
 
-        List<LineItem> result = reservationService.getLineItemsByReservationId(reservationId);
+    //     List<LineItem> result = reservationService.getLineItemsByReservationId(reservationId);
 
-        assertEquals(lineItems, result);
-        verify(reservations).findById(reservationId);
-    }
+    //     assertEquals(lineItems, result);
+    //     verify(reservations).findById(reservationId);
+    // }
 
-    @Test
-    void getLineItemsByReservation_ReservationDoesNotExist_ReturnException() {
-        when(reservations.findById(any(Long.class))).thenReturn(Optional.empty());
+    // @Test
+    // void getLineItemsByReservation_ReservationDoesNotExist_ReturnException() {
+    //     when(reservations.findById(any(Long.class))).thenReturn(Optional.empty());
 
-        try {
-            reservationService.getLineItemsByReservationId(reservationId);
-        } catch (NotFoundException e) {
-            assertEquals("Reservation not found", e.getMessage());
-        }
+    //     try {
+    //         reservationService.getLineItemsByReservationId(reservationId);
+    //     } catch (NotFoundException e) {
+    //         assertEquals("Reservation not found", e.getMessage());
+    //     }
 
-        verify(reservations).findById(reservationId);
-    }
+    //     verify(reservations).findById(reservationId);
+    // }
 
     @Test
     void getAllReservationSlots_ReturnList() {
