@@ -20,7 +20,7 @@ public class JwtTokenUtil {
     @Value("${FOODPRINT_JWT_KEY}")
     private String jwtSecret;
 
-    private final String jwtIssuer = "foodprint.io";
+    private static final String jwtIssuer = "foodprint.io";
     private final Logger loggr = LoggerFactory.getLogger(this.getClass());
 
     public String generateAccessToken(User user) {

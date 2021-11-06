@@ -127,10 +127,10 @@ public class Restaurant {
     @CollectionTable(name = "categories", joinColumns = @JoinColumn(name = "restaurantId"))
     @Column(name = "restaurantCategory")
     @LazyCollection(LazyCollectionOption.FALSE)
-    private List<@NotEmpty @Length(min=1) String> restaurantCategory = new ArrayList<String>();
+    private List<@NotEmpty @Length(min=1) String> restaurantCategory = new ArrayList<>();
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
-    private List<Food> food = new ArrayList<Food>();
+    private List<Food> food = new ArrayList<>();
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.MERGE)
     @JsonIgnore
@@ -138,7 +138,7 @@ public class Restaurant {
 
     @JsonIgnore
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
-    private List<Discount> discount = new ArrayList<Discount>();
+    private List<Discount> discount = new ArrayList<>();
 
     @JsonIgnore
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
@@ -473,12 +473,12 @@ public class Restaurant {
             return false;
         }
         Restaurant restaurant = (Restaurant) o;
-        return Objects.equals(restaurantId, restaurant.restaurantId) && Objects.equals(restaurantName, restaurant.restaurantName) && Objects.equals(restaurantDesc, restaurant.restaurantDesc) /* && Objects.equals(restaurantLocation, restaurant.restaurantLocation) && Objects.equals(restaurantPriceRange, restaurant.restaurantPriceRange) && Objects.equals(restaurantTableCapacity, restaurant.restaurantTableCapacity) && Objects.equals(restaurantWeekdayOpeningHour, restaurant.restaurantWeekdayOpeningHour) && Objects.equals(restaurantWeekdayOpeningMinutes, restaurant.restaurantWeekdayOpeningMinutes) && Objects.equals(restaurantWeekdayClosingHour, restaurant.restaurantWeekdayClosingHour) && Objects.equals(restaurantWeekdayClosingMinutes, restaurant.restaurantWeekdayClosingMinutes) && Objects.equals(restaurantWeekendOpeningHour, restaurant.restaurantWeekendOpeningHour) && Objects.equals(restaurantWeekendOpeningMinutes, restaurant.restaurantWeekendOpeningMinutes) && Objects.equals(restaurantWeekendClosingHour, restaurant.restaurantWeekendClosingHour) && Objects.equals(restaurantWeekendClosingMinutes, restaurant.restaurantWeekendClosingMinutes) && Objects.equals(food, restaurant.food) && Objects.equals(restaurantManagers, restaurant.restaurantManagers) && Objects.equals(discount, restaurant.discount) && Objects.equals(reservations, restaurant.reservations) && Objects.equals(ingredients, restaurant.ingredients) && Objects.equals(pictures, restaurant.pictures) */;
+        return Objects.equals(restaurantId, restaurant.restaurantId) && Objects.equals(restaurantName, restaurant.restaurantName) && Objects.equals(restaurantDesc, restaurant.restaurantDesc);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(restaurantId, restaurantName, restaurantDesc/* , restaurantLocation, restaurantPriceRange, restaurantTableCapacity, restaurantWeekdayOpeningHour, restaurantWeekdayOpeningMinutes, restaurantWeekdayClosingHour, restaurantWeekdayClosingMinutes, restaurantWeekendOpeningHour, restaurantWeekendOpeningMinutes, restaurantWeekendClosingHour, restaurantWeekendClosingMinutes, food, restaurantManagers, discount, reservations, ingredients, pictures */);
+        return Objects.hash(restaurantId, restaurantName, restaurantDesc);
     }
 
     @Override

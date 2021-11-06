@@ -6,7 +6,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import javax.validation.Valid;
-// import javax.ws.rs.BadRequestException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -45,10 +44,8 @@ import foodprint.backend.model.Food;
 import foodprint.backend.model.Ingredient;
 import foodprint.backend.model.Picture;
 import foodprint.backend.model.Restaurant;
-// import foodprint.backend.service.EmailService;
 import foodprint.backend.service.RestaurantService;
 import io.swagger.v3.oas.annotations.Operation;
-// REST OpenAPI Swagger - http://localhost:8080/foodprint-swagger.html
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/v1/restaurant")
@@ -248,7 +245,6 @@ public class RestaurantController {
     @ResponseStatus(code = HttpStatus.CREATED)
     @Operation(summary = "Creates a new discount using dto")
     public ResponseEntity<Discount> createDiscount(@PathVariable Long restaurantId, @RequestBody @Valid DiscountDTO discount) {
-        // Restaurant restaurantOpt = service.get(restaurantId);
         Discount newDiscount = new Discount(discount.getDiscountDescription(), discount.getDiscountPercentage());
         Discount savedDiscount = service.addDiscount(restaurantId, newDiscount);
         return new ResponseEntity<>(savedDiscount, HttpStatus.CREATED);

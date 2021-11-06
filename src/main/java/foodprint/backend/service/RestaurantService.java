@@ -4,8 +4,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
-//import com.stripe.param.CreditNoteCreateParams.Line;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -62,8 +60,7 @@ public class RestaurantService {
     }
     
     public List<Restaurant> getAllRestaurants() {
-        List<Restaurant> restaurants = repo.findAll();
-        return restaurants;
+        return repo.findAll();
     }
 
     /**
@@ -251,8 +248,7 @@ public class RestaurantService {
         newFood.setFoodIngredientQuantity(foodIngredientQuantity);
 
         newFood.setRestaurant(restaurant);
-        var savedFood = foodRepo.saveAndFlush(newFood);
-        return savedFood;
+        return foodRepo.saveAndFlush(newFood);
     }
 
     /**
@@ -387,7 +383,7 @@ public class RestaurantService {
      * @return
      */
     @PreAuthorize("hasAnyAuthority('FP_MANAGER', 'FP_ADMIN')")
-    public HashMap<String, Integer> calculateFoodNeededBetween(Restaurant restaurant, LocalDate startDate, LocalDate endDate) {
+    public Map<String, Integer> calculateFoodNeededBetween(Restaurant restaurant, LocalDate startDate, LocalDate endDate) {
 
         HashMap<String, Integer> map = new HashMap<>();
         LocalDateTime start = startDate.minusDays(1).atTime(0, 0);
@@ -421,11 +417,11 @@ public class RestaurantService {
     @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public Discount addDiscount(Long restaurantId, Discount discount) {
         Restaurant restaurant = repo.findByRestaurantId(restaurantId);
-        Discount Discount = new Discount();
-        Discount.restaurant(restaurant)
+        Discount newDiscount = new Discount();
+        newDiscount.restaurant(restaurant)
                      .discountDescription(discount.getDiscountDescription())
                      .discountPercentage(discount.getDiscountPercentage());
-        var savedDiscount = discountRepo.saveAndFlush(Discount);
+        var savedDiscount = discountRepo.saveAndFlush(newDiscount);
         restaurant.getDiscount().add(savedDiscount);
         return savedDiscount;
     }

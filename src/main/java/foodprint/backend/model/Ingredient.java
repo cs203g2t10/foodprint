@@ -56,9 +56,6 @@ public class Ingredient {
     @JoinColumn(name = "restaurant_id")
     private Restaurant restaurant;
 
-    // @Column(name = "ingredientPrice")
-    // private Double ingredientPrice;
-
     @Column(name = "units")
     @Schema(defaultValue = "1")
     private String units;
@@ -115,8 +112,7 @@ public class Ingredient {
         }
 
         String[] arr = picturesPath.split(",");
-        List<String> list = Arrays.asList(arr);
-        return list;
+        return Arrays.asList(arr);
     }
 
     public void setPicturesPath(List<String> list) {

@@ -111,7 +111,7 @@ public class ReservationController {
     public ResponseEntity<List<LineItemDTO>> getReservationOrder(@PathVariable("reservationId") Long id) {
         Reservation reservation = reservationService.getReservationById(id);
         List<LineItem> lineItems = reservation.getLineItems();
-        List<LineItemDTO> result = new ArrayList<LineItemDTO>();
+        List<LineItemDTO> result = new ArrayList<>();
         for(LineItem lineItem : lineItems) {
             LineItemDTO curr = new LineItemDTO(lineItem.getFood().getFoodId(), lineItem.getQuantity());
             result.add(curr);

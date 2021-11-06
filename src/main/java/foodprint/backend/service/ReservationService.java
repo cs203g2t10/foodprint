@@ -138,8 +138,7 @@ public class ReservationService {
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public List<Reservation> getAllReservationByRestaurant(Restaurant restaurant) {
-        List<Reservation> reservationList = reservationRepo.findByRestaurant(restaurant);
-        return reservationList;
+        return reservationRepo.findByRestaurant(restaurant);
     }
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
@@ -237,7 +236,7 @@ public class ReservationService {
     }
 
     public List<LocalDateTime> getAllAvailableSlotsByDateAndRestaurant(Long restaurantId, String date) {
-        List<LocalDateTime> availableSlots = new ArrayList<LocalDateTime>();
+        List<LocalDateTime> availableSlots = new ArrayList<>();
         Restaurant restaurant = restaurantService.get(restaurantId);
 
         LocalDate localDate = LocalDate.parse(date);

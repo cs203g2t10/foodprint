@@ -80,14 +80,8 @@ public class AuthController {
 
             return ResponseEntity.ok().header(HttpHeaders.AUTHORIZATION, jwtToken).body(responseBody);
 
-        } catch (BadCredentialsException ex) {
+        } catch (BadCredentialsException | UsernameNotFoundException ex) {
 
-            AuthResponseDTO responseBody = new AuthResponseDTO();
-            responseBody.setStatus("INCORRECT");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseBody);
-
-        } catch (UsernameNotFoundException ex) {
-        
             AuthResponseDTO responseBody = new AuthResponseDTO();
             responseBody.setStatus("INCORRECT");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseBody);

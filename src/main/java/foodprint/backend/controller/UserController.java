@@ -75,15 +75,6 @@ public class UserController {
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
-    // // GET: Get all users
-    // @GetMapping
-    // @ResponseStatus(code = HttpStatus.OK)
-    // @Operation(summary = "Gets all users on Foodprint")
-    // public ResponseEntity<List<User>> getAllUsers() {
-    //     List<User> users = userService.getAllUsers();
-    //     return new ResponseEntity<>(users, HttpStatus.OK);
-    // }
-
     // GET: Get all users, paged version
     @GetMapping
     @ResponseStatus(code = HttpStatus.OK)

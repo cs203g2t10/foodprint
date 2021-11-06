@@ -100,8 +100,7 @@ public class PictureService  {
             throw new NotFoundException("Picture not found.");
         }
         
-        String url = String.format("%s%s/%s", "https://foodprint-amazon-storage.s3.ap-southeast-1.amazonaws.com/", picture.get().getImagePath(), picture.get().getImageFileName().replace(" ", "+"));
-        return url;
+        return String.format("%s%s/%s", "https://foodprint-amazon-storage.s3.ap-southeast-1.amazonaws.com/", picture.get().getImagePath(), picture.get().getImageFileName().replace(" ", "+"));
     }
 
     @PreAuthorize("hasAnyAuthority('FP_MANAGER')")

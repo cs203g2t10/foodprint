@@ -250,10 +250,10 @@ public class User implements UserDetails {
     @Schema(hidden=true)
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<String> roles = Arrays.asList(this.roles.split(","));
-        Set<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
-        roles.forEach((role) -> {
-            authorities.add(new SimpleGrantedAuthority(role.trim()));
-        });
+        Set<GrantedAuthority> authorities = new HashSet<>();
+        roles.forEach(role ->
+            authorities.add(new SimpleGrantedAuthority(role.trim()))
+        );
         return authorities;
     }
 

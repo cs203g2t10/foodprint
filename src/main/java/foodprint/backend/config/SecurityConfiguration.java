@@ -69,9 +69,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         http = http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and();
 
         // Set unauthorized requests exception handler
-        http = http.exceptionHandling().authenticationEntryPoint((request, response, ex) -> {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage());
-        }).and();
+        http = http.exceptionHandling().authenticationEntryPoint((request, response, ex) ->
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage())
+        ).and();
 
         if (SECURITY_BYPASSED) {
 

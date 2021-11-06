@@ -60,8 +60,6 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             return;
         }
 
-        // logger.info(authHeader);
-
         if (authHeader.isEmpty() || !authHeader.startsWith("Bearer ")) {
             chain.doFilter(request, response);
             return;
