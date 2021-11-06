@@ -1,8 +1,5 @@
 package foodprint.backend.controller;
 
-
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.Set;
@@ -130,7 +127,7 @@ public class UserController {
     @Operation(summary = "Deletes a user on Foodprint")
     public ResponseEntity<User> deleteUser(@PathVariable("id") Long id) {
         User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (currentUser.getId() == id) {
+        if (currentUser.getId().equals(id)) {
             throw new BadRequestException("You cannot delete yourself.");
         }
         userService.deleteUser(id);

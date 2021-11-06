@@ -81,7 +81,7 @@ public class PictureService  {
     }
 
     public byte[] downloadPictureImage(Long id) {
-        Picture picture = repository.findById(id).get();
+        Picture picture = repository.findById(id).orElseThrow(() -> new NotFoundException("Image with this ID was not found"));
         return fileStore.download(picture.getImagePath(), picture.getImageFileName());
     }
 

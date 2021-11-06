@@ -7,6 +7,8 @@ import java.util.Optional;
 
 import org.jboss.aerogear.security.otp.Totp;
 import org.jboss.aerogear.security.otp.api.Base32;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +22,9 @@ public class TwoFaService {
     @Autowired
     UserRepo userRepo;
 
-    public static String QR_PREFIX = "https://chart.googleapis.com/chart?chs=200x200&chld=M%%7C0&cht=qr&chl=";
+    private static Logger LOGGER = LoggerFactory.getLogger(TwoFaService.class);
+    
+    public static final String QR_PREFIX = "https://chart.googleapis.com/chart?chs=200x200&chld=M%%7C0&cht=qr&chl=";
     public int TOKEN_LENGTH = 6;
 
     public boolean checkEmailHas2FA(String email) {
@@ -48,7 +52,7 @@ public class TwoFaService {
                 "UTF-8");
 
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            LOGGER.error("UnsupportedEncodingException", e);
         }
 
         return null;

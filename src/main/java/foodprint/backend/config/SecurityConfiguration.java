@@ -51,7 +51,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(email -> userRepo.findByEmail(email).orElseThrow());
+
+        auth
+            .userDetailsService(email -> userRepo.findByEmail(email).orElseThrow())
+            .passwordEncoder(new BCryptPasswordEncoder(13));
+            
     }
 
     @Override
@@ -102,7 +106,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
             .antMatchers("/swagger/**",
                     "/swagger-ui/**",
-                    "/swagger-ui/index.html",
                     "/v3/api-docs/**",
                     "/h2-console/**",
                     "/favicon.ico")

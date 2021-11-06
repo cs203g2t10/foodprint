@@ -2,7 +2,6 @@ package foodprint.backend.config;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.List;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -70,8 +69,7 @@ public class BypassSecurityFilter extends OncePerRequestFilter {
         }
 
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-            createdUser, null,
-            createdUser == null ? List.of() : createdUser.getAuthorities()
+            createdUser, null, createdUser.getAuthorities()
         );
 
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

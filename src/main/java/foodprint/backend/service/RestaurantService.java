@@ -235,7 +235,7 @@ public class RestaurantService {
         for (FoodIngredientQuantityDTO entry : ingredientQuantity) {
             Ingredient newIngredient = null;
             for(Ingredient ingredient : ingredients) {
-                if(ingredient.getIngredientId() == entry.getIngredientId()) {
+                if(ingredient.getIngredientId().equals(entry.getIngredientId())) {
                     newIngredient = ingredient;
                 }
             }
@@ -264,7 +264,7 @@ public class RestaurantService {
     public Food getFood(Long restaurantId, Long foodId) {
         Optional<Food> foodOpt = foodRepo.findById(foodId);
         Food food = foodOpt.orElseThrow(() -> new NotFoundException("Food not found"));
-        if (food.getRestaurant().getRestaurantId() != restaurantId) {
+        if (food.getRestaurant().getRestaurantId().longValue() != restaurantId) {
             throw new NotFoundException("Food found but in incorrect restaurant");
         }
         return food;
@@ -300,7 +300,7 @@ public class RestaurantService {
         Food originalFood = foodRepo.findById(foodId).orElseThrow(
              () -> new NotFoundException("Food requested could not be found")
         );
-        if (originalFood.getRestaurant().getRestaurantId() != restaurantId) {
+        if (originalFood.getRestaurant().getRestaurantId().longValue() != restaurantId) {
             throw new NotFoundException("Food requested could not be found at this restaurant");
         }
 
@@ -333,7 +333,7 @@ public class RestaurantService {
         final Food originalFood = foodRepo.findById(foodId).orElseThrow(
              () -> new NotFoundException("Food requested could not be found")
         );
-        if (originalFood.getRestaurant().getRestaurantId() != restaurantId) {
+        if (originalFood.getRestaurant().getRestaurantId().longValue() != restaurantId) {
             throw new NotFoundException("Food requested could not be found at this restaurant");
         }
 
@@ -460,7 +460,7 @@ public class RestaurantService {
     @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public Discount updateDiscount(Long restaurantId, Long discountId, Discount updatedDiscount) {
         Discount originalDiscount = discountRepo.findById(discountId).orElseThrow(() -> new NotFoundException("Discount could not be found"));
-        if (originalDiscount.getRestaurant().getRestaurantId() != restaurantId) {
+        if (originalDiscount.getRestaurant().getRestaurantId().longValue() != restaurantId) {
             throw new NotFoundException("Discount found but in incorrect restaurant");
         }
 
@@ -534,7 +534,7 @@ public class RestaurantService {
             () -> new NotFoundException("Ingredient requested could not be found")
         );
 
-        if (originalIngredient.getRestaurant().getRestaurantId() != restaurantId) {
+        if (originalIngredient.getRestaurant().getRestaurantId().longValue() != restaurantId) {
             throw new NotFoundException("Ingredient requested could not be found at this restaurant");
         }
 
@@ -587,7 +587,7 @@ public class RestaurantService {
             () -> new NotFoundException("Ingredient requested could not be found")
         );
 
-        if (originalIngredient.getRestaurant().getRestaurantId() != restaurantId) {
+        if (originalIngredient.getRestaurant().getRestaurantId().longValue() != restaurantId) {
             throw new NotFoundException("Ingredient requested could not be found at this restaurant");
         }
 

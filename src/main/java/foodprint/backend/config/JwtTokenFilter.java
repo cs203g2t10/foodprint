@@ -85,6 +85,12 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             userDetails == null ? List.of() : userDetails.getAuthorities()
         );
 
+        if (userDetails == null) {
+            logger.warn("Auth Error - userDetails is null");
+            chain.doFilter(request, response);
+            return;
+        }
+
         authentication.setDetails(
             new WebAuthenticationDetailsSource().buildDetails(request)
         );

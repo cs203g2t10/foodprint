@@ -96,13 +96,17 @@ public class AuthController {
 
             AuthResponseDTO responseBody = new AuthResponseDTO();
             responseBody.setStatus("USER_UNVERIFIED");
-            authService.emailConfirmation(repo.findByEmail(req.getEmail()).get());
+            repo.findByEmail(req.getEmail()).ifPresent((user) -> {
+                authService.emailConfirmation(user);
+            });
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseBody);
             
         } catch (InvalidException ex) {
+
             AuthResponseDTO responseBody = new AuthResponseDTO();
             responseBody.setStatus("INCORRECT OTP");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseBody);
+            
         }
     }
 
