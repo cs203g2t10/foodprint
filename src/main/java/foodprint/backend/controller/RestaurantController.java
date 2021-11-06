@@ -394,38 +394,36 @@ public class RestaurantController {
         return new ResponseEntity<>(service.savePicture(restaurantId, title, description, file), HttpStatus.CREATED);
     }
 
-    @GetMapping({"/{restaurantId}/picture/{pictureId}"})
+    @GetMapping({"/{restaurantId}/picture/"})
     @ResponseStatus(code = HttpStatus.OK)
-    @Operation(summary = "Get a picture of a restaurant by using restaurant id and picture id")
-    public ResponseEntity<String> getPictureById(@PathVariable("restaurantId") Long restaurantId, @PathVariable("pictureId") Long pictureId) {
-        String url = service.getPictureById(restaurantId, pictureId);
+    @Operation(summary = "Get a picture of a restaurant")
+    public ResponseEntity<String> getPictureById(@PathVariable("restaurantId") Long restaurantId) {
+        String url = service.getRestaurantPicture(restaurantId);
         return new ResponseEntity<>(url, HttpStatus.OK);
     }
 
-    @DeleteMapping({"/{restaurantId}/picture/{pictureId}"})
+    @DeleteMapping({"/{restaurantId}/picture"})
     @ResponseStatus(code = HttpStatus.OK)
-    @Operation(summary = "Deletes a restaurant's picture by id")
-    public ResponseEntity<Picture> deletePicture(@PathVariable("restaurantId") Long restaurantId, @PathVariable("pictureId") Long pictureId) {
-        service.deletePicture(restaurantId, pictureId);
+    @Operation(summary = "Deletes a restaurant's picture")
+    public ResponseEntity<Picture> deletePicture(@PathVariable("restaurantId") Long restaurantId) {
+        service.deleteRestaurantPicture(restaurantId);
         try {
-            service.getPictureById(restaurantId, pictureId);
+            service.getRestaurantPicture(restaurantId);
         } catch (NotFoundException ex) {
             return new ResponseEntity<>(HttpStatus.OK);
         }
-
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @PutMapping({"/{restaurantId}/picture/{pictureId}"})
+    @PutMapping({"/{restaurantId}/picture"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Updates a picture's title and description")
     public ResponseEntity<Picture> updatePictureInformation(
         @PathVariable("restaurantId") Long restaurantId,
-        @PathVariable("pictureId") Long pictureId,
         @RequestBody PictureDTO updatedPicture
     ) {
         Picture picture = new Picture(updatedPicture.getTitle() , updatedPicture.getDescription());
-        Picture savedPicture = service.updatePictureInformation(restaurantId, pictureId, picture);
+        Picture savedPicture = service.updatePictureInformation(restaurantId, picture);
         return new ResponseEntity<>(savedPicture, HttpStatus.OK);
     }
 
@@ -440,38 +438,37 @@ public class RestaurantController {
         return new ResponseEntity<>(service.saveFoodPicture(restaurantId, foodId, title, description, file), HttpStatus.CREATED);
     }
 
-    @GetMapping({"/{restaurantId}/food/{foodId}/picture/{pictureId}/"})
+    @GetMapping({"/{restaurantId}/food/{foodId}/picture"})
     @ResponseStatus(code = HttpStatus.OK)
-    @Operation(summary = "Get a picture of a restaurant's food by using restaurant id, picture id and food id")
-    public ResponseEntity<String> getPictureById(@PathVariable("restaurantId") Long restaurantId,  @PathVariable("foodId") Long foodId,  @PathVariable("pictureId") Long pictureId) {
-        String url = service.getFoodPictureById(restaurantId, foodId, pictureId);
+    @Operation(summary = "Get a picture of a restaurant's food by using restaurant id and food id")
+    public ResponseEntity<String> getPictureById(@PathVariable("restaurantId") Long restaurantId,  @PathVariable("foodId") Long foodId) {
+        String url = service.getFoodPicture(restaurantId, foodId);
         return new ResponseEntity<>(url, HttpStatus.OK);
     }
 
-    @DeleteMapping({"/{restaurantId}/food/{foodId}/picture/{pictureId}/"})
+    @DeleteMapping({"/{restaurantId}/food/{foodId}/picture"})
     @ResponseStatus(code = HttpStatus.OK)
-    @Operation(summary = "Deletes a food's picture by id")
-    public ResponseEntity<Picture> deleteFoodPicture(@PathVariable("restaurantId") Long restaurantId, @PathVariable("foodId") Long foodId, @PathVariable("pictureId") Long pictureId) {
-        service.deleteFoodPicture(restaurantId, foodId, pictureId);
+    @Operation(summary = "Deletes a food's picture")
+    public ResponseEntity<Picture> deleteFoodPicture(@PathVariable("restaurantId") Long restaurantId, @PathVariable("foodId") Long foodId) {
+        service.deleteFoodPicture(restaurantId, foodId);
         try {
-            service.getFoodPictureById(restaurantId, foodId, pictureId);
+            service.getFoodPicture(restaurantId, foodId);
         } catch (NotFoundException ex) {
             return new ResponseEntity<>(HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @PutMapping({"/{restaurantId}/food/{foodId}/picture/{pictureId}/"})
+    @PutMapping({"/{restaurantId}/food/{foodId}/picture"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Updates a picture's title and description")
     public ResponseEntity<Picture> updateFoodPictureInformation(
         @PathVariable("restaurantId") Long restaurantId,
         @PathVariable("foodId") Long foodId,
-        @PathVariable("pictureId") Long pictureId,
         @RequestBody PictureDTO updatedPicture
     ) {
         Picture picture = new Picture(updatedPicture.getTitle() , updatedPicture.getDescription());
-        Picture savedPicture = service.updateFoodPictureInformation(restaurantId, foodId, pictureId, picture);
+        Picture savedPicture = service.updateFoodPictureInformation(restaurantId, foodId, picture);
         return new ResponseEntity<>(savedPicture, HttpStatus.OK);
     }
 

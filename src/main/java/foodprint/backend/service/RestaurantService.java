@@ -631,7 +631,7 @@ public class RestaurantService {
     }
 
     /**
-     * Sets picture of a given restaurant
+     * Sets picture of a given restaurant. If a picture currently exists, delete the old picture and set the new one.
      * @param restaurantId
      * @param title
      * @param description
@@ -642,13 +642,16 @@ public class RestaurantService {
     public Picture savePicture(Long restaurantId, String title, String description, MultipartFile file) {
         Picture picture = pictureService.savePicture(title, description, file);
         Restaurant restaurant = get(restaurantId);
+        if (restaurant.getPicture() != null) {
+            deleteRestaurantPicture(restaurantId); 
+        }
         restaurant.setPicture(picture);
         repo.saveAndFlush(restaurant);
         return picture;
     }
 
     /**
-     * Swets the picture of a given food
+     * Swets the picture of a given food. If a picture currently exists, delete the old picture and set the new one.
      * @param restaurantId
      * @param foodId
      * @param title
@@ -660,87 +663,77 @@ public class RestaurantService {
     public Picture saveFoodPicture(Long restaurantId, Long foodId, String title, String description, MultipartFile file) {
         Picture picture = pictureService.savePicture(title, description, file);
         Food food = getFood(restaurantId, foodId);
+        if (food.getPicture() != null) {
+            deleteFoodPicture(restaurantId, foodId);
+        }
         food.setPicture(picture);
         foodRepo.saveAndFlush(food);
         return picture;
     }
 
-    /**
-     * Checks if a given picture belongs to the restaurant
-     * @param restaurantId
-     * @param pictureId
-     * @return
-     */
-    public Boolean pictureInRestaurant(Long restaurantId, Long pictureId) {
-        Restaurant restaurant = get(restaurantId);
-        Picture restaurantPic = restaurant.getPicture();
-        return restaurantPic.getId().equals(pictureId);
-    }
-
-    /**
-     * Checks if a given picture is found in the food
-     * @param restaurantId
-     * @param foodId
-     * @param pictureId
-     * @return
-     */
-    public Boolean pictureInFood(Long restaurantId, Long foodId, Long pictureId) {
+    public String getFoodPicture(Long restaurantId, Long foodId ) {
         Food food = getFood(restaurantId, foodId);
         Picture picture = food.getPicture();
-        return picture.getId().equals(pictureId);
-    }
-
-    public String getFoodPictureById(Long restaurantId, Long foodId, Long pictureId ) {
-        if (Boolean.FALSE.equals(pictureInFood(restaurantId, foodId, pictureId))) {
+        if (picture == null) {
             throw new NotFoundException(PICTURE_NOT_FOUND_MESSAGE);
         }
-        return pictureService.getPictureById(pictureId);
+        return pictureService.getPictureById(picture.getId());
     }
 
-    public String getPictureById(Long restaurantId, Long pictureId) {
-        if (Boolean.FALSE.equals(pictureInRestaurant(restaurantId, pictureId))) {
+    public String getRestaurantPicture(Long restaurantId) {
+        Restaurant restaurant = get(restaurantId);
+        Picture picture = restaurant.getPicture();
+        if (picture == null) {
             throw new NotFoundException(PICTURE_NOT_FOUND_MESSAGE);
         }
-        return pictureService.getPictureById(pictureId);
+        return pictureService.getPictureById(picture.getId());
     }
 
     @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
-    public void deletePicture(Long restaurantId, Long pictureId) {
-        if (Boolean.FALSE.equals(pictureInRestaurant(restaurantId, pictureId))) { //check if pic id is in restaurant list
-            throw new NotFoundException(PICTURE_NOT_FOUND_MESSAGE);
-        } else {
-            Restaurant restaurant = get(restaurantId);
+    public void deleteRestaurantPicture(Long restaurantId) {
+        Restaurant restaurant = get(restaurantId);
+        Picture picture = restaurant.getPicture();
+        if (picture != null) {
             restaurant.setPicture(null);
             repo.saveAndFlush(restaurant);
-            pictureService.deletePicture(pictureId); 
+            pictureService.deletePicture(picture.getId());
+        } else {
+            throw new NotFoundException(PICTURE_NOT_FOUND_MESSAGE);
         }
     }
 
     @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
-    public void deleteFoodPicture(Long restaurantId, Long foodId, Long pictureId) {
-        if (Boolean.FALSE.equals(pictureInFood(restaurantId, foodId, pictureId))) {
-            throw new NotFoundException(PICTURE_NOT_FOUND_MESSAGE);
-        } else {
-            Food food = getFood(restaurantId, foodId);
+    public void deleteFoodPicture(Long restaurantId, Long foodId) {
+        Food food = getFood(restaurantId, foodId);
+        Picture picture = food.getPicture();
+        if (picture != null) {
             food.setPicture(null);
             foodRepo.saveAndFlush(food);
-            pictureService.deletePicture(pictureId); 
+            pictureService.deletePicture(picture.getId()); 
+        } else {
+            throw new NotFoundException(PICTURE_NOT_FOUND_MESSAGE);
         }
     }
 
     @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
-    public Picture updatePictureInformation(Long restaurantId, Long pictureId, Picture picture) {
-        if (Boolean.FALSE.equals(pictureInRestaurant(restaurantId, pictureId))) { //check if pic id is in restaurant list
+    public Picture updatePictureInformation(Long restaurantId, Picture picture) {
+        Restaurant restaurant = get(restaurantId);
+        Picture currentPicture = restaurant.getPicture();
+        if (currentPicture != null) {
+            return pictureService.updatedPicture(currentPicture.getId(), picture);
+        } else {
             throw new NotFoundException(PICTURE_NOT_FOUND_MESSAGE);
         }
-        return pictureService.updatedPicture(pictureId, picture);
     }
 
     @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
-    public Picture updateFoodPictureInformation(Long restaurantId, Long foodId, Long pictureId, Picture picture) {
-        if (Boolean.FALSE.equals(pictureInFood(restaurantId, foodId, pictureId))) {
+    public Picture updateFoodPictureInformation(Long restaurantId, Long foodId, Picture picture) {
+        Food food = getFood(restaurantId, foodId);
+        Picture currentPicture = food.getPicture();
+        if (currentPicture != null) {
+            return pictureService.updatedPicture(currentPicture.getId(), picture);
+        } else {
             throw new NotFoundException(PICTURE_NOT_FOUND_MESSAGE);
-        } 
-        return pictureService.updatedPicture(pictureId, picture);
+        }
     }
 }

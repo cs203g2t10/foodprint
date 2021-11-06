@@ -672,47 +672,4 @@ public class RestaurantServiceTest {
 
         verify(ingredientRepo).findById(ingredientId);
     }
-
-    //--------Picture-related testing---------
-    @Test
-    void pictureInRestaurant_pictureExist_ReturnTrue() {
-        when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
-
-        Boolean pictureExist = restaurantService.pictureInRestaurant(restaurantId, pictureId);
-
-        assertTrue(pictureExist);
-        verify(repo).findById(restaurantId);
-    }
-
-    @Test
-    void pictureInRestaurant_pictureDoNotExist_ReturnFalse() {
-        Long anotherPictureId = 3L;
-
-        when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
-
-        Boolean pictureDoNotExist = restaurantService.pictureInRestaurant(restaurantId, anotherPictureId);
-
-        assertFalse(pictureDoNotExist);
-        verify(repo).findById(restaurantId);
-    }
-
-    @Test
-    void pictureInFood_FoodPicExist_ReturnTrue() {
-        when(foodRepo.findById(any(Long.class))).thenReturn(Optional.of(food));
-
-        Boolean foodExist = restaurantService.pictureInFood(restaurantId, foodId, pictureId);
-        assertTrue(foodExist);
-        verify(foodRepo).findById(foodId);
-    }
-
-    @Test
-    void pictureInFood_FoodPicDoNotExist_ReturnFalse() {
-        Long anotherPictureId = 4L;
-
-        when(foodRepo.findById(any(Long.class))).thenReturn(Optional.of(food));
-
-        Boolean foodPicDoNotExist = restaurantService.pictureInFood(restaurantId, foodId, anotherPictureId);
-        assertFalse(foodPicDoNotExist);
-        verify(foodRepo).findById(foodId);
-    }
 }
