@@ -28,7 +28,7 @@ import foodprint.backend.model.User;
 public class VaccinationService {
     
     private UserService userService;
-    private static Logger LOGGER = LoggerFactory.getLogger(VaccinationService.class);
+    private static Logger loggr = LoggerFactory.getLogger(VaccinationService.class);
     private static final String url = "https://oa.foodprint.works/";
 
     @Autowired
@@ -55,7 +55,7 @@ public class VaccinationService {
         } catch (IOException e) {
             throw new VaccinationValidationException("Unable to validate vaccination status.");
         } catch (InterruptedException e) {
-            LOGGER.error("Unable to validate vaccination status due to server error.");
+            loggr.error("Unable to validate vaccination status due to server error.");
             Thread.currentThread().interrupt();
             throw new VaccinationValidationException("Unable to validate vaccination status due to server error.");
         }

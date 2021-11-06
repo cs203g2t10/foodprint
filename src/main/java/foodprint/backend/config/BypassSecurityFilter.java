@@ -35,7 +35,7 @@ public class BypassSecurityFilter extends OncePerRequestFilter {
 
     private final UserRepo userRepo;
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger loggr = LoggerFactory.getLogger(this.getClass());
 
     @Value("${security.bypass}")
     private boolean SECURITY_BYPASSED;
@@ -73,7 +73,7 @@ public class BypassSecurityFilter extends OncePerRequestFilter {
         );
 
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-        logger.info("Auth OK - Email: {}: - Authorities: {}", createdUser.getUsername(), createdUser.getAuthorities());
+        loggr.info("Auth OK - Email: {}: - Authorities: {}", createdUser.getUsername(), createdUser.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
         chain.doFilter(request, response);
     }

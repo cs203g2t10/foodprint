@@ -620,7 +620,7 @@ public class RestaurantService {
                 
                 for(FoodIngredientQuantity entry : foodIngreQuantity) {
                     Ingredient currIngredient = entry.getIngredient();
-                    Integer currQty = map.getOrDefault(currIngredient.getIngredientName(), 0);
+                    Integer currQty = map.getOrDefault(currIngredient, 0);
                     map.put(currIngredient, currQty + entry.getQuantity() * lineItem.getQuantity());
                 }
 

@@ -22,7 +22,7 @@ public class TwoFaService {
     @Autowired
     UserRepo userRepo;
 
-    private static Logger LOGGER = LoggerFactory.getLogger(TwoFaService.class);
+    private static Logger loggr = LoggerFactory.getLogger(TwoFaService.class);
     
     public static final String QR_PREFIX = "https://chart.googleapis.com/chart?chs=200x200&chld=M%%7C0&cht=qr&chl=";
     public int TOKEN_LENGTH = 6;
@@ -52,7 +52,7 @@ public class TwoFaService {
                 "UTF-8");
 
         } catch (UnsupportedEncodingException e) {
-            LOGGER.error("UnsupportedEncodingException", e);
+            loggr.error("UnsupportedEncodingException", e);
         }
 
         return null;

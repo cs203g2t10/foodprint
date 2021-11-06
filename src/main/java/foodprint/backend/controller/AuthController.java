@@ -96,9 +96,7 @@ public class AuthController {
 
             AuthResponseDTO responseBody = new AuthResponseDTO();
             responseBody.setStatus("USER_UNVERIFIED");
-            repo.findByEmail(req.getEmail()).ifPresent((user) -> {
-                authService.emailConfirmation(user);
-            });
+            repo.findByEmail(req.getEmail()).ifPresent(user -> authService.emailConfirmation(user));
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseBody);
             
         } catch (InvalidException ex) {
