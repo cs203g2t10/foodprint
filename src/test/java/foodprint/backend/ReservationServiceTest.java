@@ -126,29 +126,6 @@ public class ReservationServiceTest {
     }
 
     @Test
-    void getLineItemsByReservation_ReservationExists_ReturnLineItems() {
-        when(reservations.findById(any(Long.class))).thenReturn(Optional.of(reservation));
-
-        List<LineItem> result = reservationService.getLineItemsByReservationId(reservationId);
-
-        assertEquals(lineItems, result);
-        verify(reservations).findById(reservationId);
-    }
-
-    @Test
-    void getLineItemsByReservation_ReservationDoesNotExist_ReturnException() {
-        when(reservations.findById(any(Long.class))).thenReturn(Optional.empty());
-
-        try {
-            reservationService.getLineItemsByReservationId(reservationId);
-        } catch (NotFoundException e) {
-            assertEquals("Reservation not found", e.getMessage());
-        }
-
-        verify(reservations).findById(reservationId);
-    }
-
-    @Test
     void getAllReservationSlots_ReturnList() {
         reservationList.add(reservation);
         when(reservations.findAll()).thenReturn(reservationList);

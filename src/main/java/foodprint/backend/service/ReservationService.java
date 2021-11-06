@@ -111,21 +111,6 @@ public class ReservationService {
         return result;
     }
 
-
-    /**
-     * Gets all line items under a reservation
-     * @param id
-     * @return
-     */
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
-    public List<LineItem> getLineItemsByReservationId(Long id) {
-        Optional<Reservation> reservation = reservationRepo.findById(id);
-        if (reservation.isEmpty()) {
-            throw new NotFoundException("Reservation not found");
-        }
-        return reservation.get().getLineItems();
-    }
-
     @PreAuthorize("hasAnyAuthority('FP_ADMIN')")
     public List<Reservation> getAllReservationSlots() {
         return reservationRepo.findAll();
@@ -224,7 +209,7 @@ public class ReservationService {
 
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN')")
     public void delete(Reservation reservation) {
         reservationRepo.delete(reservation);
     }
