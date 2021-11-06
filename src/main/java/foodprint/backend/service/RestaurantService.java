@@ -32,8 +32,12 @@ import foodprint.backend.model.FoodIngredientQuantity;
 import foodprint.backend.model.FoodIngredientQuantityKey;
 import foodprint.backend.model.FoodIngredientQuantityRepo;
 
+
 @Service
 public class RestaurantService {
+
+    private static final String PICTURE_NOT_FOUND_MESSAGE = "Picture not found in restaurant";
+    private static final String RESTAURANT_DOES_NOT_EXIST_MESSAGE = "Restaurant does not exist";
 
     private RestaurantRepo repo;
 
@@ -495,7 +499,7 @@ public class RestaurantService {
     public List<Ingredient> getAllRestaurantIngredients(Long restaurantId) {
         Restaurant restaurant = get(restaurantId);
         if (restaurant == null) {
-            throw new NotFoundException("Restaurant does not exist");
+            throw new NotFoundException(RESTAURANT_DOES_NOT_EXIST_MESSAGE);
         }
         return restaurant.getIngredients();
     }
@@ -510,7 +514,7 @@ public class RestaurantService {
     public Page<Ingredient> getRestaurantIngredients(Long restaurantId, Integer pageNumber) {
         Restaurant restaurant = get(restaurantId);
         if (restaurant == null) {
-            throw new NotFoundException("Restaurant does not exist");
+            throw new NotFoundException(RESTAURANT_DOES_NOT_EXIST_MESSAGE);
         }
         Pageable pageReq = PageRequest.of(pageNumber, 10);
         return ingredientRepo.findByRestaurantRestaurantId(pageReq, restaurantId);
@@ -560,7 +564,7 @@ public class RestaurantService {
     public Ingredient addRestaurantIngredient(Long restaurantId, Ingredient newIngredient) {
         Restaurant restaurant = get(restaurantId);
         if (restaurant == null) {
-            throw new NotFoundException("Restaurant does not exist");
+            throw new NotFoundException(RESTAURANT_DOES_NOT_EXIST_MESSAGE);
         }
         List<Ingredient> ingredients = restaurant.getIngredients();
         ingredients.add(newIngredient);
@@ -599,7 +603,7 @@ public class RestaurantService {
      */
 
     @PreAuthorize("hasAnyAuthority('FP_MANAGER', 'FP_ADMIN')")
-    public HashMap<Ingredient, Integer> calculateIngredientsNeededBetween(Restaurant restaurant, LocalDate startDate, LocalDate endDate) {
+    public Map<Ingredient, Integer> calculateIngredientsNeededBetween(Restaurant restaurant, LocalDate startDate, LocalDate endDate) {
         
         HashMap<Ingredient, Integer> map = new HashMap<>();
         LocalDateTime start = startDate.minusDays(1).atTime(0, 0);
@@ -670,10 +674,7 @@ public class RestaurantService {
     public Boolean pictureInRestaurant(Long restaurantId, Long pictureId) {
         Restaurant restaurant = get(restaurantId);
         Picture restaurantPic = restaurant.getPicture();
-        if (restaurantPic.getId().equals(pictureId)) {
-            return true;
-        }
-        return false;
+        return restaurantPic.getId().equals(pictureId);
     }
 
     /**
@@ -686,30 +687,27 @@ public class RestaurantService {
     public Boolean pictureInFood(Long restaurantId, Long foodId, Long pictureId) {
         Food food = getFood(restaurantId, foodId);
         Picture picture = food.getPicture();
-        if (picture.getId().equals(pictureId)) {
-            return true;
-        }
-        return false;
+        return picture.getId().equals(pictureId);
     }
 
     public String getFoodPictureById(Long restaurantId, Long foodId, Long pictureId ) {
-        if (!pictureInFood(restaurantId, foodId, pictureId)) {
-            throw new NotFoundException("Picture not found in restaurant");
+        if (Boolean.FALSE.equals(pictureInFood(restaurantId, foodId, pictureId))) {
+            throw new NotFoundException(PICTURE_NOT_FOUND_MESSAGE);
         }
         return pictureService.getPictureById(pictureId);
     }
 
     public String getPictureById(Long restaurantId, Long pictureId) {
-        if (!pictureInRestaurant(restaurantId, pictureId)) {
-            throw new NotFoundException("Picture not found in restaurant");
+        if (Boolean.FALSE.equals(pictureInRestaurant(restaurantId, pictureId))) {
+            throw new NotFoundException(PICTURE_NOT_FOUND_MESSAGE);
         }
         return pictureService.getPictureById(pictureId);
     }
 
     @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public void deletePicture(Long restaurantId, Long pictureId) {
-        if (!pictureInRestaurant(restaurantId, pictureId)) { //check if pic id is in restaurant list
-            throw new NotFoundException("Picture not found in restaurant");
+        if (Boolean.FALSE.equals(pictureInRestaurant(restaurantId, pictureId))) { //check if pic id is in restaurant list
+            throw new NotFoundException(PICTURE_NOT_FOUND_MESSAGE);
         } else {
             Restaurant restaurant = get(restaurantId);
             restaurant.setPicture(null);
@@ -720,8 +718,8 @@ public class RestaurantService {
 
     @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public void deleteFoodPicture(Long restaurantId, Long foodId, Long pictureId) {
-        if (!pictureInFood(restaurantId, foodId, pictureId)) {
-            throw new NotFoundException("Picture not found in restaurant");
+        if (Boolean.FALSE.equals(pictureInFood(restaurantId, foodId, pictureId))) {
+            throw new NotFoundException(PICTURE_NOT_FOUND_MESSAGE);
         } else {
             Food food = getFood(restaurantId, foodId);
             food.setPicture(null);
@@ -732,16 +730,16 @@ public class RestaurantService {
 
     @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public Picture updatePictureInformation(Long restaurantId, Long pictureId, Picture picture) {
-        if (!pictureInRestaurant(restaurantId, pictureId)) { //check if pic id is in restaurant list
-            throw new NotFoundException("Picture not found in restaurant");
+        if (Boolean.FALSE.equals(pictureInRestaurant(restaurantId, pictureId))) { //check if pic id is in restaurant list
+            throw new NotFoundException(PICTURE_NOT_FOUND_MESSAGE);
         }
         return pictureService.updatedPicture(pictureId, picture);
     }
 
     @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public Picture updateFoodPictureInformation(Long restaurantId, Long foodId, Long pictureId, Picture picture) {
-        if (!pictureInFood(restaurantId, foodId, pictureId)) {
-            throw new NotFoundException("Picture not found in restaurant");
+        if (Boolean.FALSE.equals(pictureInFood(restaurantId, foodId, pictureId))) {
+            throw new NotFoundException(PICTURE_NOT_FOUND_MESSAGE);
         } 
         return pictureService.updatedPicture(pictureId, picture);
     }

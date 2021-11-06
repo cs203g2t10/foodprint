@@ -31,8 +31,7 @@ public class StripeService {
      }
     
     public Charge charge(ChargeRequest chargeRequest)
-      throws AuthenticationException, InvalidRequestException,
-        ApiConnectionException, CardException, ApiException, StripeException {
+      throws StripeException {
 
         String token = chargeRequest.getStripeToken();
         ChargeCreateParams params =
@@ -42,8 +41,7 @@ public class StripeService {
                 .setDescription(chargeRequest.getDescription())
                 .setSource(token)
                 .build();
-        Charge charge = Charge.create(params);
-        return charge;
+        return Charge.create(params);
 
     }
 }
