@@ -690,7 +690,8 @@ public class RestaurantService {
      * @return
      */
     @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
-    public Picture saveFoodPicture(Long restaurantId, Long foodId, String title, String description, MultipartFile file) {
+    public Picture saveFoodPicture(Long restaurantId, Long foodId, String title, String description,
+            MultipartFile file) {
         Picture picture = pictureService.savePicture(title, description, file);
         Food food = getFood(restaurantId, foodId);
         if (food.getPicture() != null) {
@@ -746,51 +747,25 @@ public class RestaurantService {
     }
 
     @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
-    public Picture updateRestaurantPicture(Long restaurantId, Picture updatedPicture, MultipartFile file) {
+    public Picture updatePictureInformation(Long restaurantId, Picture picture) {
         Restaurant restaurant = get(restaurantId);
         Picture currentPicture = restaurant.getPicture();
         if (currentPicture != null) {
-            if (file != null) {
-                currentPicture = pictureService.savePicture(currentPicture.getTitle(), currentPicture.getDescription(), file);
-                deleteRestaurantPicture(restaurantId);
-            }
-            if (updatedPicture.getTitle() != null && !updatedPicture.getTitle().isEmpty()) {
-                currentPicture.setTitle(updatedPicture.getTitle());
-            }
-            if (updatedPicture.getDescription() != null && !updatedPicture.getTitle().isEmpty()) {
-                currentPicture.setDescription(updatedPicture.getDescription());
-            }
-            
-            restaurant.setPicture(currentPicture);
-            repo.saveAndFlush(restaurant);
-            return pictureService.updatedPicture(currentPicture.getId(), currentPicture);
+            return pictureService.updatedPicture(currentPicture.getId(), picture);
         } else {
             throw new NotFoundException(PICTURE_NOT_FOUND_MESSAGE);
         }
     }
 
-
     @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
-    public Picture updateFoodPicture(Long restaurantId, Long foodId, Picture updatedPicture,
-            MultipartFile file) {
+    public Picture updateFoodPictureInformation(Long restaurantId, Long foodId, Picture picture) {
         Food food = getFood(restaurantId, foodId);
         Picture currentPicture = food.getPicture();
         if (currentPicture != null) {
-            if (file != null) {
-                currentPicture = pictureService.savePicture(currentPicture.getTitle(), currentPicture.getDescription(), file);
-                deleteFoodPicture(restaurantId, foodId);
-            }
-            if (updatedPicture.getTitle() != null && !updatedPicture.getTitle().isEmpty()) {
-                currentPicture.setTitle(updatedPicture.getTitle());
-            }
-            if (updatedPicture.getDescription() != null && !updatedPicture.getTitle().isEmpty()) {
-                currentPicture.setDescription(updatedPicture.getDescription());
-            }
-            food.setPicture(currentPicture);
-            foodRepo.saveAndFlush(food);
-            return pictureService.updatedPicture(currentPicture.getId(), currentPicture);
+            return pictureService.updatedPicture(currentPicture.getId(), picture);
         } else {
             throw new NotFoundException(PICTURE_NOT_FOUND_MESSAGE);
+
         }
     }
 }
