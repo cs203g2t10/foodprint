@@ -32,7 +32,6 @@ import foodprint.backend.model.FoodIngredientQuantity;
 import foodprint.backend.model.FoodIngredientQuantityKey;
 import foodprint.backend.model.FoodIngredientQuantityRepo;
 
-
 @Service
 public class RestaurantService {
 
@@ -53,7 +52,9 @@ public class RestaurantService {
 
     private FoodIngredientQuantityRepo foodIngredientQuantityRepo;
 
-    public RestaurantService(RestaurantRepo repo, FoodRepo foodRepo, DiscountRepo discountRepo, IngredientRepo ingredientRepo, PictureService pictureService, ReservationRepo reservationRepo, FoodIngredientQuantityRepo foodIngredientQuantityRepo) {
+    public RestaurantService(RestaurantRepo repo, FoodRepo foodRepo, DiscountRepo discountRepo,
+            IngredientRepo ingredientRepo, PictureService pictureService, ReservationRepo reservationRepo,
+            FoodIngredientQuantityRepo foodIngredientQuantityRepo) {
         this.repo = repo;
         this.foodRepo = foodRepo;
         this.discountRepo = discountRepo;
@@ -62,13 +63,14 @@ public class RestaurantService {
         this.reservationRepo = reservationRepo;
         this.foodIngredientQuantityRepo = foodIngredientQuantityRepo;
     }
-    
+
     public List<Restaurant> getAllRestaurants() {
         return repo.findAll();
     }
 
     /**
      * Gets a restaurant of a given ID
+     * 
      * @param id
      * @return
      */
@@ -79,6 +81,7 @@ public class RestaurantService {
 
     /**
      * Updates only changed fields of a given food
+     * 
      * @param id
      * @param updatedRestaurant
      * @return
@@ -98,7 +101,7 @@ public class RestaurantService {
             currentRestaurant.setRestaurantLocation(updatedRestaurant.getRestaurantLocation());
         }
 
-        if (updatedRestaurant.getRestaurantPriceRange() != null ) {
+        if (updatedRestaurant.getRestaurantPriceRange() != null) {
             currentRestaurant.setRestaurantPriceRange(updatedRestaurant.getRestaurantPriceRange());
         }
 
@@ -118,16 +121,20 @@ public class RestaurantService {
             currentRestaurant.setRestaurantWeekendOpeningHour(updatedRestaurant.getRestaurantWeekendOpeningHour());
         }
         if (updatedRestaurant.getRestaurantWeekdayClosingMinutes() != null) {
-            currentRestaurant.setRestaurantWeekdayClosingMinutes(updatedRestaurant.getRestaurantWeekdayClosingMinutes());
+            currentRestaurant
+                    .setRestaurantWeekdayClosingMinutes(updatedRestaurant.getRestaurantWeekdayClosingMinutes());
         }
         if (updatedRestaurant.getRestaurantWeekdayOpeningMinutes() != null) {
-            currentRestaurant.setRestaurantWeekdayOpeningMinutes(updatedRestaurant.getRestaurantWeekdayOpeningMinutes());
+            currentRestaurant
+                    .setRestaurantWeekdayOpeningMinutes(updatedRestaurant.getRestaurantWeekdayOpeningMinutes());
         }
         if (updatedRestaurant.getRestaurantWeekendClosingMinutes() != null) {
-            currentRestaurant.setRestaurantWeekendClosingMinutes(updatedRestaurant.getRestaurantWeekendClosingMinutes());
+            currentRestaurant
+                    .setRestaurantWeekendClosingMinutes(updatedRestaurant.getRestaurantWeekendClosingMinutes());
         }
         if (updatedRestaurant.getRestaurantWeekendOpeningMinutes() != null) {
-            currentRestaurant.setRestaurantWeekendOpeningMinutes(updatedRestaurant.getRestaurantWeekendOpeningMinutes());
+            currentRestaurant
+                    .setRestaurantWeekendOpeningMinutes(updatedRestaurant.getRestaurantWeekendOpeningMinutes());
         }
 
         if (updatedRestaurant.getRestaurantCategory() != null && !updatedRestaurant.getRestaurantCategory().isEmpty()) {
@@ -138,6 +145,7 @@ public class RestaurantService {
 
     /**
      * Creates a new restaurant
+     * 
      * @param restaurant
      * @return
      */
@@ -146,16 +154,16 @@ public class RestaurantService {
         return repo.saveAndFlush(restaurant);
     }
 
-    
     /**
      * Deletes a restaurant
+     * 
      * @param id
      */
     @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public void delete(Long id) {
         Restaurant restaurant = this.get(id);
         repo.delete(restaurant);
-        try { 
+        try {
             this.get(id);
             throw new DeleteFailedException("Restaurant could not be deleted");
         } catch (NotFoundException ex) {
@@ -165,6 +173,7 @@ public class RestaurantService {
 
     /**
      * Searches for a restaurant, given the name and paging information
+     * 
      * @param page
      * @param query
      * @return
@@ -174,7 +183,8 @@ public class RestaurantService {
     }
 
     /**
-     * Gets all available categories 
+     * Gets all available categories
+     * 
      * @return
      */
     public List<String> getCategories() {
@@ -191,9 +201,9 @@ public class RestaurantService {
         return restaurantCategories;
     }
 
-    
     /**
      * Gets all restaurants belonging to a category
+     * 
      * @param restaurantCategory
      * @return
      */
@@ -209,15 +219,16 @@ public class RestaurantService {
         }
         return restaurantsRelatedToCategory;
     }
-    
+
     /*
-    *
-    * Food related methods
-    *
-    */
+     *
+     * Food related methods
+     *
+     */
 
     /**
      * Adds a food to a given restaurant
+     * 
      * @param restaurantId
      * @param foodDTO
      * @return
@@ -235,17 +246,18 @@ public class RestaurantService {
 
         for (FoodIngredientQuantityDTO entry : ingredientQuantity) {
             Ingredient newIngredient = null;
-            for(Ingredient ingredient : ingredients) {
-                if(ingredient.getIngredientId().equals(entry.getIngredientId())) {
+            for (Ingredient ingredient : ingredients) {
+                if (ingredient.getIngredientId().equals(entry.getIngredientId())) {
                     newIngredient = ingredient;
                 }
             }
 
             if (newIngredient == null) {
                 throw new NotFoundException("restaurant does not have the ingredient");
-            } 
+            }
 
-            FoodIngredientQuantity newFoodIngredientQuantity = new FoodIngredientQuantity(newFood, newIngredient, entry.getQuantity());
+            FoodIngredientQuantity newFoodIngredientQuantity = new FoodIngredientQuantity(newFood, newIngredient,
+                    entry.getQuantity());
             foodIngredientQuantity.add(newFoodIngredientQuantity);
         }
 
@@ -257,6 +269,7 @@ public class RestaurantService {
 
     /**
      * Gets a food of the restaurant
+     * 
      * @param restaurantId
      * @param foodId
      * @return
@@ -272,6 +285,7 @@ public class RestaurantService {
 
     /**
      * Deletes the food of a given restaurant id
+     * 
      * @param restaurantId
      * @param foodId
      */
@@ -290,6 +304,7 @@ public class RestaurantService {
 
     /**
      * Updates the food of a given restaurant, ignores fields that are null
+     * 
      * @param restaurantId
      * @param foodId
      * @param updatedFood
@@ -297,15 +312,14 @@ public class RestaurantService {
      */
     @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public Food updateFood(Long restaurantId, Long foodId, Food updatedFood) {
-        Food originalFood = foodRepo.findById(foodId).orElseThrow(
-             () -> new NotFoundException("Food requested could not be found")
-        );
+        Food originalFood = foodRepo.findById(foodId)
+                .orElseThrow(() -> new NotFoundException("Food requested could not be found"));
         if (originalFood.getRestaurant().getRestaurantId().longValue() != restaurantId) {
             throw new NotFoundException("Food requested could not be found at this restaurant");
         }
 
         if (updatedFood.getFoodName() != null) {
-            originalFood.setFoodName(updatedFood.getFoodName()); 
+            originalFood.setFoodName(updatedFood.getFoodName());
         }
 
         if (updatedFood.getFoodDesc() != null) {
@@ -323,22 +337,21 @@ public class RestaurantService {
         if (updatedFood.getFoodIngredientQuantity() != null) {
             originalFood.setFoodIngredientQuantity(updatedFood.getFoodIngredientQuantity());
         }
-        
+
         originalFood = foodRepo.saveAndFlush(originalFood);
         return originalFood;
     }
 
     @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public Food editFood(Long restaurantId, Long foodId, EditFoodDTO foodDTO) {
-        final Food originalFood = foodRepo.findById(foodId).orElseThrow(
-             () -> new NotFoundException("Food requested could not be found")
-        );
+        final Food originalFood = foodRepo.findById(foodId)
+                .orElseThrow(() -> new NotFoundException("Food requested could not be found"));
         if (originalFood.getRestaurant().getRestaurantId().longValue() != restaurantId) {
             throw new NotFoundException("Food requested could not be found at this restaurant");
         }
 
         if (foodDTO.getFoodName() != null) {
-            originalFood.setFoodName(foodDTO.getFoodName()); 
+            originalFood.setFoodName(foodDTO.getFoodName());
         }
 
         if (foodDTO.getFoodDesc() != null) {
@@ -354,11 +367,12 @@ public class RestaurantService {
             Set<FoodIngredientQuantityDTO> foodIngredientQuantityDTOs = foodDTO.getFoodIngredientQuantity();
             Set<FoodIngredientQuantity> foodIngredientQuantities = new HashSet<>();
 
-            for (FoodIngredientQuantityDTO dto: foodIngredientQuantityDTOs) {
+            for (FoodIngredientQuantityDTO dto : foodIngredientQuantityDTOs) {
                 FoodIngredientQuantityKey key = new FoodIngredientQuantityKey(foodId, dto.getIngredientId());
-                
+
                 FoodIngredientQuantity fiq = foodIngredientQuantityRepo.findById(key).orElseGet(() -> {
-                    return new FoodIngredientQuantity(originalFood, ingredientRepo.getById(dto.getIngredientId()), dto.getQuantity());
+                    return new FoodIngredientQuantity(originalFood, ingredientRepo.getById(dto.getIngredientId()),
+                            dto.getQuantity());
                 });
                 fiq.setQuantity(dto.getQuantity());
 
@@ -368,35 +382,38 @@ public class RestaurantService {
         }
         return foodRepo.saveAndFlush(originalFood);
     }
-    
+
     /**
      * Searches for a given food
+     * 
      * @param page
      * @param query
      * @return
      */
     public Page<Food> searchFood(Pageable page, String query) {
-        return foodRepo.findByFoodNameContains(page,query);
+        return foodRepo.findByFoodNameContains(page, query);
     }
 
     /**
      * Calculate food between dates
+     * 
      * @param restaurant
      * @param startDate
      * @param endDate
      * @return
      */
     @PreAuthorize("hasAnyAuthority('FP_MANAGER', 'FP_ADMIN')")
-    public Map<String, Integer> calculateFoodNeededBetween(Restaurant restaurant, LocalDate startDate, LocalDate endDate) {
+    public Map<String, Integer> calculateFoodNeededBetween(Restaurant restaurant, LocalDate startDate,
+            LocalDate endDate) {
 
         HashMap<String, Integer> map = new HashMap<>();
         LocalDateTime start = startDate.minusDays(1).atTime(0, 0);
-        LocalDateTime end = endDate.plusDays(1).atTime(0,0);
+        LocalDateTime end = endDate.plusDays(1).atTime(0, 0);
         List<Reservation> reservations = reservationRepo.findByRestaurantAndDateBetween(restaurant, start, end);
 
-        for(Reservation reservation : reservations) {
+        for (Reservation reservation : reservations) {
             List<LineItem> lineItems = reservation.getLineItems();
-            for (LineItem lineItem : lineItems){
+            for (LineItem lineItem : lineItems) {
                 String foodName = lineItem.getFood().getFoodName();
                 Integer currentAmt = map.getOrDefault(foodName, 0);
                 map.put(lineItem.getFood().getFoodName(), currentAmt + lineItem.getQuantity());
@@ -407,13 +424,14 @@ public class RestaurantService {
     }
 
     /*
-    *
-    * Discount related methods
-    *
-    */
+     *
+     * Discount related methods
+     *
+     */
 
     /**
      * Adds discounts to a given restaurant
+     * 
      * @param restaurantId
      * @param discount
      * @return
@@ -422,9 +440,8 @@ public class RestaurantService {
     public Discount addDiscount(Long restaurantId, Discount discount) {
         Restaurant restaurant = repo.findByRestaurantId(restaurantId);
         Discount newDiscount = new Discount();
-        newDiscount.restaurant(restaurant)
-                     .discountDescription(discount.getDiscountDescription())
-                     .discountPercentage(discount.getDiscountPercentage());
+        newDiscount.restaurant(restaurant).discountDescription(discount.getDiscountDescription())
+                .discountPercentage(discount.getDiscountPercentage());
         var savedDiscount = discountRepo.saveAndFlush(newDiscount);
         restaurant.getDiscount().add(savedDiscount);
         return savedDiscount;
@@ -432,6 +449,7 @@ public class RestaurantService {
 
     /**
      * Deletes discount of a given restaurant
+     * 
      * @param restaurantId
      * @param discountId
      */
@@ -451,7 +469,9 @@ public class RestaurantService {
     }
 
     /**
-     * Updates the discount of a given restaurant, only change fields that are changed
+     * Updates the discount of a given restaurant, only change fields that are
+     * changed
+     * 
      * @param restaurantId
      * @param discountId
      * @param updatedDiscount
@@ -459,7 +479,8 @@ public class RestaurantService {
      */
     @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public Discount updateDiscount(Long restaurantId, Long discountId, Discount updatedDiscount) {
-        Discount originalDiscount = discountRepo.findById(discountId).orElseThrow(() -> new NotFoundException("Discount could not be found"));
+        Discount originalDiscount = discountRepo.findById(discountId)
+                .orElseThrow(() -> new NotFoundException("Discount could not be found"));
         if (originalDiscount.getRestaurant().getRestaurantId().longValue() != restaurantId) {
             throw new NotFoundException("Discount found but in incorrect restaurant");
         }
@@ -477,6 +498,7 @@ public class RestaurantService {
 
     /**
      * Gets a discount by discount ID
+     * 
      * @param discountId
      * @return
      */
@@ -487,11 +509,12 @@ public class RestaurantService {
     }
 
     /*
-    * Ingredient related methods
-    */
+     * Ingredient related methods
+     */
 
     /**
      * Gets all the restaurant ingredients
+     * 
      * @param restaurantId
      * @return
      */
@@ -506,6 +529,7 @@ public class RestaurantService {
 
     /**
      * Gets all the restaurants ingredient
+     * 
      * @param restaurantId
      * @param pageNumber
      * @return
@@ -522,6 +546,7 @@ public class RestaurantService {
 
     /**
      * Updates an ingredient with a given ID
+     * 
      * @param restaurantId
      * @param ingredientId
      * @param updatedIngredient
@@ -530,9 +555,8 @@ public class RestaurantService {
     @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public Ingredient updateIngredient(Long restaurantId, Long ingredientId, Ingredient updatedIngredient) {
 
-        Ingredient originalIngredient = ingredientRepo.findById(ingredientId).orElseThrow(
-            () -> new NotFoundException("Ingredient requested could not be found")
-        );
+        Ingredient originalIngredient = ingredientRepo.findById(ingredientId)
+                .orElseThrow(() -> new NotFoundException("Ingredient requested could not be found"));
 
         if (originalIngredient.getRestaurant().getRestaurantId().longValue() != restaurantId) {
             throw new NotFoundException("Ingredient requested could not be found at this restaurant");
@@ -556,6 +580,7 @@ public class RestaurantService {
 
     /**
      * Adds an ingredient to the restaurant
+     * 
      * @param restaurantId
      * @param newIngredient
      * @return
@@ -574,18 +599,18 @@ public class RestaurantService {
         repo.saveAndFlush(restaurant);
         return newIngredient;
     }
-  
+
     /**
      * Deletes an ingredient of a given restaurant
+     * 
      * @param restaurantId
      * @param ingredientId
      */
     @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
     public void deleteRestaurantIngredient(Long restaurantId, Long ingredientId) {
 
-        Ingredient originalIngredient = ingredientRepo.findById(ingredientId).orElseThrow(
-            () -> new NotFoundException("Ingredient requested could not be found")
-        );
+        Ingredient originalIngredient = ingredientRepo.findById(ingredientId)
+                .orElseThrow(() -> new NotFoundException("Ingredient requested could not be found"));
 
         if (originalIngredient.getRestaurant().getRestaurantId().longValue() != restaurantId) {
             throw new NotFoundException("Ingredient requested could not be found at this restaurant");
@@ -596,6 +621,7 @@ public class RestaurantService {
 
     /**
      * Calculates the ingredients needed between 2 days
+     * 
      * @param restaurant
      * @param startDate
      * @param endDate
@@ -603,22 +629,23 @@ public class RestaurantService {
      */
 
     @PreAuthorize("hasAnyAuthority('FP_MANAGER', 'FP_ADMIN')")
-    public Map<Ingredient, Integer> calculateIngredientsNeededBetween(Restaurant restaurant, LocalDate startDate, LocalDate endDate) {
-        
+    public Map<Ingredient, Integer> calculateIngredientsNeededBetween(Restaurant restaurant, LocalDate startDate,
+            LocalDate endDate) {
+
         HashMap<Ingredient, Integer> map = new HashMap<>();
         LocalDateTime start = startDate.minusDays(1).atTime(0, 0);
-        LocalDateTime end = endDate.plusDays(1).atTime(0,0);
+        LocalDateTime end = endDate.plusDays(1).atTime(0, 0);
         List<Reservation> reservations = reservationRepo.findByRestaurantAndDateBetween(restaurant, start, end);
 
-        for(Reservation reservation : reservations) {
+        for (Reservation reservation : reservations) {
             List<LineItem> lineItems = reservation.getLineItems();
-        
-            for (LineItem lineItem : lineItems){
+
+            for (LineItem lineItem : lineItems) {
                 Food food = lineItem.getFood();
 
                 Set<FoodIngredientQuantity> foodIngreQuantity = food.getFoodIngredientQuantity();
-                
-                for(FoodIngredientQuantity entry : foodIngreQuantity) {
+
+                for (FoodIngredientQuantity entry : foodIngreQuantity) {
                     Ingredient currIngredient = entry.getIngredient();
                     Integer currQty = map.getOrDefault(currIngredient, 0);
                     map.put(currIngredient, currQty + entry.getQuantity() * lineItem.getQuantity());
@@ -631,7 +658,9 @@ public class RestaurantService {
     }
 
     /**
-     * Sets picture of a given restaurant. If a picture currently exists, delete the old picture and set the new one.
+     * Sets picture of a given restaurant. If a picture currently exists, delete the
+     * old picture and set the new one.
+     * 
      * @param restaurantId
      * @param title
      * @param description
@@ -643,7 +672,7 @@ public class RestaurantService {
         Picture picture = pictureService.savePicture(title, description, file);
         Restaurant restaurant = get(restaurantId);
         if (restaurant.getPicture() != null) {
-            deleteRestaurantPicture(restaurantId); 
+            deleteRestaurantPicture(restaurantId);
         }
         restaurant.setPicture(picture);
         repo.saveAndFlush(restaurant);
@@ -651,7 +680,9 @@ public class RestaurantService {
     }
 
     /**
-     * Swets the picture of a given food. If a picture currently exists, delete the old picture and set the new one.
+     * Swets the picture of a given food. If a picture currently exists, delete the
+     * old picture and set the new one.
+     * 
      * @param restaurantId
      * @param foodId
      * @param title
@@ -660,7 +691,8 @@ public class RestaurantService {
      * @return
      */
     @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
-    public Picture saveFoodPicture(Long restaurantId, Long foodId, String title, String description, MultipartFile file) {
+    public Picture saveFoodPicture(Long restaurantId, Long foodId, String title, String description,
+            MultipartFile file) {
         Picture picture = pictureService.savePicture(title, description, file);
         Food food = getFood(restaurantId, foodId);
         if (food.getPicture() != null) {
@@ -671,7 +703,7 @@ public class RestaurantService {
         return picture;
     }
 
-    public String getFoodPicture(Long restaurantId, Long foodId ) {
+    public String getFoodPicture(Long restaurantId, Long foodId) {
         Food food = getFood(restaurantId, foodId);
         Picture picture = food.getPicture();
         if (picture == null) {
@@ -709,29 +741,55 @@ public class RestaurantService {
         if (picture != null) {
             food.setPicture(null);
             foodRepo.saveAndFlush(food);
-            pictureService.deletePicture(picture.getId()); 
+            pictureService.deletePicture(picture.getId());
         } else {
             throw new NotFoundException(PICTURE_NOT_FOUND_MESSAGE);
         }
     }
 
     @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
-    public Picture updatePictureInformation(Long restaurantId, Picture picture) {
+    public Picture updateRestaurantPicture(Long restaurantId, Picture updatedPicture, MultipartFile file) {
         Restaurant restaurant = get(restaurantId);
         Picture currentPicture = restaurant.getPicture();
         if (currentPicture != null) {
-            return pictureService.updatedPicture(currentPicture.getId(), picture);
+            if (file != null) {
+                currentPicture = pictureService.savePicture(currentPicture.getTitle(), currentPicture.getDescription(), file);
+                deleteRestaurantPicture(restaurantId);
+            }
+            if (updatedPicture.getTitle() != null && !updatedPicture.getTitle().isEmpty()) {
+                currentPicture.setTitle(updatedPicture.getTitle());
+            }
+            if (updatedPicture.getDescription() != null && !updatedPicture.getTitle().isEmpty()) {
+                currentPicture.setDescription(updatedPicture.getDescription());
+            }
+            
+            restaurant.setPicture(currentPicture);
+            repo.saveAndFlush(restaurant);
+            return currentPicture = pictureService.updatedPicture(currentPicture.getId(), currentPicture);
         } else {
             throw new NotFoundException(PICTURE_NOT_FOUND_MESSAGE);
         }
     }
 
     @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
-    public Picture updateFoodPictureInformation(Long restaurantId, Long foodId, Picture picture) {
+    public Picture updateFoodPicture(Long restaurantId, Long foodId, Picture updatedPicture,
+            MultipartFile file) {
         Food food = getFood(restaurantId, foodId);
         Picture currentPicture = food.getPicture();
         if (currentPicture != null) {
-            return pictureService.updatedPicture(currentPicture.getId(), picture);
+            if (file != null) {
+                currentPicture = pictureService.savePicture(currentPicture.getTitle(), currentPicture.getDescription(), file);
+                deleteFoodPicture(restaurantId, foodId);
+            }
+            if (updatedPicture.getTitle() != null && !updatedPicture.getTitle().isEmpty()) {
+                currentPicture.setTitle(updatedPicture.getTitle());
+            }
+            if (updatedPicture.getDescription() != null && !updatedPicture.getTitle().isEmpty()) {
+                currentPicture.setDescription(updatedPicture.getDescription());
+            }
+            food.setPicture(currentPicture);
+            foodRepo.saveAndFlush(food);
+            return currentPicture = pictureService.updatedPicture(currentPicture.getId(), currentPicture);
         } else {
             throw new NotFoundException(PICTURE_NOT_FOUND_MESSAGE);
         }

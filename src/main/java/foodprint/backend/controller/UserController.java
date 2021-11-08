@@ -252,7 +252,7 @@ public class UserController {
         dto.setRestaurantCategory(restaurant.getRestaurantCategory());
         
         Picture picture = restaurant.getPicture();
-        PictureDTO picDto = new PictureDTO(picture.getTitle(), picture.getDescription(), picture.getUrl());
+        PictureDTO picDto = new PictureDTO(picture.getTitle(), picture.getDescription());
         dto.setPicture(picDto);
 
         return dto;

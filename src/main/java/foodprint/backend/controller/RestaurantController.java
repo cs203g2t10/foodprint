@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -415,15 +417,17 @@ public class RestaurantController {
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @PutMapping({"/{restaurantId}/picture"})
+    @PatchMapping(path = "/{restaurantId}/picture", 
+                consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+                produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Updates a picture's title and description")
     public ResponseEntity<Picture> updatePictureInformation(
         @PathVariable("restaurantId") Long restaurantId,
-        @RequestBody PictureDTO updatedPicture
+        @ModelAttribute PictureDTO updatedPicture
     ) {
         Picture picture = new Picture(updatedPicture.getTitle() , updatedPicture.getDescription());
-        Picture savedPicture = service.updatePictureInformation(restaurantId, picture);
+        Picture savedPicture = service.updateRestaurantPicture(restaurantId, picture, updatedPicture.getPictureFile());
         return new ResponseEntity<>(savedPicture, HttpStatus.OK);
     }
 
@@ -459,16 +463,18 @@ public class RestaurantController {
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @PutMapping({"/{restaurantId}/food/{foodId}/picture"})
+    @PatchMapping(path = "/{restaurantId}/food/{foodId}/picture",
+                    consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+                    produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Updates a picture's title and description")
     public ResponseEntity<Picture> updateFoodPictureInformation(
         @PathVariable("restaurantId") Long restaurantId,
         @PathVariable("foodId") Long foodId,
-        @RequestBody PictureDTO updatedPicture
+        @ModelAttribute PictureDTO updatedPicture
     ) {
         Picture picture = new Picture(updatedPicture.getTitle() , updatedPicture.getDescription());
-        Picture savedPicture = service.updateFoodPictureInformation(restaurantId, foodId, picture);
+        Picture savedPicture = service.updateFoodPicture(restaurantId, foodId, picture, updatedPicture.getPictureFile());
         return new ResponseEntity<>(savedPicture, HttpStatus.OK);
     }
 
@@ -510,7 +516,7 @@ public class RestaurantController {
         
         Picture picture = restaurant.getPicture();
         if (picture != null) {
-            PictureDTO picDto = new PictureDTO(picture.getTitle(), picture.getDescription(), picture.getUrl());
+            PictureDTO picDto = new PictureDTO(picture.getTitle(), picture.getDescription());
             dto.setPicture(picDto);
         }
 
