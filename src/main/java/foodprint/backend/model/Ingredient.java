@@ -48,9 +48,6 @@ public class Ingredient {
     @Length(min = 1)
     private String ingredientDesc;
 
-    @Column(name = "picturesPath")
-    private String picturesPath;
-
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "restaurant_id")
@@ -104,22 +101,6 @@ public class Ingredient {
 
     public void setUnits (String units) {
         this.units = units;
-    }
-
-    public List<String> getPicturesPath() {
-        if (this.picturesPath == null) {
-            return new ArrayList<>();
-        }
-
-        String[] arr = this.picturesPath.split(",");
-        return Arrays.asList(arr);
-    }
-
-    public void setPicturesPath(List<String> list) {
-        if (!list.isEmpty()) {
-            String picPath = String.join(",", list);
-            this.picturesPath = picPath;
-        }
     }
 
 }

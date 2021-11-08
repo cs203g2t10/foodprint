@@ -17,6 +17,7 @@ import foodprint.backend.dto.FoodIngredientQuantityDTO;
 import foodprint.backend.dto.UpdatePictureDTO;
 import foodprint.backend.exceptions.DeleteFailedException;
 import foodprint.backend.exceptions.NotFoundException;
+import foodprint.backend.exceptions.AlreadyExistsException;
 import foodprint.backend.model.Discount;
 import foodprint.backend.model.DiscountRepo;
 import foodprint.backend.model.Food;
@@ -312,38 +313,6 @@ public class RestaurantService {
      * @return
      */
     @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
-    public Food updateFood(Long restaurantId, Long foodId, Food updatedFood) {
-        Food originalFood = foodRepo.findById(foodId)
-                .orElseThrow(() -> new NotFoundException("Food requested could not be found"));
-        if (originalFood.getRestaurant().getRestaurantId().longValue() != restaurantId) {
-            throw new NotFoundException("Food requested could not be found at this restaurant");
-        }
-
-        if (updatedFood.getFoodName() != null) {
-            originalFood.setFoodName(updatedFood.getFoodName());
-        }
-
-        if (updatedFood.getFoodDesc() != null) {
-            originalFood.setFoodDesc(updatedFood.getFoodDesc());
-        }
-
-        if (updatedFood.getFoodDiscount() != null) {
-            originalFood.setFoodDiscount(updatedFood.getFoodDiscount());
-        }
-
-        if (updatedFood.getFoodPrice() != null) {
-            originalFood.setFoodPrice(updatedFood.getFoodPrice());
-        }
-
-        if (updatedFood.getFoodIngredientQuantity() != null) {
-            originalFood.setFoodIngredientQuantity(updatedFood.getFoodIngredientQuantity());
-        }
-
-        originalFood = foodRepo.saveAndFlush(originalFood);
-        return originalFood;
-    }
-
-    @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
     public Food editFood(Long restaurantId, Long foodId, EditFoodDTO foodDTO) {
         final Food originalFood = foodRepo.findById(foodId)
                 .orElseThrow(() -> new NotFoundException("Food requested could not be found"));
@@ -431,20 +400,24 @@ public class RestaurantService {
      */
 
     /**
-     * Adds discounts to a given restaurant
+     * Creates discount to a given restaurant
      * 
      * @param restaurantId
      * @param discount
      * @return
      */
     @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
-    public Discount addDiscount(Long restaurantId, Discount discount) {
+    public Discount createDiscount(Long restaurantId, Discount discount) {
         Restaurant restaurant = repo.findByRestaurantId(restaurantId);
+        if (restaurant.getDiscount() != null) {
+            throw new AlreadyExistsException("Discount already exist");
+        }
         Discount newDiscount = new Discount();
-        newDiscount.restaurant(restaurant).discountDescription(discount.getDiscountDescription())
+        newDiscount.restaurant(restaurant)
+                .discountDescription(discount.getDiscountDescription())
                 .discountPercentage(discount.getDiscountPercentage());
         var savedDiscount = discountRepo.saveAndFlush(newDiscount);
-        restaurant.getDiscount().add(savedDiscount);
+        restaurant.setDiscount(savedDiscount);
         return savedDiscount;
     }
 
@@ -455,17 +428,17 @@ public class RestaurantService {
      * @param discountId
      */
     @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
-    public void deleteDiscount(Long restaurantId, Long discountId) {
-        if (discountRepo.existsById(discountId)) {
-            Discount discount = discountRepo.getById(discountId);
-            if (discount.getRestaurant().getRestaurantId().equals(restaurantId)) {
-                discountRepo.delete(discount);
-            } else {
-                throw new NotFoundException("Discount found but not in correct restaurant");
-            }
-        } else {
+    public void deleteDiscount(Long restaurantId) {
+        Restaurant res = repo.findByRestaurantId(restaurantId);
+        if (res == null) {
+            throw new NotFoundException("Restaurant not found");
+        }
+        Discount dis = res.getDiscount();
+        if (dis == null) {
             throw new NotFoundException("Discount not found");
         }
+        res.setDiscount(null);
+        discountRepo.delete(dis);
     }
 
     /**
@@ -473,16 +446,15 @@ public class RestaurantService {
      * changed
      * 
      * @param restaurantId
-     * @param discountId
      * @param updatedDiscount
      * @return
      */
     @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
-    public Discount updateDiscount(Long restaurantId, Long discountId, Discount updatedDiscount) {
-        Discount originalDiscount = discountRepo.findById(discountId)
-                .orElseThrow(() -> new NotFoundException("Discount could not be found"));
-        if (originalDiscount.getRestaurant().getRestaurantId().longValue() != restaurantId) {
-            throw new NotFoundException("Discount found but in incorrect restaurant");
+    public Discount updateDiscount(Long restaurantId, Discount updatedDiscount) {
+        Restaurant res = repo.findByRestaurantId(restaurantId);
+        Discount originalDiscount = res.getDiscount();
+        if (originalDiscount == null) {
+            throw new NotFoundException("Discount not found");
         }
 
         if (updatedDiscount.getDiscountDescription() != null) {
@@ -494,6 +466,25 @@ public class RestaurantService {
 
         originalDiscount = discountRepo.saveAndFlush(originalDiscount);
         return originalDiscount;
+    }
+
+    /**
+     * Gets a restaurant's discount
+     * 
+     * @param discountId
+     * @return
+     */
+    @PreAuthorize("hasAnyAuthority('FP_USER', 'FP_MANAGER', 'FP_ADMIN')")
+    public Discount getRestaurantDiscount(Long restaurantId) {
+        Optional<Restaurant> res = repo.findById(restaurantId);
+        if (res.isEmpty()) {
+            throw new NotFoundException("Restaurant not found");
+        }
+        Discount discount = res.get().getDiscount();
+        if (discount == null) {
+            throw new NotFoundException("Discount not found");
+        }
+        return discount;
     }
 
     /**

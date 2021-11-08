@@ -75,10 +75,10 @@ public class Reservation {
             price += lineItem.getFood().getFoodPrice() * lineItem.getQuantity();
         }
         price = price * 100;
-        for (Discount discount : restaurant.getDiscount()) {
+        Discount discount = restaurant.getDiscount();
+        if (discount != null) {
             price = price * ((double)discount.getDiscountPercentage() / 100);
         }
-        
         return price;
     }
 
