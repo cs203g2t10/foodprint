@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import foodprint.backend.dto.EditFoodDTO;
 import foodprint.backend.dto.FoodDTO;
 import foodprint.backend.dto.FoodIngredientQuantityDTO;
+import foodprint.backend.dto.UpdatePictureDTO;
 import foodprint.backend.exceptions.DeleteFailedException;
 import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.Discount;
@@ -714,7 +715,8 @@ public class RestaurantService {
      * @return
      */
     @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
-    public Picture saveFoodPicture(Long restaurantId, Long foodId, String title, String description, MultipartFile file) {
+    public Picture saveFoodPicture(Long restaurantId, Long foodId, String title, String description,
+            MultipartFile file) {
         Picture picture = pictureService.savePicture(title, description, file);
         Food food = getFood(restaurantId, foodId);
         if (food.getPicture() != null) {
@@ -770,21 +772,21 @@ public class RestaurantService {
     }
 
     @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
-    public Picture updateRestaurantPicture(Long restaurantId, Picture updatedPicture, MultipartFile file) {
+    public Picture updateRestaurantPicture(Long restaurantId, UpdatePictureDTO updatedPicture) {
         Restaurant restaurant = get(restaurantId);
         Picture currentPicture = restaurant.getPicture();
         if (currentPicture != null) {
-            if (file != null) {
-                currentPicture = pictureService.savePicture(currentPicture.getTitle(), currentPicture.getDescription(), file);
+            if (updatedPicture.getPictureFile() != null) {
+                currentPicture = pictureService.savePicture(currentPicture.getTitle(), currentPicture.getDescription(), updatedPicture.getPictureFile());
                 deleteRestaurantPicture(restaurantId);
             }
             if (updatedPicture.getTitle() != null && !updatedPicture.getTitle().isEmpty()) {
                 currentPicture.setTitle(updatedPicture.getTitle());
             }
-            if (updatedPicture.getDescription() != null && !updatedPicture.getTitle().isEmpty()) {
+            if (updatedPicture.getDescription() != null && !updatedPicture.getDescription().isEmpty()) {
                 currentPicture.setDescription(updatedPicture.getDescription());
             }
-            
+
             restaurant.setPicture(currentPicture);
             repo.saveAndFlush(restaurant);
             return pictureService.updatedPicture(currentPicture.getId(), currentPicture);
@@ -793,21 +795,19 @@ public class RestaurantService {
         }
     }
 
-
     @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
-    public Picture updateFoodPicture(Long restaurantId, Long foodId, Picture updatedPicture,
-            MultipartFile file) {
+    public Picture updateFoodPicture(Long restaurantId, Long foodId, UpdatePictureDTO updatedPicture) {
         Food food = getFood(restaurantId, foodId);
         Picture currentPicture = food.getPicture();
         if (currentPicture != null) {
-            if (file != null) {
-                currentPicture = pictureService.savePicture(currentPicture.getTitle(), currentPicture.getDescription(), file);
+            if (updatedPicture.getPictureFile() != null) {
+                currentPicture = pictureService.savePicture(currentPicture.getTitle(), currentPicture.getDescription(), updatedPicture.getPictureFile());
                 deleteFoodPicture(restaurantId, foodId);
             }
             if (updatedPicture.getTitle() != null && !updatedPicture.getTitle().isEmpty()) {
                 currentPicture.setTitle(updatedPicture.getTitle());
             }
-            if (updatedPicture.getDescription() != null && !updatedPicture.getTitle().isEmpty()) {
+            if (updatedPicture.getDescription() != null && !updatedPicture.getDescription().isEmpty()) {
                 currentPicture.setDescription(updatedPicture.getDescription());
             }
             food.setPicture(currentPicture);
@@ -817,4 +817,5 @@ public class RestaurantService {
             throw new NotFoundException(PICTURE_NOT_FOUND_MESSAGE);
         }
     }
+
 }

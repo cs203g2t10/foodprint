@@ -1,6 +1,5 @@
 package foodprint.backend.dto;
 
-import org.springframework.web.multipart.MultipartFile;
 
 public class PictureDTO {
 
@@ -8,19 +7,13 @@ public class PictureDTO {
 
     private String description;
 
-    private MultipartFile pictureFile;
+    private String url;
 
-    public PictureDTO(String title, String description) {
+    public PictureDTO(String title, String description, String url) {
         this.title = title;
         this.description = description;
+        this.url = url;
     }
-
-    public PictureDTO(String title, String description, MultipartFile pictureFile){
-        this.title = title;
-        this.description = description;
-        this.pictureFile = pictureFile;
-    }
-
 
     public PictureDTO() {
     }
@@ -42,14 +35,14 @@ public class PictureDTO {
         this.description = description;
     }
 
-    public MultipartFile getPictureFile() {
-        return this.pictureFile;
+
+    public String getUrl() {
+        return this.url;
     }
 
-    public void setPictureFile(MultipartFile pictureFile) {
-        this.pictureFile = pictureFile;
+    public void setUrl(String url) {
+        this.url = url;
     }
-
-
     
+
 }

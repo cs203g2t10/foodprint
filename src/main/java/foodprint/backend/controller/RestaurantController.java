@@ -39,6 +39,7 @@ import foodprint.backend.dto.IngredientCalculationDTO;
 import foodprint.backend.dto.IngredientDTO;
 import foodprint.backend.dto.PictureDTO;
 import foodprint.backend.dto.RestaurantDTO;
+import foodprint.backend.dto.UpdatePictureDTO;
 import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.exceptions.BadRequestException;
 import foodprint.backend.model.Discount;
@@ -425,10 +426,9 @@ public class RestaurantController {
     @Operation(summary = "Updates a picture's title and description")
     public ResponseEntity<Picture> updatePictureInformation(
         @PathVariable("restaurantId") Long restaurantId,
-        @ModelAttribute PictureDTO updatedPicture
+        @ModelAttribute UpdatePictureDTO updatedPicture
     ) {
-        Picture picture = new Picture(updatedPicture.getTitle() , updatedPicture.getDescription());
-        Picture savedPicture = service.updateRestaurantPicture(restaurantId, picture, updatedPicture.getPictureFile());
+        Picture savedPicture = service.updateRestaurantPicture(restaurantId, updatedPicture);
         return new ResponseEntity<>(savedPicture, HttpStatus.OK);
     }
 
@@ -472,10 +472,9 @@ public class RestaurantController {
     public ResponseEntity<Picture> updateFoodPictureInformation(
         @PathVariable("restaurantId") Long restaurantId,
         @PathVariable("foodId") Long foodId,
-        @ModelAttribute PictureDTO updatedPicture
+        @ModelAttribute UpdatePictureDTO updatedPicture
     ) {
-        Picture picture = new Picture(updatedPicture.getTitle() , updatedPicture.getDescription());
-        Picture savedPicture = service.updateFoodPicture(restaurantId, foodId, picture, updatedPicture.getPictureFile());
+        Picture savedPicture = service.updateFoodPicture(restaurantId, foodId, updatedPicture);
         return new ResponseEntity<>(savedPicture, HttpStatus.OK);
     }
 
@@ -517,7 +516,7 @@ public class RestaurantController {
         
         Picture picture = restaurant.getPicture();
         if (picture != null) {
-            PictureDTO picDto = new PictureDTO(picture.getTitle(), picture.getDescription());
+            PictureDTO picDto = new PictureDTO(picture.getTitle(), picture.getDescription(), picture.getUrl());
             dto.setPicture(picDto);
         }
 

@@ -110,7 +110,6 @@ public class PictureService  {
         Picture oldPicture = get(pictureId);
         oldPicture.setDescription(newPicture.getDescription());
         oldPicture.setTitle(newPicture.getTitle());
-        oldPicture = repository.saveAndFlush(oldPicture);
-        return oldPicture;
+        return repository.saveAndFlush(oldPicture);
     }
 }
