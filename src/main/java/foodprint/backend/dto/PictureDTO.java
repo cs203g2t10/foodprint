@@ -1,6 +1,5 @@
 package foodprint.backend.dto;
 
-import org.springframework.web.multipart.MultipartFile;
 
 public class PictureDTO {
 
@@ -46,6 +45,4 @@ public class PictureDTO {
     }
     
 
-
-    
 }

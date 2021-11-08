@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import foodprint.backend.dto.EditFoodDTO;
 import foodprint.backend.dto.FoodDTO;
 import foodprint.backend.dto.FoodIngredientQuantityDTO;
+import foodprint.backend.dto.UpdatePictureDTO;
 import foodprint.backend.exceptions.DeleteFailedException;
 import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.Discount;
@@ -747,25 +748,50 @@ public class RestaurantService {
     }
 
     @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
-    public Picture updatePictureInformation(Long restaurantId, Picture picture) {
+    public Picture updateRestaurantPicture(Long restaurantId, UpdatePictureDTO updatedPicture) {
         Restaurant restaurant = get(restaurantId);
         Picture currentPicture = restaurant.getPicture();
         if (currentPicture != null) {
-            return pictureService.updatedPicture(currentPicture.getId(), picture);
+            if (updatedPicture.getPictureFile() != null) {
+                currentPicture = pictureService.savePicture(currentPicture.getTitle(), currentPicture.getDescription(), updatedPicture.getPictureFile());
+                deleteRestaurantPicture(restaurantId);
+            }
+            if (updatedPicture.getTitle() != null && !updatedPicture.getTitle().isEmpty()) {
+                currentPicture.setTitle(updatedPicture.getTitle());
+            }
+            if (updatedPicture.getDescription() != null && !updatedPicture.getDescription().isEmpty()) {
+                currentPicture.setDescription(updatedPicture.getDescription());
+            }
+
+            restaurant.setPicture(currentPicture);
+            repo.saveAndFlush(restaurant);
+            return pictureService.updatedPicture(currentPicture.getId(), currentPicture);
         } else {
             throw new NotFoundException(PICTURE_NOT_FOUND_MESSAGE);
         }
     }
 
     @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
-    public Picture updateFoodPictureInformation(Long restaurantId, Long foodId, Picture picture) {
+    public Picture updateFoodPicture(Long restaurantId, Long foodId, UpdatePictureDTO updatedPicture) {
         Food food = getFood(restaurantId, foodId);
         Picture currentPicture = food.getPicture();
         if (currentPicture != null) {
-            return pictureService.updatedPicture(currentPicture.getId(), picture);
+            if (updatedPicture.getPictureFile() != null) {
+                currentPicture = pictureService.savePicture(currentPicture.getTitle(), currentPicture.getDescription(), updatedPicture.getPictureFile());
+                deleteFoodPicture(restaurantId, foodId);
+            }
+            if (updatedPicture.getTitle() != null && !updatedPicture.getTitle().isEmpty()) {
+                currentPicture.setTitle(updatedPicture.getTitle());
+            }
+            if (updatedPicture.getDescription() != null && !updatedPicture.getDescription().isEmpty()) {
+                currentPicture.setDescription(updatedPicture.getDescription());
+            }
+            food.setPicture(currentPicture);
+            foodRepo.saveAndFlush(food);
+            return pictureService.updatedPicture(currentPicture.getId(), currentPicture);
         } else {
             throw new NotFoundException(PICTURE_NOT_FOUND_MESSAGE);
-
         }
     }
+
 }
