@@ -5,6 +5,7 @@ import foodprint.backend.dto.FoodDTO;
 import foodprint.backend.dto.FoodIngredientQuantityDTO;
 import foodprint.backend.exceptions.DeleteFailedException;
 import foodprint.backend.exceptions.NotFoundException;
+import foodprint.backend.exceptions.AlreadyExistsException;
 import foodprint.backend.model.Discount;
 import foodprint.backend.model.DiscountRepo;
 import foodprint.backend.model.Food;
@@ -457,6 +458,19 @@ public class RestaurantServiceTest {
         assertNotNull(savedDiscount);
         verify(repo).findByRestaurantId(restaurantId);
         verify(discountRepo).saveAndFlush(any(Discount.class));
+    }
+
+    @Test
+    void createDiscount_DiscountAlreadyExist_ReturnError() {
+        when(repo.findByRestaurantId(any(Long.class))).thenReturn(restaurant);
+
+        try {
+            restaurantService.createDiscount(restaurantId, discount);
+        } catch (AlreadyExistsException e) {
+            assertEquals("Discount already exist", e.getMessage());
+        }
+
+        verify(repo).findByRestaurantId(restaurantId);
     }
 
     @Test
