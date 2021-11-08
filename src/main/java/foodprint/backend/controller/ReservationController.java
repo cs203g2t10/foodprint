@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,6 +27,7 @@ import foodprint.backend.dto.CreateReservationDTO;
 import foodprint.backend.dto.LineItemDTO;
 import foodprint.backend.dto.ReservationDTO;
 import foodprint.backend.dto.NamedLineItemDTO;
+import foodprint.backend.exceptions.InsufficientPermissionsException;
 import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.Food;
 import foodprint.backend.model.LineItem;
@@ -110,6 +113,10 @@ public class ReservationController {
     @Operation(summary = "Gets all line item for reservation")
     public ResponseEntity<List<LineItemDTO>> getReservationOrder(@PathVariable("reservationId") Long id) {
         Reservation reservation = reservationService.getReservationById(id);
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!user.equals(reservation.getUser())) {
+            throw new InsufficientPermissionsException("Not authorised to view line items of another user");
+        }
         List<LineItem> lineItems = reservation.getLineItems();
         List<LineItemDTO> result = new ArrayList<>();
         for(LineItem lineItem : lineItems) {
@@ -131,7 +138,7 @@ public class ReservationController {
     // POST: Create a new reservation (DTO)
     @PostMapping
     @Operation(summary = "For users to create a new reservation slot")
-    public ResponseEntity<ReservationDTO> createReservationDTO(@RequestBody CreateReservationDTO req) {
+    public ResponseEntity<ReservationDTO> createReservationDTO(@RequestBody @Nullable CreateReservationDTO req) {
         User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         try {
             var reservation = reservationService.create(currentUser, req);
@@ -243,8 +250,8 @@ public class ReservationController {
 
             List<LineItem> savedLineItems = new ArrayList<>();
 
-            for (Food key : lineItemsHashMap.keySet()) {
-                LineItem savedLineItem = new LineItem(key, reservation, lineItemsHashMap.get(key));
+            for (Map.Entry<Food, Integer> entry : lineItemsHashMap.entrySet()) {
+                LineItem savedLineItem = new LineItem(entry.getKey(), reservation, entry.getValue());
                 savedLineItems.add(savedLineItem);
             }
 

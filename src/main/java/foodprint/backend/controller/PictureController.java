@@ -1,7 +1,5 @@
 package foodprint.backend.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -30,15 +28,6 @@ public class PictureController {
     public PictureController(PictureService service) {
         this.service = service;
     }
-
-
-    @GetMapping({"/pictures/all"})
-    @ResponseStatus(code = HttpStatus.OK)
-    @Operation(summary = "Gets all the pictures")
-    public ResponseEntity<List<Picture>> getPictures() {
-        return new ResponseEntity<>(service.getAllPictures(), HttpStatus.OK);
-    }
-
 
     @GetMapping({"/{pictureId}"})
     @ResponseStatus(code = HttpStatus.OK)

@@ -86,7 +86,7 @@ public class RestaurantService {
      * @param updatedRestaurant
      * @return
      */
-    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
     public Restaurant update(Long id, Restaurant updatedRestaurant) {
 
         Restaurant currentRestaurant = this.get(id);
@@ -149,7 +149,7 @@ public class RestaurantService {
      * @param restaurant
      * @return
      */
-    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
     public Restaurant create(Restaurant restaurant) {
         return repo.saveAndFlush(restaurant);
     }
@@ -159,7 +159,7 @@ public class RestaurantService {
      * 
      * @param id
      */
-    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
     public void delete(Long id) {
         Restaurant restaurant = this.get(id);
         repo.delete(restaurant);
@@ -233,7 +233,7 @@ public class RestaurantService {
      * @param foodDTO
      * @return
      */
-    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
     public Food addFood(Long restaurantId, FoodDTO foodDTO) {
         Restaurant restaurant = repo.findByRestaurantId(restaurantId);
 
@@ -289,7 +289,7 @@ public class RestaurantService {
      * @param restaurantId
      * @param foodId
      */
-    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
     public void deleteFood(Long restaurantId, Long foodId) {
         Restaurant restaurant = get(restaurantId);
         List<Food> allFood = restaurant.getAllFood();
@@ -310,7 +310,7 @@ public class RestaurantService {
      * @param updatedFood
      * @return
      */
-    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
     public Food updateFood(Long restaurantId, Long foodId, Food updatedFood) {
         Food originalFood = foodRepo.findById(foodId)
                 .orElseThrow(() -> new NotFoundException("Food requested could not be found"));
@@ -342,7 +342,7 @@ public class RestaurantService {
         return originalFood;
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
     public Food editFood(Long restaurantId, Long foodId, EditFoodDTO foodDTO) {
         final Food originalFood = foodRepo.findById(foodId)
                 .orElseThrow(() -> new NotFoundException("Food requested could not be found"));
@@ -436,7 +436,7 @@ public class RestaurantService {
      * @param discount
      * @return
      */
-    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
     public Discount addDiscount(Long restaurantId, Discount discount) {
         Restaurant restaurant = repo.findByRestaurantId(restaurantId);
         Discount newDiscount = new Discount();
@@ -453,13 +453,12 @@ public class RestaurantService {
      * @param restaurantId
      * @param discountId
      */
-    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
     public void deleteDiscount(Long restaurantId, Long discountId) {
         if (discountRepo.existsById(discountId)) {
             Discount discount = discountRepo.getById(discountId);
             if (discount.getRestaurant().getRestaurantId().equals(restaurantId)) {
                 discountRepo.delete(discount);
-                return;
             } else {
                 throw new NotFoundException("Discount found but not in correct restaurant");
             }
@@ -477,7 +476,7 @@ public class RestaurantService {
      * @param updatedDiscount
      * @return
      */
-    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
     public Discount updateDiscount(Long restaurantId, Long discountId, Discount updatedDiscount) {
         Discount originalDiscount = discountRepo.findById(discountId)
                 .orElseThrow(() -> new NotFoundException("Discount could not be found"));
@@ -518,7 +517,7 @@ public class RestaurantService {
      * @param restaurantId
      * @return
      */
-    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
     public List<Ingredient> getAllRestaurantIngredients(Long restaurantId) {
         Restaurant restaurant = get(restaurantId);
         if (restaurant == null) {
@@ -534,7 +533,7 @@ public class RestaurantService {
      * @param pageNumber
      * @return
      */
-    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
     public Page<Ingredient> getRestaurantIngredients(Long restaurantId, Integer pageNumber) {
         Restaurant restaurant = get(restaurantId);
         if (restaurant == null) {
@@ -552,7 +551,7 @@ public class RestaurantService {
      * @param updatedIngredient
      * @return
      */
-    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
     public Ingredient updateIngredient(Long restaurantId, Long ingredientId, Ingredient updatedIngredient) {
 
         Ingredient originalIngredient = ingredientRepo.findById(ingredientId)
@@ -585,7 +584,7 @@ public class RestaurantService {
      * @param newIngredient
      * @return
      */
-    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
     public Ingredient addRestaurantIngredient(Long restaurantId, Ingredient newIngredient) {
         Restaurant restaurant = get(restaurantId);
         if (restaurant == null) {
@@ -606,7 +605,7 @@ public class RestaurantService {
      * @param restaurantId
      * @param ingredientId
      */
-    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
     public void deleteRestaurantIngredient(Long restaurantId, Long ingredientId) {
 
         Ingredient originalIngredient = ingredientRepo.findById(ingredientId)
@@ -667,7 +666,7 @@ public class RestaurantService {
      * @param file
      * @return
      */
-    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
     public Picture savePicture(Long restaurantId, String title, String description, MultipartFile file) {
         Picture picture = pictureService.savePicture(title, description, file);
         Restaurant restaurant = get(restaurantId);
@@ -690,9 +689,8 @@ public class RestaurantService {
      * @param file
      * @return
      */
-    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
-    public Picture saveFoodPicture(Long restaurantId, Long foodId, String title, String description,
-            MultipartFile file) {
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
+    public Picture saveFoodPicture(Long restaurantId, Long foodId, String title, String description, MultipartFile file) {
         Picture picture = pictureService.savePicture(title, description, file);
         Food food = getFood(restaurantId, foodId);
         if (food.getPicture() != null) {
@@ -721,7 +719,7 @@ public class RestaurantService {
         return pictureService.getPictureById(picture.getId());
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
     public void deleteRestaurantPicture(Long restaurantId) {
         Restaurant restaurant = get(restaurantId);
         Picture picture = restaurant.getPicture();
@@ -734,7 +732,7 @@ public class RestaurantService {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
     public void deleteFoodPicture(Long restaurantId, Long foodId) {
         Food food = getFood(restaurantId, foodId);
         Picture picture = food.getPicture();
@@ -747,7 +745,7 @@ public class RestaurantService {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
     public Picture updateRestaurantPicture(Long restaurantId, Picture updatedPicture, MultipartFile file) {
         Restaurant restaurant = get(restaurantId);
         Picture currentPicture = restaurant.getPicture();
@@ -771,7 +769,8 @@ public class RestaurantService {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
+
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
     public Picture updateFoodPicture(Long restaurantId, Long foodId, Picture updatedPicture,
             MultipartFile file) {
         Food food = getFood(restaurantId, foodId);

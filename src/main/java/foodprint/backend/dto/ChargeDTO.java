@@ -1,15 +1,38 @@
 package foodprint.backend.dto;
 
 public class ChargeDTO {
-    public String Id;
-    public String status;
-    public String balance_transaction;
+    private String id;
+    private String status;
+    private String balanceTransaction;
 
-    public ChargeDTO(String id, String status, String balance_transaction) {
-        this.Id = id;
+    public ChargeDTO(String id, String status, String balanceTransaction) {
+        this.id = id;
         this.status = status;
-        this.balance_transaction = balance_transaction;
+        this.balanceTransaction = balanceTransaction;
     }
 
-    
+    public String getId() {
+        return this.id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getStatus() {
+        return this.status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getBalanceTransaction() {
+        return this.balanceTransaction;
+    }
+
+    public void setBalanceTransaction(String balanceTransaction) {
+        this.balanceTransaction = balanceTransaction;
+    }
+
 }

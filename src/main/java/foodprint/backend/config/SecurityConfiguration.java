@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -33,9 +35,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private UserRepo userRepo;
     private JwtTokenFilter jwtTokenFilter;
     private BypassSecurityFilter bypassSecurityFilter;
+    private final Logger loggr = LoggerFactory.getLogger(this.getClass());
 
     @Value("${security.bypass}")
-    private boolean SECURITY_BYPASSED;
+    private boolean securityBypassed;
 
     @Bean
     public PasswordEncoder encoder() {
@@ -73,9 +76,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage())
         ).and();
 
-        if (SECURITY_BYPASSED) {
+        if (securityBypassed) {
 
-            System.out.println("SECURITY IS BYPASSED!!!");
+            loggr.info("SECURITY IS BYPASSED!!!");
 
             http.authorizeRequests()
                 .anyRequest()
