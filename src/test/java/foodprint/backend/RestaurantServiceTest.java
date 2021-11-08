@@ -1,9 +1,11 @@
 package foodprint.backend;
 
+import foodprint.backend.dto.EditFoodDTO;
 import foodprint.backend.dto.FoodDTO;
 import foodprint.backend.dto.FoodIngredientQuantityDTO;
 import foodprint.backend.exceptions.DeleteFailedException;
 import foodprint.backend.exceptions.NotFoundException;
+import foodprint.backend.exceptions.AlreadyExistsException;
 import foodprint.backend.model.Discount;
 import foodprint.backend.model.DiscountRepo;
 import foodprint.backend.model.Food;
@@ -107,6 +109,7 @@ public class RestaurantServiceTest {
     private LocalDateTime end;
     private LocalDate endDate;
     private HashMap<String, Integer> map;
+    private EditFoodDTO editFoodDTO;
     private Set<FoodIngredientQuantity> foodIngreQuantitySet;
     private FoodIngredientQuantity foodIngredientQuantity;
 
@@ -162,6 +165,7 @@ public class RestaurantServiceTest {
         foodIngreQuantitySet = new HashSet<>();
         foodIngredientQuantity = new FoodIngredientQuantity(food, ingredient, 1);
         foodIngreQuantitySet.add(foodIngredientQuantity);
+        editFoodDTO = new EditFoodDTO();
         ReflectionTestUtils.setField(restaurant, "restaurantId", restaurantId);
         ReflectionTestUtils.setField(ingredient, "ingredientId", ingredientId);
         ReflectionTestUtils.setField(food, "foodId", foodId);
@@ -329,7 +333,7 @@ public class RestaurantServiceTest {
         when(foodRepo.saveAndFlush(any(Food.class))).thenReturn(food);
 
         restaurantService.create(restaurant);
-        restaurantService.updateFood(restaurantId, foodId, food);
+        restaurantService.editFood(restaurantId, foodId, editFoodDTO);
 
         verify(foodRepo).findById(foodId);
         verify(foodRepo).saveAndFlush(food);
@@ -337,14 +341,14 @@ public class RestaurantServiceTest {
 
     @Test
     void updateFood_FoodDoNotExist_Return() {
-        Food anotherFood = new Food("Sushi", 20.0, 10.0);
+        EditFoodDTO anotherEditedFood = new EditFoodDTO();
         Long anotherFoodId = 2L;
 
         when(foodRepo.findById(any(Long.class))).thenReturn(Optional.empty());
 
         restaurantService.create(restaurant);
         try {
-            restaurantService.updateFood(restaurantId, anotherFoodId, anotherFood);
+            restaurantService.editFood(restaurantId, anotherFoodId, anotherEditedFood);
         } catch(NotFoundException e) {
             assertEquals("Food requested could not be found", e.getMessage());
         }
@@ -360,7 +364,7 @@ public class RestaurantServiceTest {
 
         restaurantService.create(restaurant);
         try {
-            restaurantService.updateFood(anotherRestaurantId, foodId, food);
+            restaurantService.editFood(anotherRestaurantId, foodId, editFoodDTO);
         } catch (NotFoundException e) {
             assertEquals("Food requested could not be found at this restaurant", e.getMessage());
         }
@@ -454,6 +458,19 @@ public class RestaurantServiceTest {
         assertNotNull(savedDiscount);
         verify(repo).findByRestaurantId(restaurantId);
         verify(discountRepo).saveAndFlush(any(Discount.class));
+    }
+
+    @Test
+    void createDiscount_DiscountAlreadyExist_ReturnError() {
+        when(repo.findByRestaurantId(any(Long.class))).thenReturn(restaurant);
+
+        try {
+            restaurantService.createDiscount(restaurantId, discount);
+        } catch (AlreadyExistsException e) {
+            assertEquals("Discount already exist", e.getMessage());
+        }
+
+        verify(repo).findByRestaurantId(restaurantId);
     }
 
     @Test
