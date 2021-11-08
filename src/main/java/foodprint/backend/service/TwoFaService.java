@@ -25,7 +25,9 @@ public class TwoFaService {
     private static Logger loggr = LoggerFactory.getLogger(TwoFaService.class);
     
     public static final String QR_PREFIX = "https://chart.googleapis.com/chart?chs=200x200&chld=M%%7C0&cht=qr&chl=";
-    public int TOKEN_LENGTH = 6;
+    public static final int tokenLength = 6;
+
+    private static final String userNotFound = "User not found";
 
     public boolean checkEmailHas2FA(String email) {
 
@@ -36,11 +38,7 @@ public class TwoFaService {
         }
         User user = optUser.get();
 
-        if (user.getTwoFaSecret() == null || user.getTwoFaSecret().equals("")) {
-            return false;
-        }
-
-        return true;
+        return !(user.getTwoFaSecret() == null || user.getTwoFaSecret().equals(""));
     }
 
     public String generateQRUrl(String userEmail, String twoFaSecret) {
@@ -71,7 +69,7 @@ public class TwoFaService {
 
     public String setup(Principal principal) {
         String email = principal.getName();
-        User user = userRepo.findByEmail(email).orElseThrow(() ->  new NotFoundException("User not found"));
+        User user = userRepo.findByEmail(email).orElseThrow(() ->  new NotFoundException(userNotFound));
 
         if (user.isTwoFaSet()) {
             throw new InvalidException("2FA already enabled.");
@@ -81,13 +79,12 @@ public class TwoFaService {
         user.setTwoFaSecret(secret);
         userRepo.saveAndFlush(user);
         
-        String qrUrl = generateQRUrl(email, secret);
-        return qrUrl;
+        return generateQRUrl(email, secret);
     }
 
     public void confirm(String token, Principal principal) {
         String email = principal.getName();
-        User user = userRepo.findByEmail(email).orElseThrow(() ->  new NotFoundException("User not found"));
+        User user = userRepo.findByEmail(email).orElseThrow(() ->  new NotFoundException(userNotFound));
         String twoFaSecret = user.getTwoFaSecret();
 
         if (!validToken(token)) {
@@ -114,7 +111,7 @@ public class TwoFaService {
 
     public void disable(String token, Principal principal) {
         String email = principal.getName();
-        User user = userRepo.findByEmail(email).orElseThrow(() ->  new NotFoundException("User not found"));
+        User user = userRepo.findByEmail(email).orElseThrow(() ->  new NotFoundException(userNotFound));
         String twoFaSecret = user.getTwoFaSecret();
 
         if (!validToken(token)) {
@@ -137,9 +134,6 @@ public class TwoFaService {
     }
 
     public boolean validToken(String token) {
-        if (token.length() != TOKEN_LENGTH || !token.matches("[0-9]+")) {
-            return false;
-        }
-        return true;
+        return !(token.length() != tokenLength || !token.matches("[0-9]+"));
     }
 }

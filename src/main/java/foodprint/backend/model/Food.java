@@ -1,5 +1,6 @@
 package foodprint.backend.model;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -60,7 +61,7 @@ public class Food {
     private Double foodDiscount;
 
     @OneToMany(mappedBy = "food", cascade = CascadeType.ALL)
-    private Set<FoodIngredientQuantity> foodIngredientQuantity;
+    private Set<FoodIngredientQuantity> foodIngredientQuantity = new HashSet<FoodIngredientQuantity>();
 
     @JsonIgnore
     @OneToMany(mappedBy = "food", cascade = CascadeType.ALL, orphanRemoval = true)

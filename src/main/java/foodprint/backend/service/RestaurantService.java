@@ -441,7 +441,6 @@ public class RestaurantService {
             Discount discount = discountRepo.getById(discountId);
             if (discount.getRestaurant().getRestaurantId().equals(restaurantId)) {
                 discountRepo.delete(discount);
-                return;
             } else {
                 throw new NotFoundException("Discount found but not in correct restaurant");
             }

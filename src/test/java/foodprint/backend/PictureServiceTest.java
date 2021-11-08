@@ -76,18 +76,6 @@ public class PictureServiceTest {
     }
 
     @Test
-    void getAllPictures_PicturesFound_ReturnPictureList() {
-        List<Picture> pictureList = new ArrayList<>();
-        pictureList.add(picture);
-
-        when(pictureRepo.findAll()).thenReturn(pictureList);
-
-        List<Picture> getAllPictures = pictureService.getAllPictures();
-        assertNotNull(getAllPictures);
-        verify(pictureRepo).findAll();
-    }
-
-    @Test
     void getPictureById_PictureFound_ReturnStringUrl() {
         ReflectionTestUtils.setField(picture, "pictureId", pictureId);
 

@@ -107,18 +107,18 @@ public class Ingredient {
     }
 
     public List<String> getPicturesPath() {
-        if (picturesPath == null) {
-            return new ArrayList<String>();
+        if (this.picturesPath == null) {
+            return new ArrayList<>();
         }
 
-        String[] arr = picturesPath.split(",");
+        String[] arr = this.picturesPath.split(",");
         return Arrays.asList(arr);
     }
 
     public void setPicturesPath(List<String> list) {
         if (!list.isEmpty()) {
-            String picturesPath = String.join(",", list);
-            this.picturesPath = picturesPath;
+            String picPath = String.join(",", list);
+            this.picturesPath = picPath;
         }
     }
 
