@@ -763,7 +763,7 @@ public class RestaurantService {
             
             restaurant.setPicture(currentPicture);
             repo.saveAndFlush(restaurant);
-            return currentPicture = pictureService.updatedPicture(currentPicture.getId(), currentPicture);
+            return pictureService.updatedPicture(currentPicture.getId(), currentPicture);
         } else {
             throw new NotFoundException(PICTURE_NOT_FOUND_MESSAGE);
         }
@@ -788,7 +788,7 @@ public class RestaurantService {
             }
             food.setPicture(currentPicture);
             foodRepo.saveAndFlush(food);
-            return currentPicture = pictureService.updatedPicture(currentPicture.getId(), currentPicture);
+            return pictureService.updatedPicture(currentPicture.getId(), currentPicture);
         } else {
             throw new NotFoundException(PICTURE_NOT_FOUND_MESSAGE);
         }
