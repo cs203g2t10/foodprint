@@ -1,5 +1,6 @@
 package foodprint.backend.controller;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import javax.annotation.Nullable;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,6 +30,7 @@ import foodprint.backend.dto.CreateReservationDTO;
 import foodprint.backend.dto.LineItemDTO;
 import foodprint.backend.dto.ReservationDTO;
 import foodprint.backend.dto.NamedLineItemDTO;
+import foodprint.backend.exceptions.BadRequestException;
 import foodprint.backend.exceptions.InsufficientPermissionsException;
 import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.Food;
@@ -126,6 +130,27 @@ public class ReservationController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
+    // GET: Upcoming reservations for restaurant
+    @GetMapping("/restaurant/{restaurantId}")
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Gets all upcoming reservations for a restaurant between two dates")
+    public ResponseEntity<Page<ReservationDTO>> getRestaurantReservations(
+        @PathVariable("restaurantId") Long restaurantId,
+        @RequestParam(name="after", required=true) String afterStr, 
+        @RequestParam(name="before", required=true) String beforeStr,
+        @RequestParam(name="p", defaultValue="0") int page
+    ) {
+        Restaurant restaurant = restaurantService.get(restaurantId);
+        LocalDateTime after = LocalDate.parse(afterStr).atStartOfDay();
+        LocalDateTime before = LocalDate.parse(beforeStr).atStartOfDay();
+        if (after.isAfter(before)) {
+            throw new BadRequestException("Start date should be before end date");
+        }
+        Page<Reservation> reservations = reservationService.getRestaurantUpcomingReservations(restaurant, after, before, page);
+        Page<ReservationDTO> reservationDTOs = reservations.map(this::convertToDTO);
+        return new ResponseEntity<>(reservationDTOs,HttpStatus.OK);
+    }
+
     // GET: Get all reservations
     @GetMapping({ "/admin/all" })
     @ResponseStatus(code = HttpStatus.OK)
@@ -147,7 +172,6 @@ public class ReservationController {
         } catch (NotFoundException e) {
             return new ResponseEntity<>(null, HttpStatus.NOT_ACCEPTABLE);
         }
-
     }
 
     // PUT: Update reservation (DTO)
