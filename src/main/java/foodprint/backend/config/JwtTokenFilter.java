@@ -28,10 +28,10 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     private final JwtTokenUtil jwtTokenUtil;
     private final UserRepo userRepo;
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger loggr = LoggerFactory.getLogger(this.getClass());
 
     @Value("${security.bypass}")
-    private boolean SECURITY_BYPASSED;
+    private boolean securityBypassed;
 
     @Autowired
     public JwtTokenFilter(JwtTokenUtil jwtTokenUtil, UserRepo userRepo) {
@@ -45,7 +45,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                                     FilterChain chain)
             throws ServletException, IOException {
 
-        if (SECURITY_BYPASSED) {
+        if (securityBypassed) {
             // skip this filter if security is bypassed
             chain.doFilter(request, response);
             return;
@@ -55,12 +55,10 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
         if (authHeader == null) {
-            logger.warn("Authorization header missing");
+            loggr.warn("Authorization header missing");
             chain.doFilter(request, response);
             return;
         }
-
-        // logger.info(authHeader);
 
         if (authHeader.isEmpty() || !authHeader.startsWith("Bearer ")) {
             chain.doFilter(request, response);
@@ -70,7 +68,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         // Get jwt token and validate
         final String token = authHeader.split(" ")[1].trim();
         if (!jwtTokenUtil.validate(token)) {
-            logger.warn("JWT VALIDATION FAILED");
+            loggr.warn("JWT VALIDATION FAILED");
             chain.doFilter(request, response);
             return;
         }
@@ -85,11 +83,17 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             userDetails == null ? List.of() : userDetails.getAuthorities()
         );
 
+        if (userDetails == null) {
+            loggr.warn("Auth Error - userDetails is null");
+            chain.doFilter(request, response);
+            return;
+        }
+
         authentication.setDetails(
             new WebAuthenticationDetailsSource().buildDetails(request)
         );
 
-        logger.info("Auth OK - Email: {}: - Authorities: {}", userDetails.getUsername(), userDetails.getAuthorities());
+        loggr.info("Auth OK - Email: {}: - Authorities: {}", userDetails.getUsername(), userDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
         chain.doFilter(request, response);
     }

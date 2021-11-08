@@ -3,10 +3,14 @@ package foodprint.backend.service;
 import java.util.Optional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -39,21 +43,17 @@ public class ReservationService {
     }
 
     /**
-     * Checks if a slot is available for a given date and time.
+     * Checks if a slot is available for a given date and time
      * @param restaurant
      * @param date
-     * @return boolean value
+     * @return
      */
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public boolean slotAvailable(Restaurant restaurant, LocalDateTime date) {
         // assumes that duration of slot is 1 hour
         LocalDateTime endTime = date.plusHours(1);
         List<Reservation> reservations = reservationRepo.findByRestaurantAndDateBetween(restaurant, date, endTime);
-        if (reservations.size() < restaurant.getRestaurantTableCapacity()) {
-            return true;
-        } else {
-            return false;
-        }
+        return reservations.size() < restaurant.getRestaurantTableCapacity();
     }
 
 
@@ -75,8 +75,7 @@ public class ReservationService {
      */
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public List<Reservation> getAllReservationByUser(User user) {
-        List<Reservation> reservationList = reservationRepo.findByUser(user);
-        return reservationList;
+        return reservationRepo.findByUser(user);
     }
 
     /**
@@ -115,31 +114,28 @@ public class ReservationService {
         return result;
     }
 
-
     /**
-     * Gets all the 
-     * @param id
+     * Gets the upcoming reservations for a restaurant between two dates
+     * @param restaurant
+     * @param startDate
+     * @param endDate
+     * @param pageNumber
      * @return
      */
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
-    public List<LineItem> getLineItemsByReservationId(Long id) {
-        Optional<Reservation> reservation = reservationRepo.findById(id);
-        if (reservation.isEmpty()) {
-            throw new NotFoundException("Reservation not found");
-        }
-        return reservation.get().getLineItems();
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
+    public Page<Reservation> getRestaurantUpcomingReservations(Restaurant restaurant, LocalDateTime after, LocalDateTime before, int pageNumber) {
+        Pageable pageReq = PageRequest.of(pageNumber, 10);
+        return reservationRepo.findByRestaurantAndDateBetween(pageReq, restaurant, after, before);
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN')")
     public List<Reservation> getAllReservationSlots() {
-        List<Reservation> reservationList = reservationRepo.findAll();
-        return reservationList;
+        return reservationRepo.findAll();
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
     public List<Reservation> getAllReservationByRestaurant(Restaurant restaurant) {
-        List<Reservation> reservationList = reservationRepo.findByRestaurant(restaurant);
-        return reservationList;
+        return reservationRepo.findByRestaurant(restaurant);
     }
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
@@ -177,8 +173,8 @@ public class ReservationService {
 
         // Just to save
         List<LineItem> savedLineItems = new ArrayList<>();
-        for (Food key : lineItemsHashMap.keySet()) {
-            LineItem savedLineItem = new LineItem(key, reservation, lineItemsHashMap.get(key));
+        for (Map.Entry<Food, Integer> entry : lineItemsHashMap.entrySet()) {
+            LineItem savedLineItem = new LineItem(entry.getKey(), reservation, entry.getValue());
             savedLineItems.add(savedLineItem);
         }
 
@@ -230,14 +226,13 @@ public class ReservationService {
 
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN')")
     public void delete(Reservation reservation) {
         reservationRepo.delete(reservation);
-        return;
     }
 
     public List<LocalDateTime> getAllAvailableSlotsByDateAndRestaurant(Long restaurantId, String date) {
-        List<LocalDateTime> availableSlots = new ArrayList<LocalDateTime>();
+        List<LocalDateTime> availableSlots = new ArrayList<>();
         Restaurant restaurant = restaurantService.get(restaurantId);
 
         LocalDate localDate = LocalDate.parse(date);

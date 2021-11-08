@@ -39,7 +39,7 @@ public class VaccinationController {
     @PostMapping(path = {"/validate/{userId}"}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Upload the vaccination cert for verification")
-    private ResponseEntity<VaccinationResponseDTO> validateVaccinationCert(
+    public ResponseEntity<VaccinationResponseDTO> validateVaccinationCert(
         @PathVariable("userId") Long userId,
         @RequestParam("file") MultipartFile file
     ) {
@@ -50,16 +50,16 @@ public class VaccinationController {
             String vaccineCertString = new String(file.getBytes());
             vaccinationService.validateVaccination(currentUser, vaccineCertString);
         } catch (VaccinationValidationException e) {
-            return new ResponseEntity<VaccinationResponseDTO>(new VaccinationResponseDTO("Error", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new VaccinationResponseDTO("Error", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (IOException e) {
-            return new ResponseEntity<VaccinationResponseDTO>(HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         
         currentUser = userService.unprotectedGetUser(userId);
         if (currentUser.isVaccinated()) {
-            return new ResponseEntity<VaccinationResponseDTO>(new VaccinationResponseDTO("Vaccinated", "Vaccination certified for " + currentUser.getVaccinationName()), HttpStatus.OK);
+            return new ResponseEntity<>(new VaccinationResponseDTO("Vaccinated", "Vaccination certified for " + currentUser.getVaccinationName()), HttpStatus.OK);
         } else {
-            return new ResponseEntity<VaccinationResponseDTO>(new VaccinationResponseDTO("Unvaccinated", "An error occurred and validation failed."), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new VaccinationResponseDTO("Unvaccinated", "An error occurred and validation failed."), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         

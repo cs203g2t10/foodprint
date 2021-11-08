@@ -20,7 +20,7 @@ public class BackendApplication {
 	@Value("${server.port}")
 	int serverPort;
 
-	private Logger logger = LoggerFactory.getLogger(BackendApplication.class);
+	private Logger loggr = LoggerFactory.getLogger(BackendApplication.class);
 
 	public static void main(String[] args) {
 		SpringApplication.run(BackendApplication.class, args);
@@ -30,11 +30,11 @@ public class BackendApplication {
 	public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
 		return args -> {
 
-			logger.info("Inspect the beans provided by Spring Boot:");
+			loggr.info("Inspect the beans provided by Spring Boot:");
 			String[] beanNames = ctx.getBeanDefinitionNames();
 			Arrays.sort(beanNames);
-			logger.info("There are " + beanNames.length + " beans in total");
-			logger.info("Site should be up at (ctrl-click): http://{}:{}/swagger", 
+			loggr.info("There are " + beanNames.length + " beans in total");
+			loggr.info("Site should be up at (ctrl-click): http://{}:{}/swagger", 
 				InetAddress.getLocalHost().getHostAddress(), 
 				serverPort
 			);

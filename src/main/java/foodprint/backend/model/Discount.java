@@ -6,7 +6,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.validation.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -29,7 +29,7 @@ public class Discount {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long discountId;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "restaurantId")
     @Schema(defaultValue="1")
     private Restaurant restaurant;
@@ -42,7 +42,6 @@ public class Discount {
 
     @Column(name = "discountPercentage")
     @Schema(defaultValue="50")
-    @NotEmpty
     private Integer discountPercentage;
 
     public Discount() {}

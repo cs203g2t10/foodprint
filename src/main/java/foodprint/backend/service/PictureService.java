@@ -6,10 +6,8 @@ import static org.apache.http.entity.ContentType.IMAGE_JPEG;
 import static org.apache.http.entity.ContentType.IMAGE_PNG;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -41,7 +39,7 @@ public class PictureService  {
         return picture.orElseThrow(() -> new NotFoundException("Picture not found"));
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
     public Picture savePicture(String title, String description, MultipartFile file) {
 
         // Check if the file is empty
@@ -81,16 +79,8 @@ public class PictureService  {
     }
 
     public byte[] downloadPictureImage(Long id) {
-        Picture picture = repository.findById(id).get();
+        Picture picture = repository.findById(id).orElseThrow(() -> new NotFoundException("Image with this ID was not found"));
         return fileStore.download(picture.getImagePath(), picture.getImageFileName());
-    }
-
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
-    public List<Picture> getAllPictures() {
-        List<Picture> pictures = new ArrayList<>();
-        repository.findAll().forEach(pictures::add);
-        return 
-        pictures;
     }
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
@@ -100,11 +90,10 @@ public class PictureService  {
             throw new NotFoundException("Picture not found.");
         }
         
-        String url = String.format("%s%s/%s", "https://foodprint-amazon-storage.s3.ap-southeast-1.amazonaws.com/", picture.get().getImagePath(), picture.get().getImageFileName().replace(" ", "+"));
-        return url;
+        return String.format("%s%s/%s", "https://foodprint-amazon-storage.s3.ap-southeast-1.amazonaws.com/", picture.get().getImagePath(), picture.get().getImageFileName().replace(" ", "+"));
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
     public void deletePicture(Long id) {
         Picture picture = get(id);
         repository.delete(picture);
@@ -116,12 +105,11 @@ public class PictureService  {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
     public Picture updatedPicture(Long pictureId, Picture newPicture) {
         Picture oldPicture = get(pictureId);
         oldPicture.setDescription(newPicture.getDescription());
         oldPicture.setTitle(newPicture.getTitle());
-        oldPicture = repository.saveAndFlush(oldPicture);
-        return oldPicture;
+        return repository.saveAndFlush(oldPicture);
     }
 }
