@@ -136,9 +136,12 @@ public class AuthenticationService {
      */
     public Boolean check2faSet(String email) {
         if (!email.matches(emlRegex)) {
-            throw new InvalidException("Invalid email format.");
+            return false;
         }
-        User user = userRepo.findByEmail(email).orElseThrow(() ->  new NotFoundException("User not found"));
+        User user = userRepo.findByEmail(email).orElse(null);
+        if (user == null) {
+            return false;
+        }
         return user.isTwoFaSet();
     }
 
@@ -164,7 +167,7 @@ public class AuthenticationService {
             throw new InvalidException("Invalid token format.");
         }
         String twoFaSecret = user.getTwoFaSecret();
-        Boolean OtpOk = twoFaService.validate(twoFaSecret, token);
+        boolean OtpOk = twoFaService.validate(twoFaSecret, token);
 
         if (!OtpOk) {
             throw new InvalidException("Incorrect OTP entered.");

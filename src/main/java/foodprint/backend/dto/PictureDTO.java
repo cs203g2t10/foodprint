@@ -1,5 +1,6 @@
 package foodprint.backend.dto;
 
+
 public class PictureDTO {
 
     private String title;
@@ -13,6 +14,10 @@ public class PictureDTO {
         this.description = description;
         this.url = url;
     }
+
+    public PictureDTO() {
+    }
+
 
     public String getTitle() {
         return this.title;
@@ -30,6 +35,7 @@ public class PictureDTO {
         this.description = description;
     }
 
+
     public String getUrl() {
         return this.url;
     }
@@ -38,5 +44,5 @@ public class PictureDTO {
         this.url = url;
     }
     
-    
+
 }

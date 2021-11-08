@@ -130,11 +130,35 @@
 			<artifactId>modelmapper</artifactId>
 			<version>2.4.2</version>
 		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.sonarsource.scanner.maven/sonar-maven-plugin -->
+		<dependency>
+			<groupId>org.sonarsource.scanner.maven</groupId>
+			<artifactId>sonar-maven-plugin</artifactId>
+			<version>3.9.0.2155</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.jacoco/jacoco-maven-plugin -->
+		<dependency>
+			<groupId>org.jacoco</groupId> 
+			<artifactId>jacoco-maven-plugin</artifactId>
+			<version>0.8.7</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/com.google.code.findbugs/jsr305 -->
+		<dependency>
+			<groupId>com.google.code.findbugs</groupId>
+			<artifactId>jsr305</artifactId>
+			<version>3.0.2</version>
+		</dependency>
 		
 	</dependencies>
 
 	<build>
+
 		<plugins>
+
+			<!-- Additional configuration file settings for secrets.properties -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
@@ -144,7 +168,62 @@
 					</arguments>
 				</configuration>
 			</plugin>
+
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacoco.version}</version>
+				    <configuration>
+					<excludes>
+						<!-- only test for service classes -->
+						<exclude>foodprint/backend/dto/*</exclude>
+						<exclude>foodprint/backend/config/*</exclude>
+						<exclude>foodprint/backend/exceptions/*</exclude>
+						<exclude>foodprint/backend/model/*</exclude>
+						<exclude>foodprint/backend/BackendApplication.*</exclude>
+					</excludes>
+				</configuration>
+				<executions>
+					<execution>
+						<id>jacoco-initialize</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>jacoco-site</id>
+						<phase>package</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
 		</plugins>
+
+
+
 	</build>
 
+	<profiles>
+		<profile>
+			<id>sonar</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<!-- Optional URL to server. Default value is http://localhost:9000 -->
+				<sonar.host.url>https://sonar.foodprint.works/</sonar.host.url>
+				<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+				<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+				<sonar.language>java</sonar.language>
+				<sonar.coverage.exclusions>
+					**/dto/*,**/config/*,**/exceptions/*,**/model/*,**/BackendApplication.*
+				</sonar.coverage.exclusions>
+				<!-- JaCoCo Properties -->
+				<jacoco.version>0.8.7</jacoco.version>
+			</properties>
+		</profile>
+	</profiles>
 </project>

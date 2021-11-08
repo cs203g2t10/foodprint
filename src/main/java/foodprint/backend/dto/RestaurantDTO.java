@@ -7,7 +7,6 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 
-import com.stripe.model.Discount;
 
 import org.hibernate.validator.constraints.Length;
 
@@ -81,18 +80,16 @@ public class RestaurantDTO {
     @Max(59)
     private Integer restaurantWeekendClosingMinutes;
 
-    @NotEmpty
-    @Length(min=1)
-    private List<String> restaurantCategory;
+    private List<@NotEmpty @Length(min=1) String> restaurantCategory;
 
-    private List<PictureDTO> pictures;
+    private PictureDTO picture;
 
-    private List<DiscountDTO> discounts;
+    private DiscountDTO discount;
 
     public RestaurantDTO() {
     }
 
-    public RestaurantDTO(Long restaurantId, String restaurantName, String restaurantLocation, String restaurantDesc, Integer restaurantPriceRange, Integer restaurantTableCapacity, Integer restaurantWeekdayOpeningHour, Integer restaurantWeekdayOpeningMinutes, Integer restaurantWeekdayClosingHour, Integer restaurantWeekdayClosingMinutes, Integer restaurantWeekendOpeningHour, Integer restaurantWeekendOpeningMinutes, Integer restaurantWeekendClosingHour, Integer restaurantWeekendClosingMinutes, List<PictureDTO> pictures, List<DiscountDTO> discounts) {
+    public RestaurantDTO(Long restaurantId, String restaurantName, String restaurantLocation, String restaurantDesc, Integer restaurantPriceRange, Integer restaurantTableCapacity, Integer restaurantWeekdayOpeningHour, Integer restaurantWeekdayOpeningMinutes, Integer restaurantWeekdayClosingHour, Integer restaurantWeekdayClosingMinutes, Integer restaurantWeekendOpeningHour, Integer restaurantWeekendOpeningMinutes, Integer restaurantWeekendClosingHour, Integer restaurantWeekendClosingMinutes, PictureDTO picture, DiscountDTO discount) {
         this.restaurantId = restaurantId;
         this.restaurantName = restaurantName;
         this.restaurantLocation = restaurantLocation;
@@ -107,8 +104,8 @@ public class RestaurantDTO {
         this.restaurantWeekendOpeningMinutes = restaurantWeekendOpeningMinutes;
         this.restaurantWeekendClosingHour = restaurantWeekendClosingHour;
         this.restaurantWeekendClosingMinutes = restaurantWeekendClosingMinutes;
-        this.pictures = pictures;
-        this.discounts = discounts;
+        this.picture = picture;
+        this.discount = discount;
     }
 
     public Long getRestaurantId() {
@@ -227,20 +224,20 @@ public class RestaurantDTO {
         return this.restaurantCategory;
     }
 
-    public List<PictureDTO> getPictures() {
-        return this.pictures;
+    public PictureDTO getPicture() {
+        return this.picture;
     }
 
-    public void setPictures(List<PictureDTO> pictures) {
-        this.pictures = pictures;
+    public void setPicture(PictureDTO picture) {
+        this.picture = picture;
     }
 
-    public List<DiscountDTO> getDiscounts() {
-        return this.discounts;
+    public DiscountDTO getDiscount() {
+        return this.discount;
     }
 
-    public void setDiscounts(List<DiscountDTO> discounts) {
-        this.discounts = discounts;
+    public void setDiscount(DiscountDTO discount) {
+        this.discount = discount;
     }
 
     public RestaurantDTO restaurantId(Long restaurantId) {
@@ -313,13 +310,13 @@ public class RestaurantDTO {
         return this;
     }
 
-    public RestaurantDTO pictures(List<PictureDTO> pictures) {
-        setPictures(pictures);
+    public RestaurantDTO pictures(PictureDTO picture) {
+        setPicture(picture);
         return this;
     }
 
-    public RestaurantDTO discounts(List<DiscountDTO> discounts) {
-        setDiscounts(discounts);
+    public RestaurantDTO discount(DiscountDTO discount) {
+        setDiscount(discount);
         return this;
     }
 
@@ -331,12 +328,12 @@ public class RestaurantDTO {
             return false;
         }
         RestaurantDTO restaurantDTO = (RestaurantDTO) o;
-        return Objects.equals(restaurantId, restaurantDTO.restaurantId) && Objects.equals(restaurantName, restaurantDTO.restaurantName) && Objects.equals(restaurantLocation, restaurantDTO.restaurantLocation) && Objects.equals(restaurantDesc, restaurantDTO.restaurantDesc) && Objects.equals(restaurantPriceRange, restaurantDTO.restaurantPriceRange) && Objects.equals(restaurantTableCapacity, restaurantDTO.restaurantTableCapacity) && Objects.equals(restaurantWeekdayOpeningHour, restaurantDTO.restaurantWeekdayOpeningHour) && Objects.equals(restaurantWeekdayOpeningMinutes, restaurantDTO.restaurantWeekdayOpeningMinutes) && Objects.equals(restaurantWeekdayClosingHour, restaurantDTO.restaurantWeekdayClosingHour) && Objects.equals(restaurantWeekdayClosingMinutes, restaurantDTO.restaurantWeekdayClosingMinutes) && Objects.equals(restaurantWeekendOpeningHour, restaurantDTO.restaurantWeekendOpeningHour) && Objects.equals(restaurantWeekendOpeningMinutes, restaurantDTO.restaurantWeekendOpeningMinutes) && Objects.equals(restaurantWeekendClosingHour, restaurantDTO.restaurantWeekendClosingHour) && Objects.equals(restaurantWeekendClosingMinutes, restaurantDTO.restaurantWeekendClosingMinutes) && Objects.equals(pictures, restaurantDTO.pictures);
+        return Objects.equals(restaurantId, restaurantDTO.restaurantId) && Objects.equals(restaurantName, restaurantDTO.restaurantName) && Objects.equals(restaurantLocation, restaurantDTO.restaurantLocation) && Objects.equals(restaurantDesc, restaurantDTO.restaurantDesc) && Objects.equals(restaurantPriceRange, restaurantDTO.restaurantPriceRange) && Objects.equals(restaurantTableCapacity, restaurantDTO.restaurantTableCapacity) && Objects.equals(restaurantWeekdayOpeningHour, restaurantDTO.restaurantWeekdayOpeningHour) && Objects.equals(restaurantWeekdayOpeningMinutes, restaurantDTO.restaurantWeekdayOpeningMinutes) && Objects.equals(restaurantWeekdayClosingHour, restaurantDTO.restaurantWeekdayClosingHour) && Objects.equals(restaurantWeekdayClosingMinutes, restaurantDTO.restaurantWeekdayClosingMinutes) && Objects.equals(restaurantWeekendOpeningHour, restaurantDTO.restaurantWeekendOpeningHour) && Objects.equals(restaurantWeekendOpeningMinutes, restaurantDTO.restaurantWeekendOpeningMinutes) && Objects.equals(restaurantWeekendClosingHour, restaurantDTO.restaurantWeekendClosingHour) && Objects.equals(restaurantWeekendClosingMinutes, restaurantDTO.restaurantWeekendClosingMinutes) && Objects.equals(picture, restaurantDTO.picture);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(restaurantId, restaurantName, restaurantLocation, restaurantDesc, restaurantPriceRange, restaurantTableCapacity, restaurantWeekdayOpeningHour, restaurantWeekdayOpeningMinutes, restaurantWeekdayClosingHour, restaurantWeekdayClosingMinutes, restaurantWeekendOpeningHour, restaurantWeekendOpeningMinutes, restaurantWeekendClosingHour, restaurantWeekendClosingMinutes, pictures);
+        return Objects.hash(restaurantId, restaurantName, restaurantLocation, restaurantDesc, restaurantPriceRange, restaurantTableCapacity, restaurantWeekdayOpeningHour, restaurantWeekdayOpeningMinutes, restaurantWeekdayClosingHour, restaurantWeekdayClosingMinutes, restaurantWeekendOpeningHour, restaurantWeekendOpeningMinutes, restaurantWeekendClosingHour, restaurantWeekendClosingMinutes, picture);
     }
 
     @Override
@@ -356,11 +353,9 @@ public class RestaurantDTO {
             ", restaurantWeekendOpeningMinutes='" + getRestaurantWeekendOpeningMinutes() + "'" +
             ", restaurantWeekendClosingHour='" + getRestaurantWeekendClosingHour() + "'" +
             ", restaurantWeekendClosingMinutes='" + getRestaurantWeekendClosingMinutes() + "'" +
-            ", pictures='" + getPictures() + "'" +
+            ", picture='" + getPicture() + "'" +
             "}";
     }
-
-
 
     public void setRestaurantCategory(List<String> restaurantCategory) {
         this.restaurantCategory = restaurantCategory;

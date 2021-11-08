@@ -48,8 +48,6 @@ public class FileStore {
             var objRequest = new PutObjectRequest(path, fileName, inputStream, objectMetadata)
                                             .withCannedAcl(CannedAccessControlList.PublicRead);
             amazonS3.putObject(objRequest);
-            // String publicURL = ((AmazonS3Client) amazonS3).getResourceUrl("foodprint-amazon-storage", fileName);
-            // System.out.println(publicURL);
         } catch (AmazonServiceException e) {
             throw new IllegalStateException("Failed to upload the file", e);
         }

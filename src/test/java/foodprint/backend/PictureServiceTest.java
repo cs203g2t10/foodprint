@@ -10,8 +10,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
-import java.util.List;
-import java.util.ArrayList;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -73,18 +71,6 @@ public class PictureServiceTest {
         }
         
         verify(pictureRepo).findById(pictureId);
-    }
-
-    @Test
-    void getAllPictures_PicturesFound_ReturnPictureList() {
-        List<Picture> pictureList = new ArrayList<>();
-        pictureList.add(picture);
-
-        when(pictureRepo.findAll()).thenReturn(pictureList);
-
-        List<Picture> getAllPictures = pictureService.getAllPictures();
-        assertNotNull(getAllPictures);
-        verify(pictureRepo).findAll();
     }
 
     @Test
