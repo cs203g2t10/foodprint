@@ -512,7 +512,7 @@ public class RestaurantController {
         
         Picture picture = restaurant.getPicture();
         if (picture != null) {
-            PictureDTO picDto = new PictureDTO(picture.getTitle(), picture.getDescription(), picture.getUr);
+            PictureDTO picDto = new PictureDTO(picture.getTitle(), picture.getDescription(), picture.getUrl());
             dto.setPicture(picDto);
         }
 
