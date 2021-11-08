@@ -314,38 +314,6 @@ public class RestaurantService {
      * @return
      */
     @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
-    public Food updateFood(Long restaurantId, Long foodId, Food updatedFood) {
-        Food originalFood = foodRepo.findById(foodId)
-                .orElseThrow(() -> new NotFoundException("Food requested could not be found"));
-        if (originalFood.getRestaurant().getRestaurantId().longValue() != restaurantId) {
-            throw new NotFoundException("Food requested could not be found at this restaurant");
-        }
-
-        if (updatedFood.getFoodName() != null) {
-            originalFood.setFoodName(updatedFood.getFoodName());
-        }
-
-        if (updatedFood.getFoodDesc() != null) {
-            originalFood.setFoodDesc(updatedFood.getFoodDesc());
-        }
-
-        if (updatedFood.getFoodDiscount() != null) {
-            originalFood.setFoodDiscount(updatedFood.getFoodDiscount());
-        }
-
-        if (updatedFood.getFoodPrice() != null) {
-            originalFood.setFoodPrice(updatedFood.getFoodPrice());
-        }
-
-        if (updatedFood.getFoodIngredientQuantity() != null) {
-            originalFood.setFoodIngredientQuantity(updatedFood.getFoodIngredientQuantity());
-        }
-
-        originalFood = foodRepo.saveAndFlush(originalFood);
-        return originalFood;
-    }
-
-    @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
     public Food editFood(Long restaurantId, Long foodId, EditFoodDTO foodDTO) {
         final Food originalFood = foodRepo.findById(foodId)
                 .orElseThrow(() -> new NotFoundException("Food requested could not be found"));
