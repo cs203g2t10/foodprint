@@ -2,10 +2,17 @@ package foodprint.backend.dto;
 
 import java.util.Set;
 
-public class EditFoodDTO {
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public class EditFoodDTO {
+    @NotEmpty(message = "cannot be empty.")
+    @Size(min = 1, max = 40, message = "has to be between 1 to 40 letters.")
     private String foodName;
 
+    @NotEmpty(message = "cannot be empty.")
     private String foodDesc;
 
     private Double foodPrice;
