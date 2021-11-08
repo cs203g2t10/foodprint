@@ -116,7 +116,7 @@ public class ReservationService {
         return reservationRepo.findAll();
     }
 
-    @PreAuthorize("hasAnyAuthority('FP_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
     public List<Reservation> getAllReservationByRestaurant(Restaurant restaurant) {
         return reservationRepo.findByRestaurant(restaurant);
     }

@@ -136,9 +136,12 @@ public class AuthenticationService {
      */
     public Boolean check2faSet(String email) {
         if (!email.matches(emlRegex)) {
-            throw new InvalidException("Invalid email format.");
+            return false;
         }
-        User user = userRepo.findByEmail(email).orElseThrow(() ->  new NotFoundException("User not found"));
+        User user = userRepo.findByEmail(email).orElse(null);
+        if (user == null) {
+            return false;
+        }
         return user.isTwoFaSet();
     }
 
