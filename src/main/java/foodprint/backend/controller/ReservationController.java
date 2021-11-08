@@ -146,7 +146,9 @@ public class ReservationController {
         if (after.isAfter(before)) {
             throw new BadRequestException("Start date should be before end date");
         }
-        Page<Reservation> reservations = reservationService.getRestaurantUpcomingReservations(restaurant, after, before, page);
+        User requestor = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Restaurant requestorRestaurant = requestor.getRestaurant();
+        Page<Reservation> reservations = reservationService.getRestaurantUpcomingReservations(restaurant, requestorRestaurant, after, before, page);
         Page<ReservationDTO> reservationDTOs = reservations.map(this::convertToDTO);
         return new ResponseEntity<>(reservationDTOs,HttpStatus.OK);
     }

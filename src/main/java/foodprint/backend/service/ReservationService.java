@@ -122,8 +122,8 @@ public class ReservationService {
      * @param pageNumber
      * @return
      */
-    @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
-    public Page<Reservation> getRestaurantUpcomingReservations(Restaurant restaurant, LocalDateTime after, LocalDateTime before, int pageNumber) {
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN') or (hasAnyAuthority('FP_MANAGER') and #restaurant.restaurantId == #requestorRestaurant.restaurantId)")
+    public Page<Reservation> getRestaurantUpcomingReservations(Restaurant restaurant, Restaurant requestorRestaurant, LocalDateTime after, LocalDateTime before, int pageNumber) {
         Pageable pageReq = PageRequest.of(pageNumber, 10);
         return reservationRepo.findByRestaurantAndDateBetween(pageReq, restaurant, after, before);
     }
