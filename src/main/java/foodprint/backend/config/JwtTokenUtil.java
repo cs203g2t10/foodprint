@@ -31,12 +31,23 @@ public class JwtTokenUtil {
                 .setHeaderParam("userId", user.getId())
                 .setHeaderParam("userFname", user.getFirstName())
                 .setHeaderParam("userLname", user.getLastName())
-                .setHeaderParam("userAuthorities", user.getRoles().split(","))
-                .setExpiration(Date.from(LocalDateTime.now().plus(7, ChronoUnit.DAYS).toInstant(ZoneOffset.UTC)))
-                .signWith(SignatureAlgorithm.HS512, jwtSecret);
+                .setHeaderParam("userAuthorities", user.getRoles().split(","));
+
          if (user.getRoles().contains("FP_MANAGER")) {
-            token.setHeaderParam("restaurantId", user.getRestaurant().getRestaurantId());
+            token
+            .setHeaderParam("restaurantId", user.getRestaurant().getRestaurantId());
          }
+
+         if (user.getVaccinationDob() != null && user.getVaccinationName() != null) {
+            token
+            .setHeaderParam("vaccinationName", user.getVaccinationName())
+            .setHeaderParam("vaccinationDob", user.getVaccinationDob().toString());
+         }
+
+         token
+         .setExpiration(Date.from(LocalDateTime.now().plus(7, ChronoUnit.DAYS).toInstant(ZoneOffset.UTC)))
+         .signWith(SignatureAlgorithm.HS512, jwtSecret);
+
          return token.compact();
     }
 
