@@ -7,6 +7,8 @@ import java.time.LocalDateTime;
 
 import javax.validation.Valid;
 
+import com.amazonaws.services.kms.model.AlreadyExistsException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -218,27 +220,25 @@ public class RestaurantController {
 
     @GetMapping({"/{restaurantId}/discount"})
     @ResponseStatus(code = HttpStatus.OK)
-    public ResponseEntity<List<Discount>> getAllRestaurantDiscount(@PathVariable("restaurantId") Long restaurantId) {
-        Restaurant restaurant = service.get(restaurantId);
-        List<Discount> allDiscounts = restaurant.getDiscount();
-        return new ResponseEntity<>(allDiscounts, HttpStatus.OK);
+    public ResponseEntity<Discount> getRestaurantDiscount(@PathVariable("restaurantId") Long restaurantId) {
+        return new ResponseEntity<>(service.getRestaurantDiscount(restaurantId), HttpStatus.OK);
     }
 
-    //GET: Get a discount of restaurant
-    @GetMapping({"/{restaurantId}/discount/{discountId}"})
-    @ResponseStatus(code = HttpStatus.OK)
-    @Operation(summary = "Gets a discount of restaurant")
-    public ResponseEntity<Discount> getDiscount(@PathVariable("restaurantId") Long restaurantId, @PathVariable("discountId") Long discountId) {
-        Restaurant restaurant = service.get(restaurantId);
-        List<Discount> allDiscounts = restaurant.getDiscount();
-        for(Discount discount : allDiscounts) {
-            if (discount.getDiscountId().equals(discountId)) {
-                Discount discountFound = service.getDiscount(discountId);
-                return new ResponseEntity<>(discountFound, HttpStatus.OK);
-            }
-        }
-        throw new NotFoundException("Discount not found");
-    }
+    // //GET: Get a discount of restaurant
+    // @GetMapping({"/{restaurantId}/discount/{discountId}"})
+    // @ResponseStatus(code = HttpStatus.OK)
+    // @Operation(summary = "Gets a discount of restaurant")
+    // public ResponseEntity<Discount> getDiscount(@PathVariable("restaurantId") Long restaurantId, @PathVariable("discountId") Long discountId) {
+    //     Restaurant restaurant = service.get(restaurantId);
+    //     List<Discount> allDiscounts = restaurant.getDiscount();
+    //     for(Discount discount : allDiscounts) {
+    //         if (discount.getDiscountId().equals(discountId)) {
+    //             Discount discountFound = service.getDiscount(discountId);
+    //             return new ResponseEntity<>(discountFound, HttpStatus.OK);
+    //         }
+    //     }
+    //     throw new NotFoundException("Discount not found");
+    // }
 
     //POST: Creates new discount for restaurant
     @PostMapping("/{restaurantId}/discount")
@@ -246,34 +246,37 @@ public class RestaurantController {
     @Operation(summary = "Creates a new discount using dto")
     public ResponseEntity<Discount> createDiscount(@PathVariable Long restaurantId, @RequestBody @Valid DiscountDTO discount) {
         Discount newDiscount = new Discount(discount.getDiscountDescription(), discount.getDiscountPercentage());
-        Discount savedDiscount = service.addDiscount(restaurantId, newDiscount);
-        return new ResponseEntity<>(savedDiscount, HttpStatus.CREATED);
+        try {
+            Discount savedDiscount = service.createDiscount(restaurantId, newDiscount);
+            return new ResponseEntity<>(savedDiscount, HttpStatus.CREATED);
+        } catch (AlreadyExistsException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        
     }
 
     //DELETE: Delete a discount from restaurant
-    @DeleteMapping({"/{restaurantId}/discount/{discountId}"})
+    @DeleteMapping({"/{restaurantId}/discount"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Deletes an existing discount")
-    public ResponseEntity<Discount> deleteDiscount(@PathVariable("restaurantId") Long restaurantId, @PathVariable("discountId") Long discountId) {
-        service.deleteDiscount(restaurantId, discountId);
+    public ResponseEntity<Discount> deleteDiscount(@PathVariable("restaurantId") Long restaurantId) {
+        service.deleteDiscount(restaurantId);
         try {
-            service.getDiscount(discountId);
+            service.getRestaurantDiscount(restaurantId);
         } catch (NotFoundException ex) {
             return new ResponseEntity<>(HttpStatus.OK);
         }
-
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @PatchMapping({"/{restaurantId}/discount/{discountId}"})
+    @PatchMapping({"/{restaurantId}/discount"})
     @ResponseStatus(code = HttpStatus.OK)
-    @Operation(summary = "Updates an existing restaurant, only changed fields need to be set")
+    @Operation(summary = "Updates an existing discount of restaurant, only changed fields need to be set")
     public ResponseEntity<Discount> updateRestaurantDiscount(
         @PathVariable("restaurantId") Long restaurantId,
-        @PathVariable("discountId") Long discountId,
         @RequestBody Discount updatedDiscount
     ) {
-        Discount discount = service.updateDiscount(restaurantId, discountId, updatedDiscount);
+        Discount discount = service.updateDiscount(restaurantId, updatedDiscount);
         return new ResponseEntity<>(discount, HttpStatus.OK);
     }
 
@@ -518,13 +521,10 @@ public class RestaurantController {
             dto.setPicture(picDto);
         }
 
-        List<Discount> discounts = restaurant.getDiscount();
-        List<DiscountDTO> discountDTOs = new ArrayList<>();
-        dto.setDiscounts(discountDTOs);
-
-        for (Discount discount : discounts) {
+        Discount discount = restaurant.getDiscount();
+        if (discount != null) {
             DiscountDTO discDTO = new DiscountDTO(discount.getRestaurant().getRestaurantId(), discount.getDiscountDescription(), discount.getDiscountPercentage());
-            discountDTOs.add(discDTO);
+            dto.setDiscount(discDTO);
         }
 
         return dto;

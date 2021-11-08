@@ -11,13 +11,12 @@ public class DiscountDTO {
     @Schema(defaultValue="1")
     private Long restaurantId;
 
-    @Schema(defaultValue="1for1")
+    @Schema(defaultValue="1 for 1")
     @NotEmpty
     @Length(min = 1)
     private String discountDescription;
 
     @Schema(defaultValue="50")
-    @NotEmpty
     private Integer discountPercentage;
 
     public DiscountDTO(Long restaurantId, String discountDescription, Integer discountPercentage) {

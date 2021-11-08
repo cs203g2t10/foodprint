@@ -24,9 +24,7 @@ import foodprint.backend.model.Reservation.ReservationStatus;
 import foodprint.backend.model.LineItem;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -149,6 +147,7 @@ public class RestaurantServiceTest {
         food.setRestaurant(restaurant);
         food.setPicture(pic);
         restaurant.setIngredients(ingredients);
+        restaurant.setDiscount(discount);
         discount.setRestaurant(restaurant);
         restaurant.setAllFood(allFood);
         restaurant.setPicture(pic);
@@ -445,11 +444,12 @@ public class RestaurantServiceTest {
 
     //----------Discount-related Testing-----------
     @Test
-    void addDiscount_newDiscount_ReturnSavedDiscount() {
-        when (repo.findByRestaurantId(any(Long.class))).thenReturn(restaurant);
+    void createDiscount_newDiscount_ReturnSavedDiscount() {
+        Restaurant newRes = new Restaurant("New Restaurant", "Bencoolen");
+        when (repo.findByRestaurantId(any(Long.class))).thenReturn(newRes);
         when (discountRepo.saveAndFlush(any(Discount.class))).thenReturn(discount);
 
-        Discount savedDiscount = restaurantService.addDiscount(restaurantId, discount);
+        Discount savedDiscount = restaurantService.createDiscount(restaurantId, discount);
 
         assertNotNull(savedDiscount);
         verify(repo).findByRestaurantId(restaurantId);
@@ -459,45 +459,27 @@ public class RestaurantServiceTest {
     @Test
     void updateDiscount_DiscountExist_ReturnUpdatedDiscount() {
         when(repo.findByRestaurantId(any(Long.class))).thenReturn(restaurant);
-        when(discountRepo.findById(any(Long.class))).thenReturn(Optional.of(discount));
         when(discountRepo.saveAndFlush(any(Discount.class))).thenReturn(discount);
 
-        restaurantService.addDiscount(restaurantId, discount);
-        Discount updatedDiscount = restaurantService.updateDiscount(restaurantId, discountId, discount);
+        Discount updatedDiscount = restaurantService.updateDiscount(restaurantId, discount);
 
         assertNotNull(updatedDiscount);
-        verify(discountRepo).findById(discountId);
+        verify(repo).findByRestaurantId(restaurantId);
         verify(discountRepo).saveAndFlush(discount);
     }
 
     @Test
     void updateDiscount_DiscountDoNotExist_ReturnError() {
-        when(discountRepo.findById(any(Long.class))).thenReturn(Optional.empty());
+        Restaurant newRes = new Restaurant("New Restaurant", "Bencoolen");
+        when(repo.findByRestaurantId(any(Long.class))).thenReturn(newRes);
 
         try {
-            restaurantService.updateDiscount(restaurantId, discountId, discount);
+            restaurantService.updateDiscount(restaurantId, discount);
         } catch (NotFoundException e) {
-            assertEquals("Discount could not be found", e.getMessage());
-        }
-
-        verify(discountRepo).findById(discountId);
-    }
-
-    @Test
-    void updateDiscount_DiscountExistButInWrongRestaurant_ReturnError() {
-        when(repo.findByRestaurantId(any(Long.class))).thenReturn(restaurant);
-        when(discountRepo.findById(any(Long.class))).thenReturn(Optional.of(discount));
-
-        restaurantService.addDiscount(restaurantId, discount);
-
-        try {
-            restaurantService.updateDiscount(4L, discountId, discount);
-        } catch (NotFoundException e) {
-            assertEquals("Discount found but in incorrect restaurant", e.getMessage());
+            assertEquals("Discount not found", e.getMessage());
         }
 
         verify(repo).findByRestaurantId(restaurantId);
-        verify(discountRepo).findById(discountId);
     }
 
     @Test
@@ -524,49 +506,17 @@ public class RestaurantServiceTest {
     }
 
     @Test
-    void deleteDiscount_DiscountExist_Return() {
-        when(repo.findByRestaurantId(any(Long.class))).thenReturn(restaurant);
-        when(discountRepo.existsById(any(Long.class))).thenReturn(true);
-        when(discountRepo.getById(any(Long.class))).thenReturn(discount);
-
-        restaurantService.addDiscount(restaurantId, discount);
-        restaurantService.deleteDiscount(restaurantId, discountId);
-
-        assertNotNull(discount);
-        verify(discountRepo).getById(discountId);
-        verify(discountRepo).existsById(discountId);
-        verify(repo).findByRestaurantId(restaurantId);
-    }
-
-    @Test
     void deleteDiscount_DiscountDoNotExist_ReturnError() {
-        when(discountRepo.existsById(any(Long.class))).thenReturn(false);
+        Restaurant newRes = new Restaurant("New Restaurant", "Bencoolen");
+        when(repo.findByRestaurantId(any(Long.class))).thenReturn(newRes);
 
         try {
-            restaurantService.deleteDiscount(restaurantId, discountId);
+            restaurantService.deleteDiscount(restaurantId);
         } catch (NotFoundException e) {
             assertEquals("Discount not found", e.getMessage());
         }
 
-        verify(discountRepo).existsById(discountId);
-    }
-
-    @Test
-    void deleteDiscount_DiscountFoundInWrongRestaurant_ReturnError() {
-        Restaurant anotherRestaurant = new Restaurant("Sushi Tei", "Desc","Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
-        ReflectionTestUtils.setField(anotherRestaurant,"restaurantId", 2L);
-
-        when(discountRepo.existsById(any(Long.class))).thenReturn(true);
-        when(discountRepo.getById(any(Long.class))).thenReturn(discount);
-
-        try {
-            restaurantService.deleteDiscount(2L, discountId);
-        } catch(NotFoundException e) {
-            assertEquals("Discount found but not in correct restaurant", e.getMessage());
-        }
-
-        verify(discountRepo).existsById(discountId);
-        verify(discountRepo).getById(discountId);
+        verify(repo).findByRestaurantId(restaurantId);
     }
 
     //-------Ingredient-related testing---------

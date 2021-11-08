@@ -137,8 +137,8 @@ public class Restaurant {
     private List<User> restaurantManagers;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
-    private List<Discount> discount = new ArrayList<>();
+    @OneToOne(mappedBy = "restaurant", cascade = CascadeType.ALL)
+    private Discount discount;
 
     @JsonIgnore
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
@@ -174,7 +174,7 @@ public class Restaurant {
     }
 
 
-    public Restaurant(Long restaurantId, String restaurantName, String restaurantDesc, String restaurantLocation, Integer restaurantPriceRange, Integer restaurantTableCapacity, Integer restaurantWeekdayOpeningHour, Integer restaurantWeekdayOpeningMinutes, Integer restaurantWeekdayClosingHour, Integer restaurantWeekdayClosingMinutes, Integer restaurantWeekendOpeningHour, Integer restaurantWeekendOpeningMinutes, Integer restaurantWeekendClosingHour, Integer restaurantWeekendClosingMinutes, List<Food> food, List<User> restaurantManagers, List<Discount> discount, List<Reservation> reservations, List<Ingredient> ingredients, Picture picture) {
+    public Restaurant(Long restaurantId, String restaurantName, String restaurantDesc, String restaurantLocation, Integer restaurantPriceRange, Integer restaurantTableCapacity, Integer restaurantWeekdayOpeningHour, Integer restaurantWeekdayOpeningMinutes, Integer restaurantWeekdayClosingHour, Integer restaurantWeekdayClosingMinutes, Integer restaurantWeekendOpeningHour, Integer restaurantWeekendOpeningMinutes, Integer restaurantWeekendClosingHour, Integer restaurantWeekendClosingMinutes, List<Food> food, List<User> restaurantManagers, Discount discount, List<Reservation> reservations, List<Ingredient> ingredients, Picture picture) {
         this.restaurantId = restaurantId;
         this.restaurantName = restaurantName;
         this.restaurantDesc = restaurantDesc;
@@ -333,11 +333,11 @@ public class Restaurant {
         this.restaurantManagers = restaurantManagers;
     }
 
-    public List<Discount> getDiscount() {
+    public Discount getDiscount() {
         return this.discount;
     }
 
-    public void setDiscount(List<Discount> discount) {
+    public void setDiscount(Discount discount) {
         this.discount = discount;
     }
 
@@ -445,7 +445,7 @@ public class Restaurant {
         return this;
     }
 
-    public Restaurant discount(List<Discount> discount) {
+    public Restaurant discount(Discount discount) {
         setDiscount(discount);
         return this;
     }
