@@ -6,6 +6,7 @@ import java.util.Set;
 
 import javax.validation.Valid;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import foodprint.backend.dto.AdminUserDTO;
 import foodprint.backend.dto.ManagerRequestDTO;
 import foodprint.backend.dto.PictureDTO;
 import foodprint.backend.dto.RequestResetPwdDTO;
@@ -61,9 +63,9 @@ public class UserController {
     @PostMapping
     @ResponseStatus(code = HttpStatus.CREATED)
     @Operation(summary = "Creates a user account on Foodprint")
-    public ResponseEntity<User> createUser(@RequestBody @Valid User user) {
-        User savedUser = userService.createUser(user);
-        return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
+    public ResponseEntity<User> createUser(@RequestBody @Valid AdminUserDTO userDTO) {
+        User savedUser = convertToEntity(userDTO);
+        return new ResponseEntity<>(userService.createUser(savedUser), HttpStatus.CREATED);
     }
 
     // GET: Get the user by ID
@@ -257,4 +259,10 @@ public class UserController {
 
         return dto;
     }
+
+    private User convertToEntity(AdminUserDTO userDTO) {
+        ModelMapper mapper = new ModelMapper();
+        return mapper.map(userDTO, User.class);
+    }
+
 }

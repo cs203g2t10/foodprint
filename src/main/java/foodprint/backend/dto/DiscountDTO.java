@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class DiscountDTO {
 
     @Schema(defaultValue="1")
-    @JsonIgnore
     private Long restaurantId;
 
     @Schema(defaultValue="1 for 1")
