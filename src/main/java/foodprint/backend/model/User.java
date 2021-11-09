@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.*;
 
@@ -239,17 +240,14 @@ public class User implements UserDetails {
         this.favouriteRestaurants = favouriteRestaurants;
     }
 
-
-
-
     @Override
     @Schema(hidden=true)
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<String> roles = Arrays.asList(this.roles.split(","));
-        Set<GrantedAuthority> authorities = new HashSet<>();
-        roles.forEach(role ->
-            authorities.add(new SimpleGrantedAuthority(role.trim()))
-        );
+        List<String> userRoles = Arrays.asList(this.roles.split(","));
+        List<SimpleGrantedAuthority> authorities = userRoles
+            .stream()
+            .map(role -> new SimpleGrantedAuthority(role.trim()))
+            .collect(Collectors.toList());
         return authorities;
     }
 

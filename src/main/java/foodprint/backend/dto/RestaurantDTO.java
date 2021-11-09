@@ -7,8 +7,6 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import org.hibernate.validator.constraints.Length;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -83,7 +81,6 @@ public class RestaurantDTO {
 
     private List<@NotEmpty @Length(min=1) String> restaurantCategory;
 
-    @JsonIgnore
     private PictureDTO picture;
 
     private DiscountDTO discount;

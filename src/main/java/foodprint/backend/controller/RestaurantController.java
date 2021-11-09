@@ -7,8 +7,7 @@ import java.time.LocalDateTime;
 
 import javax.validation.Valid;
 
-import com.amazonaws.services.kms.model.AlreadyExistsException;
-
+import org.hibernate.exception.ConstraintViolationException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -41,6 +40,7 @@ import foodprint.backend.dto.IngredientDTO;
 import foodprint.backend.dto.RestaurantDTO;
 import foodprint.backend.dto.UpdatePictureDTO;
 import foodprint.backend.exceptions.NotFoundException;
+import foodprint.backend.exceptions.AlreadyExistsException;
 import foodprint.backend.exceptions.BadRequestException;
 import foodprint.backend.model.Discount;
 import foodprint.backend.model.Food;
@@ -49,6 +49,7 @@ import foodprint.backend.model.Picture;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.service.RestaurantService;
 import io.swagger.v3.oas.annotations.Operation;
+
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/v1/restaurant")
@@ -68,8 +69,7 @@ public class RestaurantController {
     @Operation(summary = "Gets a single restaurant from ID")
     public ResponseEntity<RestaurantDTO> restaurantGet(@PathVariable("restaurantId") Long id) {
         Restaurant restaurant = service.get(id);
-        ModelMapper mapper = new ModelMapper();
-        RestaurantDTO restaurantDto = mapper.map(restaurant, RestaurantDTO.class);
+        RestaurantDTO restaurantDto = restaurantConvertToDTO(restaurant);
         return new ResponseEntity<>(restaurantDto, HttpStatus.OK);
     }
 
@@ -79,8 +79,18 @@ public class RestaurantController {
     @Operation(summary = "Gets all restaurants")
     public ResponseEntity<List<RestaurantDTO>> restaurantGetAll() {
         List<Restaurant> restaurants = service.getAllRestaurants();
-        ModelMapper mapper = new ModelMapper();
-        List<RestaurantDTO> restaurantDtos = restaurants.stream().map(r -> mapper.map(r, RestaurantDTO.class)).collect(Collectors.toList());
+        List<RestaurantDTO> restaurantDtos = restaurants.stream().map(r -> restaurantConvertToDTO(r)).collect(Collectors.toList());
+
+        return new ResponseEntity<>(restaurantDtos, HttpStatus.OK);
+    }
+
+    // GET (ALL): Get all the restaurants
+    @GetMapping({"/page"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Gets all restaurants")
+    public ResponseEntity<Page<RestaurantDTO>> restaurantGetAllPaged(@RequestParam(name="p", defaultValue="0") int page) {
+        Page<Restaurant> restaurants = service.getAllRestaurantsPaged(page);
+        Page<RestaurantDTO> restaurantDtos = restaurants.map(this::restaurantConvertToDTO);
         return new ResponseEntity<>(restaurantDtos, HttpStatus.OK);
     }
 
@@ -89,8 +99,7 @@ public class RestaurantController {
     @ResponseStatus(code = HttpStatus.CREATED)
     @Operation(summary = "Create a new restaurant using DTO")
     public ResponseEntity<Restaurant> restaurantCreate(@RequestBody @Valid RestaurantDTO restaurantDTO) {
-        ModelMapper mapper = new ModelMapper();
-        var convertedRestaurant = mapper.map(restaurantDTO, Restaurant.class);
+        var convertedRestaurant = restaurantConvertToEntity(restaurantDTO);
         Restaurant savedRestaurant = service.create(convertedRestaurant);
         return new ResponseEntity<>(savedRestaurant, HttpStatus.CREATED);
     }
@@ -102,8 +111,7 @@ public class RestaurantController {
     public ResponseEntity<Restaurant> restaurantUpdate(
         @PathVariable("restaurantId") Long id,
         @RequestBody RestaurantDTO updatedRestaurant) {
-        ModelMapper mapper = new ModelMapper();
-        Restaurant restaurant = mapper.map(updatedRestaurant, Restaurant.class);
+        Restaurant restaurant = restaurantConvertToEntity(updatedRestaurant);
         return new ResponseEntity<>(service.update(id, restaurant), HttpStatus.OK);
     }
 
@@ -130,8 +138,7 @@ public class RestaurantController {
         Sort sorting = Sort.by(direction, sortField);
 		Pageable page = PageRequest.of(pageNum - 1, 16, sorting); // Pagination
 		Page<Restaurant> searchResult = service.search(page, query);
-        ModelMapper mapper = new ModelMapper();
-        return searchResult.map(result -> mapper.map(result, RestaurantDTO.class));
+        return searchResult.map(result -> restaurantConvertToDTO(result));
     }
 
     @GetMapping({"/categories"})
@@ -146,9 +153,8 @@ public class RestaurantController {
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Get a list of restaurant DTOs associated with selected category")
     public ResponseEntity<List<RestaurantDTO>> getRestaurantRelatedToCategory(@PathVariable("category") String restaurantCategory) {
-            ModelMapper mapper = new ModelMapper();
             List<Restaurant> restaurantsRelatedToCategory = service.getRestaurantsRelatedToCategory(restaurantCategory);
-            List<RestaurantDTO> restaurantDtos = restaurantsRelatedToCategory.stream().map(r -> mapper.map(r, RestaurantDTO.class)).collect(Collectors.toList());
+            List<RestaurantDTO> restaurantDtos = restaurantsRelatedToCategory.stream().map(r -> restaurantConvertToDTO(r)).collect(Collectors.toList());
             return new ResponseEntity<>(restaurantDtos, HttpStatus.OK);
     }
 
@@ -442,4 +448,15 @@ public class RestaurantController {
         Picture savedPicture = service.updateFoodPicture(restaurantId, foodId, updatedPicture);
         return new ResponseEntity<>(savedPicture, HttpStatus.OK);
     }
+
+    private Restaurant restaurantConvertToEntity(RestaurantDTO restaurantDTO) {
+        ModelMapper mapper = new ModelMapper();
+        return mapper.map(restaurantDTO, Restaurant.class);
+    }
+
+    private RestaurantDTO restaurantConvertToDTO(Restaurant restaurant) {
+        ModelMapper mapper = new ModelMapper();
+        return mapper.map(restaurant, RestaurantDTO.class);
+    }
+
 }
