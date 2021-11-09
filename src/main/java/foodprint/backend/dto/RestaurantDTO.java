@@ -83,7 +83,6 @@ public class RestaurantDTO {
 
     private List<@NotEmpty @Length(min=1) String> restaurantCategory;
 
-    @JsonIgnore
     private PictureDTO picture;
 
     private DiscountDTO discount;
