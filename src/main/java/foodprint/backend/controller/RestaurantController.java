@@ -7,8 +7,6 @@ import java.time.LocalDateTime;
 
 import javax.validation.Valid;
 
-import com.amazonaws.services.kms.model.AlreadyExistsException;
-
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -41,6 +39,7 @@ import foodprint.backend.dto.IngredientDTO;
 import foodprint.backend.dto.RestaurantDTO;
 import foodprint.backend.dto.UpdatePictureDTO;
 import foodprint.backend.exceptions.NotFoundException;
+import foodprint.backend.exceptions.AlreadyExistsException;
 import foodprint.backend.exceptions.BadRequestException;
 import foodprint.backend.model.Discount;
 import foodprint.backend.model.Food;
@@ -49,6 +48,7 @@ import foodprint.backend.model.Picture;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.service.RestaurantService;
 import io.swagger.v3.oas.annotations.Operation;
+
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/v1/restaurant")
@@ -79,6 +79,17 @@ public class RestaurantController {
     public ResponseEntity<List<RestaurantDTO>> restaurantGetAll() {
         List<Restaurant> restaurants = service.getAllRestaurants();
         List<RestaurantDTO> restaurantDtos = restaurants.stream().map(r -> restaurantConvertToDTO(r)).collect(Collectors.toList());
+
+        return new ResponseEntity<>(restaurantDtos, HttpStatus.OK);
+    }
+
+    // GET (ALL): Get all the restaurants
+    @GetMapping({"/page"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Gets all restaurants")
+    public ResponseEntity<Page<RestaurantDTO>> restaurantGetAllPaged(@RequestParam(name="p", defaultValue="0") int page) {
+        Page<Restaurant> restaurants = service.getAllRestaurantsPaged(page);
+        Page<RestaurantDTO> restaurantDtos = restaurants.map(this::restaurantConvertToDTO);
         return new ResponseEntity<>(restaurantDtos, HttpStatus.OK);
     }
 
@@ -446,7 +457,5 @@ public class RestaurantController {
         ModelMapper mapper = new ModelMapper();
         return mapper.map(restaurant, RestaurantDTO.class);
     }
-
-
 
 }

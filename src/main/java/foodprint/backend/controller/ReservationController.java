@@ -15,7 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,12 +25,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import foodprint.backend.config.AuthHelper;
 import foodprint.backend.dto.CreateReservationDTO;
 import foodprint.backend.dto.LineItemDTO;
 import foodprint.backend.dto.ReservationDTO;
 import foodprint.backend.dto.NamedLineItemDTO;
 import foodprint.backend.exceptions.BadRequestException;
-import foodprint.backend.exceptions.InsufficientPermissionsException;
 import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.Food;
 import foodprint.backend.model.LineItem;
@@ -59,9 +58,10 @@ public class ReservationController {
     // GET: Get reservation by id (DTO)
     @GetMapping({ "/{reservationId}" })
     @ResponseStatus(code = HttpStatus.OK)
-    @Operation(summary = "Gets a reservation slot of a user")
+    @Operation(summary = "Gets a reservation slot of a user, returns not found if logged in as wrong user")
     public ResponseEntity<ReservationDTO> getReservation(@PathVariable("reservationId") Long id) {
-        Reservation reservation = reservationService.getReservationById(id);
+        User requestor = AuthHelper.getCurrentUser();
+        Reservation reservation = reservationService.getReservationByIdAndUser(id, requestor.getId());
         ReservationDTO reservationDTO = this.convertToDTO(reservation);
         return new ResponseEntity<>(reservationDTO, HttpStatus.OK);
     }
@@ -115,12 +115,11 @@ public class ReservationController {
     @GetMapping({ "/order/{reservationId}" })
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Gets all line item for reservation")
-    public ResponseEntity<List<LineItemDTO>> getReservationOrder(@PathVariable("reservationId") Long id) {
-        Reservation reservation = reservationService.getReservationById(id);
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!user.equals(reservation.getUser())) {
-            throw new InsufficientPermissionsException("Not authorised to view line items of another user");
-        }
+    public ResponseEntity<List<LineItemDTO>> getReservationOrder(
+        @PathVariable("reservationId") Long id
+    ) {
+        User user = AuthHelper.getCurrentUser();
+        Reservation reservation = reservationService.getReservationByIdAndUser(id, user.getId());
         List<LineItem> lineItems = reservation.getLineItems();
         List<LineItemDTO> result = new ArrayList<>();
         for(LineItem lineItem : lineItems) {
@@ -179,10 +178,12 @@ public class ReservationController {
     // PUT: Update reservation (DTO)
     @PatchMapping({ "/{reservationId}" })
     @Operation(summary = "For users to update an existing reservation slot")
-    public ResponseEntity<ReservationDTO> updateReservationDTO(@PathVariable("reservationId") Long id,
+    public ResponseEntity<ReservationDTO> updateReservationDTO(
+            @PathVariable("reservationId") Long id,
             @RequestBody CreateReservationDTO pendingReservationDTO) {
 
-        var currentReservation = reservationService.getReservationById(id);
+        User requestor = AuthHelper.getCurrentUser();
+        var currentReservation = reservationService.getReservationByIdAndUser(id, requestor.getId());
         var restaurant = currentReservation.getRestaurant();
 
         // Dont allow users to change the restaurant of their reservation
@@ -192,23 +193,6 @@ public class ReservationController {
         var updatedReservation = reservationService.update(id, reservation);
         var updatedReservationDTO = this.convertToDTO(updatedReservation);
         return new ResponseEntity<>(updatedReservationDTO, HttpStatus.OK);
-    }
-
-    // DELETE: Delete reservation
-    @DeleteMapping({ "/admin/{reservationId}" })
-    @ResponseStatus(code = HttpStatus.OK)
-    @Operation(summary = "Delete an existing reservation slot")
-    public ResponseEntity<Reservation> deleteReservation(@PathVariable("reservationId") Long id) {
-        Reservation reservation = reservationService.getReservationById(id);
-        reservationService.delete(reservation);
-
-        try {
-            reservationService.getReservationById(id);
-        } catch (NotFoundException ex) {
-            return new ResponseEntity<>(HttpStatus.OK);
-        }
-
-        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     // Get all reservations by a restaurant
