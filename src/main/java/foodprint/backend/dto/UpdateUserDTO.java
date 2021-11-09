@@ -2,12 +2,15 @@ package foodprint.backend.dto;
 
 import java.util.Objects;
 
+import javax.validation.constraints.Email;
+
 public class UpdateUserDTO {
 
     private String firstName;
 
     private String lastName;
-    
+
+    @Email
     private String email;
 
     private String password;
