@@ -309,13 +309,12 @@ public class RestaurantServiceTest {
         
         when(repo.findByRestaurantId(any(Long.class))).thenReturn(restaurant);
         when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
-        when(foodRepo.saveAndFlush(any(Food.class))).thenReturn(food);
+        when(foodRepo.saveAndFlush(any(Food.class))).thenReturn(newFood);
 
         restaurantService.create(restaurant);
         Food savedFood = restaurantService.addFood(restaurantId, newFoodDTO);
 
-        //assertSame(savedFood, (Food)(newFoodDTO));
-        assertNotNull(savedFood);
+        assertEquals(newFood, savedFood);
         verify(repo).findById(restaurantId);
         verify(repo).findByRestaurantId(restaurantId);
         verify(foodRepo).saveAndFlush(any(Food.class));
