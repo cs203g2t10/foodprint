@@ -79,6 +79,17 @@ public class RestaurantController {
     public ResponseEntity<List<RestaurantDTO>> restaurantGetAll() {
         List<Restaurant> restaurants = service.getAllRestaurants();
         List<RestaurantDTO> restaurantDtos = restaurants.stream().map(r -> restaurantConvertToDTO(r)).collect(Collectors.toList());
+
+        return new ResponseEntity<>(restaurantDtos, HttpStatus.OK);
+    }
+
+    // GET (ALL): Get all the restaurants
+    @GetMapping({"/page"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Gets all restaurants")
+    public ResponseEntity<Page<RestaurantDTO>> restaurantGetAllPaged(@RequestParam(name="p", defaultValue="0") int page) {
+        Page<Restaurant> restaurants = service.getAllRestaurantsPaged(page);
+        Page<RestaurantDTO> restaurantDtos = restaurants.map(this::restaurantConvertToDTO);
         return new ResponseEntity<>(restaurantDtos, HttpStatus.OK);
     }
 
@@ -446,7 +457,5 @@ public class RestaurantController {
         ModelMapper mapper = new ModelMapper();
         return mapper.map(restaurant, RestaurantDTO.class);
     }
-
-
 
 }

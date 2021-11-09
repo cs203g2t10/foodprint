@@ -128,18 +128,13 @@ public class UserService {
             existingUser.setRoles(String.join(",", filteredRoles));
         }
 
-        if (updatedUser.getVaccinationDob() != null) {
-            existingUser.setVaccinationDob(updatedUser.getVaccinationDob());
+        if (updatedUser.getLastLogin() != null) {
+            existingUser.setLastLogin(updatedUser.getLastLogin());
         }
 
-        if (updatedUser.getVaccinationName() != null) {
-            existingUser.setVaccinationName(updatedUser.getVaccinationName());
+        if (updatedUser.getRegisteredOn() != null) {
+            existingUser.setRegisteredOn(updatedUser.getRegisteredOn());
         }
-
-        if (updatedUser.getRestaurant() != null) {
-            existingUser.setRestaurant(updatedUser.getRestaurant());
-        }
-
         return this.userRepo.saveAndFlush(existingUser);
     }
 

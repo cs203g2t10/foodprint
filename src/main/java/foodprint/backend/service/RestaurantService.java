@@ -87,6 +87,11 @@ public class RestaurantService {
         return repo.findAll();
     }
 
+    public Page<Restaurant> getAllRestaurantsPaged(int pageNumber) {
+        Pageable pageReq = PageRequest.of(pageNumber, 8);
+        return repo.findAll(pageReq);
+    }
+
     /**
      * Gets a restaurant of a given ID
      * 
