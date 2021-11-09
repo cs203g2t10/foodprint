@@ -1,5 +1,6 @@
 package foodprint.backend.model;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 import javax.persistence.Column;
@@ -14,7 +15,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Entity
 @Table
 @EnableTransactionManagement
-public class Picture {
+public class Picture implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "pictureId" )

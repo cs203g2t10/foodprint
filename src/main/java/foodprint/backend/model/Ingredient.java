@@ -1,5 +1,6 @@
 package foodprint.backend.model;
 
+import java.io.Serializable;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -22,8 +23,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 @Entity
 @Table
-
-public class Ingredient {
+public class Ingredient implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
