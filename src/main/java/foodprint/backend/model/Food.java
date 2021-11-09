@@ -49,7 +49,7 @@ public class Food {
 
     @Column(name = "foodDesc")
     @Schema(defaultValue = "Salmon slices")
-    @NotEmpty(message = "The food description cannot be empty.")
+    @NotNull(message = "The food description cannot be empty.")
     @Size(min = 1)
     private String foodDesc;
 
