@@ -367,29 +367,28 @@ public class RestaurantServiceTest {
 
     @Test
     void deleteFood_FoodExist_Return() {
-        when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
+        when(foodRepo.findByFoodIdAndRestaurantRestaurantId(any(Long.class), any(Long.class))).thenReturn(Optional.of(food));
+        doNothing().when(foodRepo).delete(food);
 
-        restaurantService.create(restaurant);
         restaurantService.deleteFood(restaurantId, foodId);
 
-        verify(repo).findById(restaurantId);
+        verify(foodRepo).findByFoodIdAndRestaurantRestaurantId(foodId, restaurantId);
+        verify(foodRepo).delete(food);
     }
 
     @Test
     void deleteFood_FoodDoNotExist_ReturnError() {
         Long anotherFoodId = 2L;
 
-        when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
-
-        restaurantService.create(restaurant);
-        restaurant.setAllFood(allFood);
+        when(foodRepo.findByFoodIdAndRestaurantRestaurantId(any(Long.class), any(Long.class))).thenReturn(Optional.empty());
+        
         try {
             restaurantService.deleteFood(restaurantId, anotherFoodId);
         } catch (NotFoundException e) {
             assertEquals("Food not found", e.getMessage());
         }
 
-        verify(repo).findById(restaurantId);
+        verify(foodRepo).findByFoodIdAndRestaurantRestaurantId(anotherFoodId, restaurantId);
     }
 
     @Test
