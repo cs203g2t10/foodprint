@@ -68,8 +68,7 @@ public class RestaurantController {
     @Operation(summary = "Gets a single restaurant from ID")
     public ResponseEntity<RestaurantDTO> restaurantGet(@PathVariable("restaurantId") Long id) {
         Restaurant restaurant = service.get(id);
-        ModelMapper mapper = new ModelMapper();
-        RestaurantDTO restaurantDto = mapper.map(restaurant, RestaurantDTO.class);
+        RestaurantDTO restaurantDto = restaurantConvertToDTO(restaurant);
         return new ResponseEntity<>(restaurantDto, HttpStatus.OK);
     }
 
@@ -79,8 +78,7 @@ public class RestaurantController {
     @Operation(summary = "Gets all restaurants")
     public ResponseEntity<List<RestaurantDTO>> restaurantGetAll() {
         List<Restaurant> restaurants = service.getAllRestaurants();
-        ModelMapper mapper = new ModelMapper();
-        List<RestaurantDTO> restaurantDtos = restaurants.stream().map(r -> mapper.map(r, RestaurantDTO.class)).collect(Collectors.toList());
+        List<RestaurantDTO> restaurantDtos = restaurants.stream().map(r -> restaurantConvertToDTO(r)).collect(Collectors.toList());
         return new ResponseEntity<>(restaurantDtos, HttpStatus.OK);
     }
 
@@ -89,8 +87,7 @@ public class RestaurantController {
     @ResponseStatus(code = HttpStatus.CREATED)
     @Operation(summary = "Create a new restaurant using DTO")
     public ResponseEntity<Restaurant> restaurantCreate(@RequestBody @Valid RestaurantDTO restaurantDTO) {
-        ModelMapper mapper = new ModelMapper();
-        var convertedRestaurant = mapper.map(restaurantDTO, Restaurant.class);
+        var convertedRestaurant = restaurantConvertToEntity(restaurantDTO);
         Restaurant savedRestaurant = service.create(convertedRestaurant);
         return new ResponseEntity<>(savedRestaurant, HttpStatus.CREATED);
     }
@@ -102,8 +99,7 @@ public class RestaurantController {
     public ResponseEntity<Restaurant> restaurantUpdate(
         @PathVariable("restaurantId") Long id,
         @RequestBody RestaurantDTO updatedRestaurant) {
-        ModelMapper mapper = new ModelMapper();
-        Restaurant restaurant = mapper.map(updatedRestaurant, Restaurant.class);
+        Restaurant restaurant = restaurantConvertToEntity(updatedRestaurant);
         return new ResponseEntity<>(service.update(id, restaurant), HttpStatus.OK);
     }
 
@@ -130,8 +126,7 @@ public class RestaurantController {
         Sort sorting = Sort.by(direction, sortField);
 		Pageable page = PageRequest.of(pageNum - 1, 16, sorting); // Pagination
 		Page<Restaurant> searchResult = service.search(page, query);
-        ModelMapper mapper = new ModelMapper();
-        return searchResult.map(result -> mapper.map(result, RestaurantDTO.class));
+        return searchResult.map(result -> restaurantConvertToDTO(result));
     }
 
     @GetMapping({"/categories"})
@@ -146,9 +141,8 @@ public class RestaurantController {
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Get a list of restaurant DTOs associated with selected category")
     public ResponseEntity<List<RestaurantDTO>> getRestaurantRelatedToCategory(@PathVariable("category") String restaurantCategory) {
-            ModelMapper mapper = new ModelMapper();
             List<Restaurant> restaurantsRelatedToCategory = service.getRestaurantsRelatedToCategory(restaurantCategory);
-            List<RestaurantDTO> restaurantDtos = restaurantsRelatedToCategory.stream().map(r -> mapper.map(r, RestaurantDTO.class)).collect(Collectors.toList());
+            List<RestaurantDTO> restaurantDtos = restaurantsRelatedToCategory.stream().map(r -> restaurantConvertToDTO(r)).collect(Collectors.toList());
             return new ResponseEntity<>(restaurantDtos, HttpStatus.OK);
     }
 
@@ -442,4 +436,17 @@ public class RestaurantController {
         Picture savedPicture = service.updateFoodPicture(restaurantId, foodId, updatedPicture);
         return new ResponseEntity<>(savedPicture, HttpStatus.OK);
     }
+
+    private Restaurant restaurantConvertToEntity(RestaurantDTO restaurantDTO) {
+        ModelMapper mapper = new ModelMapper();
+        return mapper.map(restaurantDTO, Restaurant.class);
+    }
+
+    private RestaurantDTO restaurantConvertToDTO(Restaurant restaurant) {
+        ModelMapper mapper = new ModelMapper();
+        return mapper.map(restaurant, RestaurantDTO.class);
+    }
+
+
+
 }
