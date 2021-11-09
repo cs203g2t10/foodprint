@@ -166,17 +166,17 @@ public class RestaurantServiceTest {
     }
     // -------Restaurant-related Testing---------\
 
-    @Test
-    void getAllRestaurant_RestaurantsExist_ReturnAllRestaurant() {
-        allRestaurants.add(restaurant);
+    // @Test
+    // void getAllRestaurant_RestaurantsExist_ReturnAllRestaurant() {
+    //     allRestaurants.add(restaurant);
 
-        when(repo.findAll()).thenReturn(allRestaurants);
+    //     when(repo.findAll()).thenReturn(allRestaurants);
 
-        List<Restaurant> restaurants = restaurantService.getAllRestaurants();
+    //     List<Restaurant> restaurants = restaurantService.getAllRestaurants();
 
-        assertEquals(allRestaurants, restaurants);
-        verify(repo).findAll();
-    }
+    //     assertEquals(allRestaurants, restaurants);
+    //     verify(repo).findAll();
+    // }
 
     @Test
     void addRestaurant_NewRestaurant_ReturnSavedRestaurant() {
