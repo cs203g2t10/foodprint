@@ -255,10 +255,11 @@ public class RestaurantController {
     @Operation(summary = "Updates an existing discount of restaurant, only changed fields need to be set")
     public ResponseEntity<Discount> updateRestaurantDiscount(
         @PathVariable("restaurantId") Long restaurantId,
-        @RequestBody Discount updatedDiscount
-    ) {
-        Discount discount = service.updateDiscount(restaurantId, updatedDiscount);
-        return new ResponseEntity<>(discount, HttpStatus.OK);
+        @RequestBody DiscountDTO updatedDiscount
+    ) { 
+        ModelMapper mapper = new ModelMapper();
+        Discount discount = mapper.map(updatedDiscount, Discount.class);
+        return new ResponseEntity<>(service.updateDiscount(restaurantId, discount), HttpStatus.OK);
     }
 
     /*
@@ -441,55 +442,4 @@ public class RestaurantController {
         Picture savedPicture = service.updateFoodPicture(restaurantId, foodId, updatedPicture);
         return new ResponseEntity<>(savedPicture, HttpStatus.OK);
     }
-
-    // // DTO <-> Entity Conversion Helper Methods
-    // public Restaurant convertToEntity(RestaurantDTO restaurantDTO) {
-    //     Restaurant restaurant = new Restaurant(restaurantDTO.getRestaurantName(), restaurantDTO.getRestaurantLocation());
-    //     restaurant.setRestaurantDesc(restaurantDTO.getRestaurantDesc());
-    //     restaurant.setRestaurantTableCapacity(restaurantDTO.getRestaurantTableCapacity());
-    //     restaurant.setRestaurantPriceRange(restaurantDTO.getRestaurantPriceRange());
-    //     restaurant.setRestaurantWeekdayClosingHour(restaurantDTO.getRestaurantWeekdayClosingHour());
-    //     restaurant.setRestaurantWeekdayClosingMinutes(restaurantDTO.getRestaurantWeekdayClosingMinutes());
-    //     restaurant.setRestaurantWeekdayOpeningHour(restaurantDTO.getRestaurantWeekdayOpeningHour());
-    //     restaurant.setRestaurantWeekdayOpeningMinutes(restaurantDTO.getRestaurantWeekdayOpeningMinutes());
-    //     restaurant.setRestaurantWeekendClosingHour(restaurantDTO.getRestaurantWeekendClosingHour());
-    //     restaurant.setRestaurantWeekendClosingMinutes(restaurantDTO.getRestaurantWeekendClosingMinutes());
-    //     restaurant.setRestaurantWeekendOpeningHour(restaurantDTO.getRestaurantWeekendOpeningHour());
-    //     restaurant.setRestaurantWeekendOpeningMinutes(restaurantDTO.getRestaurantWeekendOpeningMinutes());
-    //     restaurant.setRestaurantCategory(restaurantDTO.getRestaurantCategory());
-    //     return restaurant;
-    // }
-
-    // public RestaurantDTO convertToDTO(Restaurant restaurant) {
-    //     RestaurantDTO dto = new RestaurantDTO();
-    //     dto.setRestaurantId(restaurant.getRestaurantId());
-    //     dto.setRestaurantName(restaurant.getRestaurantName());
-    //     dto.setRestaurantLocation(restaurant.getRestaurantLocation());
-    //     dto.setRestaurantDesc(restaurant.getRestaurantDesc());
-    //     dto.setRestaurantTableCapacity(restaurant.getRestaurantTableCapacity());
-    //     dto.setRestaurantPriceRange(restaurant.getRestaurantPriceRange());
-    //     dto.setRestaurantWeekdayClosingHour(restaurant.getRestaurantWeekdayClosingHour());
-    //     dto.setRestaurantWeekdayClosingMinutes(restaurant.getRestaurantWeekdayClosingMinutes());
-    //     dto.setRestaurantWeekdayOpeningHour(restaurant.getRestaurantWeekdayOpeningHour());
-    //     dto.setRestaurantWeekdayOpeningMinutes(restaurant.getRestaurantWeekdayOpeningMinutes());
-    //     dto.setRestaurantWeekendClosingHour(restaurant.getRestaurantWeekendClosingHour());
-    //     dto.setRestaurantWeekendClosingMinutes(restaurant.getRestaurantWeekendClosingMinutes());
-    //     dto.setRestaurantWeekendOpeningHour(restaurant.getRestaurantWeekendOpeningHour());
-    //     dto.setRestaurantWeekendOpeningMinutes(restaurant.getRestaurantWeekendOpeningMinutes());
-    //     dto.setRestaurantCategory(restaurant.getRestaurantCategory());
-        
-    //     Picture picture = restaurant.getPicture();
-    //     if (picture != null) {
-    //         PictureDTO picDto = new PictureDTO(picture.getTitle(), picture.getDescription(), picture.getUrl());
-    //         dto.setPicture(picDto);
-    //     }
-
-    //     Discount discount = restaurant.getDiscount();
-    //     if (discount != null) {
-    //         DiscountDTO discDTO = new DiscountDTO(discount.getRestaurant().getRestaurantId(), discount.getDiscountDescription(), discount.getDiscountPercentage());
-    //         dto.setDiscount(discDTO);
-    //     }
-
-    //     return dto;
-    // }
 }
