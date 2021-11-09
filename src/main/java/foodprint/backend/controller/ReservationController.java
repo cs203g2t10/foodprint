@@ -239,6 +239,7 @@ public class ReservationController {
         
         ReservationDTO dto = mapper.map(reservation, ReservationDTO.class);
         dto.setImageUrl(reservation.getRestaurant().getPicture().getUrl());
+        
 
         List<NamedLineItemDTO> lineItemDtos = new ArrayList<>();
         for (LineItem lineItem : reservation.getLineItems()) {
