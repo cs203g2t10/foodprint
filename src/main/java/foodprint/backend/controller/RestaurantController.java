@@ -376,14 +376,6 @@ public class RestaurantController {
         return new ResponseEntity<>(service.savePicture(restaurantId, title, description, file), HttpStatus.CREATED);
     }
 
-    @GetMapping({"/{restaurantId}/picture/"})
-    @ResponseStatus(code = HttpStatus.OK)
-    @Operation(summary = "Get a picture of a restaurant")
-    public ResponseEntity<String> getPictureById(@PathVariable("restaurantId") Long restaurantId) {
-        String url = service.getRestaurantPicture(restaurantId);
-        return new ResponseEntity<>(url, HttpStatus.OK);
-    }
-
     @DeleteMapping({"/{restaurantId}/picture"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Deletes a restaurant's picture")
@@ -419,14 +411,6 @@ public class RestaurantController {
                                             @RequestParam("description") String description,
                                             @RequestParam("file") MultipartFile file) {                                
         return new ResponseEntity<>(service.saveFoodPicture(restaurantId, foodId, title, description, file), HttpStatus.CREATED);
-    }
-
-    @GetMapping({"/{restaurantId}/food/{foodId}/picture"})
-    @ResponseStatus(code = HttpStatus.OK)
-    @Operation(summary = "Get a picture of a restaurant's food by using restaurant id and food id")
-    public ResponseEntity<String> getPictureById(@PathVariable("restaurantId") Long restaurantId,  @PathVariable("foodId") Long foodId) {
-        String url = service.getFoodPicture(restaurantId, foodId);
-        return new ResponseEntity<>(url, HttpStatus.OK);
     }
 
     @DeleteMapping({"/{restaurantId}/food/{foodId}/picture"})
