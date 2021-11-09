@@ -1,6 +1,7 @@
 package foodprint.backend.model;
 
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,6 +16,8 @@ public interface ReservationRepo extends JpaRepository<Reservation, Long> {
     List<Reservation> findByRestaurant(Restaurant restaurant);
     
     List<Reservation> findByRestaurantAndDateBetween(Restaurant restaurant, LocalDateTime after, LocalDateTime before);
+
+    Page<Reservation> findByRestaurantAndDateBetween(Pageable page, Restaurant restaurant, LocalDateTime after, LocalDateTime before);
     
     List<Reservation> findByUser(User user);
 

@@ -239,7 +239,7 @@ public class RestaurantService {
     public Food addFood(Long restaurantId, FoodDTO foodDTO) {
         Restaurant restaurant = repo.findByRestaurantId(restaurantId);
 
-        Food newFood = new Food(foodDTO.getFoodName(), foodDTO.getFoodPrice(), 0.00);
+        Food newFood = new Food(foodDTO.getFoodName(), foodDTO.getFoodDesc(), foodDTO.getFoodPrice(), 0.00);
         newFood.setPicture(null);
 
         List<Ingredient> ingredients = getAllRestaurantIngredients(restaurantId);
@@ -293,15 +293,8 @@ public class RestaurantService {
      */
     @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
     public void deleteFood(Long restaurantId, Long foodId) {
-        Restaurant restaurant = get(restaurantId);
-        List<Food> allFood = restaurant.getAllFood();
-        for (Food food : allFood) {
-            if (food.getFoodId().equals(foodId)) {
-                foodRepo.delete(food);
-                return;
-            }
-        }
-        throw new NotFoundException("Food not found");
+        Food food = foodRepo.findByFoodIdAndRestaurantRestaurantId(foodId, restaurantId).orElseThrow(() -> new NotFoundException("Food not found"));
+        foodRepo.delete(food);
     }
 
     /**
