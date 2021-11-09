@@ -38,6 +38,8 @@ public class UserService {
 
     private RestaurantRepo restaurantRepo;
 
+    private static final Set<String> VALID_ROLES_SET = Set.of("FP_ADMIN", "FP_MANAGER", "FP_USER", "FP_UNVERIFIED");
+
     @Autowired
     UserService(UserRepo repo, PasswordEncoder passwordEncoder, TokenRepo tokenRepo, EmailService emailService,
             RestaurantRepo restaurantRepo) {
@@ -113,9 +115,8 @@ public class UserService {
             Set<String> filteredRoles = new HashSet<>();
 
             for (String role : roles) {
-                role = role.strip();
-                if (role.equals("FP_ADMIN") || role.equals("FP_MANAGER") || role.equals("FP_USER")
-                        || role.equals("FP_UNVERIFIED")) {
+                role = role.strip().toUpperCase();
+                if (VALID_ROLES_SET.contains(role)) {
                     filteredRoles.add(role);
                 }
             }

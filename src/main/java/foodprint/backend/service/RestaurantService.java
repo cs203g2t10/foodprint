@@ -40,6 +40,7 @@ public class RestaurantService {
 
     private static final String PICTURE_NOT_FOUND_MESSAGE = "Picture not found in restaurant";
     private static final String RESTAURANT_DOES_NOT_EXIST_MESSAGE = "Restaurant does not exist";
+    private static final String DISCOUNT_NOT_FOUND_MESSAGE = "Discount not found";
 
     private RestaurantRepo repo;
 
@@ -433,7 +434,7 @@ public class RestaurantService {
         }
         Discount dis = res.getDiscount();
         if (dis == null) {
-            throw new NotFoundException("Discount not found");
+            throw new NotFoundException(DISCOUNT_NOT_FOUND_MESSAGE);
         }
         res.setDiscount(null);
         discountRepo.delete(dis);
@@ -452,7 +453,7 @@ public class RestaurantService {
         Restaurant res = repo.findByRestaurantId(restaurantId);
         Discount originalDiscount = res.getDiscount();
         if (originalDiscount == null) {
-            throw new NotFoundException("Discount not found");
+            throw new NotFoundException(DISCOUNT_NOT_FOUND_MESSAGE);
         }
 
         if (updatedDiscount.getDiscountDescription() != null) {
@@ -475,7 +476,7 @@ public class RestaurantService {
     @PreAuthorize("hasAnyAuthority('FP_USER', 'FP_MANAGER', 'FP_ADMIN')")
     public Discount getDiscount(Long discountId) {
         Optional<Discount> discount = discountRepo.findById(discountId);
-        return discount.orElseThrow(() -> new NotFoundException("Discount not found"));
+        return discount.orElseThrow(() -> new NotFoundException(DISCOUNT_NOT_FOUND_MESSAGE));
     }
 
     /*
