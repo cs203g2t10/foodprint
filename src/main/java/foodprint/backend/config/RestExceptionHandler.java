@@ -124,6 +124,6 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ConstraintViolationException.class)
     public void handleConstraintViolationException(ConstraintViolationException ex, HttpServletResponse response) throws IOException {
         loggr.error("Constraint violation exception", ex);
-        response.sendError(HttpStatus.CONFLICT.value(), "Database inconsistency error");
+        response.sendError(HttpStatus.CONFLICT.value(), "Unable to perform action to prevent inconsistency");
     }
 }
