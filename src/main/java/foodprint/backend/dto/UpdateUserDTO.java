@@ -25,7 +25,7 @@ public class UpdateUserDTO {
         this.password = password;
     }
 
-    public String getFirstName() {X
+    public String getFirstName() {
         return this.firstName;
     }
 
