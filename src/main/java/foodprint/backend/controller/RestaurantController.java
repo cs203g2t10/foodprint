@@ -255,10 +255,11 @@ public class RestaurantController {
     @Operation(summary = "Updates an existing discount of restaurant, only changed fields need to be set")
     public ResponseEntity<Discount> updateRestaurantDiscount(
         @PathVariable("restaurantId") Long restaurantId,
-        @RequestBody Discount updatedDiscount
-    ) {
-        Discount discount = service.updateDiscount(restaurantId, updatedDiscount);
-        return new ResponseEntity<>(discount, HttpStatus.OK);
+        @RequestBody DiscountDTO updatedDiscount
+    ) { 
+        ModelMapper mapper = new ModelMapper();
+        Discount discount = mapper.map(updatedDiscount, Discount.class);
+        return new ResponseEntity<>(service.updateDiscount(restaurantId, discount), HttpStatus.OK);
     }
 
     /*
