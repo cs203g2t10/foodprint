@@ -239,7 +239,7 @@ public class RestaurantService {
     public Food addFood(Long restaurantId, FoodDTO foodDTO) {
         Restaurant restaurant = repo.findByRestaurantId(restaurantId);
 
-        Food newFood = new Food(foodDTO.getFoodName(), foodDTO.getFoodPrice(), 0.00);
+        Food newFood = new Food(foodDTO.getFoodName(), foodDTO.getFoodDesc(), foodDTO.getFoodPrice(), 0.00);
         newFood.setPicture(null);
 
         List<Ingredient> ingredients = getAllRestaurantIngredients(restaurantId);
