@@ -2,8 +2,21 @@ package foodprint.backend.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,30 +28,32 @@ import foodprint.backend.dto.EditFoodDTO;
 import foodprint.backend.dto.FoodDTO;
 import foodprint.backend.dto.FoodIngredientQuantityDTO;
 import foodprint.backend.dto.UpdatePictureDTO;
+import foodprint.backend.exceptions.AlreadyExistsException;
+import foodprint.backend.exceptions.BadRequestException;
 import foodprint.backend.exceptions.DeleteFailedException;
 import foodprint.backend.exceptions.NotFoundException;
-import foodprint.backend.exceptions.AlreadyExistsException;
 import foodprint.backend.model.Discount;
 import foodprint.backend.model.DiscountRepo;
 import foodprint.backend.model.Food;
-import foodprint.backend.model.FoodRepo;
-import foodprint.backend.model.Ingredient;
-import foodprint.backend.model.LineItem;
-import foodprint.backend.model.Picture;
-import foodprint.backend.model.ReservationRepo;
-import foodprint.backend.model.Reservation;
-import foodprint.backend.model.Restaurant;
-import foodprint.backend.model.RestaurantRepo;
-import foodprint.backend.model.IngredientRepo;
 import foodprint.backend.model.FoodIngredientQuantity;
 import foodprint.backend.model.FoodIngredientQuantityKey;
 import foodprint.backend.model.FoodIngredientQuantityRepo;
+import foodprint.backend.model.FoodRepo;
+import foodprint.backend.model.Ingredient;
+import foodprint.backend.model.IngredientRepo;
+import foodprint.backend.model.LineItem;
+import foodprint.backend.model.Picture;
+import foodprint.backend.model.Reservation;
+import foodprint.backend.model.ReservationRepo;
+import foodprint.backend.model.Restaurant;
+import foodprint.backend.model.RestaurantRepo;
 
 @Service
 public class RestaurantService {
 
     private static final String PICTURE_NOT_FOUND_MESSAGE = "Picture not found in restaurant";
     private static final String RESTAURANT_DOES_NOT_EXIST_MESSAGE = "Restaurant does not exist";
+    private static final String DISCOUNT_NOT_FOUND_MESSAGE = "Discount not found";
 
     private RestaurantRepo repo;
 
@@ -53,6 +68,8 @@ public class RestaurantService {
     private ReservationRepo reservationRepo;
 
     private FoodIngredientQuantityRepo foodIngredientQuantityRepo;
+
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     public RestaurantService(RestaurantRepo repo, FoodRepo foodRepo, DiscountRepo discountRepo,
             IngredientRepo ingredientRepo, PictureService pictureService, ReservationRepo reservationRepo,
@@ -141,6 +158,13 @@ public class RestaurantService {
 
         if (updatedRestaurant.getRestaurantCategory() != null && !updatedRestaurant.getRestaurantCategory().isEmpty()) {
             currentRestaurant.setRestaurantCategory(updatedRestaurant.getRestaurantCategory());
+        }
+
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        Validator validator = factory.getValidator();
+        Set<ConstraintViolation<Restaurant>> violations = validator.validate(currentRestaurant);
+        for (ConstraintViolation<Restaurant> violation : violations) {
+            log.error(violation.getMessage());
         }
         return repo.saveAndFlush(currentRestaurant);
     }
@@ -237,6 +261,10 @@ public class RestaurantService {
      */
     @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
     public Food addFood(Long restaurantId, FoodDTO foodDTO) {
+        if (foodDTO.getIngredientQuantityList().size() == 0) {
+            throw new BadRequestException("Food should have at least 1 ingredient");
+        }
+
         Restaurant restaurant = repo.findByRestaurantId(restaurantId);
 
         Food newFood = new Food(foodDTO.getFoodName(), foodDTO.getFoodDesc(), foodDTO.getFoodPrice(), 0.00);
@@ -293,7 +321,8 @@ public class RestaurantService {
      */
     @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
     public void deleteFood(Long restaurantId, Long foodId) {
-        Food food = foodRepo.findByFoodIdAndRestaurantRestaurantId(foodId, restaurantId).orElseThrow(() -> new NotFoundException("Food not found"));
+        Food food = foodRepo.findByFoodIdAndRestaurantRestaurantId(foodId, restaurantId)
+                .orElseThrow(() -> new NotFoundException("Food not found"));
         foodRepo.delete(food);
     }
 
@@ -406,8 +435,7 @@ public class RestaurantService {
             throw new AlreadyExistsException("Discount already exist");
         }
         Discount newDiscount = new Discount();
-        newDiscount.restaurant(restaurant)
-                .discountDescription(discount.getDiscountDescription())
+        newDiscount.restaurant(restaurant).discountDescription(discount.getDiscountDescription())
                 .discountPercentage(discount.getDiscountPercentage());
         var savedDiscount = discountRepo.saveAndFlush(newDiscount);
         restaurant.setDiscount(savedDiscount);
@@ -428,7 +456,7 @@ public class RestaurantService {
         }
         Discount dis = res.getDiscount();
         if (dis == null) {
-            throw new NotFoundException("Discount not found");
+            throw new NotFoundException(DISCOUNT_NOT_FOUND_MESSAGE);
         }
         res.setDiscount(null);
         discountRepo.delete(dis);
@@ -447,7 +475,7 @@ public class RestaurantService {
         Restaurant res = repo.findByRestaurantId(restaurantId);
         Discount originalDiscount = res.getDiscount();
         if (originalDiscount == null) {
-            throw new NotFoundException("Discount not found");
+            throw new NotFoundException(DISCOUNT_NOT_FOUND_MESSAGE);
         }
 
         if (updatedDiscount.getDiscountDescription() != null) {
@@ -470,7 +498,7 @@ public class RestaurantService {
     @PreAuthorize("hasAnyAuthority('FP_USER', 'FP_MANAGER', 'FP_ADMIN')")
     public Discount getDiscount(Long discountId) {
         Optional<Discount> discount = discountRepo.findById(discountId);
-        return discount.orElseThrow(() -> new NotFoundException("Discount not found"));
+        return discount.orElseThrow(() -> new NotFoundException(DISCOUNT_NOT_FOUND_MESSAGE));
     }
 
     /*
@@ -718,7 +746,8 @@ public class RestaurantService {
         Picture currentPicture = restaurant.getPicture();
         if (currentPicture != null) {
             if (updatedPicture.getPictureFile() != null) {
-                currentPicture = pictureService.savePicture(currentPicture.getTitle(), currentPicture.getDescription(), updatedPicture.getPictureFile());
+                currentPicture = pictureService.savePicture(currentPicture.getTitle(), currentPicture.getDescription(),
+                        updatedPicture.getPictureFile());
                 deleteRestaurantPicture(restaurantId);
             }
             if (updatedPicture.getTitle() != null && !updatedPicture.getTitle().isEmpty()) {
@@ -742,7 +771,8 @@ public class RestaurantService {
         Picture currentPicture = food.getPicture();
         if (currentPicture != null) {
             if (updatedPicture.getPictureFile() != null) {
-                currentPicture = pictureService.savePicture(currentPicture.getTitle(), currentPicture.getDescription(), updatedPicture.getPictureFile());
+                currentPicture = pictureService.savePicture(currentPicture.getTitle(), currentPicture.getDescription(),
+                        updatedPicture.getPictureFile());
                 deleteFoodPicture(restaurantId, foodId);
             }
             if (updatedPicture.getTitle() != null && !updatedPicture.getTitle().isEmpty()) {

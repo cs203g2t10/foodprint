@@ -33,6 +33,26 @@ public class ReservationDTO {
 
     private ReservationStatus status;
 
+    private String userFirstName;
+
+    private String userLastName;
+
+    public String getUserFirstName() {
+        return userFirstName;
+    }
+
+    public void setUserFirstName(String userFirstName) {
+        this.userFirstName = userFirstName;
+    }
+
+    public String getUserLastName() {
+        return userLastName;
+    }
+
+    public void setUserLastName(String userLastName) {
+        this.userLastName = userLastName;
+    }
+
     @Schema(defaultValue = "0.0")
     private Double price;
 

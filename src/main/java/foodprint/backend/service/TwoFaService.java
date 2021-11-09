@@ -25,9 +25,9 @@ public class TwoFaService {
     private static Logger loggr = LoggerFactory.getLogger(TwoFaService.class);
     
     public static final String QR_PREFIX = "https://chart.googleapis.com/chart?chs=200x200&chld=M%%7C0&cht=qr&chl=";
-    public static final int tokenLength = 6;
+    public static final int TOKEN_LENGTH = 6;
 
-    private static final String userNotFound = "User not found";
+    private static final String USER_NOT_FOUND_MESSAGE = "User not found";
 
     public boolean checkEmailHas2FA(String email) {
 
@@ -69,7 +69,7 @@ public class TwoFaService {
 
     public String setup(Principal principal) {
         String email = principal.getName();
-        User user = userRepo.findByEmail(email).orElseThrow(() ->  new NotFoundException(userNotFound));
+        User user = userRepo.findByEmail(email).orElseThrow(() ->  new NotFoundException(USER_NOT_FOUND_MESSAGE));
 
         if (user.isTwoFaSet()) {
             throw new InvalidException("2FA already enabled.");
@@ -84,7 +84,7 @@ public class TwoFaService {
 
     public void confirm(String token, Principal principal) {
         String email = principal.getName();
-        User user = userRepo.findByEmail(email).orElseThrow(() ->  new NotFoundException(userNotFound));
+        User user = userRepo.findByEmail(email).orElseThrow(() ->  new NotFoundException(USER_NOT_FOUND_MESSAGE));
         String twoFaSecret = user.getTwoFaSecret();
 
         if (!validToken(token)) {
@@ -111,7 +111,7 @@ public class TwoFaService {
 
     public void disable(String token, Principal principal) {
         String email = principal.getName();
-        User user = userRepo.findByEmail(email).orElseThrow(() ->  new NotFoundException(userNotFound));
+        User user = userRepo.findByEmail(email).orElseThrow(() ->  new NotFoundException(USER_NOT_FOUND_MESSAGE));
         String twoFaSecret = user.getTwoFaSecret();
 
         if (!validToken(token)) {
@@ -134,6 +134,6 @@ public class TwoFaService {
     }
 
     public boolean validToken(String token) {
-        return !(token.length() != tokenLength || !token.matches("[0-9]+"));
+        return !(token.length() != TOKEN_LENGTH || !token.matches("[0-9]+"));
     }
 }

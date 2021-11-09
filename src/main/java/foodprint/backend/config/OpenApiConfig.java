@@ -16,13 +16,13 @@ import io.swagger.v3.oas.models.servers.Server;
 @Configuration
 public class OpenApiConfig {
 
-    private static final String moduleName = "Foodprint";
-    private static final String apiVersion = "1";
+    private static final String MODULE_NAME = "Foodprint";
+    private static final String API_VERSION = "1";
 
     @Bean
     public OpenAPI openApi() {
       final String securitySchemeName = "jwtAuthentication";
-      final String apiTitle = String.format("%s API", StringUtils.capitalize(moduleName));
+      final String apiTitle = String.format("%s API", StringUtils.capitalize(MODULE_NAME));
       final Server server = new Server();
       server.setUrl("/");
       return new OpenAPI()
@@ -40,7 +40,7 @@ public class OpenApiConfig {
           .info(
               new Info()
                 .title(apiTitle)
-                .version(apiVersion)
+                .version(API_VERSION)
             )
           .servers(List.of(server));
     }
