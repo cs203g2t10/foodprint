@@ -1,5 +1,7 @@
 package foodprint.backend.model;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -20,7 +22,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Entity
 @JsonIgnoreProperties("restaurant")
 @EnableTransactionManagement
-public class Discount {
+public class Discount implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

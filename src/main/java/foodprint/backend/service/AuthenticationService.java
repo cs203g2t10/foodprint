@@ -23,7 +23,7 @@ import foodprint.backend.model.UserRepo;
 @Service
 public class AuthenticationService {
 
-    private static final String emlRegex = "^([_a-zA-Z0-9-]+(\\.[_a-zA-Z0-9-]+)*@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*(\\.[a-zA-Z]{1,6}))?$";
+    private static final String EMAIL_REGEX = "^([_a-zA-Z0-9-]+(\\.[_a-zA-Z0-9-]+)*@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*(\\.[a-zA-Z]{1,6}))?$";
 
     private UserDetailsService userDetailsService;
     
@@ -135,7 +135,7 @@ public class AuthenticationService {
      * @return
      */
     public Boolean check2faSet(String email) {
-        if (!email.matches(emlRegex)) {
+        if (!email.matches(EMAIL_REGEX)) {
             return false;
         }
         User user = userRepo.findByEmail(email).orElse(null);

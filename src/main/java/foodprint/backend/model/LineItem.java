@@ -1,5 +1,7 @@
 package foodprint.backend.model;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -13,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Entity
-public class LineItem {
+public class LineItem implements Serializable {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
