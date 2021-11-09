@@ -219,7 +219,7 @@ public class UserController {
     public ResponseEntity<List<RestaurantDTO>> getAllFavouriteRestaurants() {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Set<Restaurant> restaurants = user.getFavouriteRestaurants();
-        List<RestaurantDTO> restaurantDtos = restaurants.stream().map(r -> restaurantConvertToDTO(r)).collect(Collectors.toList());
+        List<RestaurantDTO> restaurantDtos = restaurants.stream().map(this::restaurantConvertToDTO).collect(Collectors.toList());
         return new ResponseEntity<>(restaurantDtos, HttpStatus.OK);
     }
 
