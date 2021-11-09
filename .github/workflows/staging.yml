@@ -17,6 +17,7 @@ jobs:
   deploy:
     name: Build and Push to ECR
     runs-on: [self-hosted, linux, ARM64]
+    timeout-minutes: 10
     environment: staging
 
     steps:
@@ -58,6 +59,7 @@ jobs:
   webhook:
     name: Trigger Automated Deployment via Webhook
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [deploy]
     environment: staging
     steps:
@@ -74,6 +76,7 @@ jobs:
   zap-scan:
     name: Run ZAP Scan on OpenAPI
     runs-on: ubuntu-latest
+    timeout-minutes: 120
     needs: [webhook]
     environment: staging
     steps:
