@@ -55,7 +55,7 @@ import io.swagger.v3.oas.annotations.Operation;
 public class RestaurantController {
     
     private RestaurantService service;
-    private static final String restaurantNotFound = "restaurant does not exist";
+    private static final String RESTAURANT_NOT_FOUND = "restaurant does not exist";
 
     @Autowired
     RestaurantController(RestaurantService service) {
@@ -164,7 +164,7 @@ public class RestaurantController {
     public ResponseEntity<Food> addRestaurantFood(@PathVariable("restaurantId") Long restaurantId, @RequestBody @Valid FoodDTO food) {
         Restaurant restaurant = service.get(restaurantId);
         if(restaurant == null)
-            throw new NotFoundException(restaurantNotFound);
+            throw new NotFoundException(RESTAURANT_NOT_FOUND);
 
         Food savedFood = service.addFood(restaurantId, food);
 
@@ -326,7 +326,7 @@ public class RestaurantController {
     public ResponseEntity<List<IngredientCalculationDTO>> calculateIngredientsBetween (@PathVariable Long restaurantId, @RequestParam("start") String startDate, @RequestParam("end") String endDate) {
         Restaurant restaurant = service.get(restaurantId);
         if(restaurant == null) {
-            throw new NotFoundException(restaurantNotFound);
+            throw new NotFoundException(RESTAURANT_NOT_FOUND);
         }
         
         LocalDate start = LocalDate.parse(startDate);
@@ -354,7 +354,7 @@ public class RestaurantController {
     public ResponseEntity<Map<String, Integer>> calculateFoodBetween(@PathVariable Long restaurantId, @RequestParam("start") String startDate, @RequestParam("end") String endDate) {
         Restaurant restaurant = service.get(restaurantId);
         if(restaurant == null)
-            throw new NotFoundException(restaurantNotFound);
+            throw new NotFoundException(RESTAURANT_NOT_FOUND);
         
         LocalDate start = LocalDate.parse(startDate);
         LocalDate end = LocalDate.parse(endDate);

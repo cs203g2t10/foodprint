@@ -1,6 +1,7 @@
 package foodprint.backend.model;
 
 import java.util.List;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 import javax.persistence.CascadeType;
@@ -25,7 +26,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Table
 @EnableTransactionManagement
 
-public class Reservation {
+public class Reservation implements Serializable {
     
     // Properties
     @Id

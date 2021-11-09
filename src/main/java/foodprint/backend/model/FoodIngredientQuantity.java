@@ -1,5 +1,7 @@
 package foodprint.backend.model;
 
+import java.io.Serializable;
+
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -11,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Entity
-public class FoodIngredientQuantity {
+public class FoodIngredientQuantity implements Serializable {
     @EmbeddedId
     private FoodIngredientQuantityKey id = new FoodIngredientQuantityKey();
 

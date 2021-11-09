@@ -5,7 +5,7 @@ import java.util.Objects;
 
 import javax.persistence.Column;
 
-public class FoodIngredientQuantityKey implements Serializable{
+public class FoodIngredientQuantityKey implements Serializable {
     @Column(name = "foodId")
     private Long foodId;
     

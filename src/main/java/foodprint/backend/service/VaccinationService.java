@@ -29,7 +29,7 @@ public class VaccinationService {
     
     private UserService userService;
     private static Logger loggr = LoggerFactory.getLogger(VaccinationService.class);
-    private static final String url = "https://oa.foodprint.works/";
+    private static final String URL = "https://oa.foodprint.works/";
 
     @Autowired
     public VaccinationService(UserService userService) {
@@ -40,7 +40,7 @@ public class VaccinationService {
     public void validateVaccination(@Param("usrParam") User user, String oaFileString) {
         var client = HttpClient.newHttpClient();
         
-        var request = HttpRequest.newBuilder(URI.create(url))
+        var request = HttpRequest.newBuilder(URI.create(URL))
             .header("accept", "application/json")
             .header("content-type", "application/json")
             .POST(BodyPublishers.ofString(oaFileString))
