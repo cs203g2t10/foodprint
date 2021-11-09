@@ -1,16 +1,33 @@
 package foodprint.backend;
 
+import foodprint.backend.controller.AuthController;
+import foodprint.backend.controller.RestaurantController;
+import foodprint.backend.dto.AuthRequestDTO;
+import foodprint.backend.dto.AuthResponseDTO;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.RestaurantRepo;
 import foodprint.backend.model.User;
+import foodprint.backend.model.UserRepo;
+import foodprint.backend.service.UserService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+
+import javax.persistence.DiscriminatorColumn;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Inheritance;
+import javax.persistence.Table;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,17 +41,21 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
+@DiscriminatorValue( "null" )
 public class RestaurantIntegrationTest {
 
     @LocalServerPort
@@ -48,15 +69,34 @@ public class RestaurantIntegrationTest {
     @Autowired
     private RestaurantRepo restaurants;
 
-    
+    @Autowired
+    private AuthController authController;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private ObjectMapper mapper;
+
+    @Autowired
+    private UserRepo userRepo;
+
     HttpHeaders headers = new HttpHeaders();
     TestRestTemplate testRestTemplate = new TestRestTemplate();
 
     @BeforeEach
     void createUser() {
-        User user = new User("bobbytan@gmail.com", "SuperSecurePassw0rd", "bobby");
-        user.setRoles("FP_MANAGER");
-        user.setRoles("FP_ADMIN");
+        Optional<User> user = userRepo.findByEmail("bobby@gmail.com");
+        if (!user.isEmpty()) {
+            userRepo.delete(user.get());
+        }
+        String encodedPassword = new BCryptPasswordEncoder().encode("SuperSecurePassw0rd");
+        User newUser = new User("bobby@gmail.com", encodedPassword, "bobby");
+        newUser.setRoles("FP_MANAGER");
+        newUser.setRoles("FP_ADMIN");
+        ReflectionTestUtils.setField(newUser, "id", 1L);
+        newUser.setRegisteredOn(LocalDateTime.now());
+        userRepo.saveAndFlush(newUser);
         //userService.createUser(user);
         
     }
@@ -74,19 +114,37 @@ public class RestaurantIntegrationTest {
         restaurants.deleteAll();
     }
     
-    @WithMockUser(roles = "FP_MANAGER")
     @Test
     public void CreateRestaurant_Success() throws Exception{
-        HttpEntity<String> entity = new HttpEntity<>(null, headers);
+        AuthRequestDTO loginRequest = new AuthRequestDTO();
+        loginRequest.setEmail("bobby@gmail.com");
+        loginRequest.setPassword("SuperSecurePassw0rd");
+        AuthResponseDTO loginResponse = testRestTemplate.postForObject(createURLWithPort("/api/v1/auth/login"), loginRequest, AuthResponseDTO.class);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.add("Authorization", "Bearer " + loginResponse.getToken());
+        System.out.println(loginResponse.getStatus());
+        headers.add("Content-Type", "application/json");
+        
         List<String> restaurantCategories = new ArrayList<>();
         restaurantCategories.add("Japanese");
         restaurantCategories.add("Rice");
         Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
-        restaurants.save(restaurant);
-
-        ResponseEntity<Restaurant> responseEntity = testRestTemplate.exchange(createURLWithPort(
-                "/api/v1/restaurant"),HttpMethod.POST, entity, Restaurant.class);
-        assertNotNull(responseEntity);
+        ReflectionTestUtils.setField(restaurant, "restaurantId", 1L);
+        if (!restaurants.findById(1L).isEmpty()) {
+            restaurants.delete(restaurant);
+        }
+        HttpEntity<Restaurant> entity = new HttpEntity<>(restaurant, headers);
+        restaurants.saveAndFlush(restaurant);
+        ResponseEntity<Restaurant> responseEntity = testRestTemplate.exchange(
+                createURLWithPort("/api/v1/restaurant"),
+                HttpMethod.POST,
+                entity,
+                Restaurant.class
+            );
+        assertEquals(201, responseEntity.getStatusCode().value());
+        // assertNotNull(responseEntity);
     }
 
     @Test
@@ -112,7 +170,7 @@ public class RestaurantIntegrationTest {
         URI uri = new URI(baseUrl + port + "/books/" + restaurant.getRestaurantId().longValue());
         Restaurant updatedRestaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
         
-        ResponseEntity<Restaurant> result = restTemplate.withBasicAuth("admin", "goodpassword")
+        ResponseEntity<Restaurant> result = restTemplate.withBasicAuth("admin", "SuperSecurePassw0rd")
                 .exchange(uri, HttpMethod.PUT, new HttpEntity<>(updatedRestaurant), Restaurant.class);
             
         assertNotNull(result);
