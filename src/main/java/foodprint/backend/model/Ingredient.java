@@ -1,9 +1,5 @@
 package foodprint.backend.model;
 
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -48,16 +44,10 @@ public class Ingredient {
     @Length(min = 1)
     private String ingredientDesc;
 
-    @Column(name = "picturesPath")
-    private String picturesPath;
-
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "restaurant_id")
     private Restaurant restaurant;
-
-    // @Column(name = "ingredientPrice")
-    // private Double ingredientPrice;
 
     @Column(name = "units")
     @Schema(defaultValue = "1")
@@ -107,23 +97,6 @@ public class Ingredient {
 
     public void setUnits (String units) {
         this.units = units;
-    }
-
-    public List<String> getPicturesPath() {
-        if (picturesPath == null) {
-            return new ArrayList<String>();
-        }
-
-        String[] arr = picturesPath.split(",");
-        List<String> list = Arrays.asList(arr);
-        return list;
-    }
-
-    public void setPicturesPath(List<String> list) {
-        if (!list.isEmpty()) {
-            String picturesPath = String.join(",", list);
-            this.picturesPath = picturesPath;
-        }
     }
 
 }

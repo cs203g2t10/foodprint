@@ -50,12 +50,12 @@ public class UserService {
 
     @PreAuthorize("hasAnyAuthority('FP_ADMIN')")
     public User createUser(User user) {
-        userRepo.findByEmail(user.getEmail()).ifPresent((duplicateUser) -> {
+        userRepo.findByEmail(user.getEmail()).ifPresent(duplicateUser -> {
             throw new AlreadyExistsException("User with the same email already exists");
         });
 
         if (user.getId() != null) {
-            userRepo.findById(user.getId()).ifPresent((duplicateUser) -> {
+            userRepo.findById(user.getId()).ifPresent(duplicateUser -> {
                 throw new AlreadyExistsException("User with the same ID already exists");
             });
         }
@@ -73,8 +73,7 @@ public class UserService {
 
     @PreAuthorize("hasAnyAuthority('FP_ADMIN')")
     public User getUser(Long id) {
-        User user = this.userRepo.findById(id).orElseThrow(() -> new NotFoundException("User not found"));
-        return user;
+        return this.userRepo.findById(id).orElseThrow(() -> new NotFoundException("User not found"));
     }
 
     public User unprotectedGetUser(Long id) {
@@ -121,7 +120,7 @@ public class UserService {
                 }
             }
 
-            if (filteredRoles.size() == 0) {
+            if (filteredRoles.isEmpty()) {
                 throw new BadRequestException("No roles specified");
             }
 
@@ -210,7 +209,7 @@ public class UserService {
 
     public void addFavouriteRestaurant(User user, Long restaurantId) {
         Restaurant restaurant = getRestaurantById(restaurantId);
-        Set<Restaurant> favouriteRestaurants = new HashSet<Restaurant>();
+        Set<Restaurant> favouriteRestaurants = new HashSet<>();
         if (user.getFavouriteRestaurants() != null) {
             favouriteRestaurants = user.getFavouriteRestaurants();
         }

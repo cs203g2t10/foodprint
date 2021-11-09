@@ -16,8 +16,8 @@ import io.swagger.v3.oas.models.servers.Server;
 @Configuration
 public class OpenApiConfig {
 
-    private final String moduleName = "Foodprint";
-    private final String apiVersion = "1";
+    private static final String moduleName = "Foodprint";
+    private static final String apiVersion = "1";
 
     @Bean
     public OpenAPI openApi() {

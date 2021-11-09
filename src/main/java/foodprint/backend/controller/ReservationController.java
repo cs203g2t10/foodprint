@@ -1,13 +1,17 @@
 package foodprint.backend.controller;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,6 +22,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,6 +30,8 @@ import foodprint.backend.dto.CreateReservationDTO;
 import foodprint.backend.dto.LineItemDTO;
 import foodprint.backend.dto.ReservationDTO;
 import foodprint.backend.dto.NamedLineItemDTO;
+import foodprint.backend.exceptions.BadRequestException;
+import foodprint.backend.exceptions.InsufficientPermissionsException;
 import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.Food;
 import foodprint.backend.model.LineItem;
@@ -110,13 +117,40 @@ public class ReservationController {
     @Operation(summary = "Gets all line item for reservation")
     public ResponseEntity<List<LineItemDTO>> getReservationOrder(@PathVariable("reservationId") Long id) {
         Reservation reservation = reservationService.getReservationById(id);
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!user.equals(reservation.getUser())) {
+            throw new InsufficientPermissionsException("Not authorised to view line items of another user");
+        }
         List<LineItem> lineItems = reservation.getLineItems();
-        List<LineItemDTO> result = new ArrayList<LineItemDTO>();
+        List<LineItemDTO> result = new ArrayList<>();
         for(LineItem lineItem : lineItems) {
             LineItemDTO curr = new LineItemDTO(lineItem.getFood().getFoodId(), lineItem.getQuantity());
             result.add(curr);
         }
         return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    // GET: Upcoming reservations for restaurant
+    @GetMapping("/restaurant/{restaurantId}")
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Gets all upcoming reservations for a restaurant between two dates")
+    public ResponseEntity<Page<ReservationDTO>> getRestaurantReservations(
+        @PathVariable("restaurantId") Long restaurantId,
+        @RequestParam(name="after", required=true) String afterStr, 
+        @RequestParam(name="before", required=true) String beforeStr,
+        @RequestParam(name="p", defaultValue="0") int page
+    ) {
+        Restaurant restaurant = restaurantService.get(restaurantId);
+        LocalDateTime after = LocalDate.parse(afterStr).atStartOfDay();
+        LocalDateTime before = LocalDate.parse(beforeStr).atStartOfDay();
+        if (after.isAfter(before)) {
+            throw new BadRequestException("Start date should be before end date");
+        }
+        User requestor = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Restaurant requestorRestaurant = requestor.getRestaurant();
+        Page<Reservation> reservations = reservationService.getRestaurantUpcomingReservations(restaurant, requestorRestaurant, after, before, page);
+        Page<ReservationDTO> reservationDTOs = reservations.map(this::convertToDTO);
+        return new ResponseEntity<>(reservationDTOs,HttpStatus.OK);
     }
 
     // GET: Get all reservations
@@ -131,7 +165,7 @@ public class ReservationController {
     // POST: Create a new reservation (DTO)
     @PostMapping
     @Operation(summary = "For users to create a new reservation slot")
-    public ResponseEntity<ReservationDTO> createReservationDTO(@RequestBody CreateReservationDTO req) {
+    public ResponseEntity<ReservationDTO> createReservationDTO(@RequestBody @Nullable CreateReservationDTO req) {
         User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         try {
             var reservation = reservationService.create(currentUser, req);
@@ -140,7 +174,6 @@ public class ReservationController {
         } catch (NotFoundException e) {
             return new ResponseEntity<>(null, HttpStatus.NOT_ACCEPTABLE);
         }
-
     }
 
     // PUT: Update reservation (DTO)
@@ -243,8 +276,8 @@ public class ReservationController {
 
             List<LineItem> savedLineItems = new ArrayList<>();
 
-            for (Food key : lineItemsHashMap.keySet()) {
-                LineItem savedLineItem = new LineItem(key, reservation, lineItemsHashMap.get(key));
+            for (Map.Entry<Food, Integer> entry : lineItemsHashMap.entrySet()) {
+                LineItem savedLineItem = new LineItem(entry.getKey(), reservation, entry.getValue());
                 savedLineItems.add(savedLineItem);
             }
 

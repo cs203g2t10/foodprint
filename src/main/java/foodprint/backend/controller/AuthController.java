@@ -80,14 +80,8 @@ public class AuthController {
 
             return ResponseEntity.ok().header(HttpHeaders.AUTHORIZATION, jwtToken).body(responseBody);
 
-        } catch (BadCredentialsException ex) {
+        } catch (BadCredentialsException | UsernameNotFoundException ex) {
 
-            AuthResponseDTO responseBody = new AuthResponseDTO();
-            responseBody.setStatus("INCORRECT");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseBody);
-
-        } catch (UsernameNotFoundException ex) {
-        
             AuthResponseDTO responseBody = new AuthResponseDTO();
             responseBody.setStatus("INCORRECT");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseBody);
@@ -96,13 +90,15 @@ public class AuthController {
 
             AuthResponseDTO responseBody = new AuthResponseDTO();
             responseBody.setStatus("USER_UNVERIFIED");
-            authService.emailConfirmation(repo.findByEmail(req.getEmail()).get());
+            repo.findByEmail(req.getEmail()).ifPresent(user -> authService.emailConfirmation(user));
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseBody);
             
         } catch (InvalidException ex) {
+
             AuthResponseDTO responseBody = new AuthResponseDTO();
             responseBody.setStatus("INCORRECT OTP");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseBody);
+            
         }
     }
 

@@ -7,7 +7,6 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 
-import com.stripe.model.Discount;
 
 import org.hibernate.validator.constraints.Length;
 
@@ -85,12 +84,12 @@ public class RestaurantDTO {
 
     private PictureDTO picture;
 
-    private List<DiscountDTO> discounts;
+    private DiscountDTO discount;
 
     public RestaurantDTO() {
     }
 
-    public RestaurantDTO(Long restaurantId, String restaurantName, String restaurantLocation, String restaurantDesc, Integer restaurantPriceRange, Integer restaurantTableCapacity, Integer restaurantWeekdayOpeningHour, Integer restaurantWeekdayOpeningMinutes, Integer restaurantWeekdayClosingHour, Integer restaurantWeekdayClosingMinutes, Integer restaurantWeekendOpeningHour, Integer restaurantWeekendOpeningMinutes, Integer restaurantWeekendClosingHour, Integer restaurantWeekendClosingMinutes, PictureDTO picture, List<DiscountDTO> discounts) {
+    public RestaurantDTO(Long restaurantId, String restaurantName, String restaurantLocation, String restaurantDesc, Integer restaurantPriceRange, Integer restaurantTableCapacity, Integer restaurantWeekdayOpeningHour, Integer restaurantWeekdayOpeningMinutes, Integer restaurantWeekdayClosingHour, Integer restaurantWeekdayClosingMinutes, Integer restaurantWeekendOpeningHour, Integer restaurantWeekendOpeningMinutes, Integer restaurantWeekendClosingHour, Integer restaurantWeekendClosingMinutes, PictureDTO picture, DiscountDTO discount) {
         this.restaurantId = restaurantId;
         this.restaurantName = restaurantName;
         this.restaurantLocation = restaurantLocation;
@@ -106,7 +105,7 @@ public class RestaurantDTO {
         this.restaurantWeekendClosingHour = restaurantWeekendClosingHour;
         this.restaurantWeekendClosingMinutes = restaurantWeekendClosingMinutes;
         this.picture = picture;
-        this.discounts = discounts;
+        this.discount = discount;
     }
 
     public Long getRestaurantId() {
@@ -233,12 +232,12 @@ public class RestaurantDTO {
         this.picture = picture;
     }
 
-    public List<DiscountDTO> getDiscounts() {
-        return this.discounts;
+    public DiscountDTO getDiscount() {
+        return this.discount;
     }
 
-    public void setDiscounts(List<DiscountDTO> discounts) {
-        this.discounts = discounts;
+    public void setDiscount(DiscountDTO discount) {
+        this.discount = discount;
     }
 
     public RestaurantDTO restaurantId(Long restaurantId) {
@@ -316,8 +315,8 @@ public class RestaurantDTO {
         return this;
     }
 
-    public RestaurantDTO discounts(List<DiscountDTO> discounts) {
-        setDiscounts(discounts);
+    public RestaurantDTO discount(DiscountDTO discount) {
+        setDiscount(discount);
         return this;
     }
 
