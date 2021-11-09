@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -109,6 +112,20 @@ public class ReservationService {
             }
         }
         return result;
+    }
+
+    /**
+     * Gets the upcoming reservations for a restaurant between two dates
+     * @param restaurant
+     * @param startDate
+     * @param endDate
+     * @param pageNumber
+     * @return
+     */
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN') or (hasAnyAuthority('FP_MANAGER') and #restaurant.restaurantId == #requestorRestaurant.restaurantId)")
+    public Page<Reservation> getRestaurantUpcomingReservations(Restaurant restaurant, Restaurant requestorRestaurant, LocalDateTime after, LocalDateTime before, int pageNumber) {
+        Pageable pageReq = PageRequest.of(pageNumber, 10);
+        return reservationRepo.findByRestaurantAndDateBetween(pageReq, restaurant, after, before);
     }
 
     @PreAuthorize("hasAnyAuthority('FP_ADMIN')")

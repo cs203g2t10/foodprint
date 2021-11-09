@@ -76,7 +76,9 @@ public class Reservation {
         }
         price = price * 100;
         Discount discount = restaurant.getDiscount();
-        price = price * ((double)discount.getDiscountPercentage() / 100);
+        if (discount != null) {
+            price = price * ((double)discount.getDiscountPercentage() / 100);
+        }
         return price;
     }
 

@@ -16,11 +16,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import org.hibernate.validator.constraints.Length;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -38,8 +37,8 @@ public class Food {
 
     @Column(name = "foodName")
     @Schema(defaultValue="Sashimi")
-    @NotEmpty
-    @Length(min = 1, max = 40)
+    @NotEmpty(message = "The food description cannot be empty.")
+    @Size(min = 1, max = 40, message = "The food name has to be between 1 to 40 letters.")
     private String foodName;
 
     @ManyToOne
@@ -49,8 +48,8 @@ public class Food {
 
     @Column(name = "foodDesc")
     @Schema(defaultValue = "Salmon slices")
-    @NotEmpty
-    @Length(min = 1)
+    @NotEmpty(message = "The food description cannot be empty.")
+    @Size(min = 1)
     private String foodDesc;
 
     @Column(name = "foodprice")
