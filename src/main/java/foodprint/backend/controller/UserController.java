@@ -28,7 +28,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import foodprint.backend.dto.AdminUserDTO;
 import foodprint.backend.dto.ManagerRequestDTO;
-import foodprint.backend.dto.PictureDTO;
 import foodprint.backend.dto.RequestResetPwdDTO;
 import foodprint.backend.dto.ResetPwdDTO;
 import foodprint.backend.dto.RestaurantDTO;
@@ -38,7 +37,6 @@ import foodprint.backend.exceptions.BadRequestException;
 import foodprint.backend.exceptions.InvalidException;
 import foodprint.backend.exceptions.MailException;
 import foodprint.backend.exceptions.NotFoundException;
-import foodprint.backend.model.Picture;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.User;
 import foodprint.backend.service.RestaurantService;
