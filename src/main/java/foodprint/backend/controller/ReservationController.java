@@ -172,7 +172,7 @@ public class ReservationController {
             var reservationDTO = this.convertToDTO(reservation);
             return new ResponseEntity<>(reservationDTO, HttpStatus.CREATED);
         } catch (NotFoundException e) {
-            return new ResponseEntity<>(null, HttpStatus.NOT_ACCEPTABLE);
+            return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
         }
     }
 

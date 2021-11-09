@@ -33,7 +33,7 @@ public class BackendApplication {
 			loggr.info("Inspect the beans provided by Spring Boot:");
 			String[] beanNames = ctx.getBeanDefinitionNames();
 			Arrays.sort(beanNames);
-			loggr.info("There are " + beanNames.length + " beans in total");
+			loggr.info("There are {} beans in total", beanNames.length);
 			loggr.info("Site should be up at (ctrl-click): http://{}:{}/swagger", 
 				InetAddress.getLocalHost().getHostAddress(), 
 				serverPort
