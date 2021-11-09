@@ -154,7 +154,7 @@ public class UserService {
             return userRepo.findAll(page);
         }
 
-        return userRepo.findByEmail(page, emailSearch);
+        return userRepo.findByEmailContains(page, emailSearch);
     }
 
     // --------------------------- PASSWORD RESET ---------------------------------

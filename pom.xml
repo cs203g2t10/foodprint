@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>foodprint</groupId>
 	<artifactId>backend</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.9.0-BETA</version>
 	<name>backend</name>
 	<description>Backend API for foodprint</description>
 	<properties>
