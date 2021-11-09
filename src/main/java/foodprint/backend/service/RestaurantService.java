@@ -293,15 +293,8 @@ public class RestaurantService {
      */
     @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
     public void deleteFood(Long restaurantId, Long foodId) {
-        Restaurant restaurant = get(restaurantId);
-        List<Food> allFood = restaurant.getAllFood();
-        for (Food food : allFood) {
-            if (food.getFoodId().equals(foodId)) {
-                foodRepo.delete(food);
-                return;
-            }
-        }
-        throw new NotFoundException("Food not found");
+        Food food = foodRepo.findByFoodIdAndRestaurantRestaurantId(foodId, restaurantId).orElseThrow(() -> new NotFoundException("Food not found"));
+        foodRepo.delete(food);
     }
 
     /**
@@ -466,25 +459,6 @@ public class RestaurantService {
 
         originalDiscount = discountRepo.saveAndFlush(originalDiscount);
         return originalDiscount;
-    }
-
-    /**
-     * Gets a restaurant's discount
-     * 
-     * @param discountId
-     * @return
-     */
-    @PreAuthorize("hasAnyAuthority('FP_USER', 'FP_MANAGER', 'FP_ADMIN')")
-    public Discount getRestaurantDiscount(Long restaurantId) {
-        Optional<Restaurant> res = repo.findById(restaurantId);
-        if (res.isEmpty()) {
-            throw new NotFoundException("Restaurant not found");
-        }
-        Discount discount = res.get().getDiscount();
-        if (discount == null) {
-            throw new NotFoundException("Discount not found");
-        }
-        return discount;
     }
 
     /**
