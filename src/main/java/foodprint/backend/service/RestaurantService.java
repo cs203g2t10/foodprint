@@ -18,6 +18,7 @@ import foodprint.backend.dto.UpdatePictureDTO;
 import foodprint.backend.exceptions.DeleteFailedException;
 import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.exceptions.AlreadyExistsException;
+import foodprint.backend.exceptions.BadRequestException;
 import foodprint.backend.model.Discount;
 import foodprint.backend.model.DiscountRepo;
 import foodprint.backend.model.Food;
@@ -237,6 +238,10 @@ public class RestaurantService {
      */
     @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
     public Food addFood(Long restaurantId, FoodDTO foodDTO) {
+        if(foodDTO.getIngredientQuantityList().size() == 0) {
+            throw new BadRequestException("Food should have at least 1 ingredient");
+        }
+
         Restaurant restaurant = repo.findByRestaurantId(restaurantId);
 
         Food newFood = new Food(foodDTO.getFoodName(), foodDTO.getFoodDesc(), foodDTO.getFoodPrice(), 0.00);
