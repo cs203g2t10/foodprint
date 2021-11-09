@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table
@@ -37,7 +38,7 @@ public class Food {
 
     @Column(name = "foodName")
     @Schema(defaultValue="Sashimi")
-    @NotEmpty(message = "The food description cannot be empty.")
+    @NotNull(message = "Food name may not be null")
     @Size(min = 1, max = 40, message = "The food name has to be between 1 to 40 letters.")
     private String foodName;
 
