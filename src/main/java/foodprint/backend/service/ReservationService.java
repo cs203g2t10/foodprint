@@ -158,7 +158,7 @@ public class ReservationService {
                     .pax(req.getPax())
                     .isVaccinated(req.getIsVaccinated())
                     .reservedOn(LocalDateTime.now())
-                    .status(ReservationStatus.ONGOING)
+                    .status(ReservationStatus.UNPAID)
                     .restaurant(restaurant);
 
         HashMap<Food, Integer> lineItemsHashMap = new HashMap<>();

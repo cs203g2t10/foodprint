@@ -117,7 +117,7 @@ public class RestaurantServiceTest {
         restaurantId = 1L;
         lineItems = new ArrayList<LineItem>();
         reservation = new Reservation(user, LocalDateTime.now(), 5, true, LocalDateTime.now(),
-                ReservationStatus.ONGOING, lineItems, restaurant);
+                ReservationStatus.UNPAID, lineItems, restaurant);
         ingredientsDTOList = new ArrayList<>();
         food = new Food("sashimi", 10.0, 0.0);
         foodId = 1L;
@@ -148,7 +148,7 @@ public class RestaurantServiceTest {
         restaurant.setPicture(pic);
         reservationList = new ArrayList<>();
         reservation = new Reservation(user, LocalDateTime.now(), 5, true, LocalDateTime.now(),
-                ReservationStatus.ONGOING, lineItems, restaurant);
+                ReservationStatus.UNPAID, lineItems, restaurant);
         reservationList.add(reservation);
         startDate = LocalDate.now();
         endDate = LocalDate.now().plusDays(2);

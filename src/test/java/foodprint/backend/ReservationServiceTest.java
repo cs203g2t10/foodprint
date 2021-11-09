@@ -67,7 +67,7 @@ public class ReservationServiceTest {
         restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
         restaurantId = 1L;
         lineItems = new ArrayList<LineItem>();
-        reservation = new Reservation(user, LocalDateTime.now(), 5, true, LocalDateTime.now(), ReservationStatus.ONGOING, lineItems, restaurant);
+        reservation = new Reservation(user, LocalDateTime.now(), 5, true, LocalDateTime.now(), ReservationStatus.UNPAID, lineItems, restaurant);
         reservationId = 1L;
         food = new Food("sashimi", 10.0, 0.0);
         foodId = 1L;
@@ -151,7 +151,7 @@ public class ReservationServiceTest {
     void createReservation_SlotAvailable_ReturnReservation() {
         List<LineItemDTO> lineItemDTOs = new ArrayList<>();
         lineItemDTOs.add(lineItemDTO);
-        CreateReservationDTO req = new CreateReservationDTO(LocalDateTime.now(), 5, true, lineItemDTOs, restaurantId, ReservationStatus.ONGOING);
+        CreateReservationDTO req = new CreateReservationDTO(LocalDateTime.now(), 5, true, lineItemDTOs, restaurantId, ReservationStatus.UNPAID);
 
         when(restaurantService.get(any(Long.class))).thenReturn(restaurant);
         when(reservations.findByRestaurantAndDateBetween(any(Restaurant.class), any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(reservationList);
@@ -169,7 +169,7 @@ public class ReservationServiceTest {
     void createReservation_SlotNotAvailable_ReturnException() {
         List<LineItemDTO> lineItemDTOs = new ArrayList<>();
         lineItemDTOs.add(lineItemDTO);
-        CreateReservationDTO req = new CreateReservationDTO(LocalDateTime.now(), 5, true, lineItemDTOs, restaurantId, ReservationStatus.ONGOING);
+        CreateReservationDTO req = new CreateReservationDTO(LocalDateTime.now(), 5, true, lineItemDTOs, restaurantId, ReservationStatus.UNPAID);
         
         when(restaurantService.get(any(Long.class))).thenReturn(restaurant);
         for (int i = 0; i < 15; i++) {
@@ -191,7 +191,7 @@ public class ReservationServiceTest {
 
     @Test
     void updateReservation_SlotAvailable_ReturnReservation() {
-        Reservation updatedReservation = new Reservation(user, LocalDateTime.now(), 3, true, LocalDateTime.now(), ReservationStatus.ONGOING, lineItems, restaurant);
+        Reservation updatedReservation = new Reservation(user, LocalDateTime.now(), 3, true, LocalDateTime.now(), ReservationStatus.UNPAID, lineItems, restaurant);
         reservationList.add(reservation);
         when(reservations.findByRestaurantAndDateBetween(any(Restaurant.class), any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(reservationList);
         when(reservations.getById(any(Long.class))).thenReturn(reservation);
@@ -207,7 +207,7 @@ public class ReservationServiceTest {
 
     @Test
     void updateReservation_SlotNotAvailable_ReturnException() {
-        Reservation updatedReservation = new Reservation(user, LocalDateTime.now(), 3, true, LocalDateTime.now(), ReservationStatus.ONGOING, lineItems, restaurant);
+        Reservation updatedReservation = new Reservation(user, LocalDateTime.now(), 3, true, LocalDateTime.now(), ReservationStatus.UNPAID, lineItems, restaurant);
         for (int i = 0; i < 15; i++) {
             reservationList.add(reservation);
         }
