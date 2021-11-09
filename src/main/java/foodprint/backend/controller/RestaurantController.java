@@ -219,28 +219,6 @@ public class RestaurantController {
     *
     */
 
-    @GetMapping({"/{restaurantId}/discount"})
-    @ResponseStatus(code = HttpStatus.OK)
-    public ResponseEntity<Discount> getRestaurantDiscount(@PathVariable("restaurantId") Long restaurantId) {
-        return new ResponseEntity<>(service.getRestaurantDiscount(restaurantId), HttpStatus.OK);
-    }
-
-    // //GET: Get a discount of restaurant
-    // @GetMapping({"/{restaurantId}/discount/{discountId}"})
-    // @ResponseStatus(code = HttpStatus.OK)
-    // @Operation(summary = "Gets a discount of restaurant")
-    // public ResponseEntity<Discount> getDiscount(@PathVariable("restaurantId") Long restaurantId, @PathVariable("discountId") Long discountId) {
-    //     Restaurant restaurant = service.get(restaurantId);
-    //     List<Discount> allDiscounts = restaurant.getDiscount();
-    //     for(Discount discount : allDiscounts) {
-    //         if (discount.getDiscountId().equals(discountId)) {
-    //             Discount discountFound = service.getDiscount(discountId);
-    //             return new ResponseEntity<>(discountFound, HttpStatus.OK);
-    //         }
-    //     }
-    //     throw new NotFoundException("Discount not found");
-    // }
-
     //POST: Creates new discount for restaurant
     @PostMapping("/{restaurantId}/discount")
     @ResponseStatus(code = HttpStatus.CREATED)
@@ -263,7 +241,7 @@ public class RestaurantController {
     public ResponseEntity<Discount> deleteDiscount(@PathVariable("restaurantId") Long restaurantId) {
         service.deleteDiscount(restaurantId);
         try {
-            service.getRestaurantDiscount(restaurantId);
+            service.get(restaurantId).getDiscount();
         } catch (NotFoundException ex) {
             return new ResponseEntity<>(HttpStatus.OK);
         }

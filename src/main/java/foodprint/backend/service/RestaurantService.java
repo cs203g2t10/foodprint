@@ -469,25 +469,6 @@ public class RestaurantService {
     }
 
     /**
-     * Gets a restaurant's discount
-     * 
-     * @param discountId
-     * @return
-     */
-    @PreAuthorize("hasAnyAuthority('FP_USER', 'FP_MANAGER', 'FP_ADMIN')")
-    public Discount getRestaurantDiscount(Long restaurantId) {
-        Optional<Restaurant> res = repo.findById(restaurantId);
-        if (res.isEmpty()) {
-            throw new NotFoundException("Restaurant not found");
-        }
-        Discount discount = res.get().getDiscount();
-        if (discount == null) {
-            throw new NotFoundException("Discount not found");
-        }
-        return discount;
-    }
-
-    /**
      * Gets a discount by discount ID
      * 
      * @param discountId
