@@ -7,8 +7,6 @@ import java.time.LocalDateTime;
 
 import javax.validation.Valid;
 
-import com.amazonaws.services.kms.model.AlreadyExistsException;
-
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -41,6 +39,7 @@ import foodprint.backend.dto.IngredientDTO;
 import foodprint.backend.dto.RestaurantDTO;
 import foodprint.backend.dto.UpdatePictureDTO;
 import foodprint.backend.exceptions.NotFoundException;
+import foodprint.backend.exceptions.AlreadyExistsException;
 import foodprint.backend.exceptions.BadRequestException;
 import foodprint.backend.model.Discount;
 import foodprint.backend.model.Food;
@@ -49,6 +48,7 @@ import foodprint.backend.model.Picture;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.service.RestaurantService;
 import io.swagger.v3.oas.annotations.Operation;
+
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/v1/restaurant")

@@ -104,25 +104,25 @@ public class ReservationServiceTest {
 
     @Test
     void getReservation_IdExists_ReturnReservation() {
-        when(reservations.findById(any(Long.class))).thenReturn(Optional.of(reservation));
+        when(reservations.findByReservationIdAndUserId(any(Long.class), any(Long.class))).thenReturn(Optional.of(reservation));
 
-        Reservation result = reservationService.getReservationById(reservationId);
-
+        Reservation result = reservationService.getReservationByIdAndUser(reservationId, 0L);
+        
         assertEquals(reservation, result);
-        verify(reservations).findById(reservationId);
+        verify(reservations).findByReservationIdAndUserId(reservationId, 0L);
     }
 
     @Test
     void getReservation_IdDoesNotExist_ReturnException() {
-        when(reservations.findById(any(Long.class))).thenReturn(Optional.empty());
+        when(reservations.findByReservationIdAndUserId(any(Long.class), any(Long.class))).thenReturn(Optional.empty());
 
         try {
-            reservationService.getReservationById(reservationId);
+            reservationService.getReservationByIdAndUser(reservationId, 0L);
         } catch (NotFoundException e) {
             assertEquals("Reservation not found", e.getMessage());
         }
 
-        verify(reservations).findById(reservationId);
+        verify(reservations).findByReservationIdAndUserId(reservationId, 0L);
     }
 
     @Test
@@ -224,9 +224,8 @@ public class ReservationServiceTest {
 
     @Test
     void deleteReservation_ReservationIsNull_ReturnException() {
-        Reservation toDelReservation = null;
         try {
-            reservationService.delete(toDelReservation);
+            reservationService.deleteReservationById(null);
         } catch (IllegalArgumentException e) {
             assertEquals(new IllegalArgumentException(), e);
         }
@@ -234,7 +233,7 @@ public class ReservationServiceTest {
 
     @Test
     void deleteReservation_ReservationNotNull_Success() {
-        reservationService.delete(reservation);
-        verify(reservations).delete(reservation);
+        reservationService.deleteReservationById(reservation.getReservationId());
+        verify(reservations).deleteById(reservation.getReservationId());
     }
 }

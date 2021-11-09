@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ReservationRepo extends JpaRepository<Reservation, Long> {
@@ -20,5 +21,8 @@ public interface ReservationRepo extends JpaRepository<Reservation, Long> {
     Page<Reservation> findByRestaurantAndDateBetween(Pageable page, Restaurant restaurant, LocalDateTime after, LocalDateTime before);
     
     List<Reservation> findByUser(User user);
+
+    Optional<Reservation> findByReservationIdAndUserId(Long id, Long userId);
+
 
 }
