@@ -120,7 +120,7 @@ public class Restaurant {
     @Max(59)
     private Integer restaurantWeekendClosingMinutes;
 
-    @OneToOne(optional = true)/* (mappedBy = "restaurant") */
+    @OneToOne(optional = true, cascade = CascadeType.ALL)/* (mappedBy = "restaurant") */
     private Picture picture;
 
     @ElementCollection
