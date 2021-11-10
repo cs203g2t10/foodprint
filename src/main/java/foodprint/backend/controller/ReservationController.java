@@ -3,6 +3,7 @@ package foodprint.backend.controller;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -93,6 +94,7 @@ public class ReservationController {
             ReservationDTO reservationDTO = this.convertToDTO(reservation);
             reservationDTOs.add(reservationDTO);
         }
+        Collections.reverse(reservationDTOs);
         return new ResponseEntity<>(reservationDTOs, HttpStatus.OK);
     }
 
@@ -108,6 +110,7 @@ public class ReservationController {
             ReservationDTO reservationDTO = this.convertToDTO(reservation);
             reservationDTOs.add(reservationDTO);
         }
+        Collections.reverse(reservationDTOs);
         return new ResponseEntity<>(reservationDTOs, HttpStatus.OK);
     }
 
