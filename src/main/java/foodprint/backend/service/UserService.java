@@ -166,7 +166,7 @@ public class UserService {
 
         // Craft and send the email
         String emailBody = String.format("Hi %s, \n\n"
-                + "You have requested for a password reset! Please use this link to set a new password http://foodprint.works/resetpassword?token=%s \n\n"
+                + "You have requested for a password reset! Please use this link to set a new password http://ui.foodprint.works/resetpassword?token=%s \n\n"
                 + "This verification token will expire in 48 hours. You can safely ignore this email if you did not request for it. \n\n"
                 + "Regards,\nFoodprint Support", user.getFirstName(), token.getToken());
 
