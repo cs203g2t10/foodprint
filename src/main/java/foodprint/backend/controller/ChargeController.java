@@ -12,8 +12,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import foodprint.backend.config.AuthHelper;
 import foodprint.backend.dto.ChargeDTO;
 import foodprint.backend.dto.ChargeRequest;
+import foodprint.backend.model.User;
 import foodprint.backend.service.StripeService;
 
 @RestController
@@ -30,10 +32,10 @@ public class ChargeController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<ChargeDTO> charge(@RequestBody ChargeRequest chargeRequest)
-      throws StripeException {
+    public ResponseEntity<ChargeDTO> charge(@RequestBody ChargeRequest chargeRequest) throws StripeException {
+        User user = AuthHelper.getCurrentUser();
         Charge charge = paymentsService.charge(chargeRequest);
-        reservationService.setPaid(chargeRequest.getReservationId());
+        reservationService.setPaid(chargeRequest.getReservationId(), user.getId());
         ChargeDTO chargeDTO = new ChargeDTO(charge.getId(), charge.getStatus(), charge.getBalanceTransaction());
         return new ResponseEntity<>(chargeDTO, HttpStatus.CREATED);
     }

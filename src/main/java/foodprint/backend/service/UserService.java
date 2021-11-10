@@ -38,6 +38,8 @@ public class UserService {
 
     private RestaurantRepo restaurantRepo;
 
+    private static final Set<String> VALID_ROLES_SET = Set.of("FP_ADMIN", "FP_MANAGER", "FP_USER", "FP_UNVERIFIED");
+
     @Autowired
     UserService(UserRepo repo, PasswordEncoder passwordEncoder, TokenRepo tokenRepo, EmailService emailService,
             RestaurantRepo restaurantRepo) {
@@ -113,9 +115,8 @@ public class UserService {
             Set<String> filteredRoles = new HashSet<>();
 
             for (String role : roles) {
-                role = role.strip();
-                if (role.equals("FP_ADMIN") || role.equals("FP_MANAGER") || role.equals("FP_USER")
-                        || role.equals("FP_UNVERIFIED")) {
+                role = role.strip().toUpperCase();
+                if (VALID_ROLES_SET.contains(role)) {
                     filteredRoles.add(role);
                 }
             }
@@ -127,18 +128,13 @@ public class UserService {
             existingUser.setRoles(String.join(",", filteredRoles));
         }
 
-        if (updatedUser.getVaccinationDob() != null) {
-            existingUser.setVaccinationDob(updatedUser.getVaccinationDob());
+        if (updatedUser.getLastLogin() != null) {
+            existingUser.setLastLogin(updatedUser.getLastLogin());
         }
 
-        if (updatedUser.getVaccinationName() != null) {
-            existingUser.setVaccinationName(updatedUser.getVaccinationName());
+        if (updatedUser.getRegisteredOn() != null) {
+            existingUser.setRegisteredOn(updatedUser.getRegisteredOn());
         }
-
-        if (updatedUser.getRestaurant() != null) {
-            existingUser.setRestaurant(updatedUser.getRestaurant());
-        }
-
         return this.userRepo.saveAndFlush(existingUser);
     }
 
@@ -154,7 +150,7 @@ public class UserService {
             return userRepo.findAll(page);
         }
 
-        return userRepo.findByEmail(page, emailSearch);
+        return userRepo.findByEmailContains(page, emailSearch);
     }
 
     // --------------------------- PASSWORD RESET ---------------------------------

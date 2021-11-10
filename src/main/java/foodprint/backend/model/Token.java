@@ -1,5 +1,6 @@
 package foodprint.backend.model;
 
+import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
@@ -24,7 +25,7 @@ and password resetting purposes
 @Entity
 @Table
 @EnableTransactionManagement
-public class Token {
+public class Token implements Serializable {
 
     public static final int EMAIL_CONFIRMATION_TOKEN = 1;
     public static final int PASSWORD_RESET_REQUEST_TOKEN = 2;

@@ -7,8 +7,8 @@ import java.time.LocalDateTime;
 
 import javax.validation.Valid;
 
-import com.amazonaws.services.kms.model.AlreadyExistsException;
-
+import org.hibernate.exception.ConstraintViolationException;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -37,10 +37,10 @@ import foodprint.backend.dto.EditFoodDTO;
 import foodprint.backend.dto.FoodDTO;
 import foodprint.backend.dto.IngredientCalculationDTO;
 import foodprint.backend.dto.IngredientDTO;
-import foodprint.backend.dto.PictureDTO;
 import foodprint.backend.dto.RestaurantDTO;
 import foodprint.backend.dto.UpdatePictureDTO;
 import foodprint.backend.exceptions.NotFoundException;
+import foodprint.backend.exceptions.AlreadyExistsException;
 import foodprint.backend.exceptions.BadRequestException;
 import foodprint.backend.model.Discount;
 import foodprint.backend.model.Food;
@@ -49,13 +49,14 @@ import foodprint.backend.model.Picture;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.service.RestaurantService;
 import io.swagger.v3.oas.annotations.Operation;
+
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/v1/restaurant")
 public class RestaurantController {
     
     private RestaurantService service;
-    private static final String restaurantNotFound = "restaurant does not exist";
+    private static final String RESTAURANT_NOT_FOUND = "restaurant does not exist";
 
     @Autowired
     RestaurantController(RestaurantService service) {
@@ -68,7 +69,7 @@ public class RestaurantController {
     @Operation(summary = "Gets a single restaurant from ID")
     public ResponseEntity<RestaurantDTO> restaurantGet(@PathVariable("restaurantId") Long id) {
         Restaurant restaurant = service.get(id);
-        RestaurantDTO restaurantDto = convertToDTO(restaurant);
+        RestaurantDTO restaurantDto = restaurantConvertToDTO(restaurant);
         return new ResponseEntity<>(restaurantDto, HttpStatus.OK);
     }
 
@@ -78,7 +79,18 @@ public class RestaurantController {
     @Operation(summary = "Gets all restaurants")
     public ResponseEntity<List<RestaurantDTO>> restaurantGetAll() {
         List<Restaurant> restaurants = service.getAllRestaurants();
-        List<RestaurantDTO> restaurantDtos = restaurants.stream().map(r -> convertToDTO(r)).collect(Collectors.toList());
+        List<RestaurantDTO> restaurantDtos = restaurants.stream().map(this::restaurantConvertToDTO).collect(Collectors.toList());
+
+        return new ResponseEntity<>(restaurantDtos, HttpStatus.OK);
+    }
+
+    // GET (ALL): Get all the restaurants
+    @GetMapping({"/page"})
+    @ResponseStatus(code = HttpStatus.OK)
+    @Operation(summary = "Gets all restaurants")
+    public ResponseEntity<Page<RestaurantDTO>> restaurantGetAllPaged(@RequestParam(name="p", defaultValue="0") int page) {
+        Page<Restaurant> restaurants = service.getAllRestaurantsPaged(page);
+        Page<RestaurantDTO> restaurantDtos = restaurants.map(this::restaurantConvertToDTO);
         return new ResponseEntity<>(restaurantDtos, HttpStatus.OK);
     }
 
@@ -87,7 +99,7 @@ public class RestaurantController {
     @ResponseStatus(code = HttpStatus.CREATED)
     @Operation(summary = "Create a new restaurant using DTO")
     public ResponseEntity<Restaurant> restaurantCreate(@RequestBody @Valid RestaurantDTO restaurantDTO) {
-        var convertedRestaurant = this.convertToEntity(restaurantDTO);
+        var convertedRestaurant = restaurantConvertToEntity(restaurantDTO);
         Restaurant savedRestaurant = service.create(convertedRestaurant);
         return new ResponseEntity<>(savedRestaurant, HttpStatus.CREATED);
     }
@@ -98,9 +110,9 @@ public class RestaurantController {
     @Operation(summary = "Updates an existing restaurant, only changed fields need to be set")
     public ResponseEntity<Restaurant> restaurantUpdate(
         @PathVariable("restaurantId") Long id,
-        @RequestBody @Valid Restaurant updatedRestaurant) {
-        updatedRestaurant = service.update(id, updatedRestaurant);
-        return new ResponseEntity<>(updatedRestaurant, HttpStatus.OK);
+        @RequestBody RestaurantDTO updatedRestaurant) {
+        Restaurant restaurant = restaurantConvertToEntity(updatedRestaurant);
+        return new ResponseEntity<>(service.update(id, restaurant), HttpStatus.OK);
     }
 
 
@@ -126,8 +138,8 @@ public class RestaurantController {
         Sort sorting = Sort.by(direction, sortField);
 		Pageable page = PageRequest.of(pageNum - 1, 16, sorting); // Pagination
 		Page<Restaurant> searchResult = service.search(page, query);
-        return searchResult.map(result -> convertToDTO(result));
-    }
+        return searchResult.map(this::restaurantConvertToDTO);
+    } 
 
     @GetMapping({"/categories"})
     @ResponseStatus(code = HttpStatus.OK)
@@ -141,13 +153,9 @@ public class RestaurantController {
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Get a list of restaurant DTOs associated with selected category")
     public ResponseEntity<List<RestaurantDTO>> getRestaurantRelatedToCategory(@PathVariable("category") String restaurantCategory) {
-            List<RestaurantDTO> restaurantDTOs = new ArrayList<>();
             List<Restaurant> restaurantsRelatedToCategory = service.getRestaurantsRelatedToCategory(restaurantCategory);
-            for (Restaurant restaurant : restaurantsRelatedToCategory) {
-                RestaurantDTO resDTO = this.convertToDTO(restaurant);
-                restaurantDTOs.add(resDTO);
-            }
-            return new ResponseEntity<>(restaurantDTOs, HttpStatus.OK);
+            List<RestaurantDTO> restaurantDtos = restaurantsRelatedToCategory.stream().map(this::restaurantConvertToDTO).collect(Collectors.toList());
+            return new ResponseEntity<>(restaurantDtos, HttpStatus.OK);
     }
 
     /*
@@ -162,7 +170,7 @@ public class RestaurantController {
     public ResponseEntity<Food> addRestaurantFood(@PathVariable("restaurantId") Long restaurantId, @RequestBody @Valid FoodDTO food) {
         Restaurant restaurant = service.get(restaurantId);
         if(restaurant == null)
-            throw new NotFoundException(restaurantNotFound);
+            throw new NotFoundException(RESTAURANT_NOT_FOUND);
 
         Food savedFood = service.addFood(restaurantId, food);
 
@@ -219,28 +227,6 @@ public class RestaurantController {
     *
     */
 
-    @GetMapping({"/{restaurantId}/discount"})
-    @ResponseStatus(code = HttpStatus.OK)
-    public ResponseEntity<Discount> getRestaurantDiscount(@PathVariable("restaurantId") Long restaurantId) {
-        return new ResponseEntity<>(service.getRestaurantDiscount(restaurantId), HttpStatus.OK);
-    }
-
-    // //GET: Get a discount of restaurant
-    // @GetMapping({"/{restaurantId}/discount/{discountId}"})
-    // @ResponseStatus(code = HttpStatus.OK)
-    // @Operation(summary = "Gets a discount of restaurant")
-    // public ResponseEntity<Discount> getDiscount(@PathVariable("restaurantId") Long restaurantId, @PathVariable("discountId") Long discountId) {
-    //     Restaurant restaurant = service.get(restaurantId);
-    //     List<Discount> allDiscounts = restaurant.getDiscount();
-    //     for(Discount discount : allDiscounts) {
-    //         if (discount.getDiscountId().equals(discountId)) {
-    //             Discount discountFound = service.getDiscount(discountId);
-    //             return new ResponseEntity<>(discountFound, HttpStatus.OK);
-    //         }
-    //     }
-    //     throw new NotFoundException("Discount not found");
-    // }
-
     //POST: Creates new discount for restaurant
     @PostMapping("/{restaurantId}/discount")
     @ResponseStatus(code = HttpStatus.CREATED)
@@ -263,7 +249,7 @@ public class RestaurantController {
     public ResponseEntity<Discount> deleteDiscount(@PathVariable("restaurantId") Long restaurantId) {
         service.deleteDiscount(restaurantId);
         try {
-            service.getRestaurantDiscount(restaurantId);
+            service.get(restaurantId).getDiscount();
         } catch (NotFoundException ex) {
             return new ResponseEntity<>(HttpStatus.OK);
         }
@@ -275,10 +261,11 @@ public class RestaurantController {
     @Operation(summary = "Updates an existing discount of restaurant, only changed fields need to be set")
     public ResponseEntity<Discount> updateRestaurantDiscount(
         @PathVariable("restaurantId") Long restaurantId,
-        @RequestBody Discount updatedDiscount
-    ) {
-        Discount discount = service.updateDiscount(restaurantId, updatedDiscount);
-        return new ResponseEntity<>(discount, HttpStatus.OK);
+        @RequestBody DiscountDTO updatedDiscount
+    ) { 
+        ModelMapper mapper = new ModelMapper();
+        Discount discount = mapper.map(updatedDiscount, Discount.class);
+        return new ResponseEntity<>(service.updateDiscount(restaurantId, discount), HttpStatus.OK);
     }
 
     /*
@@ -346,7 +333,7 @@ public class RestaurantController {
     public ResponseEntity<List<IngredientCalculationDTO>> calculateIngredientsBetween (@PathVariable Long restaurantId, @RequestParam("start") String startDate, @RequestParam("end") String endDate) {
         Restaurant restaurant = service.get(restaurantId);
         if(restaurant == null) {
-            throw new NotFoundException(restaurantNotFound);
+            throw new NotFoundException(RESTAURANT_NOT_FOUND);
         }
         
         LocalDate start = LocalDate.parse(startDate);
@@ -374,7 +361,7 @@ public class RestaurantController {
     public ResponseEntity<Map<String, Integer>> calculateFoodBetween(@PathVariable Long restaurantId, @RequestParam("start") String startDate, @RequestParam("end") String endDate) {
         Restaurant restaurant = service.get(restaurantId);
         if(restaurant == null)
-            throw new NotFoundException(restaurantNotFound);
+            throw new NotFoundException(RESTAURANT_NOT_FOUND);
         
         LocalDate start = LocalDate.parse(startDate);
         LocalDate end = LocalDate.parse(endDate);
@@ -396,14 +383,6 @@ public class RestaurantController {
                                             @RequestParam("description") String description,
                                             @RequestParam("file") MultipartFile file) {                                
         return new ResponseEntity<>(service.savePicture(restaurantId, title, description, file), HttpStatus.CREATED);
-    }
-
-    @GetMapping({"/{restaurantId}/picture/"})
-    @ResponseStatus(code = HttpStatus.OK)
-    @Operation(summary = "Get a picture of a restaurant")
-    public ResponseEntity<String> getPictureById(@PathVariable("restaurantId") Long restaurantId) {
-        String url = service.getRestaurantPicture(restaurantId);
-        return new ResponseEntity<>(url, HttpStatus.OK);
     }
 
     @DeleteMapping({"/{restaurantId}/picture"})
@@ -443,14 +422,6 @@ public class RestaurantController {
         return new ResponseEntity<>(service.saveFoodPicture(restaurantId, foodId, title, description, file), HttpStatus.CREATED);
     }
 
-    @GetMapping({"/{restaurantId}/food/{foodId}/picture"})
-    @ResponseStatus(code = HttpStatus.OK)
-    @Operation(summary = "Get a picture of a restaurant's food by using restaurant id and food id")
-    public ResponseEntity<String> getPictureById(@PathVariable("restaurantId") Long restaurantId,  @PathVariable("foodId") Long foodId) {
-        String url = service.getFoodPicture(restaurantId, foodId);
-        return new ResponseEntity<>(url, HttpStatus.OK);
-    }
-
     @DeleteMapping({"/{restaurantId}/food/{foodId}/picture"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Deletes a food's picture")
@@ -478,54 +449,14 @@ public class RestaurantController {
         return new ResponseEntity<>(savedPicture, HttpStatus.OK);
     }
 
-    // DTO <-> Entity Conversion Helper Methods
-    public Restaurant convertToEntity(RestaurantDTO restaurantDTO) {
-        Restaurant restaurant = new Restaurant(restaurantDTO.getRestaurantName(), restaurantDTO.getRestaurantLocation());
-        restaurant.setRestaurantDesc(restaurantDTO.getRestaurantDesc());
-        restaurant.setRestaurantTableCapacity(restaurantDTO.getRestaurantTableCapacity());
-        restaurant.setRestaurantPriceRange(restaurantDTO.getRestaurantPriceRange());
-        restaurant.setRestaurantWeekdayClosingHour(restaurantDTO.getRestaurantWeekdayClosingHour());
-        restaurant.setRestaurantWeekdayClosingMinutes(restaurantDTO.getRestaurantWeekdayClosingMinutes());
-        restaurant.setRestaurantWeekdayOpeningHour(restaurantDTO.getRestaurantWeekdayOpeningHour());
-        restaurant.setRestaurantWeekdayOpeningMinutes(restaurantDTO.getRestaurantWeekdayOpeningMinutes());
-        restaurant.setRestaurantWeekendClosingHour(restaurantDTO.getRestaurantWeekendClosingHour());
-        restaurant.setRestaurantWeekendClosingMinutes(restaurantDTO.getRestaurantWeekendClosingMinutes());
-        restaurant.setRestaurantWeekendOpeningHour(restaurantDTO.getRestaurantWeekendOpeningHour());
-        restaurant.setRestaurantWeekendOpeningMinutes(restaurantDTO.getRestaurantWeekendOpeningMinutes());
-        restaurant.setRestaurantCategory(restaurantDTO.getRestaurantCategory());
-        return restaurant;
+    private Restaurant restaurantConvertToEntity(RestaurantDTO restaurantDTO) {
+        ModelMapper mapper = new ModelMapper();
+        return mapper.map(restaurantDTO, Restaurant.class);
     }
 
-    public RestaurantDTO convertToDTO(Restaurant restaurant) {
-        RestaurantDTO dto = new RestaurantDTO();
-        dto.setRestaurantId(restaurant.getRestaurantId());
-        dto.setRestaurantName(restaurant.getRestaurantName());
-        dto.setRestaurantLocation(restaurant.getRestaurantLocation());
-        dto.setRestaurantDesc(restaurant.getRestaurantDesc());
-        dto.setRestaurantTableCapacity(restaurant.getRestaurantTableCapacity());
-        dto.setRestaurantPriceRange(restaurant.getRestaurantPriceRange());
-        dto.setRestaurantWeekdayClosingHour(restaurant.getRestaurantWeekdayClosingHour());
-        dto.setRestaurantWeekdayClosingMinutes(restaurant.getRestaurantWeekdayClosingMinutes());
-        dto.setRestaurantWeekdayOpeningHour(restaurant.getRestaurantWeekdayOpeningHour());
-        dto.setRestaurantWeekdayOpeningMinutes(restaurant.getRestaurantWeekdayOpeningMinutes());
-        dto.setRestaurantWeekendClosingHour(restaurant.getRestaurantWeekendClosingHour());
-        dto.setRestaurantWeekendClosingMinutes(restaurant.getRestaurantWeekendClosingMinutes());
-        dto.setRestaurantWeekendOpeningHour(restaurant.getRestaurantWeekendOpeningHour());
-        dto.setRestaurantWeekendOpeningMinutes(restaurant.getRestaurantWeekendOpeningMinutes());
-        dto.setRestaurantCategory(restaurant.getRestaurantCategory());
-        
-        Picture picture = restaurant.getPicture();
-        if (picture != null) {
-            PictureDTO picDto = new PictureDTO(picture.getTitle(), picture.getDescription(), picture.getUrl());
-            dto.setPicture(picDto);
-        }
-
-        Discount discount = restaurant.getDiscount();
-        if (discount != null) {
-            DiscountDTO discDTO = new DiscountDTO(discount.getRestaurant().getRestaurantId(), discount.getDiscountDescription(), discount.getDiscountPercentage());
-            dto.setDiscount(discDTO);
-        }
-
-        return dto;
+    private RestaurantDTO restaurantConvertToDTO(Restaurant restaurant) {
+        ModelMapper mapper = new ModelMapper();
+        return mapper.map(restaurant, RestaurantDTO.class);
     }
+
 }

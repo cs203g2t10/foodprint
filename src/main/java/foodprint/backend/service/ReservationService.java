@@ -1,7 +1,5 @@
 package foodprint.backend.service;
 
-import java.util.Optional;
-
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
@@ -62,10 +60,14 @@ public class ReservationService {
      * @param id
      * @return
      */
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
-    public Reservation getReservationById(Long id) {
-        Optional<Reservation> reservation = reservationRepo.findById(id);
-        return reservation.orElseThrow(() -> new NotFoundException("Reservation not found"));
+    @PreAuthorize("hasAnyAuthority('FP_USER', 'FP_MANAGER', 'FP_ADMIN')")
+    public Reservation getReservationByIdAndUser(Long id, Long userId) {
+        Reservation reservation = reservationRepo
+            .findByReservationIdAndUserId(id, userId)
+            .orElseThrow(
+                () -> new NotFoundException("Reservation not found")
+            );
+        return reservation;
     }
 
     /**
@@ -122,9 +124,9 @@ public class ReservationService {
      * @param pageNumber
      * @return
      */
-    @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
-    public Page<Reservation> getRestaurantUpcomingReservations(Restaurant restaurant, LocalDateTime after, LocalDateTime before, int pageNumber) {
-        Pageable pageReq = PageRequest.of(pageNumber, 10);
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN') or (hasAnyAuthority('FP_MANAGER') and #restaurant.restaurantId == #requestorRestaurant.restaurantId)")
+    public Page<Reservation> getRestaurantUpcomingReservations(Restaurant restaurant, Restaurant requestorRestaurant, LocalDateTime after, LocalDateTime before, int pageNumber) {
+        Pageable pageReq = PageRequest.of(pageNumber, 6);
         return reservationRepo.findByRestaurantAndDateBetween(pageReq, restaurant, after, before);
     }
 
@@ -156,7 +158,7 @@ public class ReservationService {
                     .pax(req.getPax())
                     .isVaccinated(req.getIsVaccinated())
                     .reservedOn(LocalDateTime.now())
-                    .status(ReservationStatus.ONGOING)
+                    .status(ReservationStatus.UNPAID)
                     .restaurant(restaurant);
 
         HashMap<Food, Integer> lineItemsHashMap = new HashMap<>();
@@ -227,8 +229,8 @@ public class ReservationService {
     }
 
     @PreAuthorize("hasAnyAuthority('FP_ADMIN')")
-    public void delete(Reservation reservation) {
-        reservationRepo.delete(reservation);
+    public void deleteReservationById(Long reservationId) {
+        reservationRepo.deleteById(reservationId);
     }
 
     public List<LocalDateTime> getAllAvailableSlotsByDateAndRestaurant(Long restaurantId, String date) {
@@ -273,8 +275,8 @@ public class ReservationService {
     }
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
-    public void setPaid(Long reservationId) {
-        Reservation reservation = getReservationById(reservationId);
+    public void setPaid(Long reservationId, Long userId) {
+        Reservation reservation = getReservationByIdAndUser(reservationId, userId);
         reservation.setStatus(ReservationStatus.PAID);
         reservationRepo.saveAndFlush(reservation);
     }
