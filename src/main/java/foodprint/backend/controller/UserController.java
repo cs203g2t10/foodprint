@@ -1,7 +1,7 @@
 package foodprint.backend.controller;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -14,7 +14,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -32,6 +36,7 @@ import foodprint.backend.dto.RequestResetPwdDTO;
 import foodprint.backend.dto.ResetPwdDTO;
 import foodprint.backend.dto.RestaurantDTO;
 import foodprint.backend.dto.UpdateUserDTO;
+import foodprint.backend.dto.FavouriteRestaurantDTO;
 import foodprint.backend.exceptions.AlreadyExistsException;
 import foodprint.backend.exceptions.BadRequestException;
 import foodprint.backend.exceptions.InvalidException;
@@ -39,6 +44,7 @@ import foodprint.backend.exceptions.MailException;
 import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.User;
+import foodprint.backend.service.AuthenticationService;
 import foodprint.backend.service.RestaurantService;
 import foodprint.backend.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -51,10 +57,13 @@ public class UserController {
 
     private RestaurantService restaurantService;
 
+    private AuthenticationService authService;
+
     @Autowired
-    UserController(UserService userService, RestaurantService restaurantService) {
+    UserController(UserService userService, RestaurantService restaurantService, PasswordEncoder passwordEncoder, AuthenticationService authService) {
         this.userService = userService;
         this.restaurantService = restaurantService;
+        this.authService = authService;
     }
 
     // POST: Create the user
@@ -98,6 +107,15 @@ public class UserController {
     public ResponseEntity<UpdateUserDTO> updateUser(@PathVariable("id") Long id, @RequestBody @Valid UpdateUserDTO updatedUserDto) {
         User updatedUser = convertToEntity(updatedUserDto);
         User currentUser = userService.getUser(id);
+
+        if (updatedUserDto.getNewPassword() != null) {
+            try {
+                authService.authenticate(new UsernamePasswordAuthenticationToken(currentUser.getEmail(), updatedUserDto.getOldPassword()));
+            } catch (BadCredentialsException | UsernameNotFoundException ex) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+        }
+
         updatedUser = userService.updateUser(id, currentUser, updatedUser);
         updatedUserDto = convertToDto(updatedUser);
         return new ResponseEntity<>(updatedUserDto, HttpStatus.OK);
@@ -145,7 +163,7 @@ public class UserController {
         user.setEmail(dto.getEmail());
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
-        user.setPassword(dto.getPassword());
+        user.setPassword(dto.getNewPassword());
         return user;
     }
 
@@ -216,10 +234,18 @@ public class UserController {
     }
 
     @GetMapping({"favouriteRestaurants"})
-    public ResponseEntity<List<RestaurantDTO>> getAllFavouriteRestaurants() {
+    public ResponseEntity<List<FavouriteRestaurantDTO>> getAllFavouriteRestaurants() {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Set<Restaurant> restaurants = user.getFavouriteRestaurants();
-        List<RestaurantDTO> restaurantDtos = restaurants.stream().map(this::restaurantConvertToDTO).collect(Collectors.toList());
+        List<FavouriteRestaurantDTO> restaurantDtos = new ArrayList<>();
+        for(Restaurant restaurant : restaurants) {
+            FavouriteRestaurantDTO newFav = new FavouriteRestaurantDTO();
+            newFav.setPicture(restaurant.getPicture());
+            newFav.setRestaurantId(restaurant.getRestaurantId());
+            newFav.setRestaurantName(restaurant.getRestaurantName());
+            restaurantDtos.add(newFav);
+        }
+
         return new ResponseEntity<>(restaurantDtos, HttpStatus.OK);
     }
 

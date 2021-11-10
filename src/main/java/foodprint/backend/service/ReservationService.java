@@ -187,19 +187,18 @@ public class ReservationService {
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public Reservation update(Long id, Reservation reservation) {
 
-        LocalDateTime startTime = reservation.getDate().truncatedTo(ChronoUnit.HOURS);
-        if (!this.slotAvailable(reservation.getRestaurant(), startTime)) {
-            throw new NotFoundException("Slot not found");
-        }
-
         Reservation currentReservation = reservationRepo.getById(id);
+
+        if (reservation.getDate() != null) {
+            LocalDateTime startTime = reservation.getDate().truncatedTo(ChronoUnit.HOURS);
+            if (!this.slotAvailable(reservation.getRestaurant(), startTime)) {
+                throw new NotFoundException("Slot not found");
+            }
+            currentReservation.setDate(reservation.getDate());
+        }
 
         if (reservation.getIsVaccinated() != null) {
             currentReservation.setIsVaccinated(reservation.getIsVaccinated());
-        }
-
-        if (reservation.getDate() != null) {
-            currentReservation.setDate(reservation.getDate());
         }
 
         if (reservation.getLineItems() != null) {
