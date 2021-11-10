@@ -1,5 +1,6 @@
 package foodprint.backend.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.Set;
@@ -36,6 +37,7 @@ import foodprint.backend.dto.RequestResetPwdDTO;
 import foodprint.backend.dto.ResetPwdDTO;
 import foodprint.backend.dto.RestaurantDTO;
 import foodprint.backend.dto.UpdateUserDTO;
+import foodprint.backend.dto.FavouriteRestaurantDTO;
 import foodprint.backend.exceptions.AlreadyExistsException;
 import foodprint.backend.exceptions.BadRequestException;
 import foodprint.backend.exceptions.InvalidException;
@@ -231,10 +233,18 @@ public class UserController {
     }
 
     @GetMapping({"favouriteRestaurants"})
-    public ResponseEntity<List<RestaurantDTO>> getAllFavouriteRestaurants() {
+    public ResponseEntity<List<FavouriteRestaurantDTO>> getAllFavouriteRestaurants() {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Set<Restaurant> restaurants = user.getFavouriteRestaurants();
-        List<RestaurantDTO> restaurantDtos = restaurants.stream().map(this::restaurantConvertToDTO).collect(Collectors.toList());
+        List<FavouriteRestaurantDTO> restaurantDtos = new ArrayList<>();
+        for(Restaurant restaurant : restaurants) {
+            FavouriteRestaurantDTO newFav = new FavouriteRestaurantDTO();
+            newFav.setPicture(restaurant.getPicture());
+            newFav.setRestaurantId(restaurant.getRestaurantId());
+            newFav.setRestaurantName(restaurant.getRestaurantName());
+            restaurantDtos.add(newFav);
+        }
+
         return new ResponseEntity<>(restaurantDtos, HttpStatus.OK);
     }
 
