@@ -313,6 +313,56 @@ public class RestaurantIntegrationTest {
         assertEquals(404, responseEntity.getStatusCode().value());
     }
 
+    @Test
+    public void getRestaurantCategories_Successful() {
+        AuthRequestDTO loginRequest = new AuthRequestDTO();
+        loginRequest.setEmail("bobby@gmail.com");
+        loginRequest.setPassword("SuperSecurePassw0rd");
+        AuthResponseDTO loginResponse = testRestTemplate.postForObject(createURLWithPort("/api/v1/auth/login"), loginRequest, AuthResponseDTO.class);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.add("Authorization", "Bearer " + loginResponse.getToken());
+        headers.add("Content-Type", "application/json");
+
+        List<String> restaurantCategories = new ArrayList<>();
+        restaurantCategories.add("Japanese");
+        restaurantCategories.add("Rice");
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+        restaurants.saveAndFlush(restaurant);
+
+        ResponseEntity<String[]> responseEntity = testRestTemplate.getForEntity(
+                createURLWithPort("/api/v1/restaurant/categories"),
+                String[].class);
+        assertEquals(200, responseEntity.getStatusCode().value());
+    }
+
+    @Test
+    public void getRestaurantRelatedToCategory_Successful() {
+        AuthRequestDTO loginRequest = new AuthRequestDTO();
+        loginRequest.setEmail("bobby@gmail.com");
+        loginRequest.setPassword("SuperSecurePassw0rd");
+        AuthResponseDTO loginResponse = testRestTemplate.postForObject(createURLWithPort("/api/v1/auth/login"), loginRequest, AuthResponseDTO.class);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.add("Authorization", "Bearer " + loginResponse.getToken());
+        headers.add("Content-Type", "application/json");
+
+        List<String> restaurantCategories = new ArrayList<>();
+        restaurantCategories.add("Japanese");
+        restaurantCategories.add("Rice");
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+        var savedRestaurant = restaurants.saveAndFlush(restaurant);
+
+        ResponseEntity<RestaurantDTO[]> responseEntity = testRestTemplate.getForEntity(
+                createURLWithPort("/api/v1/restaurant/categories/{category}"),
+                RestaurantDTO[].class,
+                savedRestaurant.getRestaurantCategory()
+                );
+        assertEquals(200, responseEntity.getStatusCode().value());
+    }
+
     /**
      * 
      * Food-related integration test
