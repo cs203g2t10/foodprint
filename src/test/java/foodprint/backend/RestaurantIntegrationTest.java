@@ -448,11 +448,11 @@ public class RestaurantIntegrationTest {
         restaurantCategories.add("Rice");
         Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
         Food food = new Food("sashimi", 10.0, 0.0);
-        food.setRestaurant(restaurant);
+        var savedFood = foodRepo.saveAndFlush(food);
         var savedRestaurant = restaurants.saveAndFlush(restaurant);
 
         HttpEntity<Food> entity = new HttpEntity<Food>(food, headers);
-        ResponseEntity<Food> responseEntity = testRestTemplate.exchange(createURLWithPort("/api/v1/restaurant/{restaurantId}/food/{foodId}"), HttpMethod.DELETE, entity, Food.class,savedRestaurant.getRestaurantId(), 1L);
+        ResponseEntity<Food> responseEntity = testRestTemplate.exchange(createURLWithPort("/api/v1/restaurant/{restaurantId}/food/{foodId}"), HttpMethod.DELETE, entity, Food.class,savedRestaurant.getRestaurantId(), savedFood.getFoodId());
         assertEquals(404, responseEntity.getStatusCode().value());
     }
 
@@ -472,11 +472,12 @@ public class RestaurantIntegrationTest {
         restaurantCategories.add("Japanese");
         restaurantCategories.add("Rice");
         Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+        var savedRestaurant = restaurants.saveAndFlush(restaurant);
         Food food = new Food("sashimi", 10.0, 0.0);
         var savedFood = foodRepo.saveAndFlush(food);
 
         HttpEntity<Food> entity = new HttpEntity<Food>(food, headers);
-        ResponseEntity<Food> responseEntity = testRestTemplate.exchange(createURLWithPort("/api/v1/restaurant/{restaurantId}/food/{foodId}"), HttpMethod.DELETE, entity, Food.class, 1L, savedFood.getFoodId());
+        ResponseEntity<Food> responseEntity = testRestTemplate.exchange(createURLWithPort("/api/v1/restaurant/{restaurantId}/food/{foodId}"), HttpMethod.DELETE, entity, Food.class, savedRestaurant.getRestaurantId(), savedFood.getFoodId());
         assertEquals(404, responseEntity.getStatusCode().value());
     }
 
@@ -528,7 +529,6 @@ public class RestaurantIntegrationTest {
         Food food = new Food("sashimi", 10.0, 0.0);
         food.setRestaurant(restaurant);
         var savedRestaurant = restaurants.saveAndFlush(restaurant);
-        var savedFood = foodRepo.saveAndFlush(food);
         EditFoodDTO editFoodDTO = new EditFoodDTO();
         editFoodDTO.setFoodDesc("desc");
         editFoodDTO.setFoodName("name");
@@ -555,14 +555,16 @@ public class RestaurantIntegrationTest {
         Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
         Food food = new Food("sashimi", 10.0, 0.0);
         food.setRestaurant(restaurant);
-        var savedRestaurant = restaurants.saveAndFlush(restaurant);
+        restaurants.saveAndFlush(restaurant);
         var savedFood = foodRepo.saveAndFlush(food);
+        Restaurant anotherRestaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+        var savedAnotherRestaurant = restaurants.saveAndFlush(anotherRestaurant);
         EditFoodDTO editFoodDTO = new EditFoodDTO();
         editFoodDTO.setFoodDesc("desc");
         editFoodDTO.setFoodName("name");
         
         HttpEntity<EditFoodDTO> entity = new HttpEntity<EditFoodDTO>(editFoodDTO, headers);
-        ResponseEntity<Food> responseEntity = testRestTemplate.exchange(createURLWithPort("/api/v1/restaurant/{restaurantId}/food/{foodId}"), HttpMethod.PATCH, entity, Food.class, 1L, savedFood.getFoodId());
+        ResponseEntity<Food> responseEntity = testRestTemplate.exchange(createURLWithPort("/api/v1/restaurant/{restaurantId}/food/{foodId}"), HttpMethod.PATCH, entity, Food.class, savedAnotherRestaurant.getRestaurantId(), savedFood.getFoodId());
         assertEquals(404, responseEntity.getStatusCode().value());
     }
 
