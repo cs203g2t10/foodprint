@@ -5,13 +5,10 @@ import foodprint.backend.controller.RestaurantController;
 import foodprint.backend.dto.AuthRequestDTO;
 import foodprint.backend.dto.AuthResponseDTO;
 import foodprint.backend.dto.EditFoodDTO;
-import foodprint.backend.dto.FoodDTO;
-import foodprint.backend.model.FoodIngredientQuantity;
 import foodprint.backend.model.FoodRepo;
-import foodprint.backend.model.Ingredient;
-import foodprint.backend.dto.FoodIngredientQuantityDTO;
-import foodprint.backend.dto.IngredientDTO;
 import foodprint.backend.dto.RestaurantDTO;
+import foodprint.backend.model.Discount;
+import foodprint.backend.model.DiscountRepo;
 import foodprint.backend.model.Food;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.RestaurantRepo;
@@ -25,10 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.persistence.DiscriminatorValue;
 
@@ -74,6 +69,9 @@ public class RestaurantIntegrationTest {
 
     @Autowired
     private FoodRepo foodRepo;
+
+    @Autowired
+    private DiscountRepo discountRepo;
 
     @Autowired
     private AuthController authController;
@@ -529,11 +527,16 @@ public class RestaurantIntegrationTest {
         Food food = new Food("sashimi", 10.0, 0.0);
         food.setRestaurant(restaurant);
         var savedRestaurant = restaurants.saveAndFlush(restaurant);
+        Restaurant anotherRestaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+        Food anotherFood = new Food("sashimi", 10.0, 0.0);
+        anotherFood.setRestaurant(anotherRestaurant);
+        restaurants.saveAndFlush(anotherRestaurant);
+        var savedAnotherFood = foodRepo.saveAndFlush(anotherFood);
         EditFoodDTO editFoodDTO = new EditFoodDTO();
         editFoodDTO.setFoodDesc("desc");
         editFoodDTO.setFoodName("name");
         HttpEntity<EditFoodDTO> entity = new HttpEntity<EditFoodDTO>(editFoodDTO, headers);
-        ResponseEntity<Food> responseEntity = testRestTemplate.exchange(createURLWithPort("/api/v1/restaurant/{restaurantId}/food/{foodId}"), HttpMethod.PATCH, entity, Food.class,savedRestaurant.getRestaurantId(), 1L);
+        ResponseEntity<Food> responseEntity = testRestTemplate.exchange(createURLWithPort("/api/v1/restaurant/{restaurantId}/food/{foodId}"), HttpMethod.PATCH, entity, Food.class,savedRestaurant.getRestaurantId(), savedAnotherFood.getFoodId());
         assertEquals(404, responseEntity.getStatusCode().value());
     }
 
@@ -565,6 +568,169 @@ public class RestaurantIntegrationTest {
         
         HttpEntity<EditFoodDTO> entity = new HttpEntity<EditFoodDTO>(editFoodDTO, headers);
         ResponseEntity<Food> responseEntity = testRestTemplate.exchange(createURLWithPort("/api/v1/restaurant/{restaurantId}/food/{foodId}"), HttpMethod.PATCH, entity, Food.class, savedAnotherRestaurant.getRestaurantId(), savedFood.getFoodId());
+        assertEquals(404, responseEntity.getStatusCode().value());
+    }
+
+    /**
+     * 
+     * Discount-related test
+     * 
+     */
+
+    @Test
+    public void createDiscount_Successful() {
+        AuthRequestDTO loginRequest = new AuthRequestDTO();
+        loginRequest.setEmail("bobby@gmail.com");
+        loginRequest.setPassword("SuperSecurePassw0rd");
+        AuthResponseDTO loginResponse = testRestTemplate.postForObject(createURLWithPort("/api/v1/auth/login"), loginRequest, AuthResponseDTO.class);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.add("Authorization", "Bearer " + loginResponse.getToken());
+        headers.add("Content-Type", "application/json");
+
+        List<String> restaurantCategories = new ArrayList<>();
+        restaurantCategories.add("Japanese");
+        restaurantCategories.add("Rice");
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+        var savedRestaurant = restaurants.saveAndFlush(restaurant);
+        Discount discount = new Discount("desc", 10);
+        
+        HttpEntity<Discount> entity = new HttpEntity<>(discount, headers);
+        ResponseEntity<Discount> responseEntity = testRestTemplate.exchange(
+                createURLWithPort("/api/v1/restaurant/{restaurantId}/discount"),
+                HttpMethod.POST,
+                entity,
+                Discount.class,
+                savedRestaurant.getRestaurantId()
+            );
+        assertEquals(201, responseEntity.getStatusCode().value());
+    }
+
+    @Test
+    public void createDiscount_DiscountAlreadyExist_Failure() {
+        AuthRequestDTO loginRequest = new AuthRequestDTO();
+        loginRequest.setEmail("bobby@gmail.com");
+        loginRequest.setPassword("SuperSecurePassw0rd");
+        AuthResponseDTO loginResponse = testRestTemplate.postForObject(createURLWithPort("/api/v1/auth/login"), loginRequest, AuthResponseDTO.class);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.add("Authorization", "Bearer " + loginResponse.getToken());
+        headers.add("Content-Type", "application/json");
+
+        List<String> restaurantCategories = new ArrayList<>();
+        restaurantCategories.add("Japanese");
+        restaurantCategories.add("Rice");
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+        Discount discount = new Discount("desc", 10);
+        discount.setRestaurant(restaurant);
+        var savedRestaurant = restaurants.saveAndFlush(restaurant);
+        discountRepo.saveAndFlush(discount);
+        
+        HttpEntity<Discount> entity = new HttpEntity<>(discount, headers);
+        ResponseEntity<Discount> responseEntity = testRestTemplate.exchange(
+                createURLWithPort("/api/v1/restaurant/{restaurantId}/discount"),
+                HttpMethod.POST,
+                entity,
+                Discount.class,
+                savedRestaurant.getRestaurantId()
+            );
+
+        assertEquals(400, responseEntity.getStatusCode().value());
+    }
+
+    // @Test
+    // public void deleteDiscount_DiscountExist_Successful() {
+    //     AuthRequestDTO loginRequest = new AuthRequestDTO();
+    //     loginRequest.setEmail("bobby@gmail.com");
+    //     loginRequest.setPassword("SuperSecurePassw0rd");
+    //     AuthResponseDTO loginResponse = testRestTemplate.postForObject(createURLWithPort("/api/v1/auth/login"), loginRequest, AuthResponseDTO.class);
+
+    //     HttpHeaders headers = new HttpHeaders();
+    //     headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+    //     headers.add("Authorization", "Bearer " + loginResponse.getToken());
+    //     headers.add("Content-Type", "application/json");
+
+    //     List<String> restaurantCategories = new ArrayList<>();
+    //     restaurantCategories.add("Japanese");
+    //     restaurantCategories.add("Rice");
+    //     Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+    //     Discount discount = new Discount("desc", 10);
+    //     discount.setRestaurant(restaurant);
+    //     var savedRestaurant = restaurants.saveAndFlush(restaurant);
+    //     discountRepo.saveAndFlush(discount);
+
+    //     HttpEntity<Discount> entity = new HttpEntity<Discount>(discount, headers);
+    //     ResponseEntity<Discount> responseEntity = testRestTemplate.exchange(
+    //             createURLWithPort("/api/v1/restaurant/{restaurantId}/discount"), 
+    //             HttpMethod.DELETE, 
+    //             entity, 
+    //             Discount.class,
+    //             savedRestaurant.getRestaurantId()
+    //             );
+    //     assertEquals(200, responseEntity.getStatusCode().value());
+    // }
+
+    @Test
+    public void updateDiscount_DiscountExist_Successful() {
+        AuthRequestDTO loginRequest = new AuthRequestDTO();
+        loginRequest.setEmail("bobby@gmail.com");
+        loginRequest.setPassword("SuperSecurePassw0rd");
+        AuthResponseDTO loginResponse = testRestTemplate.postForObject(createURLWithPort("/api/v1/auth/login"), loginRequest, AuthResponseDTO.class);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.add("Authorization", "Bearer " + loginResponse.getToken());
+        headers.add("Content-Type", "application/json");
+
+        List<String> restaurantCategories = new ArrayList<>();
+        restaurantCategories.add("Japanese");
+        restaurantCategories.add("Rice");
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+        Discount discount = new Discount("desc", 10);
+        discount.setRestaurant(restaurant);
+        var savedRestaurant = restaurants.saveAndFlush(restaurant);
+        discountRepo.saveAndFlush(discount);
+
+        HttpEntity<Discount> entity = new HttpEntity<>(discount, headers);
+        ResponseEntity<Discount> responseEntity = testRestTemplate.exchange(
+                createURLWithPort("/api/v1/restaurant/{restaurantId}/discount"), 
+                HttpMethod.PATCH, 
+                entity, 
+                Discount.class,
+                savedRestaurant.getRestaurantId()
+                );
+        assertEquals(200, responseEntity.getStatusCode().value());
+    }
+
+    @Test
+    public void updateDiscount_DiscountDoNotExist_Failure() {
+        AuthRequestDTO loginRequest = new AuthRequestDTO();
+        loginRequest.setEmail("bobby@gmail.com");
+        loginRequest.setPassword("SuperSecurePassw0rd");
+        AuthResponseDTO loginResponse = testRestTemplate.postForObject(createURLWithPort("/api/v1/auth/login"), loginRequest, AuthResponseDTO.class);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.add("Authorization", "Bearer " + loginResponse.getToken());
+        headers.add("Content-Type", "application/json");
+
+        List<String> restaurantCategories = new ArrayList<>();
+        restaurantCategories.add("Japanese");
+        restaurantCategories.add("Rice");
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+        Discount discount = new Discount("desc", 10);
+        var savedRestaurant = restaurants.saveAndFlush(restaurant);
+
+        HttpEntity<Discount> entity = new HttpEntity<>(discount, headers);
+        ResponseEntity<Discount> responseEntity = testRestTemplate.exchange(
+                createURLWithPort("/api/v1/restaurant/{restaurantId}/discount"), 
+                HttpMethod.PATCH, 
+                entity, 
+                Discount.class,
+                savedRestaurant.getRestaurantId()
+                );
         assertEquals(404, responseEntity.getStatusCode().value());
     }
 
