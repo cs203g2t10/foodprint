@@ -5,6 +5,7 @@ import foodprint.backend.controller.RestaurantController;
 import foodprint.backend.dto.AuthRequestDTO;
 import foodprint.backend.dto.AuthResponseDTO;
 import foodprint.backend.dto.RestaurantDTO;
+import foodprint.backend.model.Food;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.RestaurantRepo;
 import foodprint.backend.model.User;
@@ -13,51 +14,36 @@ import foodprint.backend.service.RestaurantService;
 import foodprint.backend.service.UserService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorValue;
-import javax.persistence.Inheritance;
-import javax.persistence.Table;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.modelmapper.ModelMapper;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.transaction.annotation.Transactional;
 
 
 @ExtendWith(SpringExtension.class)
@@ -89,7 +75,8 @@ public class RestaurantIntegrationTest {
     @Autowired
     private UserRepo userRepo;
 
-    @MockBean
+    //@MockBean
+    @Autowired
     private RestaurantController restaurantController;
 
     @Autowired
@@ -168,11 +155,8 @@ public class RestaurantIntegrationTest {
         Long restaurantId = 1L;
         ReflectionTestUtils.setField(restaurant, "restaurantId", restaurantId);
         restaurants.saveAndFlush(restaurant);
-        ModelMapper mappers = new ModelMapper();
-        RestaurantDTO restaurantDto = mappers.map(restaurant, RestaurantDTO.class);
-        HttpEntity<RestaurantDTO> entity = new HttpEntity<>(restaurantDto, headers);
-        
-        ResponseEntity<RestaurantDTO[]> responseEntity = testRestTemplate.exchange(createURLWithPort("/api/v1/restaurant/{restaurantId}"), HttpMethod.GET, entity, RestaurantDTO[].class,restaurantId);
+
+        ResponseEntity<Restaurant[]> responseEntity = testRestTemplate.getForEntity(createURLWithPort("/api/v1/restaurant"), Restaurant[].class);
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
@@ -192,43 +176,30 @@ public class RestaurantIntegrationTest {
         restaurantCategories.add("Japanese");
         restaurantCategories.add("Rice");
         Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
-        Long restaurantId = 1L;
-        ReflectionTestUtils.setField(restaurant, "restaurantId", restaurantId);
-        restaurants.saveAndFlush(restaurant);
-        ModelMapper mappers = new ModelMapper();
-        RestaurantDTO restaurantDto = mappers.map(restaurant, RestaurantDTO.class);
-        HttpEntity<RestaurantDTO> entity = new HttpEntity<>(restaurantDto, headers);
+        var savedRestaurant = restaurants.saveAndFlush(restaurant);
 
-		ResponseEntity<RestaurantDTO> responseEntity = testRestTemplate.exchange(createURLWithPort("/api/v1/restaurant/{restaurantId}"), HttpMethod.GET, entity, RestaurantDTO.class, restaurantId);
+		ResponseEntity<RestaurantDTO> responseEntity = testRestTemplate.getForEntity(createURLWithPort("/api/v1/restaurant/{restaurantId}"),RestaurantDTO.class, savedRestaurant.getRestaurantId());
         
         assertEquals(200, responseEntity.getStatusCode().value());
         assertEquals(1.0, restaurants.count());
     }
 
-    // @Test
-    // public void getRestaurant_InvalidId_Failure() {
-    //     AuthRequestDTO loginRequest = new AuthRequestDTO();
-    //     loginRequest.setEmail("bobby@gmail.com");
-    //     loginRequest.setPassword("SuperSecurePassw0rd");
-    //     AuthResponseDTO loginResponse = testRestTemplate.postForObject(createURLWithPort("/api/v1/auth/login"), loginRequest, AuthResponseDTO.class);
+    @Test
+    public void getRestaurant_InvalidId_Failure() {
+        AuthRequestDTO loginRequest = new AuthRequestDTO();
+        loginRequest.setEmail("bobby@gmail.com");
+        loginRequest.setPassword("SuperSecurePassw0rd");
+        AuthResponseDTO loginResponse = testRestTemplate.postForObject(createURLWithPort("/api/v1/auth/login"), loginRequest, AuthResponseDTO.class);
 
-    //     HttpHeaders headers = new HttpHeaders();
-    //     headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-    //     headers.add("Authorization", "Bearer " + loginResponse.getToken());
-    //     headers.add("Content-Type", "application/json");
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.add("Authorization", "Bearer " + loginResponse.getToken());
+        headers.add("Content-Type", "application/json");
 
-    //     List<String> restaurantCategories = new ArrayList<>();
-    //     restaurantCategories.add("Japanese");
-    //     restaurantCategories.add("Rice");
-    //     Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
-    //     Long restaurantId = 2L;
-    //     ModelMapper mappers = new ModelMapper();
-    //     RestaurantDTO restaurantDto = mappers.map(restaurant, RestaurantDTO.class);
-
-    //     HttpEntity<RestaurantDTO> entity = new HttpEntity<>(restaurantDto, headers);
-    //     ResponseEntity<RestaurantDTO> responseEntity = testRestTemplate.exchange(createURLWithPort("/api/v1/restaurant/{restaurantId}"), HttpMethod.GET, entity, RestaurantDTO.class,restaurantId);
-    //     assertEquals(404, responseEntity.getStatusCode().value());
-    // }
+        //HttpEntity<RestaurantDTO> entity = new HttpEntity<>(restaurantDto, headers);
+        ResponseEntity<RestaurantDTO> responseEntity = testRestTemplate.getForEntity(createURLWithPort("/api/v1/restaurant/345"), RestaurantDTO.class);
+        assertEquals(404, responseEntity.getStatusCode().value());
+    }
 
     @Test
     public void updateRestaurant_Successful() throws Exception {
@@ -246,38 +217,34 @@ public class RestaurantIntegrationTest {
         restaurantCategories.add("Japanese");
         restaurantCategories.add("Rice");
         Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
-        Long restaurantId = 1L;
-        ReflectionTestUtils.setField(restaurant, "restaurantId", restaurantId);
-        restaurants.saveAndFlush(restaurant);
+        var updatedRestaurant = restaurants.saveAndFlush(restaurant);
         HttpEntity<Restaurant> entity = new HttpEntity<>(restaurant, headers);
 
-        ResponseEntity<Restaurant> responseEntity = testRestTemplate.exchange(createURLWithPort("/api/v1/restaurant/{restaurantId}"), HttpMethod.PATCH, entity, Restaurant.class, restaurantId);
+        ResponseEntity<Restaurant> responseEntity = testRestTemplate.exchange(createURLWithPort("/api/v1/restaurant/{restaurantId}"), HttpMethod.PATCH, entity, Restaurant.class, updatedRestaurant.getRestaurantId());
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
-    // @Test
-    // public void updateRestaurant_InvalidId_Unsuccessful() {
-    //     AuthRequestDTO loginRequest = new AuthRequestDTO();
-    //     loginRequest.setEmail("bobby@gmail.com");
-    //     loginRequest.setPassword("SuperSecurePassw0rd");
-    //     AuthResponseDTO loginResponse = testRestTemplate.postForObject(createURLWithPort("/api/v1/auth/login"), loginRequest, AuthResponseDTO.class);
+    @Test
+    public void updateRestaurant_InvalidId_Failure() {
+        AuthRequestDTO loginRequest = new AuthRequestDTO();
+        loginRequest.setEmail("bobby@gmail.com");
+        loginRequest.setPassword("SuperSecurePassw0rd");
+        AuthResponseDTO loginResponse = testRestTemplate.postForObject(createURLWithPort("/api/v1/auth/login"), loginRequest, AuthResponseDTO.class);
 
-    //     HttpHeaders headers = new HttpHeaders();
-    //     headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-    //     headers.add("Authorization", "Bearer " + loginResponse.getToken());
-    //     headers.add("Content-Type", "application/json");
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.add("Authorization", "Bearer " + loginResponse.getToken());
+        headers.add("Content-Type", "application/json");
 
-    //     List<String> restaurantCategories = new ArrayList<>();
-    //     restaurantCategories.add("Japanese");
-    //     restaurantCategories.add("Rice");
-    //     Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
-    //     Long restaurantId = 1L;
-    //     ReflectionTestUtils.setField(restaurant, "restaurantId", restaurantId);
+        List<String> restaurantCategories = new ArrayList<>();
+        restaurantCategories.add("Japanese");
+        restaurantCategories.add("Rice");
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
 
-    //     HttpEntity<Restaurant> entity = new HttpEntity<>(restaurant, headers);
-    //     ResponseEntity<Restaurant> responseEntity = testRestTemplate.exchange(createURLWithPort("/api/v1/restaurant/{restaurantId}"), HttpMethod.PATCH, entity, Restaurant.class, restaurantId);
-    //     assertEquals(404, responseEntity.getStatusCode().value());
-    // }
+        HttpEntity<Restaurant> entity = new HttpEntity<>(restaurant, headers);
+        ResponseEntity<Restaurant> responseEntity = testRestTemplate.exchange(createURLWithPort("/api/v1/restaurant/{restaurantId}"), HttpMethod.PATCH, entity, Restaurant.class, 345L);
+        assertEquals(404, responseEntity.getStatusCode().value());
+    }
 
     @Test
     public void deleteRestaurant_Successful() throws Exception {
@@ -295,36 +262,44 @@ public class RestaurantIntegrationTest {
         restaurantCategories.add("Japanese");
         restaurantCategories.add("Rice");
         Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
-        Long restaurantId = 1L;
-        ReflectionTestUtils.setField(restaurant, "restaurantId", restaurantId);
-        restaurants.saveAndFlush(restaurant);
+        var currentRestaurantStored = restaurants.saveAndFlush(restaurant);
 
         HttpEntity<Restaurant> entity = new HttpEntity<>(restaurant, headers);
 
-        ResponseEntity<Restaurant> responseEntity = testRestTemplate.exchange(createURLWithPort("/api/v1/restaurant/{restaurantId}"), HttpMethod.DELETE, entity, Restaurant.class, restaurantId);
+        ResponseEntity<Restaurant> responseEntity = testRestTemplate.exchange(createURLWithPort("/api/v1/restaurant/{restaurantId}"), HttpMethod.DELETE, entity, Restaurant.class, currentRestaurantStored.getRestaurantId());
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
-    // @WithMockUser(roles = "FP_MANAGER")
-    // @Test
-    // public void CreateFood_Success() throws Exception{
-    //     HttpEntity<String> entity = new HttpEntity<>(null, headers);
-    //     Food food = new Food("sashimi", 10.0, 0.0);
-    //     List<String> restaurantCategories = new ArrayList<>();
-    //     restaurantCategories.add("Japanese");
-    //     restaurantCategories.add("Rice");
-    //     Restaurant restaurant = restaurants.save(new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories));
-    //     food.setRestaurant(restaurant);
-    //     foods.save(food);
+    @Test
+    public void deleteRestaurant_InvalidId_Failure() {
+        AuthRequestDTO loginRequest = new AuthRequestDTO();
+        loginRequest.setEmail("bobby@gmail.com");
+        loginRequest.setPassword("SuperSecurePassw0rd");
+        AuthResponseDTO loginResponse = testRestTemplate.postForObject(createURLWithPort("/api/v1/auth/login"), loginRequest, AuthResponseDTO.class);
 
-    //     URI uri = new URI(baseUrl + port + "/restaurant/" + restaurant.getRestaurantId().longValue() + "/food");
-    //     ResponseEntity<Food> result = restTemplate.getForEntity(uri, Food.class);
-    //     assertNotNull(result);
-    // }
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.add("Authorization", "Bearer " + loginResponse.getToken());
+        headers.add("Content-Type", "application/json");
 
+        List<String> restaurantCategories = new ArrayList<>();
+        restaurantCategories.add("Japanese");
+        restaurantCategories.add("Rice");
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+        HttpEntity<Restaurant> entity = new HttpEntity<>(restaurant, headers);
+
+        ResponseEntity<Restaurant> responseEntity = testRestTemplate.exchange(createURLWithPort("/api/v1/restaurant/{restaurantId}"), HttpMethod.DELETE, entity, Restaurant.class, 2L);
+        assertEquals(404, responseEntity.getStatusCode().value());
+    }
+
+    /**
+     * 
+     * Food-related integration test
+     * 
+     */
 
     private String createURLWithPort(String uri)
     {
-        return "http://localhost:" + port + uri;
+        return baseUrl + port + uri;
     }
 }
