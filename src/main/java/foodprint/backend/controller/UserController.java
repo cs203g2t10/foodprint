@@ -107,10 +107,12 @@ public class UserController {
         User updatedUser = convertToEntity(updatedUserDto);
         User currentUser = userService.getUser(id);
 
-        try {
-            authService.authenticate(new UsernamePasswordAuthenticationToken(currentUser.getEmail(), updatedUserDto.getOldPassword()));
-        } catch (BadCredentialsException | UsernameNotFoundException ex) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        if (updatedUserDto.getNewPassword() != null) {
+            try {
+                authService.authenticate(new UsernamePasswordAuthenticationToken(currentUser.getEmail(), updatedUserDto.getOldPassword()));
+            } catch (BadCredentialsException | UsernameNotFoundException ex) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
         }
 
         updatedUser = userService.updateUser(id, currentUser, updatedUser);
