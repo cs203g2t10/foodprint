@@ -131,7 +131,6 @@ public class RestaurantServiceTest {
         ingredient = new Ingredient("Salmon");
         ingredients = new ArrayList<>();
         ingredients.add(ingredient);
-        ingredientsDTOList = new ArrayList<>();
         ingredientId = 1L;
         discount = new Discount("1 For 1", 30);
         discountId = 1L;
