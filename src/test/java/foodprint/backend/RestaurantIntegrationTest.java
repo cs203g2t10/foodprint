@@ -428,7 +428,6 @@ public class RestaurantIntegrationTest {
 
         HttpEntity<Food> entity = new HttpEntity<Food>(food, headers);
         ResponseEntity<Food> responseEntity = testRestTemplate.exchange(createURLWithPort("/api/v1/restaurant/{restaurantId}/food/{foodId}"), HttpMethod.DELETE, entity, Food.class,savedRestaurant.getRestaurantId(), savedFood.getFoodId());
-        System.out.println(responseEntity.getStatusCode());
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
@@ -451,11 +450,9 @@ public class RestaurantIntegrationTest {
         Food food = new Food("sashimi", 10.0, 0.0);
         food.setRestaurant(restaurant);
         var savedRestaurant = restaurants.saveAndFlush(restaurant);
-        var savedFood = foodRepo.saveAndFlush(food);
 
         HttpEntity<Food> entity = new HttpEntity<Food>(food, headers);
         ResponseEntity<Food> responseEntity = testRestTemplate.exchange(createURLWithPort("/api/v1/restaurant/{restaurantId}/food/{foodId}"), HttpMethod.DELETE, entity, Food.class,savedRestaurant.getRestaurantId(), 1L);
-        System.out.println(responseEntity.getStatusCode());
         assertEquals(404, responseEntity.getStatusCode().value());
     }
 
@@ -476,13 +473,10 @@ public class RestaurantIntegrationTest {
         restaurantCategories.add("Rice");
         Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
         Food food = new Food("sashimi", 10.0, 0.0);
-        food.setRestaurant(restaurant);
-        var savedRestaurant = restaurants.saveAndFlush(restaurant);
         var savedFood = foodRepo.saveAndFlush(food);
 
         HttpEntity<Food> entity = new HttpEntity<Food>(food, headers);
         ResponseEntity<Food> responseEntity = testRestTemplate.exchange(createURLWithPort("/api/v1/restaurant/{restaurantId}/food/{foodId}"), HttpMethod.DELETE, entity, Food.class, 1L, savedFood.getFoodId());
-        System.out.println(responseEntity.getStatusCode());
         assertEquals(404, responseEntity.getStatusCode().value());
     }
 
