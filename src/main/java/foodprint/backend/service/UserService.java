@@ -110,6 +110,9 @@ public class UserService {
             String encodedPassword = passwordEncoder.encode(plaintextPassword);
             existingUser.setPassword(encodedPassword);
         }
+        if (updatedUser.getRestaurant() != null) {
+            existingUser.setRestaurant(updatedUser.getRestaurant());
+        }
         if (updatedUser.getRoles() != null) {
             String[] roles = updatedUser.getRoles().split(",");
             Set<String> filteredRoles = new HashSet<>();
