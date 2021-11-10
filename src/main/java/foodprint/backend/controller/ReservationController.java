@@ -84,7 +84,7 @@ public class ReservationController {
     // GET: Get upcoming reservation by user
     @GetMapping({ "/upcoming" })
     @ResponseStatus(code = HttpStatus.OK)
-    @Operation(summary = "Gets all the reservation(s) of a user")
+    @Operation(summary = "Gets all the upcoming reservation(s) of a user")
     public ResponseEntity<List<ReservationDTO>> getUserUpcomingReservations() {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<Reservation> reservations = reservationService.getUserUpcomingReservations(user);
@@ -99,7 +99,7 @@ public class ReservationController {
     // GET: Get past reservation by user
     @GetMapping({ "/past" })
     @ResponseStatus(code = HttpStatus.OK)
-    @Operation(summary = "Gets all the reservation(s) of a user")
+    @Operation(summary = "Gets all the past reservation(s) of a user")
     public ResponseEntity<List<ReservationDTO>> getUserPastReservations() {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<Reservation> reservations = reservationService.getUserPastReservations(user);
@@ -244,13 +244,19 @@ public class ReservationController {
         Restaurant restaurant = restaurantService.get(dto.getRestaurantId());
         Long restaurantId = restaurant.getRestaurantId();
 
-        reservation.setDate(dto.getDate());
-        reservation.setPax(dto.getPax());
-        reservation.setIsVaccinated(dto.getIsVaccinated());
-        reservation.setStatus(dto.getStatus());
-
+        if (dto.getDate() != null) {
+            reservation.setDate(dto.getDate());
+        }
+        if (dto.getPax() != null) {
+            reservation.setPax(dto.getPax());
+        }
+        if (dto.getIsVaccinated() != null) {
+            reservation.setIsVaccinated(dto.getIsVaccinated());
+        }
+        if (dto.getStatus() != null) {
+            reservation.setStatus(dto.getStatus());
+        }
         if (dto.getLineItems() != null) {
-
             Map<Food, Integer> lineItemsHashMap = new HashMap<>();
 
             for (LineItemDTO lineItemDTO : dto.getLineItems()) {
@@ -260,14 +266,11 @@ public class ReservationController {
             }
 
             List<LineItem> savedLineItems = new ArrayList<>();
-
             for (Map.Entry<Food, Integer> entry : lineItemsHashMap.entrySet()) {
                 LineItem savedLineItem = new LineItem(entry.getKey(), reservation, entry.getValue());
                 savedLineItems.add(savedLineItem);
             }
-
             reservation.setLineItems(savedLineItems);
-
         } else {
             reservation.setLineItems(null);
         }
