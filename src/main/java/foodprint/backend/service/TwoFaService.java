@@ -58,8 +58,7 @@ public class TwoFaService {
     }
 
     public String generateSecret() {
-        String secret = Base32.random();
-        return secret;
+        return Base32.random();
     }
 
     public boolean validate(String secret, String token) {
@@ -71,7 +70,7 @@ public class TwoFaService {
         String email = principal.getName();
         User user = userRepo.findByEmail(email).orElseThrow(() ->  new NotFoundException(USER_NOT_FOUND_MESSAGE));
 
-        if (user.isTwoFaSet()) {
+        if (Boolean.TRUE.equals(user.isTwoFaSet())) { 
             throw new InvalidException("2FA already enabled.");
         }
 
@@ -91,7 +90,7 @@ public class TwoFaService {
             throw new InvalidException("Incorrect token format.");
         }
         
-        if (user.isTwoFaSet()) {
+        if (Boolean.TRUE.equals(user.isTwoFaSet())) { 
             throw new InvalidException("2FA already enabled.");
         }
 
@@ -118,9 +117,9 @@ public class TwoFaService {
             throw new InvalidException("Incorrect token format.");
         }
 
-        if (!user.isTwoFaSet()) {
+        if (Boolean.FALSE.equals(user.isTwoFaSet())) { 
             throw new InvalidException("2FA not yet set.");
-        }
+        } 
 
         boolean disableOtpOk = validate(twoFaSecret, token);
 

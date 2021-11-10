@@ -56,10 +56,10 @@ public class Reservation implements Serializable {
     private LocalDateTime reservedOn;
 
     public enum ReservationStatus {
-        PAID, ONGOING, CANCELLED
+        PAID, UNPAID, CANCELLED
     }
     @Column(name = "status")
-    @Schema(defaultValue = "ONGOING")
+    @Schema(defaultValue = "UNPAID")
     private ReservationStatus status;
 
     @OneToMany(mappedBy = "reservation", cascade=CascadeType.ALL, orphanRemoval = true)

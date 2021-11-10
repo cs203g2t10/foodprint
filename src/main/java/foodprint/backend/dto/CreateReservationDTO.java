@@ -22,8 +22,8 @@ public class CreateReservationDTO {
     @Schema(defaultValue = "1")
     private Long restaurantId;
 
-    @Schema(defaultValue = "ONGOING")
-    private ReservationStatus status = ReservationStatus.ONGOING;
+    @Schema(defaultValue = "UNPAID")
+    private ReservationStatus status = ReservationStatus.UNPAID;
 
     public CreateReservationDTO(LocalDateTime date, Integer pax, Boolean isVaccinated, List<LineItemDTO> lineItems, Long restaurantId, ReservationStatus status) {
         this.date = date;

@@ -6,6 +6,7 @@ import java.util.Set;
 
 import javax.validation.Valid;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,8 +26,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import foodprint.backend.dto.AdminUserDTO;
 import foodprint.backend.dto.ManagerRequestDTO;
-import foodprint.backend.dto.PictureDTO;
 import foodprint.backend.dto.RequestResetPwdDTO;
 import foodprint.backend.dto.ResetPwdDTO;
 import foodprint.backend.dto.RestaurantDTO;
@@ -36,7 +37,6 @@ import foodprint.backend.exceptions.BadRequestException;
 import foodprint.backend.exceptions.InvalidException;
 import foodprint.backend.exceptions.MailException;
 import foodprint.backend.exceptions.NotFoundException;
-import foodprint.backend.model.Picture;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.User;
 import foodprint.backend.service.RestaurantService;
@@ -61,9 +61,9 @@ public class UserController {
     @PostMapping
     @ResponseStatus(code = HttpStatus.CREATED)
     @Operation(summary = "Creates a user account on Foodprint")
-    public ResponseEntity<User> createUser(@RequestBody @Valid User user) {
-        User savedUser = userService.createUser(user);
-        return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
+    public ResponseEntity<User> createUser(@RequestBody @Valid AdminUserDTO userDTO) {
+        User savedUser = convertToEntity(userDTO);
+        return new ResponseEntity<>(userService.createUser(savedUser), HttpStatus.CREATED);
     }
 
     // GET: Get the user by ID
@@ -107,10 +107,10 @@ public class UserController {
     @PatchMapping({"/admin/{id}"})
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Updates a user on Foodprint (Email, Password, First Name, Last Name, Roles)")
-    public ResponseEntity<User> updateUser(@PathVariable("id") Long id, @RequestBody @Valid User updatedUser) {
+    public ResponseEntity<User> updateUser(@PathVariable("id") Long id, @RequestBody @Valid AdminUserDTO updatedUserDTO) {
         User currentUser = userService.getUser(id);
-        updatedUser = userService.updateUser(id, currentUser, updatedUser);
-        return new ResponseEntity<>(updatedUser, HttpStatus.OK);
+        User updatedUser = convertToEntity(updatedUserDTO);
+        return new ResponseEntity<>(userService.updateUser(id, currentUser, updatedUser), HttpStatus.OK);
     }
 
     @DeleteMapping({"/{id}"})
@@ -219,7 +219,7 @@ public class UserController {
     public ResponseEntity<List<RestaurantDTO>> getAllFavouriteRestaurants() {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Set<Restaurant> restaurants = user.getFavouriteRestaurants();
-        List<RestaurantDTO> restaurantDtos = restaurants.stream().map(r -> convertResToDTO(r)).collect(Collectors.toList());
+        List<RestaurantDTO> restaurantDtos = restaurants.stream().map(this::restaurantConvertToDTO).collect(Collectors.toList());
         return new ResponseEntity<>(restaurantDtos, HttpStatus.OK);
     }
 
@@ -234,27 +234,14 @@ public class UserController {
         }
     }
 
-    public RestaurantDTO convertResToDTO(Restaurant restaurant) {
-        RestaurantDTO dto = new RestaurantDTO();
-        dto.setRestaurantId(restaurant.getRestaurantId());
-        dto.setRestaurantName(restaurant.getRestaurantName());
-        dto.setRestaurantLocation(restaurant.getRestaurantLocation());
-        dto.setRestaurantDesc(restaurant.getRestaurantDesc());
-        dto.setRestaurantTableCapacity(restaurant.getRestaurantTableCapacity());
-        dto.setRestaurantWeekdayClosingHour(restaurant.getRestaurantWeekdayClosingHour());
-        dto.setRestaurantWeekdayClosingMinutes(restaurant.getRestaurantWeekdayClosingMinutes());
-        dto.setRestaurantWeekdayOpeningHour(restaurant.getRestaurantWeekdayOpeningHour());
-        dto.setRestaurantWeekdayOpeningMinutes(restaurant.getRestaurantWeekdayOpeningMinutes());
-        dto.setRestaurantWeekendClosingHour(restaurant.getRestaurantWeekendClosingHour());
-        dto.setRestaurantWeekendClosingMinutes(restaurant.getRestaurantWeekendClosingMinutes());
-        dto.setRestaurantWeekendOpeningHour(restaurant.getRestaurantWeekendOpeningHour());
-        dto.setRestaurantWeekendOpeningMinutes(restaurant.getRestaurantWeekendOpeningMinutes());
-        dto.setRestaurantCategory(restaurant.getRestaurantCategory());
-        
-        Picture picture = restaurant.getPicture();
-        PictureDTO picDto = new PictureDTO(picture.getTitle(), picture.getDescription(), picture.getUrl());
-        dto.setPicture(picDto);
-
-        return dto;
+    private RestaurantDTO restaurantConvertToDTO(Restaurant restaurant) {
+        ModelMapper mapper = new ModelMapper();
+        return mapper.map(restaurant, RestaurantDTO.class);
     }
+
+    private User convertToEntity(AdminUserDTO userDTO) {
+        ModelMapper mapper = new ModelMapper();
+        return mapper.map(userDTO, User.class);
+    }
+
 }
