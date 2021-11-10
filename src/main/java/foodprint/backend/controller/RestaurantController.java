@@ -78,7 +78,7 @@ public class RestaurantController {
     @Operation(summary = "Gets all restaurants")
     public ResponseEntity<List<RestaurantDTO>> restaurantGetAll() {
         List<Restaurant> restaurants = service.getAllRestaurants();
-        List<RestaurantDTO> restaurantDtos = restaurants.stream().map(r -> restaurantConvertToDTO(r)).collect(Collectors.toList());
+        List<RestaurantDTO> restaurantDtos = restaurants.stream().map(this::restaurantConvertToDTO).collect(Collectors.toList());
 
         return new ResponseEntity<>(restaurantDtos, HttpStatus.OK);
     }
@@ -137,8 +137,8 @@ public class RestaurantController {
         Sort sorting = Sort.by(direction, sortField);
 		Pageable page = PageRequest.of(pageNum - 1, 16, sorting); // Pagination
 		Page<Restaurant> searchResult = service.search(page, query);
-        return searchResult.map(result -> restaurantConvertToDTO(result));
-    }
+        return searchResult.map(this::restaurantConvertToDTO);
+    } 
 
     @GetMapping({"/categories"})
     @ResponseStatus(code = HttpStatus.OK)
@@ -153,7 +153,7 @@ public class RestaurantController {
     @Operation(summary = "Get a list of restaurant DTOs associated with selected category")
     public ResponseEntity<List<RestaurantDTO>> getRestaurantRelatedToCategory(@PathVariable("category") String restaurantCategory) {
             List<Restaurant> restaurantsRelatedToCategory = service.getRestaurantsRelatedToCategory(restaurantCategory);
-            List<RestaurantDTO> restaurantDtos = restaurantsRelatedToCategory.stream().map(r -> restaurantConvertToDTO(r)).collect(Collectors.toList());
+            List<RestaurantDTO> restaurantDtos = restaurantsRelatedToCategory.stream().map(this::restaurantConvertToDTO).collect(Collectors.toList());
             return new ResponseEntity<>(restaurantDtos, HttpStatus.OK);
     }
 
