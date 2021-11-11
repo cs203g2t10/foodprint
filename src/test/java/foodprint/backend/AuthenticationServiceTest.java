@@ -129,14 +129,14 @@ public class AuthenticationServiceTest {
         when(twoFaService.validToken(any(String.class))).thenReturn(true);
         when(twoFaService.validate(any(String.class), any(String.class))).thenReturn(true);
 
-        InvalidException exception = null;
+        String errorMsg = "";
         try {
             authenticationService.checkValidToken(token, user);
         } catch (InvalidException e) {
-            exception = e;
+            errorMsg = e.getMessage();
         }
 
-        assertNull(exception);
+        assertEquals("", errorMsg);
         verify(twoFaService).validToken(token);
         verify(twoFaService).validate("secret", token);
 
@@ -241,11 +241,11 @@ public class AuthenticationServiceTest {
 
     @Test
     void confirmRegistration_ValidToken_Return() {
-        Token token = new Token(1, user);
+        Token emailToken = new Token(1, user);
         String tokenString = "validToken";
-        when(tokenRepo.findByToken(any(String.class))).thenReturn(Optional.of(token));
+        when(tokenRepo.findByToken(any(String.class))).thenReturn(Optional.of(emailToken));
         when(userRepo.saveAndFlush(any(User.class))).thenReturn(user);
-        when(tokenRepo.saveAndFlush(any(Token.class))).thenReturn(token);
+        when(tokenRepo.saveAndFlush(any(Token.class))).thenReturn(emailToken);
 
         RegistrationException exception = null;
         try {
@@ -256,15 +256,15 @@ public class AuthenticationServiceTest {
         assertNull(exception);
         verify(tokenRepo).findByToken(tokenString);
         verify(userRepo).saveAndFlush(user);
-        verify(tokenRepo).saveAndFlush(token);
+        verify(tokenRepo).saveAndFlush(emailToken);
     }
 
     @Test
     void confirmRegistration_InvalidToken_ReturnException() {
-        Token token = new Token(1, user);
-        token.setUsed(true);
+        Token emailToken = new Token(1, user);
+        emailToken.setUsed(true);
         String tokenString = "usedToken";
-        when(tokenRepo.findByToken(any(String.class))).thenReturn(Optional.of(token));
+        when(tokenRepo.findByToken(any(String.class))).thenReturn(Optional.of(emailToken));
 
         String errorMsg = "";
         try {
@@ -275,22 +275,4 @@ public class AuthenticationServiceTest {
         assertEquals("Invalid token", errorMsg);
         verify(tokenRepo).findByToken(tokenString);
     }
-
-    @Test
-    void confirmRegistration_InvalidRequestor_ReturnException() {
-        Token token = new Token(1, null);
-        String tokenString = "token";
-        when(tokenRepo.findByToken(any(String.class))).thenReturn(Optional.of(token));
-
-        String errorMsg = "";
-        try {
-            authenticationService.confirmRegistration(tokenString);
-        } catch (RegistrationException e) {
-            errorMsg = e.getMessage();
-        }
-        assertEquals("Requestor not found", errorMsg);
-        verify(tokenRepo).findByToken(tokenString);
-    }
-
-    
 }

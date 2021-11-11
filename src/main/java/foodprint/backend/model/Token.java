@@ -14,6 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -45,6 +46,7 @@ public class Token implements Serializable {
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name="requestor")
+    @NotNull
     private User requestor;
 
     @Column(name="created")
