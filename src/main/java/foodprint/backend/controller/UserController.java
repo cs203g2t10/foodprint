@@ -135,7 +135,7 @@ public class UserController {
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Deletes a user on Foodprint")
     public ResponseEntity<User> deleteUser(@PathVariable("id") Long id) {
-        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User currentUser = AuthHelper.getCurrentUser();
         if (currentUser.getId().equals(id)) {
             throw new BadRequestException("You cannot delete yourself.");
         }
@@ -225,7 +225,7 @@ public class UserController {
 
     @PostMapping({ "favourite/{restaurantId}"})
     public ResponseEntity<String> favouriteRestaurant(@PathVariable("restaurantId") Long restaurantId) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = AuthHelper.getCurrentUser();
         try {
             userService.addFavouriteRestaurant(user, restaurantId);
             return new ResponseEntity<>("Restaurant successfully favourited.", HttpStatus.OK);
@@ -238,7 +238,7 @@ public class UserController {
 
     @GetMapping({"favouriteRestaurants"})
     public ResponseEntity<List<FavouriteRestaurantDTO>> getAllFavouriteRestaurants() {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = AuthHelper.getCurrentUser();
         Set<Restaurant> restaurants = user.getFavouriteRestaurants();
         List<FavouriteRestaurantDTO> restaurantDtos = new ArrayList<>();
         for(Restaurant restaurant : restaurants) {
@@ -254,7 +254,7 @@ public class UserController {
 
     @DeleteMapping({"favourite/{restaurantId}"})
     public ResponseEntity<String> deleteFavouriteRestaurant(@PathVariable("restaurantId") Long restaurantId) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = AuthHelper.getCurrentUser();
         try {
             userService.deleteFavouriteRestaurant(user, restaurantId);
             return new ResponseEntity<>("Favourite restaurant successfully removed.", HttpStatus.OK);

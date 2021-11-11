@@ -125,7 +125,7 @@ public class AuthController {
     @GetMapping({ "/whoami" })
     @ResponseStatus(code = HttpStatus.OK)
     public ResponseEntity<CurrentUserDetailsDTO> currentUserDetails() {
-        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User currentUser = AuthHelper.getCurrentUser();
         ModelMapper mapper = new ModelMapper();
         CurrentUserDetailsDTO currentUserDetails = mapper.map(currentUser, CurrentUserDetailsDTO.class);
         currentUserDetails.setUserRoles(currentUser.getRoles().split(","));

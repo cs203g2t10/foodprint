@@ -72,7 +72,7 @@ public class ReservationController {
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Gets all the reservation(s) of a user")
     public ResponseEntity<List<ReservationDTO>> getAllReservationByUser() {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = AuthHelper.getCurrentUser();
         List<Reservation> reservations = reservationService.getAllReservationByUser(user);
         List<ReservationDTO> reservationDTOs = new ArrayList<>();
         for (Reservation reservation : reservations) {
@@ -87,7 +87,8 @@ public class ReservationController {
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Gets all the upcoming reservation(s) of a user")
     public ResponseEntity<List<ReservationDTO>> getUserUpcomingReservations() {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = AuthHelper.getCurrentUser();
+        
         List<Reservation> reservations = reservationService.getUserUpcomingReservations(user);
         List<ReservationDTO> reservationDTOs = new ArrayList<>();
         for (Reservation reservation : reservations) {
@@ -103,7 +104,7 @@ public class ReservationController {
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Gets all the past reservation(s) of a user")
     public ResponseEntity<List<ReservationDTO>> getUserPastReservations() {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = AuthHelper.getCurrentUser();
         List<Reservation> reservations = reservationService.getUserPastReservations(user);
         List<ReservationDTO> reservationDTOs = new ArrayList<>();
         for (Reservation reservation : reservations) {
@@ -148,7 +149,7 @@ public class ReservationController {
         if (after.isAfter(before)) {
             throw new BadRequestException("Start date should be before end date");
         }
-        User requestor = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User requestor = AuthHelper.getCurrentUser();
         Restaurant requestorRestaurant = requestor.getRestaurant();
         Page<Reservation> reservations = reservationService.getRestaurantUpcomingReservations(restaurant, requestorRestaurant, after, before, page);
         Page<ReservationDTO> reservationDTOs = reservations.map(this::convertToDTO);
@@ -168,7 +169,7 @@ public class ReservationController {
     @PostMapping
     @Operation(summary = "For users to create a new reservation slot")
     public ResponseEntity<ReservationDTO> createReservationDTO(@RequestBody @Nullable CreateReservationDTO req) {
-        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User currentUser = AuthHelper.getCurrentUser();
         try {
             var reservation = reservationService.create(currentUser, req);
             var reservationDTO = this.convertToDTO(reservation);
