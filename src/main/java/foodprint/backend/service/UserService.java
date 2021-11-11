@@ -82,8 +82,8 @@ public class UserService {
     @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER', 'FP_USER')")
     public User protectedGetUser(Long id) {
         User currentUser = AuthHelper.getCurrentUser();
-        if (currentUser.getId() != id) {
-            new NotFoundException("Unable to retrieve user.");
+        if (!currentUser.getId().equals(id)) {
+            throw new NotFoundException("Unable to retrieve user.");
         }
         return this.userRepo.findById(id).orElseThrow(() -> new NotFoundException("User not found"));
     }

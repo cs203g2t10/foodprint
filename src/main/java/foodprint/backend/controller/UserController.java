@@ -35,7 +35,6 @@ import foodprint.backend.dto.AdminUserDTO;
 import foodprint.backend.dto.ManagerRequestDTO;
 import foodprint.backend.dto.RequestResetPwdDTO;
 import foodprint.backend.dto.ResetPwdDTO;
-import foodprint.backend.dto.RestaurantDTO;
 import foodprint.backend.dto.UpdateUserDTO;
 import foodprint.backend.dto.FavouriteRestaurantDTO;
 import foodprint.backend.exceptions.AlreadyExistsException;
