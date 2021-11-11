@@ -1,7 +1,6 @@
 package foodprint.backend;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -22,7 +21,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import foodprint.backend.exceptions.AlreadyExistsException;
-import foodprint.backend.exceptions.BadRequestException;
 import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.RestaurantRepo;
@@ -155,8 +153,8 @@ public class UserServiceTest {
 
         User getUserUnprotected = userService.unprotectedGetUser(userId);
 
-        verify(users).findById(userId);
         assertEquals(user, getUserUnprotected);
+        verify(users).findById(userId);
     }
 
     @Test

@@ -129,14 +129,14 @@ public class AuthenticationServiceTest {
         when(twoFaService.validToken(any(String.class))).thenReturn(true);
         when(twoFaService.validate(any(String.class), any(String.class))).thenReturn(true);
 
-        InvalidException exception = null;
+        String errorMsg = "";
         try {
             authenticationService.checkValidToken(token, user);
         } catch (InvalidException e) {
-            exception = e;
+            errorMsg = e.getMessage();
         }
 
-        assertNull(exception);
+        assertEquals("", errorMsg);
         verify(twoFaService).validToken(token);
         verify(twoFaService).validate("secret", token);
 
