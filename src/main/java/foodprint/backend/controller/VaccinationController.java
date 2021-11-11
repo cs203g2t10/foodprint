@@ -45,10 +45,10 @@ public class VaccinationController {
     ) {
 
         User currentUser = userService.unprotectedGetUser(userId);
-
+        String newJwtToken = null;
         try {
             String vaccineCertString = new String(file.getBytes());
-            vaccinationService.validateVaccination(currentUser, vaccineCertString);
+            newJwtToken = vaccinationService.validateVaccination(currentUser, vaccineCertString);
         } catch (VaccinationValidationException e) {
             return new ResponseEntity<>(new VaccinationResponseDTO("Error", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (IOException e) {
@@ -57,7 +57,12 @@ public class VaccinationController {
         
         currentUser = userService.unprotectedGetUser(userId);
         if (currentUser.isVaccinated()) {
-            return new ResponseEntity<>(new VaccinationResponseDTO("Vaccinated", "Vaccination certified for " + currentUser.getVaccinationName()), HttpStatus.OK);
+            return ResponseEntity
+                .status(HttpStatus.OK)
+                .header("Authorization", newJwtToken)
+                .body(
+                    new VaccinationResponseDTO("Vaccinated", "Vaccination certified for " + currentUser.getVaccinationName())
+                );
         } else {
             return new ResponseEntity<>(new VaccinationResponseDTO("Unvaccinated", "An error occurred and validation failed."), HttpStatus.INTERNAL_SERVER_ERROR);
         }
