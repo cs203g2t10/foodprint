@@ -153,6 +153,42 @@ public class ReservationServiceTest {
     }
 
     @Test
+    void getAllReservationByUser_ReturnList() {
+        reservationList.add(reservation);
+        when(reservations.findByUser(any(User.class))).thenReturn(reservationList);
+
+        List<Reservation> result = reservationService.getAllReservationByUser(user);
+
+        assertEquals(reservationList, result);
+        verify(reservations).findByUser(user);
+    }
+
+    @Test
+    void getUserUpcomingReservations_UserFound_ReturnList() {
+        reservation.setDate(LocalDateTime.now().plusDays(10));
+        reservationList.add(reservation);
+        when(reservations.findByUser(any(User.class))).thenReturn(reservationList);
+
+        List<Reservation> result = reservationService.getUserUpcomingReservations(user);
+
+        assertEquals(reservationList, result);
+        verify(reservations).findByUser(user);
+    }
+
+    @Test
+    void getUserPastReservations_UserFound_ReturnList() {
+        reservationList.add(reservation);
+        user.setReservations(reservationList);
+        reservation.setDate(LocalDateTime.now().minusDays(10));
+        when(reservations.findByUser(any(User.class))).thenReturn(reservationList);
+
+        List<Reservation> result = reservationService.getUserPastReservations(user);
+
+        assertEquals(reservationList, result);
+        verify(reservations).findByUser(user);
+    }
+
+    @Test
     void createReservation_SlotAvailable_ReturnReservation() {
         List<LineItemDTO> lineItemDTOs = new ArrayList<>();
         lineItemDTOs.add(lineItemDTO);
