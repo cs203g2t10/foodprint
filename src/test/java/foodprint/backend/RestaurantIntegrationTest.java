@@ -282,13 +282,11 @@ public class RestaurantIntegrationTest {
         Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
         var currentRestaurantStored = restaurants.saveAndFlush(restaurant);
 
-        HttpEntity<Restaurant> entity = new HttpEntity<>(restaurant, headers);
-
-        ResponseEntity<Restaurant> responseEntity = testRestTemplate.exchange(
+        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
                 createURLWithPort("/api/v1/restaurant/{restaurantId}"), 
                 HttpMethod.DELETE, 
-                entity, 
-                Restaurant.class, 
+                new HttpEntity<>(headers), 
+                Void.class, 
                 currentRestaurantStored.getRestaurantId());
         assertEquals(200, responseEntity.getStatusCode().value());
     }
@@ -312,13 +310,12 @@ public class RestaurantIntegrationTest {
         var savedRestaurant = restaurants.saveAndFlush(restaurant);
         Long savedRestaurantId = savedRestaurant.getRestaurantId();
         restaurants.delete(restaurant);
-        HttpEntity<Restaurant> entity = new HttpEntity<>(restaurant, headers);
 
-        ResponseEntity<Restaurant> responseEntity = testRestTemplate.exchange(
+        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
                 createURLWithPort("/api/v1/restaurant/{restaurantId}"), 
                 HttpMethod.DELETE, 
-                entity, 
-                Restaurant.class, 
+                new HttpEntity<>(headers), 
+                Void.class, 
                 savedRestaurantId);
         assertEquals(404, responseEntity.getStatusCode().value());
     }
@@ -475,11 +472,10 @@ public class RestaurantIntegrationTest {
         var savedRestaurant = restaurants.saveAndFlush(restaurant);
         var savedFood = foodRepo.saveAndFlush(food);
 
-        HttpEntity<Food> entity = new HttpEntity<>(null, headers);
         ResponseEntity<Food> responseEntity = testRestTemplate.exchange(
                 createURLWithPort("/api/v1/restaurant/{restaurantId}/food/{foodId}"), 
                 HttpMethod.GET,
-                entity,
+                new HttpEntity<>(null, headers),
                 Food.class,
                 savedRestaurant.getRestaurantId(),
                 savedFood.getFoodId()
@@ -511,12 +507,11 @@ public class RestaurantIntegrationTest {
         Long foodId = savedFood.getFoodId();
         foodRepo.delete(food);
 
-        HttpEntity<Food> entity = new HttpEntity<>(null, headers);
-        ResponseEntity<Food> responseEntity = testRestTemplate.exchange(
+        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
                 createURLWithPort("/api/v1/restaurant/{restaurantId}/food/{foodId}"), 
                 HttpMethod.GET,
-                entity,
-                Food.class,
+                new HttpEntity<>(headers),
+                Void.class,
                 savedRestaurant.getRestaurantId(),
                 foodId
                 );
@@ -547,12 +542,11 @@ public class RestaurantIntegrationTest {
         var savedRestaurant = restaurants.saveAndFlush(restaurant);
         var savedFood = foodRepo.saveAndFlush(food);
 
-        HttpEntity<Food> entity = new HttpEntity<>(null, headers);
-        ResponseEntity<Food> responseEntity = testRestTemplate.exchange(
+        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
                 createURLWithPort("/api/v1/restaurant/{restaurantId}/food/{foodId}"), 
                 HttpMethod.GET,
-                entity,
-                Food.class,
+                new HttpEntity<>(headers),
+                Void.class,
                 savedRestaurant.getRestaurantId(),
                 savedFood.getFoodId()
                 );
@@ -581,12 +575,11 @@ public class RestaurantIntegrationTest {
         var savedRestaurant = restaurants.saveAndFlush(restaurant);
         var savedFood = foodRepo.saveAndFlush(food);
 
-        HttpEntity<Food> entity = new HttpEntity<Food>(food, headers);
-        ResponseEntity<Food> responseEntity = testRestTemplate.exchange(
+        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
                 createURLWithPort("/api/v1/restaurant/{restaurantId}/food/{foodId}"), 
                 HttpMethod.DELETE, 
-                entity, 
-                Food.class,
+                new HttpEntity<Object>(headers), 
+                Void.class,
                 savedRestaurant.getRestaurantId(), 
                 savedFood.getFoodId());
         assertEquals(200, responseEntity.getStatusCode().value());
