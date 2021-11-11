@@ -224,6 +224,7 @@ public class UserController {
     }
 
     @PostMapping({ "favourite/{restaurantId}"})
+    @Operation(summary = "Adds a restaurant to the current user's list of favourites")
     public ResponseEntity<String> favouriteRestaurant(@PathVariable("restaurantId") Long restaurantId) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         try {
@@ -237,6 +238,7 @@ public class UserController {
     }
 
     @GetMapping({"favouriteRestaurants"})
+    @Operation(summary = "Gets all favourited restaurants of the current user")
     public ResponseEntity<List<FavouriteRestaurantDTO>> getAllFavouriteRestaurants() {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Set<Restaurant> restaurants = user.getFavouriteRestaurants();
@@ -246,6 +248,7 @@ public class UserController {
             newFav.setPicture(restaurant.getPicture());
             newFav.setRestaurantId(restaurant.getRestaurantId());
             newFav.setRestaurantName(restaurant.getRestaurantName());
+            newFav.setRestaurantLocation(restaurant.getRestaurantLocation());
             restaurantDtos.add(newFav);
         }
 
@@ -253,6 +256,7 @@ public class UserController {
     }
 
     @DeleteMapping({"favourite/{restaurantId}"})
+    @Operation(summary = "Deletes a restaurant from the current user's list of favourites")
     public ResponseEntity<String> deleteFavouriteRestaurant(@PathVariable("restaurantId") Long restaurantId) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         try {

@@ -7,6 +7,8 @@ public class FavouriteRestaurantDTO {
     
     private Long restaurantId;
 
+    private String restaurantLocation;
+
     private Picture picture;
 
     public String getRestaurantName() {
@@ -23,6 +25,14 @@ public class FavouriteRestaurantDTO {
 
     public void setRestaurantId(Long restaurantId) {
         this.restaurantId = restaurantId;
+    }
+
+    public String getRestaurantLocation() {
+        return restaurantLocation;
+    }
+
+    public void setRestaurantLocation(String restaurantLocation) {
+        this.restaurantLocation = restaurantLocation;
     }
 
     public Picture getPicture() {
