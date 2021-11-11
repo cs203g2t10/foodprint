@@ -6,6 +6,7 @@ import foodprint.backend.dto.FoodIngredientQuantityDTO;
 import foodprint.backend.exceptions.DeleteFailedException;
 import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.exceptions.AlreadyExistsException;
+import foodprint.backend.exceptions.BadRequestException;
 import foodprint.backend.model.Discount;
 import foodprint.backend.model.DiscountRepo;
 import foodprint.backend.model.Food;
@@ -131,7 +132,6 @@ public class RestaurantServiceTest {
         ingredient = new Ingredient("Salmon");
         ingredients = new ArrayList<>();
         ingredients.add(ingredient);
-        ingredientsDTOList = new ArrayList<>();
         ingredientId = 1L;
         discount = new Discount("1 For 1", 30);
         discountId = 1L;
@@ -301,7 +301,7 @@ public class RestaurantServiceTest {
     // ------------Food-related Testing---------------
 
     @Test
-    void addFood_newFoodNoIngredient_BadRequest() {
+    void addFood_newFoodMoreThanOneIngredient_ReturnFood() {
         FoodDTO newFoodDTO = new FoodDTO();
         newFoodDTO.setFoodDesc("desc");
         newFoodDTO.setFoodName("Sushi");
@@ -327,6 +327,25 @@ public class RestaurantServiceTest {
         verify(repo).findById(restaurantId);
         verify(repo).findByRestaurantId(restaurantId);
         verify(foodRepo).saveAndFlush(any(Food.class));
+    }
+
+    @Test
+    void addFood_newFoodNoIngredient_BadRequest() {
+        FoodDTO newFoodDTO = new FoodDTO();
+        newFoodDTO.setFoodDesc("desc");
+        newFoodDTO.setFoodName("Sushi");
+        newFoodDTO.setFoodPrice(10.0);
+        Food newFood = new Food(newFoodDTO.getFoodName(), newFoodDTO.getFoodDesc(), newFoodDTO.getFoodPrice(), 10.0);
+        newFoodDTO.setIngredientQuantityList(ingredientsDTOList);
+
+        allFood.add(newFood);
+
+        restaurantService.create(restaurant);
+        try {
+            restaurantService.addFood(restaurantId, newFoodDTO);
+        } catch(BadRequestException e) {
+            assertEquals("Food should have at least 1 ingredient", e.getMessage());
+        }
     }
 
     @Test

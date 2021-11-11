@@ -30,7 +30,6 @@ import jakarta.validation.constraints.NotNull;
 @Entity
 @Table
 @EnableTransactionManagement
-@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 public class User implements UserDetails {
 
     // Properties

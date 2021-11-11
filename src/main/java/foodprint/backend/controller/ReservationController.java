@@ -3,6 +3,7 @@ package foodprint.backend.controller;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -71,7 +71,7 @@ public class ReservationController {
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Gets all the reservation(s) of a user")
     public ResponseEntity<List<ReservationDTO>> getAllReservationByUser() {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = AuthHelper.getCurrentUser();
         List<Reservation> reservations = reservationService.getAllReservationByUser(user);
         List<ReservationDTO> reservationDTOs = new ArrayList<>();
         for (Reservation reservation : reservations) {
@@ -84,30 +84,33 @@ public class ReservationController {
     // GET: Get upcoming reservation by user
     @GetMapping({ "/upcoming" })
     @ResponseStatus(code = HttpStatus.OK)
-    @Operation(summary = "Gets all the reservation(s) of a user")
+    @Operation(summary = "Gets all the upcoming reservation(s) of a user")
     public ResponseEntity<List<ReservationDTO>> getUserUpcomingReservations() {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = AuthHelper.getCurrentUser();
+        
         List<Reservation> reservations = reservationService.getUserUpcomingReservations(user);
         List<ReservationDTO> reservationDTOs = new ArrayList<>();
         for (Reservation reservation : reservations) {
             ReservationDTO reservationDTO = this.convertToDTO(reservation);
             reservationDTOs.add(reservationDTO);
         }
+        Collections.reverse(reservationDTOs);
         return new ResponseEntity<>(reservationDTOs, HttpStatus.OK);
     }
 
     // GET: Get past reservation by user
     @GetMapping({ "/past" })
     @ResponseStatus(code = HttpStatus.OK)
-    @Operation(summary = "Gets all the reservation(s) of a user")
+    @Operation(summary = "Gets all the past reservation(s) of a user")
     public ResponseEntity<List<ReservationDTO>> getUserPastReservations() {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = AuthHelper.getCurrentUser();
         List<Reservation> reservations = reservationService.getUserPastReservations(user);
         List<ReservationDTO> reservationDTOs = new ArrayList<>();
         for (Reservation reservation : reservations) {
             ReservationDTO reservationDTO = this.convertToDTO(reservation);
             reservationDTOs.add(reservationDTO);
         }
+        Collections.reverse(reservationDTOs);
         return new ResponseEntity<>(reservationDTOs, HttpStatus.OK);
     }
 
@@ -145,7 +148,7 @@ public class ReservationController {
         if (after.isAfter(before)) {
             throw new BadRequestException("Start date should be before end date");
         }
-        User requestor = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User requestor = AuthHelper.getCurrentUser();
         Restaurant requestorRestaurant = requestor.getRestaurant();
         Page<Reservation> reservations = reservationService.getRestaurantUpcomingReservations(restaurant, requestorRestaurant, after, before, page);
         Page<ReservationDTO> reservationDTOs = reservations.map(this::convertToDTO);
@@ -165,7 +168,7 @@ public class ReservationController {
     @PostMapping
     @Operation(summary = "For users to create a new reservation slot")
     public ResponseEntity<ReservationDTO> createReservationDTO(@RequestBody @Nullable CreateReservationDTO req) {
-        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User currentUser = AuthHelper.getCurrentUser();
         try {
             var reservation = reservationService.create(currentUser, req);
             var reservationDTO = this.convertToDTO(reservation);
@@ -244,13 +247,19 @@ public class ReservationController {
         Restaurant restaurant = restaurantService.get(dto.getRestaurantId());
         Long restaurantId = restaurant.getRestaurantId();
 
-        reservation.setDate(dto.getDate());
-        reservation.setPax(dto.getPax());
-        reservation.setIsVaccinated(dto.getIsVaccinated());
-        reservation.setStatus(dto.getStatus());
-
+        if (dto.getDate() != null) {
+            reservation.setDate(dto.getDate());
+        }
+        if (dto.getPax() != null) {
+            reservation.setPax(dto.getPax());
+        }
+        if (dto.getIsVaccinated() != null) {
+            reservation.setIsVaccinated(dto.getIsVaccinated());
+        }
+        if (dto.getStatus() != null) {
+            reservation.setStatus(dto.getStatus());
+        }
         if (dto.getLineItems() != null) {
-
             Map<Food, Integer> lineItemsHashMap = new HashMap<>();
 
             for (LineItemDTO lineItemDTO : dto.getLineItems()) {
@@ -260,14 +269,11 @@ public class ReservationController {
             }
 
             List<LineItem> savedLineItems = new ArrayList<>();
-
             for (Map.Entry<Food, Integer> entry : lineItemsHashMap.entrySet()) {
                 LineItem savedLineItem = new LineItem(entry.getKey(), reservation, entry.getValue());
                 savedLineItems.add(savedLineItem);
             }
-
             reservation.setLineItems(savedLineItems);
-
         } else {
             reservation.setLineItems(null);
         }

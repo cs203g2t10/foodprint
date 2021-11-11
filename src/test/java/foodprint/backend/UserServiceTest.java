@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import foodprint.backend.exceptions.AlreadyExistsException;
+import foodprint.backend.exceptions.BadRequestException;
 import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.RestaurantRepo;
@@ -55,6 +56,7 @@ public class UserServiceTest {
     void init() {
         user = new User("bobbytan@gmail.com", "SuperSecurePassw0rd", "Bobby Tan");
         userId = 1L;
+        ReflectionTestUtils.setField(user, "id", userId);
         restaurantCategories = new ArrayList<>();
         restaurantCategories.add("Japanese");
         restaurantCategories.add("Rice");
@@ -93,6 +95,21 @@ public class UserServiceTest {
     }
 
     @Test
+    void addUser_SameId_ReturnException() {
+        when(users.findByEmail(any(String.class))).thenReturn(Optional.empty());
+        when(users.findById(any(Long.class))).thenReturn(Optional.of(user));
+
+        try {
+            userService.createUser(user);
+        } catch (AlreadyExistsException e) {
+            assertEquals("User with the same ID already exists", e.getMessage());
+        }
+
+        verify(users).findByEmail(user.getEmail());
+        verify(users).findById(userId);
+    }
+
+    @Test
     void getUsers_ReturnUsers() {
         List<User> retrievedUser = userService.getAllUsers();
         assertNotNull(retrievedUser);
@@ -116,6 +133,29 @@ public class UserServiceTest {
         when(users.findById(any(Long.class))).thenReturn(Optional.of(user));
 
         userService.getUser(userId);
+
+        verify(users).findById(userId);
+    }
+
+    @Test
+    void unprotectedGetUser_ExistingId_ReturnUser() {
+        when(users.findById(any(Long.class))).thenReturn(Optional.of(user));
+
+        User getUserUnprotected = userService.unprotectedGetUser(userId);
+
+        verify(users).findById(userId);
+        assertEquals(user, getUserUnprotected);
+    }
+
+    @Test
+    void unprotectedGetUser_NonExistentId_ReturnUser() {
+        when(users.findById(any(Long.class))).thenReturn(Optional.empty());
+
+        try {
+            userService.unprotectedGetUser(userId);
+        } catch (NotFoundException e) {
+            assertEquals("User not found", e.getMessage());
+        }
 
         verify(users).findById(userId);
     }
@@ -161,6 +201,27 @@ public class UserServiceTest {
         verify(users).findById(userId);
         verify(passwordEncoder).encode("SuperSecurePassw0rd");
         verify(users).saveAndFlush(user);
+    }
+
+    @Test
+    void updateUser_NoFilteredRoles_ReturnError() {
+        User newUser = new User("bobbytan@gmail.com", "SuperSecurePassw0rd", "Bobby Tan");
+        newUser.setLastName("tan");
+        newUser.setRoles("");
+
+        when(users.findByEmail(any(String.class))).thenReturn(Optional.empty());
+        when(users.findById(any(Long.class))).thenReturn(Optional.of(user));
+        when(passwordEncoder.encode("SuperSecurePassw0rd")).thenReturn("$2a$12$uaTxLl9sPzGbIozqCB0wcuKjmmsZNW2mswGw5VRdsU4XFWs9Se7Uq");
+
+        try {
+            userService.updateUser(userId, user);
+        } catch (BadRequestException e){
+            assertEquals("No roles specified", e.getMessage());
+        }
+
+        verify(users).findByEmail(user.getEmail());
+        verify(users).findById(userId);
+        verify(passwordEncoder).encode("SuperSecurePassw0rd");
     }
 
     @Test

@@ -91,7 +91,7 @@ public class AuthenticationService {
         
         String emailBody = String.format(
             "Hi %s, \n\n" +    
-            "Thank you for registering with Foodprint, you can confirm your email at http://foodprint.works/verifyaccount?token=%s \n\n" +
+            "Thank you for registering with Foodprint, you can confirm your email at http://ui.foodprint.works/verifyaccount?token=%s \n\n" +
             "This verification token will expire in 48 hours. \n\n" +
             "Regards,\nFoodprint Support",
             user.getFirstName(),
