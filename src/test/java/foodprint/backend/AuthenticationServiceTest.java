@@ -16,7 +16,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import foodprint.backend.exceptions.UserUnverifiedException;
 import foodprint.backend.model.User;
+import foodprint.backend.model.UserRepo;
 import foodprint.backend.service.AuthenticationService;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,6 +29,9 @@ public class AuthenticationServiceTest {
 
     @Mock
     private UserDetailsService userDetailsService;
+
+    @Mock
+    private UserRepo userRepo;
 
     @InjectMocks
     private AuthenticationService authenticationService;
@@ -67,6 +72,20 @@ public class AuthenticationServiceTest {
     }
 
     @Test
+    void authenticateUser_UserUnverified_ReturnException() {
+        when(userDetailsService.loadUserByUsername(any(String.class))).thenReturn(user);
+        user.setRoles("FP_UNVERIFIED");
+
+        try {
+            authenticationService.authenticate(token);
+        } catch (UserUnverifiedException e) {
+            assertEquals(UserUnverifiedException.class, e.getClass());
+        }
+
+        verify(userDetailsService).loadUserByUsername(user.getEmail());
+    }
+
+    @Test
     void encodePassword_Success() {
         String password = "SuperSecurePassw0rd";
         String encodedPassword = "$2a$12$uaTxLl9sPzGbIozqCB0wcuKjmmsZNW2mswGw5VRdsU4XFWs9Se7Uq";
@@ -76,4 +95,6 @@ public class AuthenticationServiceTest {
 
         verify(passwordEncoder).encode(password);
     }
+
+    
 }
