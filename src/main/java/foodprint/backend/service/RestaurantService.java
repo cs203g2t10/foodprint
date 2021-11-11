@@ -538,7 +538,7 @@ public class RestaurantService {
         if (restaurant == null) {
             throw new NotFoundException(RESTAURANT_DOES_NOT_EXIST_MESSAGE);
         }
-        Pageable pageReq = PageRequest.of(pageNumber, 10);
+        Pageable pageReq = PageRequest.of(pageNumber, 8);
         return ingredientRepo.findByRestaurantRestaurantId(pageReq, restaurantId);
     }
 

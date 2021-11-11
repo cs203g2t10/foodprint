@@ -16,7 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,11 +29,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import foodprint.backend.config.AuthHelper;
+import foodprint.backend.config.JwtTokenUtil;
 import foodprint.backend.dto.AdminUserDTO;
 import foodprint.backend.dto.ManagerRequestDTO;
 import foodprint.backend.dto.RequestResetPwdDTO;
 import foodprint.backend.dto.ResetPwdDTO;
-import foodprint.backend.dto.RestaurantDTO;
 import foodprint.backend.dto.UpdateUserDTO;
 import foodprint.backend.dto.FavouriteRestaurantDTO;
 import foodprint.backend.exceptions.AlreadyExistsException;
@@ -59,8 +59,11 @@ public class UserController {
 
     private AuthenticationService authService;
 
+    private JwtTokenUtil jwtTokenUtil;
+
     @Autowired
-    UserController(UserService userService, RestaurantService restaurantService, PasswordEncoder passwordEncoder, AuthenticationService authService) {
+    UserController(UserService userService, RestaurantService restaurantService, PasswordEncoder passwordEncoder, AuthenticationService authService, JwtTokenUtil jwtTokenUtil) {
+        this.jwtTokenUtil = jwtTokenUtil;
         this.userService = userService;
         this.restaurantService = restaurantService;
         this.authService = authService;
@@ -95,7 +98,7 @@ public class UserController {
         @RequestParam(value="sortDesc", defaultValue="false") boolean sortDesc
     ) {
         Direction direction = (sortDesc) ? Direction.DESC : Direction.ASC;
-        Pageable pageDetails = PageRequest.of(pageNumber, 10, direction, sortByField);
+        Pageable pageDetails = PageRequest.of(pageNumber, 8, direction, sortByField);
         Page<User> respEntities = userService.searchUsers(pageDetails, emailQuery);
         return new ResponseEntity<>(respEntities, HttpStatus.OK);
     }
@@ -106,7 +109,7 @@ public class UserController {
     @Operation(summary = "Updates a user based on Foodprint")
     public ResponseEntity<UpdateUserDTO> updateUser(@PathVariable("id") Long id, @RequestBody @Valid UpdateUserDTO updatedUserDto) {
         User updatedUser = convertToEntity(updatedUserDto);
-        User currentUser = userService.getUser(id);
+        User currentUser = userService.protectedGetUser(id);
 
         if (updatedUserDto.getNewPassword() != null) {
             try {
@@ -117,8 +120,9 @@ public class UserController {
         }
 
         updatedUser = userService.updateUser(id, currentUser, updatedUser);
+        String jwtToken = jwtTokenUtil.generateAccessToken(updatedUser);
         updatedUserDto = convertToDto(updatedUser);
-        return new ResponseEntity<>(updatedUserDto, HttpStatus.OK);
+        return ResponseEntity.ok().header("Authorization", jwtToken).body(updatedUserDto);
     }
 
     // PATCH: Update a user
@@ -135,7 +139,7 @@ public class UserController {
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Deletes a user on Foodprint")
     public ResponseEntity<User> deleteUser(@PathVariable("id") Long id) {
-        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User currentUser = AuthHelper.getCurrentUser();
         if (currentUser.getId().equals(id)) {
             throw new BadRequestException("You cannot delete yourself.");
         }
@@ -149,6 +153,9 @@ public class UserController {
     @Operation(summary = "Makes an existing user manager")
     public ResponseEntity<User> makeManager(@RequestBody ManagerRequestDTO requestDTO) {
         User user = userService.getUser(requestDTO.getUserId());
+        if (user.getRoles().contains("FP_MANAGER")) {
+            throw new BadRequestException("User is already a manager");
+        }
         Restaurant restaurant = restaurantService.get(requestDTO.getRestaurantId());
         User updatedUser = new User();
         updatedUser.setRestaurant(restaurant);
@@ -221,8 +228,9 @@ public class UserController {
     }
 
     @PostMapping({ "favourite/{restaurantId}"})
+    @Operation(summary = "Adds a restaurant to the current user's list of favourites")
     public ResponseEntity<String> favouriteRestaurant(@PathVariable("restaurantId") Long restaurantId) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = AuthHelper.getCurrentUser();
         try {
             userService.addFavouriteRestaurant(user, restaurantId);
             return new ResponseEntity<>("Restaurant successfully favourited.", HttpStatus.OK);
@@ -234,8 +242,9 @@ public class UserController {
     }
 
     @GetMapping({"favouriteRestaurants"})
+    @Operation(summary = "Gets all favourited restaurants of the current user")
     public ResponseEntity<List<FavouriteRestaurantDTO>> getAllFavouriteRestaurants() {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = AuthHelper.getCurrentUser();
         Set<Restaurant> restaurants = user.getFavouriteRestaurants();
         List<FavouriteRestaurantDTO> restaurantDtos = new ArrayList<>();
         for(Restaurant restaurant : restaurants) {
@@ -243,6 +252,7 @@ public class UserController {
             newFav.setPicture(restaurant.getPicture());
             newFav.setRestaurantId(restaurant.getRestaurantId());
             newFav.setRestaurantName(restaurant.getRestaurantName());
+            newFav.setRestaurantLocation(restaurant.getRestaurantLocation());
             restaurantDtos.add(newFav);
         }
 
@@ -250,19 +260,15 @@ public class UserController {
     }
 
     @DeleteMapping({"favourite/{restaurantId}"})
+    @Operation(summary = "Deletes a restaurant from the current user's list of favourites")
     public ResponseEntity<String> deleteFavouriteRestaurant(@PathVariable("restaurantId") Long restaurantId) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = AuthHelper.getCurrentUser();
         try {
             userService.deleteFavouriteRestaurant(user, restaurantId);
             return new ResponseEntity<>("Favourite restaurant successfully removed.", HttpStatus.OK);
         } catch (NotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
-    }
-
-    private RestaurantDTO restaurantConvertToDTO(Restaurant restaurant) {
-        ModelMapper mapper = new ModelMapper();
-        return mapper.map(restaurant, RestaurantDTO.class);
     }
 
     private User convertToEntity(AdminUserDTO userDTO) {

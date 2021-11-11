@@ -14,6 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -45,6 +46,7 @@ public class Token implements Serializable {
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name="requestor")
+    @NotNull
     private User requestor;
 
     @Column(name="created")
@@ -66,10 +68,11 @@ public class Token implements Serializable {
         this.token = generateRandomToken();
         this.used = false;
         
-        this.created = new Date();
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(created);
-        calendar.add(Calendar.HOUR_OF_DAY, 48);
+        calendar.setTime(new Date());
+        calendar.add(Calendar.HOUR_OF_DAY, -24);
+        this.created = calendar.getTime();
+        calendar.add(Calendar.HOUR_OF_DAY, 72);
         this.expiry = calendar.getTime();
     }
 

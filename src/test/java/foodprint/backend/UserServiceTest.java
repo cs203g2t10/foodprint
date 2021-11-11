@@ -1,7 +1,6 @@
 package foodprint.backend;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -50,11 +49,14 @@ public class UserServiceTest {
     private List<String> restaurantCategories;
     private Set<Restaurant> favouriteRestaurants;
     private Long restaurantId;
+    private List<User> userList;
 
     @BeforeEach
     void init() {
         user = new User("bobbytan@gmail.com", "SuperSecurePassw0rd", "Bobby Tan");
         userId = 1L;
+        ReflectionTestUtils.setField(user, "id", userId);
+        userList = new ArrayList<>();
         restaurantCategories = new ArrayList<>();
         restaurantCategories.add("Japanese");
         restaurantCategories.add("Rice");
@@ -73,7 +75,7 @@ public class UserServiceTest {
 
         User savedUser = userService.createUser(user);
 
-        assertNotNull(savedUser);
+        assertEquals(user, savedUser);
         verify(users).findByEmail(user.getEmail());
         verify(passwordEncoder).encode("SuperSecurePassw0rd");
         verify(users).saveAndFlush(user);
@@ -83,31 +85,55 @@ public class UserServiceTest {
     void addUser_SameEmail_ReturnException() {
         when(users.findByEmail(any(String.class))).thenReturn(Optional.of(user));
 
+        String errorMsg = "";
         try {
             userService.createUser(user);
         } catch (AlreadyExistsException e) {
-            assertEquals("User with the same email already exists", e.getMessage());
+            errorMsg = e.getMessage();
         }
 
+        assertEquals("User with the same email already exists", errorMsg);
         verify(users).findByEmail(user.getEmail());
     }
 
     @Test
+    void addUser_SameId_ReturnException() {
+        when(users.findByEmail(any(String.class))).thenReturn(Optional.empty());
+        when(users.findById(any(Long.class))).thenReturn(Optional.of(user));
+
+        String errorMsg = "";
+        try {
+            userService.createUser(user);
+        } catch (AlreadyExistsException e) {
+            errorMsg = e.getMessage();
+        }
+
+        assertEquals("User with the same ID already exists", errorMsg);
+        verify(users).findByEmail(user.getEmail());
+        verify(users).findById(userId);
+    }
+
+    @Test
     void getUsers_ReturnUsers() {
+        userList.add(user);
+        when(users.findAll()).thenReturn(userList);
+
         List<User> retrievedUser = userService.getAllUsers();
-        assertNotNull(retrievedUser);
+        assertEquals(userList, retrievedUser);
     }
 
     @Test
     void getUser_NonExistentId_ReturnException() {
         when(users.findById(any(Long.class))).thenReturn(Optional.empty());
 
+        String errorMsg = "";
         try {
             userService.getUser(userId);
         } catch (NotFoundException e) {
-            assertEquals("User not found", e.getMessage());
+            errorMsg = e.getMessage();
         }
 
+        assertEquals("User not found", errorMsg);
         verify(users).findById(userId);
     }
 
@@ -115,8 +141,34 @@ public class UserServiceTest {
     void getUser_ExistingId_ReturnUser() {
         when(users.findById(any(Long.class))).thenReturn(Optional.of(user));
 
-        userService.getUser(userId);
+        User getUser = userService.getUser(userId);
 
+        assertEquals(user, getUser);
+        verify(users).findById(userId);
+    }
+
+    @Test
+    void unprotectedGetUser_ExistingId_ReturnUser() {
+        when(users.findById(any(Long.class))).thenReturn(Optional.of(user));
+
+        User getUserUnprotected = userService.unprotectedGetUser(userId);
+
+        assertEquals(user, getUserUnprotected);
+        verify(users).findById(userId);
+    }
+
+    @Test
+    void unprotectedGetUser_NonExistentId_ReturnUser() {
+        when(users.findById(any(Long.class))).thenReturn(Optional.empty());
+
+        String errorMsg = "";
+        try {
+            userService.unprotectedGetUser(userId);
+        } catch (NotFoundException e) {
+            errorMsg = e.getMessage();
+        }
+
+        assertEquals("User not found", errorMsg);
         verify(users).findById(userId);
     }
 
@@ -124,12 +176,14 @@ public class UserServiceTest {
     void updateUser_NotFound_ReturnException(){
         when(users.findById(any(Long.class))).thenReturn(Optional.empty());
 
+        String errorMsg = "";
         try {
             userService.updateUser(userId, user);
         } catch (NotFoundException e) {
-            assertEquals("User not found", e.getMessage());
+            errorMsg = e.getMessage();
         }
 
+        assertEquals("User not found", errorMsg);
         verify(users).findById(userId);
     }
 
@@ -141,7 +195,7 @@ public class UserServiceTest {
 
         User updatedUser = userService.updateUser(userId, user);
 
-        assertNotNull(updatedUser);
+        assertEquals(user, updatedUser);
         verify(users).findById(userId);
         verify(users).findByEmail(user.getEmail());
         verify(users).saveAndFlush(user);
@@ -156,7 +210,7 @@ public class UserServiceTest {
 
         User updatedUser = userService.updateUser(userId, user);
 
-        assertNotNull(updatedUser);
+        assertEquals(user, updatedUser);
         verify(users).findByEmail(user.getEmail());
         verify(users).findById(userId);
         verify(passwordEncoder).encode("SuperSecurePassw0rd");
@@ -167,20 +221,29 @@ public class UserServiceTest {
     void deleteUser_UserDoesNotExist_ReturnException() {
         when(users.findById(any(Long.class))).thenReturn(Optional.empty());
 
+        String errorMsg = "";
         try {
             userService.deleteUser(userId);
         } catch (NotFoundException e) {
-            assertEquals("User not found", e.getMessage());
+            errorMsg = e.getMessage();
         }
+
+        assertEquals("User not found", errorMsg);
         verify(users).findById(userId);
     }
 
     @Test
-    void deleteUser_UsertExists_Success() {
+    void deleteUser_UserExists_Success() {
         when(users.findById(any(Long.class))).thenReturn(Optional.of(user));
 
-        userService.deleteUser(userId);
+        String errorMsg = "";
+        try {
+            userService.deleteUser(userId);
+        } catch (Exception e) {
+            errorMsg = e.getMessage();
+        }
 
+        assertEquals("", errorMsg);
         verify(users).findById(userId);
     }
 
@@ -189,8 +252,14 @@ public class UserServiceTest {
         when(restaurants.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
         when(users.saveAndFlush(any(User.class))).thenReturn(user);
 
-        userService.addFavouriteRestaurant(user, restaurantId);
+        String errorMsg = "";
+        try {
+            userService.addFavouriteRestaurant(user, restaurantId);
+        } catch (Exception e) {
+            errorMsg = e.getMessage();
+        }
 
+        assertEquals("", errorMsg);
         verify(restaurants).findById(restaurantId);
         verify(users).saveAndFlush(user);
     }
@@ -199,12 +268,14 @@ public class UserServiceTest {
     void addFavouriteRestaurant_RestaurantNotFound_ReturnError() {
         when(restaurants.findById(any(Long.class))).thenReturn(Optional.empty());
 
+        String errorMsg = "";
         try {
             userService.addFavouriteRestaurant(user, restaurantId);
         } catch (NotFoundException e) {
-            assertEquals("Restaurant not found", e.getMessage());
+            errorMsg = e.getMessage();
         }
 
+        assertEquals("Restaurant not found", errorMsg);
         verify(restaurants).findById(restaurantId);
     }
 
@@ -214,12 +285,14 @@ public class UserServiceTest {
 
         when(restaurants.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
         
+        String errorMsg = "";
         try {
             userService.addFavouriteRestaurant(user, restaurantId);
         } catch (AlreadyExistsException e) {
-            assertEquals("Favourite restaurant already exists.", e.getMessage());
+            errorMsg = e.getMessage();
         }
 
+        assertEquals("Favourite restaurant already exists.", errorMsg);
         verify(restaurants).findById(restaurantId);
     }
 
@@ -230,8 +303,14 @@ public class UserServiceTest {
         when(restaurants.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
         when(users.saveAndFlush(any(User.class))).thenReturn(user);
 
-        userService.deleteFavouriteRestaurant(user, restaurantId);
+        String errorMsg = "";
+        try {
+            userService.deleteFavouriteRestaurant(user, restaurantId);
+        } catch (Exception e) {
+            errorMsg = e.getMessage();
+        }
 
+        assertEquals("", errorMsg);
         verify(restaurants).findById(restaurantId);
         verify(users).saveAndFlush(user);
     }
@@ -240,12 +319,14 @@ public class UserServiceTest {
     void deleteFavouriteRestaurant_RestaurantNotFound_ReturnError() {
         when(restaurants.findById(any(Long.class))).thenReturn(Optional.empty());
 
+        String errorMsg = "";
         try {
             userService.deleteFavouriteRestaurant(user, restaurantId);
         } catch (NotFoundException e) {
-            assertEquals("Restaurant not found", e.getMessage());
+            errorMsg = e.getMessage();
         }
 
+        assertEquals("Restaurant not found", errorMsg);
         verify(restaurants).findById(restaurantId);
     }
 
@@ -253,12 +334,14 @@ public class UserServiceTest {
     void deleteFavouriteRestaurant_RestaurantNotFoundInFavourites_ReturnError() {
         when(restaurants.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
 
+        String errorMsg = "";
         try {
             userService.deleteFavouriteRestaurant(user, restaurantId);
         } catch (NotFoundException e) {
-            assertEquals("Favourite restaurant not found.", e.getMessage());
+            errorMsg = e.getMessage();
         }
 
+        assertEquals("Favourite restaurant not found.", errorMsg);
         verify(restaurants).findById(restaurantId);
     }
 }
