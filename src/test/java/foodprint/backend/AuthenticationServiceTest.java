@@ -1,9 +1,13 @@
 package foodprint.backend;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,8 +20,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import foodprint.backend.exceptions.InvalidException;
+import foodprint.backend.exceptions.UserUnverifiedException;
 import foodprint.backend.model.User;
+import foodprint.backend.model.UserRepo;
 import foodprint.backend.service.AuthenticationService;
+import foodprint.backend.service.TwoFaService;
 
 @ExtendWith(MockitoExtension.class)
 public class AuthenticationServiceTest {
@@ -28,8 +36,14 @@ public class AuthenticationServiceTest {
     @Mock
     private UserDetailsService userDetailsService;
 
+    @Mock
+    private UserRepo userRepo;
+
     @InjectMocks
     private AuthenticationService authenticationService;
+
+    @InjectMocks
+    private TwoFaService twoFaService;
 
     private User user;
     private UsernamePasswordAuthenticationToken token;
@@ -67,6 +81,21 @@ public class AuthenticationServiceTest {
     }
 
     @Test
+    void authenticateUser_UserUnverified_ReturnException() {
+        when(userDetailsService.loadUserByUsername(any(String.class))).thenReturn(user);
+        user.setRoles("FP_UNVERIFIED");
+
+        UserUnverifiedException exception = null;
+        try {
+            authenticationService.authenticate(token);
+        } catch (UserUnverifiedException e) {
+            exception = e;
+        }
+        assertNotNull(exception);
+        verify(userDetailsService).loadUserByUsername(user.getEmail());
+    }
+
+    @Test
     void encodePassword_Success() {
         String password = "SuperSecurePassw0rd";
         String encodedPassword = "$2a$12$uaTxLl9sPzGbIozqCB0wcuKjmmsZNW2mswGw5VRdsU4XFWs9Se7Uq";
@@ -76,4 +105,5 @@ public class AuthenticationServiceTest {
 
         verify(passwordEncoder).encode(password);
     }
+
 }
