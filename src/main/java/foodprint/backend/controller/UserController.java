@@ -95,7 +95,7 @@ public class UserController {
         @RequestParam(value="sortDesc", defaultValue="false") boolean sortDesc
     ) {
         Direction direction = (sortDesc) ? Direction.DESC : Direction.ASC;
-        Pageable pageDetails = PageRequest.of(pageNumber, 10, direction, sortByField);
+        Pageable pageDetails = PageRequest.of(pageNumber, 8, direction, sortByField);
         Page<User> respEntities = userService.searchUsers(pageDetails, emailQuery);
         return new ResponseEntity<>(respEntities, HttpStatus.OK);
     }
