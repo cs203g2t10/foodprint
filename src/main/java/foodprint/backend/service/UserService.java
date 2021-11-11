@@ -150,6 +150,15 @@ public class UserService {
         if (updatedUser.getRegisteredOn() != null) {
             existingUser.setRegisteredOn(updatedUser.getRegisteredOn());
         }
+
+        if (updatedUser.getVaccinationDob() != null) {
+            existingUser.setVaccinationDob(updatedUser.getVaccinationDob());
+        }
+
+        if (updatedUser.getVaccinationName() != null) {
+            existingUser.setVaccinationName(updatedUser.getVaccinationName());
+        }
+
         return this.userRepo.saveAndFlush(existingUser);
     }
 

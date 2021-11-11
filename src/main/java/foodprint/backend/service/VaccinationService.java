@@ -21,6 +21,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import foodprint.backend.config.JwtTokenUtil;
 import foodprint.backend.exceptions.VaccinationValidationException;
 import foodprint.backend.model.User;
 
@@ -28,16 +29,18 @@ import foodprint.backend.model.User;
 public class VaccinationService {
     
     private UserService userService;
+    private JwtTokenUtil jwtUtil;
     private static Logger loggr = LoggerFactory.getLogger(VaccinationService.class);
     private static final String URL = "https://oa.foodprint.works/";
 
     @Autowired
-    public VaccinationService(UserService userService) {
+    public VaccinationService(UserService userService, JwtTokenUtil jwtUtil) {
         this.userService = userService;
+        this.jwtUtil = jwtUtil;
     }
 
     @PreAuthorize("hasAnyAuthority('FP_ADMIN') OR #usrParam.email == authentication.name")
-    public void validateVaccination(@Param("usrParam") User user, String oaFileString) {
+    public String validateVaccination(@Param("usrParam") User user, String oaFileString) {
         var client = HttpClient.newHttpClient();
         
         var request = HttpRequest.newBuilder(URI.create(URL))
@@ -81,9 +84,13 @@ public class VaccinationService {
             String vaccDob = responseObject.get("patientBirthDate").asText();
             LocalDate vaccDobDate = LocalDate.parse(vaccDob); 
 
-            user.setVaccinationName(vaccName);
-            user.setVaccinationDob(vaccDobDate);
-            userService.updateUser(user.getId(), user);
+            User newTempUser = new User();
+            newTempUser.setVaccinationName(vaccName);
+            newTempUser.setVaccinationDob(vaccDobDate);
+            userService.updateUser(user.getId(), newTempUser);
+
+            User updatedUser = userService.protectedGetUser(user.getId());
+            return jwtUtil.generateAccessToken(updatedUser);
 
         } else {
 
