@@ -16,7 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import foodprint.backend.config.AuthHelper;
 import foodprint.backend.dto.AdminUserDTO;
 import foodprint.backend.dto.ManagerRequestDTO;
 import foodprint.backend.dto.RequestResetPwdDTO;
@@ -135,7 +135,7 @@ public class UserController {
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Deletes a user on Foodprint")
     public ResponseEntity<User> deleteUser(@PathVariable("id") Long id) {
-        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User currentUser = AuthHelper.getCurrentUser();
         if (currentUser.getId().equals(id)) {
             throw new BadRequestException("You cannot delete yourself.");
         }
@@ -226,7 +226,7 @@ public class UserController {
     @PostMapping({ "favourite/{restaurantId}"})
     @Operation(summary = "Adds a restaurant to the current user's list of favourites")
     public ResponseEntity<String> favouriteRestaurant(@PathVariable("restaurantId") Long restaurantId) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = AuthHelper.getCurrentUser();
         try {
             userService.addFavouriteRestaurant(user, restaurantId);
             return new ResponseEntity<>("Restaurant successfully favourited.", HttpStatus.OK);
@@ -240,7 +240,7 @@ public class UserController {
     @GetMapping({"favouriteRestaurants"})
     @Operation(summary = "Gets all favourited restaurants of the current user")
     public ResponseEntity<List<FavouriteRestaurantDTO>> getAllFavouriteRestaurants() {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = AuthHelper.getCurrentUser();
         Set<Restaurant> restaurants = user.getFavouriteRestaurants();
         List<FavouriteRestaurantDTO> restaurantDtos = new ArrayList<>();
         for(Restaurant restaurant : restaurants) {
@@ -258,7 +258,7 @@ public class UserController {
     @DeleteMapping({"favourite/{restaurantId}"})
     @Operation(summary = "Deletes a restaurant from the current user's list of favourites")
     public ResponseEntity<String> deleteFavouriteRestaurant(@PathVariable("restaurantId") Long restaurantId) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = AuthHelper.getCurrentUser();
         try {
             userService.deleteFavouriteRestaurant(user, restaurantId);
             return new ResponseEntity<>("Favourite restaurant successfully removed.", HttpStatus.OK);
