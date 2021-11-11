@@ -135,4 +135,56 @@ public class AuthenticationServiceTest {
 
     }
 
+     @Test
+    void checkValidToken_InvalidTokenFormat_ReturnException() {
+        String token = "invalidToken";
+        user.setTwoFaSet(true);
+        when(twoFaService.validToken(any(String.class))).thenReturn(false);
+
+        String errorMsg = "";
+        try {
+            authenticationService.checkValidToken(token, user);
+        } catch (InvalidException e) {
+            errorMsg = e.getMessage();
+        }
+
+        assertEquals("Invalid token format.", errorMsg);
+        verify(twoFaService).validToken(token);
+    }
+
+    @Test
+    void checkValidToken_userNo2fa_Return() {
+        String token = "token";
+        user.setTwoFaSet(false);
+
+        String errorMsg = "";
+        try {
+            authenticationService.checkValidToken(token, user);
+        } catch (InvalidException e) {
+            errorMsg = e.getMessage();
+        }
+
+        assertEquals("", errorMsg);
+    }
+
+     @Test
+    void checkValidToken_IncorrectOTP_ReturnException() {
+        String token = "wrongOtp";
+        user.setTwoFaSecret("secret");
+        user.setTwoFaSet(true);
+        when(twoFaService.validToken(any(String.class))).thenReturn(true);
+        when(twoFaService.validate(any(String.class), any(String.class))).thenReturn(false);
+
+        String errorMsg = "";
+        try {
+            authenticationService.checkValidToken(token, user);
+        } catch (InvalidException e) {
+            errorMsg = e.getMessage();
+        }
+
+        assertEquals("Incorrect OTP entered.", errorMsg);
+        verify(twoFaService).validToken(token);
+        verify(twoFaService).validate("secret", token);
+
+    }
 }
