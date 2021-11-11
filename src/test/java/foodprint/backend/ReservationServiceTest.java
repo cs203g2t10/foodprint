@@ -7,7 +7,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -179,6 +178,8 @@ public class ReservationServiceTest {
 
     @Test
     void getUserPastReservations_UserFound_ReturnList() {
+        reservationList.add(reservation);
+        user.setReservations(reservationList);
         reservation.setDate(LocalDateTime.now().minusDays(10));
         when(reservations.findByUser(any(User.class))).thenReturn(reservationList);
 
