@@ -41,6 +41,8 @@ public class UserService {
 
     private static final Set<String> VALID_ROLES_SET = Set.of("FP_ADMIN", "FP_MANAGER", "FP_USER", "FP_UNVERIFIED");
 
+    private static final String USER_NOT_FOUND = "User not found";
+
     @Autowired
     UserService(UserRepo repo, PasswordEncoder passwordEncoder, TokenRepo tokenRepo, EmailService emailService,
             RestaurantRepo restaurantRepo) {
@@ -76,7 +78,7 @@ public class UserService {
 
     @PreAuthorize("hasAnyAuthority('FP_ADMIN')")
     public User getUser(Long id) {
-        return this.userRepo.findById(id).orElseThrow(() -> new NotFoundException("User not found"));
+        return this.userRepo.findById(id).orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
     }
 
     @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER', 'FP_USER')")
@@ -85,7 +87,7 @@ public class UserService {
         if (!currentUser.getId().equals(id)) {
             throw new NotFoundException("Unable to retrieve user.");
         }
-        return this.userRepo.findById(id).orElseThrow(() -> new NotFoundException("User not found"));
+        return this.userRepo.findById(id).orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
     }
 
     public User unprotectedGetUser(Long id) {
@@ -169,7 +171,7 @@ public class UserService {
     // --------------------------- PASSWORD RESET ---------------------------------
 
     public void requestPasswordReset(String email) {
-        User user = userRepo.findByEmail(email).orElseThrow(() -> new NotFoundException("User not found"));
+        User user = userRepo.findByEmail(email).orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
 
         Token token = new Token(Token.PASSWORD_RESET_REQUEST_TOKEN, user);
         tokenRepo.save(token);
