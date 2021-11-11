@@ -8,8 +8,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -192,8 +191,8 @@ public class AuthenticationServiceTest {
     @Test
     void check2faSet_2faSet_ReturnTrue() {
         String email = "bobbytan@gmail.com";
-        when(email.matches(any(String.class))).thenReturn(true);
-        when(userRepo.findByEmail(any(String.class)).orElse(null)).thenReturn(user);
+        user.setTwoFaSet(true);
+        when(userRepo.findByEmail(any(String.class))).thenReturn(Optional.of(user));
 
         Boolean isTwoFaSet = authenticationService.check2faSet(email);
 

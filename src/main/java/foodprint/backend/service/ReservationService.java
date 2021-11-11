@@ -21,6 +21,7 @@ import foodprint.backend.model.Reservation;
 import foodprint.backend.model.ReservationRepo;
 import foodprint.backend.model.User;
 import foodprint.backend.model.Reservation.ReservationStatus;
+import foodprint.backend.exceptions.InvalidException;
 import foodprint.backend.exceptions.NotFoundException;
 
 import java.time.DayOfWeek;
@@ -229,6 +230,9 @@ public class ReservationService {
 
     @PreAuthorize("hasAnyAuthority('FP_ADMIN')")
     public void deleteReservationById(Long reservationId) {
+        if (reservationId == null) {
+            throw new InvalidException("reservationId cannot be null");
+        }
         reservationRepo.deleteById(reservationId);
     }
 
