@@ -29,7 +29,7 @@ import foodprint.backend.service.TwoFaService;
 
 @ExtendWith(MockitoExtension.class)
 public class AuthenticationServiceTest {
-    
+
     @Mock
     private PasswordEncoder passwordEncoder;
 
@@ -104,6 +104,27 @@ public class AuthenticationServiceTest {
         passwordEncoder.encode(password);
 
         verify(passwordEncoder).encode(password);
+    }
+
+    @Test
+    void checkValidToken_validToken_Success() {
+        String token = "validToken";
+        user.setTwoFaSecret("secret");
+        user.setTwoFaSet(true);
+        when(twoFaService.validToken(any(String.class))).thenReturn(true);
+        when(twoFaService.validate(any(String.class), any(String.class))).thenReturn(true);
+
+        String errorMsg = "";
+        try {
+            authenticationService.checkValidToken(token, user);
+        } catch (InvalidException e) {
+            errorMsg = e.getMessage();
+        }
+
+        assertEquals("", errorMsg);
+        verify(twoFaService).validToken(token);
+        verify(twoFaService).validate("secret", token);
+
     }
 
 }
