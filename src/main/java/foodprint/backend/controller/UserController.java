@@ -149,6 +149,9 @@ public class UserController {
     @Operation(summary = "Makes an existing user manager")
     public ResponseEntity<User> makeManager(@RequestBody ManagerRequestDTO requestDTO) {
         User user = userService.getUser(requestDTO.getUserId());
+        if (user.getRoles().contains("FP_MANAGER")) {
+            throw new BadRequestException("User is already a manager");
+        }
         Restaurant restaurant = restaurantService.get(requestDTO.getRestaurantId());
         User updatedUser = new User();
         updatedUser.setRestaurant(restaurant);
