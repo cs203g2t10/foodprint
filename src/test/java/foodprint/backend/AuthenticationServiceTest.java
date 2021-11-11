@@ -275,22 +275,4 @@ public class AuthenticationServiceTest {
         assertEquals("Invalid token", errorMsg);
         verify(tokenRepo).findByToken(tokenString);
     }
-
-    @Test
-    void confirmRegistration_InvalidRequestor_ReturnException() {
-        Token emailToken = new Token(1, null);
-        String tokenString = "token";
-        when(tokenRepo.findByToken(any(String.class))).thenReturn(Optional.of(emailToken));
-
-        String errorMsg = "";
-        try {
-            authenticationService.confirmRegistration(tokenString);
-        } catch (RegistrationException e) {
-            errorMsg = e.getMessage();
-        }
-        assertEquals("Requestor not found", errorMsg);
-        verify(tokenRepo).findByToken(tokenString);
-    }
-
-    
 }
