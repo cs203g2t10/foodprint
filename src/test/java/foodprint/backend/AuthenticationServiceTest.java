@@ -7,9 +7,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,7 +19,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import foodprint.backend.exceptions.InvalidException;
 import foodprint.backend.exceptions.UserUnverifiedException;
 import foodprint.backend.model.User;
 import foodprint.backend.model.UserRepo;
