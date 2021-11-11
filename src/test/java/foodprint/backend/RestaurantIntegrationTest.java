@@ -1107,37 +1107,38 @@ public class RestaurantIntegrationTest {
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
-    // @Test
-    // public void getAllIngredients_RestaurantDoNotExist_Failure() throws Exception{
-    //     AuthRequestDTO loginRequest = new AuthRequestDTO();
-    //     loginRequest.setEmail("bobby@gmail.com");
-    //     loginRequest.setPassword("SuperSecurePassw0rd");
-    //     AuthResponseDTO loginResponse = testRestTemplate.postForObject(createURLWithPort("/api/v1/auth/login"), loginRequest, AuthResponseDTO.class);
+    @Test
+    public void getAllIngredients_RestaurantDoNotExist_Failure() throws Exception{
+        AuthRequestDTO loginRequest = new AuthRequestDTO();
+        loginRequest.setEmail("bobby@gmail.com");
+        loginRequest.setPassword("SuperSecurePassw0rd");
+        AuthResponseDTO loginResponse = testRestTemplate.postForObject(createURLWithPort("/api/v1/auth/login"), loginRequest, AuthResponseDTO.class);
 
-    //     HttpHeaders headers = new HttpHeaders();
-    //     headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-    //     headers.add("Authorization", "Bearer " + loginResponse.getToken());
-    //     headers.add("Content-Type", "application/json");
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.add("Authorization", "Bearer " + loginResponse.getToken());
+        headers.add("Content-Type", "application/json");
 
-    //     List<String> restaurantCategories = new ArrayList<>();
-    //     restaurantCategories.add("Japanese");
-    //     restaurantCategories.add("Rice");
-    //     Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
-    //     var savedRestaurant = restaurants.saveAndFlush(restaurant);
-    //     Long restaurantId = savedRestaurant.getRestaurantId();
-    //     restaurants.delete(restaurant);
+        List<String> restaurantCategories = new ArrayList<>();
+        restaurantCategories.add("Japanese");
+        restaurantCategories.add("Rice");
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+        var savedRestaurant = restaurants.saveAndFlush(restaurant);
+        Long restaurantId = savedRestaurant.getRestaurantId();
+        restaurants.delete(restaurant);
 
-    //     HttpEntity<Ingredient[]> entity = new HttpEntity<>(null, headers);
-    //     ResponseEntity<Ingredient[]> responseEntity = testRestTemplate.exchange(
-    //             createURLWithPort("/api/v1/restaurant/{restaurantId}/ingredient/all"), 
-    //             HttpMethod.GET,
-    //             entity,
-    //             Ingredient[].class,
-    //             restaurantId
-    //             );
-    //             System.out.println(responseEntity.getStatusCode());
-    //     assertEquals(200, responseEntity.getStatusCode().value());
-    // }
+        HttpEntity<Ingredient[]> entity = new HttpEntity<>(null, headers);
+        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
+                createURLWithPort("/api/v1/restaurant/{restaurantId}/ingredient/all"), 
+                HttpMethod.GET,
+                entity,
+                Void.class,
+                restaurantId
+                );
+                System.out.println(responseEntity.getStatusCode());
+
+        assertEquals(404, responseEntity.getStatusCode().value());
+    }
 
     @Test
     public void modifyIngredient_Successful() throws Exception{
