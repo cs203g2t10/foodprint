@@ -7,6 +7,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -57,6 +58,7 @@ public class ReservationServiceTest {
     private LineItemDTO lineItemDTO;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+    private String date;
     private List<Reservation> reservationList;
     private List<String> restaurantCategories;
 
@@ -150,6 +152,40 @@ public class ReservationServiceTest {
 
         assertEquals(reservationList, result);
         verify(reservations).findByRestaurant(restaurant);
+    }
+
+    @Test
+    void getAllReservationByUser_ReturnList() {
+        reservationList.add(reservation);
+        when(reservations.findByUser(any(User.class))).thenReturn(reservationList);
+
+        List<Reservation> result = reservationService.getAllReservationByUser(user);
+
+        assertEquals(reservationList, result);
+        verify(reservations).findByUser(user);
+    }
+
+    @Test
+    void getUserUpcomingReservations_UserFound_ReturnList() {
+        reservation.setDate(LocalDateTime.now().plusDays(10));
+        reservationList.add(reservation);
+        when(reservations.findByUser(any(User.class))).thenReturn(reservationList);
+
+        List<Reservation> result = reservationService.getUserUpcomingReservations(user);
+
+        assertEquals(reservationList, result);
+        verify(reservations).findByUser(user);
+    }
+
+    @Test
+    void getUserPastReservations_UserFound_ReturnList() {
+        reservation.setDate(LocalDateTime.now().minusDays(10));
+        when(reservations.findByUser(any(User.class))).thenReturn(reservationList);
+
+        List<Reservation> result = reservationService.getUserPastReservations(user);
+
+        assertEquals(reservationList, result);
+        verify(reservations).findByUser(user);
     }
 
     @Test
