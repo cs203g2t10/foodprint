@@ -19,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import foodprint.backend.exceptions.InvalidException;
 import foodprint.backend.exceptions.UserUnverifiedException;
 import foodprint.backend.model.User;
 import foodprint.backend.model.UserRepo;
