@@ -2,6 +2,7 @@ package foodprint.backend;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -17,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -42,7 +44,7 @@ public class AuthenticationServiceTest {
     @InjectMocks
     private AuthenticationService authenticationService;
 
-    @InjectMocks
+    @Mock
     private TwoFaService twoFaService;
 
     private User user;
@@ -51,6 +53,7 @@ public class AuthenticationServiceTest {
     @BeforeEach
     void init() {
         user = new User("bobbytan@gmail.com", "SuperSecurePassw0rd", "Bobby Tan");
+        user.setRoles("FP_USER");
         token = new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword());
     }
 
@@ -59,8 +62,10 @@ public class AuthenticationServiceTest {
         when(userDetailsService.loadUserByUsername(any(String.class))).thenReturn(user);
         when(passwordEncoder.matches(any(String.class), any(String.class))).thenReturn(true);
 
-        authenticationService.authenticate(token);
+        Authentication rslt = null;
+        rslt = authenticationService.authenticate(token);
 
+        assertNotNull(rslt);
         verify(userDetailsService).loadUserByUsername(user.getEmail());
         verify(passwordEncoder).matches("SuperSecurePassw0rd", "SuperSecurePassw0rd");
     }
@@ -70,12 +75,14 @@ public class AuthenticationServiceTest {
         when(userDetailsService.loadUserByUsername(any(String.class))).thenReturn(user);
         when(passwordEncoder.matches(any(String.class), any(String.class))).thenReturn(false);
 
+        Authentication rslt = null;
         try {
-            authenticationService.authenticate(token);
+            rslt = authenticationService.authenticate(token);
         } catch (BadCredentialsException e) {
             assertEquals("Incorrect credentials provided", e.getMessage());
         }
 
+        assertNull(rslt);
         verify(userDetailsService).loadUserByUsername(user.getEmail());
         verify(passwordEncoder).matches("SuperSecurePassw0rd", "SuperSecurePassw0rd");
     }
@@ -101,8 +108,9 @@ public class AuthenticationServiceTest {
         String encodedPassword = "$2a$12$uaTxLl9sPzGbIozqCB0wcuKjmmsZNW2mswGw5VRdsU4XFWs9Se7Uq";
         when(passwordEncoder.encode(password)).thenReturn(encodedPassword);
 
-        passwordEncoder.encode(password);
+        String rslt = authenticationService.encodePassword(password);
 
+        assertEquals(encodedPassword, rslt);
         verify(passwordEncoder).encode(password);
     }
 
