@@ -41,10 +41,12 @@ public class PictureServiceTest {
     private Picture picture;
     private Long pictureId;
     private Picture newPicture;
+    private String pictureURL;
     
     @BeforeEach
     void init() {
         picture = new Picture("image", "desc", "Path", "file", "www.file.com");
+        pictureURL = "https://foodprint-amazon-storage.s3.ap-southeast-1.amazonaws.com/Path/file";
         pictureId = 1L;
         newPicture = new Picture("anotherimage", "desc", "Path", "file", "www.file.com");
     }
@@ -56,7 +58,7 @@ public class PictureServiceTest {
         when(pictureRepo.findById(any(Long.class))).thenReturn(Optional.of(picture));
 
         Picture getPicture = pictureService.get(pictureId);
-        assertNotNull(getPicture);
+        assertEquals(picture, getPicture);
         verify(pictureRepo).findById(pictureId);
     }
 
@@ -82,7 +84,7 @@ public class PictureServiceTest {
         when(pictureRepo.findById(any(Long.class))).thenReturn(Optional.of(picture));
 
         String pictureUrl = pictureService.getPictureById(pictureId);
-        assertNotNull(pictureUrl);
+        assertEquals(pictureURL, pictureUrl);
         verify(pictureRepo).findById(pictureId);
     }
 
@@ -163,7 +165,8 @@ public class PictureServiceTest {
 
         pictureRepo.saveAndFlush(picture);
         Picture updatedPicture = pictureService.updatedPicture(pictureId, newPicture);
-        assertNotNull(updatedPicture);
+        
+        assertEquals(picture, updatedPicture);
         verify(pictureRepo).findById(pictureId);
         verify(pictureRepo, times(2)).saveAndFlush(picture);
     }
