@@ -1,7 +1,9 @@
 package foodprint.backend;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -77,6 +79,7 @@ public class ReservationServiceTest {
         startTime = reservation.getDate();
         endTime = startTime.plusHours(1);
         reservationList = new ArrayList<>();
+        reservationId = 1L;
     }
 
     @Test
@@ -116,12 +119,14 @@ public class ReservationServiceTest {
     void getReservation_IdDoesNotExist_ReturnException() {
         when(reservations.findByReservationIdAndUserId(any(Long.class), any(Long.class))).thenReturn(Optional.empty());
 
+        String errorMsg = "";
         try {
             reservationService.getReservationByIdAndUser(reservationId, 0L);
         } catch (NotFoundException e) {
-            assertEquals("Reservation not found", e.getMessage());
+            errorMsg = e.getMessage();
         }
 
+        assertEquals("Reservation not found", errorMsg);
         verify(reservations).findByReservationIdAndUserId(reservationId, 0L);
     }
 
@@ -177,14 +182,14 @@ public class ReservationServiceTest {
         }
         when(reservations.findByRestaurantAndDateBetween(any(Restaurant.class), any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(reservationList);
 
+        String errorMsg = "";
         try {
             reservationService.create(user, req);
         } catch (Exception e) {
-            LocalDateTime dateOfReservation = reservation.getDate();
-            String msg = String.format("Slot not available for %s on %d %s %d at %d:%dHr", restaurant.getRestaurantName(), dateOfReservation.getDayOfMonth(), dateOfReservation.getMonth(), dateOfReservation.getYear(), dateOfReservation.getHour(), dateOfReservation.getMinute());
-            assertEquals(msg, e.getMessage());
+            errorMsg = e.getMessage();
         }
 
+        assertNotEquals("", errorMsg);
         verify(restaurantService).get(restaurantId);
         verify(reservations).findByRestaurantAndDateBetween(restaurant, startTime.truncatedTo(ChronoUnit.HOURS), endTime.truncatedTo(ChronoUnit.HOURS));
     }
@@ -213,27 +218,41 @@ public class ReservationServiceTest {
         }
         when(reservations.findByRestaurantAndDateBetween(any(Restaurant.class), any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(reservationList);
 
+        String errorMsg = "";
         try {
             reservationService.update(reservationId, updatedReservation);
         } catch (NotFoundException e) {
-            assertEquals("Slot not found", e.getMessage());
+            errorMsg = e.getMessage();
         }
 
+        assertEquals("Slot not found", errorMsg);
         verify(reservations).findByRestaurantAndDateBetween(restaurant, startTime.truncatedTo(ChronoUnit.HOURS), endTime.truncatedTo(ChronoUnit.HOURS));
     }
 
     @Test
     void deleteReservation_ReservationIsNull_ReturnException() {
+        String errorMsg = "";
         try {
             reservationService.deleteReservationById(null);
-        } catch (IllegalArgumentException e) {
-            assertEquals(new IllegalArgumentException(), e);
+        } catch (Exception e) {
+            errorMsg = e.getMessage();
         }
+
+        assertNotEquals("", errorMsg);
     }
 
     @Test
     void deleteReservation_ReservationNotNull_Success() {
-        reservationService.deleteReservationById(reservation.getReservationId());
-        verify(reservations).deleteById(reservation.getReservationId());
+        doNothing().when(reservations).deleteById(any(Long.class));
+        String errorMsg = "";
+
+        try {
+            reservationService.deleteReservationById(reservationId);
+        } catch (Exception e) {
+            errorMsg = e.getMessage();
+        }
+        
+        assertEquals("", errorMsg);
+        verify(reservations).deleteById(reservationId);
     }
 }

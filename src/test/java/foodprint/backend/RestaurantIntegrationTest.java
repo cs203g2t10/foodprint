@@ -23,7 +23,6 @@ import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.RestaurantRepo;
 import foodprint.backend.model.User;
 import foodprint.backend.model.UserRepo;
-import foodprint.backend.model.Reservation.ReservationStatus;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -1140,16 +1139,16 @@ public class RestaurantIntegrationTest {
     //     Long restaurantId = savedRestaurant.getRestaurantId();
     //     restaurants.delete(restaurant);
 
-    //     HttpEntity<Ingredient[]> entity = new HttpEntity<>(null, headers);
+    //     //HttpEntity<Void> entity = new HttpEntity<>(headers);
     //     ResponseEntity<Ingredient[]> responseEntity = testRestTemplate.exchange(
     //             createURLWithPort("/api/v1/restaurant/{restaurantId}/ingredient/all"), 
     //             HttpMethod.GET,
-    //             entity,
+    //             new HttpEntity<Object>(headers),
     //             Ingredient[].class,
     //             restaurantId
     //             );
     //             System.out.println(responseEntity.getStatusCode());
-    //     assertEquals(200, responseEntity.getStatusCode().value());
+    //     assertEquals(404, responseEntity.getStatusCode().value());
     // }
 
     @Test
