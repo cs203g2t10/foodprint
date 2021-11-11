@@ -2,7 +2,6 @@ package foodprint.backend;
 
 import foodprint.backend.dto.AuthRequestDTO;
 import foodprint.backend.dto.AuthResponseDTO;
-import foodprint.backend.model.Token;
 import foodprint.backend.model.TokenRepo;
 import foodprint.backend.model.User;
 import foodprint.backend.model.UserRepo;

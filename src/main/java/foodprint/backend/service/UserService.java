@@ -13,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import foodprint.backend.config.AuthHelper;
 import foodprint.backend.exceptions.AlreadyExistsException;
 import foodprint.backend.exceptions.BadRequestException;
 import foodprint.backend.exceptions.InvalidException;
@@ -75,6 +76,15 @@ public class UserService {
 
     @PreAuthorize("hasAnyAuthority('FP_ADMIN')")
     public User getUser(Long id) {
+        return this.userRepo.findById(id).orElseThrow(() -> new NotFoundException("User not found"));
+    }
+
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER', 'FP_USER')")
+    public User protectedGetUser(Long id) {
+        User currentUser = AuthHelper.getCurrentUser();
+        if (currentUser.getId() != id) {
+            new NotFoundException("Unable to retrieve user.");
+        }
         return this.userRepo.findById(id).orElseThrow(() -> new NotFoundException("User not found"));
     }
 

@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import foodprint.backend.config.AuthHelper;
+import foodprint.backend.config.JwtTokenUtil;
 import foodprint.backend.dto.AdminUserDTO;
 import foodprint.backend.dto.ManagerRequestDTO;
 import foodprint.backend.dto.RequestResetPwdDTO;
@@ -59,8 +60,11 @@ public class UserController {
 
     private AuthenticationService authService;
 
+    private JwtTokenUtil jwtTokenUtil;
+
     @Autowired
-    UserController(UserService userService, RestaurantService restaurantService, PasswordEncoder passwordEncoder, AuthenticationService authService) {
+    UserController(UserService userService, RestaurantService restaurantService, PasswordEncoder passwordEncoder, AuthenticationService authService, JwtTokenUtil jwtTokenUtil) {
+        this.jwtTokenUtil = jwtTokenUtil;
         this.userService = userService;
         this.restaurantService = restaurantService;
         this.authService = authService;
@@ -106,7 +110,7 @@ public class UserController {
     @Operation(summary = "Updates a user based on Foodprint")
     public ResponseEntity<UpdateUserDTO> updateUser(@PathVariable("id") Long id, @RequestBody @Valid UpdateUserDTO updatedUserDto) {
         User updatedUser = convertToEntity(updatedUserDto);
-        User currentUser = userService.getUser(id);
+        User currentUser = userService.protectedGetUser(id);
 
         if (updatedUserDto.getNewPassword() != null) {
             try {
@@ -117,8 +121,9 @@ public class UserController {
         }
 
         updatedUser = userService.updateUser(id, currentUser, updatedUser);
+        String jwtToken = jwtTokenUtil.generateAccessToken(updatedUser);
         updatedUserDto = convertToDto(updatedUser);
-        return new ResponseEntity<>(updatedUserDto, HttpStatus.OK);
+        return ResponseEntity.ok().header("Authorization", jwtToken).body(updatedUserDto);
     }
 
     // PATCH: Update a user
@@ -265,11 +270,6 @@ public class UserController {
         } catch (NotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
-    }
-
-    private RestaurantDTO restaurantConvertToDTO(Restaurant restaurant) {
-        ModelMapper mapper = new ModelMapper();
-        return mapper.map(restaurant, RestaurantDTO.class);
     }
 
     private User convertToEntity(AdminUserDTO userDTO) {
