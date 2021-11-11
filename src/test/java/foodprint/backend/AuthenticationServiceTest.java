@@ -3,6 +3,7 @@ package foodprint.backend;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -186,5 +187,16 @@ public class AuthenticationServiceTest {
         verify(twoFaService).validToken(token);
         verify(twoFaService).validate("secret", token);
 
+    }
+
+    @Test
+    void check2faSet_2faSet_ReturnTrue() {
+        String email = "bobbytan@gmail.com";
+        when(email.matches(any(String.class))).thenReturn(true);
+        when(userRepo.findByEmail(any(String.class)).orElse(null)).thenReturn(user);
+
+        Boolean isTwoFaSet = authenticationService.check2faSet(email);
+
+        assertTrue(isTwoFaSet);
     }
 }
