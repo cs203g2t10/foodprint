@@ -10,7 +10,7 @@ public class AuthRequestDTO {
     @NotEmpty @Email
     private String email;
 
-    @Schema(defaultValue="SuperSecurePassw0rd")
+    @Schema(defaultValue="Hello123")
     @NotEmpty
     private String password;
 

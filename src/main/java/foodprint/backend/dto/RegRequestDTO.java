@@ -14,7 +14,7 @@ public class RegRequestDTO {
     @NotEmpty @Email
     private String email;
 
-    @Schema(defaultValue="SuperSecurePassw0rd")
+    @Schema(defaultValue="Hello123")
     @NotEmpty
     @Size(min = 8, max = 60)
     @Pattern(regexp = "(?=^.{8,}$)(?=.*\\d)(?=.*[a-zA-Z])(?!.*\\s)[0-9a-zA-Z*$-+?_&=!%{}/'.]*$", message = "must have 1 letter, 1 number and at least 8 characters")
