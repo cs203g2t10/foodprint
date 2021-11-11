@@ -56,7 +56,7 @@ public class User implements UserDetails {
     private String lastName;
 
     @Column(name = "password", nullable = false)
-    @Schema(defaultValue="SuperSecurePassw0rd")
+    @Schema(defaultValue="Hello123")
     @NotEmpty
     private String password;
 
