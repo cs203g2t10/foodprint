@@ -12,7 +12,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.net.URLEncoder;
 import java.util.Optional;
 
 import org.mockito.junit.jupiter.MockitoExtension;

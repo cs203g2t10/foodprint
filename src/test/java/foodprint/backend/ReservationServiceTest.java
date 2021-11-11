@@ -57,7 +57,6 @@ public class ReservationServiceTest {
     private LineItemDTO lineItemDTO;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private String date;
     private List<Reservation> reservationList;
     private List<String> restaurantCategories;
 
