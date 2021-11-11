@@ -7,6 +7,8 @@ import foodprint.backend.dto.IngredientDTO;
 import foodprint.backend.model.FoodRepo;
 import foodprint.backend.model.Ingredient;
 import foodprint.backend.model.IngredientRepo;
+import foodprint.backend.model.Picture;
+import foodprint.backend.model.PictureRepo;
 import foodprint.backend.dto.RestaurantDTO;
 import foodprint.backend.model.Discount;
 import foodprint.backend.model.DiscountRepo;
@@ -72,6 +74,9 @@ public class RestaurantIntegrationTest {
     @Autowired
     private UserRepo userRepo;
 
+    @Autowired
+    private PictureRepo pictureRepo;
+
     HttpHeaders headers = new HttpHeaders();
     TestRestTemplate testRestTemplate = new TestRestTemplate();
 
@@ -96,6 +101,7 @@ public class RestaurantIntegrationTest {
         ingredientRepo.deleteAll();
         discountRepo.deleteAll();
         userRepo.deleteAll();
+        pictureRepo.deleteAll();
     }
     
     @Test
@@ -174,7 +180,6 @@ public class RestaurantIntegrationTest {
                 savedRestaurant.getRestaurantId());
         
         assertEquals(200, responseEntity.getStatusCode().value());
-        assertEquals(1.0, restaurants.count());
     }
 
     @Test
@@ -1185,6 +1190,251 @@ public class RestaurantIntegrationTest {
         assertEquals(404, responseEntity.getStatusCode().value());
     }
 
+    /**
+     * 
+     * Picture-related testing 
+     * 
+     */
+
+    @Test
+    public void deleteRestaurantPicture_Successful() {
+        AuthRequestDTO loginRequest = new AuthRequestDTO();
+        loginRequest.setEmail("bobby@gmail.com");
+        loginRequest.setPassword("SuperSecurePassw0rd");
+        AuthResponseDTO loginResponse = testRestTemplate.postForObject(createURLWithPort("/api/v1/auth/login"), loginRequest, AuthResponseDTO.class);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.add("Authorization", "Bearer " + loginResponse.getToken());
+        headers.add("Content-Type", "application/json");
+
+        List<String> restaurantCategories = new ArrayList<>();
+        restaurantCategories.add("Japanese");
+        restaurantCategories.add("Rice");
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+        Picture picture = new Picture("title", "description", "imagePath", "imageFileName", "url");
+        restaurant.setPicture(picture);
+        var savedRestaurant = restaurants.saveAndFlush(restaurant);
+        pictureRepo.saveAndFlush(picture);
+
+        HttpEntity<Picture> entity = new HttpEntity<>(null, headers);
+        ResponseEntity<Picture> responseEntity = testRestTemplate.exchange(
+                createURLWithPort("/api/v1/restaurant/{restaurantId}/picture"),
+                HttpMethod.DELETE,
+                entity,
+                Picture.class,
+                savedRestaurant.getRestaurantId()
+                );
+        
+        assertEquals(200, responseEntity.getStatusCode().value());
+   }
+
+    @Test
+    public void deleteRestaurantPicture_PictureNotFound_Failure() {
+        AuthRequestDTO loginRequest = new AuthRequestDTO();
+        loginRequest.setEmail("bobby@gmail.com");
+        loginRequest.setPassword("SuperSecurePassw0rd");
+        AuthResponseDTO loginResponse = testRestTemplate.postForObject(createURLWithPort("/api/v1/auth/login"), loginRequest, AuthResponseDTO.class);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.add("Authorization", "Bearer " + loginResponse.getToken());
+        headers.add("Content-Type", "application/json");
+
+        List<String> restaurantCategories = new ArrayList<>();
+        restaurantCategories.add("Japanese");
+        restaurantCategories.add("Rice");
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+        var savedRestaurant = restaurants.saveAndFlush(restaurant);
+
+        HttpEntity<Picture> entity = new HttpEntity<>(null, headers);
+        ResponseEntity<Picture> responseEntity = testRestTemplate.exchange(
+                createURLWithPort("/api/v1/restaurant/{restaurantId}/picture"),
+                HttpMethod.DELETE,
+                entity,
+                Picture.class,
+                savedRestaurant.getRestaurantId()
+                );
+        
+        assertEquals(404, responseEntity.getStatusCode().value());
+   }
+
+   @Test
+   public void deleteRestaurantPicture_RestaurantNotFound_Failure() {
+       AuthRequestDTO loginRequest = new AuthRequestDTO();
+       loginRequest.setEmail("bobby@gmail.com");
+       loginRequest.setPassword("SuperSecurePassw0rd");
+       AuthResponseDTO loginResponse = testRestTemplate.postForObject(createURLWithPort("/api/v1/auth/login"), loginRequest, AuthResponseDTO.class);
+
+       HttpHeaders headers = new HttpHeaders();
+       headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+       headers.add("Authorization", "Bearer " + loginResponse.getToken());
+       headers.add("Content-Type", "application/json");
+
+       List<String> restaurantCategories = new ArrayList<>();
+       restaurantCategories.add("Japanese");
+       restaurantCategories.add("Rice");
+       Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+       var savedRestaurant = restaurants.saveAndFlush(restaurant);
+       Long restaurantId = savedRestaurant.getRestaurantId();
+       restaurants.delete(restaurant);
+
+       HttpEntity<Picture> entity = new HttpEntity<>(null, headers);
+       ResponseEntity<Picture> responseEntity = testRestTemplate.exchange(
+               createURLWithPort("/api/v1/restaurant/{restaurantId}/picture"),
+               HttpMethod.DELETE,
+               entity,
+               Picture.class,
+               restaurantId
+               );
+       
+       assertEquals(404, responseEntity.getStatusCode().value());
+  }
+
+    @Test
+    public void deleteFoodPicture_Successful() {
+        AuthRequestDTO loginRequest = new AuthRequestDTO();
+        loginRequest.setEmail("bobby@gmail.com");
+        loginRequest.setPassword("SuperSecurePassw0rd");
+        AuthResponseDTO loginResponse = testRestTemplate.postForObject(createURLWithPort("/api/v1/auth/login"), loginRequest, AuthResponseDTO.class);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.add("Authorization", "Bearer " + loginResponse.getToken());
+        headers.add("Content-Type", "application/json");
+
+        List<String> restaurantCategories = new ArrayList<>();
+        restaurantCategories.add("Japanese");
+        restaurantCategories.add("Rice");
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+        var savedRestaurant = restaurants.saveAndFlush(restaurant);
+        Food food = new Food("sashimi", 10.0, 0.0);
+        Picture picture = new Picture("title", "description", "imagePath", "imageFileName", "url");
+        pictureRepo.saveAndFlush(picture);
+        food.setPicture(picture);
+        food.setRestaurant(restaurant);
+        var savedFood = foodRepo.saveAndFlush(food);
+
+        HttpEntity<Picture> entity = new HttpEntity<>(null, headers);
+        ResponseEntity<Picture> responseEntity = testRestTemplate.exchange(
+                createURLWithPort("/api/v1/restaurant/{restaurantId}/food/{foodId}/picture"),
+                HttpMethod.DELETE,
+                entity,
+                Picture.class,
+                savedRestaurant.getRestaurantId(),
+                savedFood.getFoodId()
+                );
+       
+        assertEquals(200, responseEntity.getStatusCode().value());
+    }
+
+    @Test
+    public void deleteFoodPicture_FoodPictureNotFound_Failure() {
+        AuthRequestDTO loginRequest = new AuthRequestDTO();
+        loginRequest.setEmail("bobby@gmail.com");
+        loginRequest.setPassword("SuperSecurePassw0rd");
+        AuthResponseDTO loginResponse = testRestTemplate.postForObject(createURLWithPort("/api/v1/auth/login"), loginRequest, AuthResponseDTO.class);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.add("Authorization", "Bearer " + loginResponse.getToken());
+        headers.add("Content-Type", "application/json");
+
+        List<String> restaurantCategories = new ArrayList<>();
+        restaurantCategories.add("Japanese");
+        restaurantCategories.add("Rice");
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+        var savedRestaurant = restaurants.saveAndFlush(restaurant);
+        Food food = new Food("sashimi", 10.0, 0.0);
+        food.setRestaurant(restaurant);
+        var savedFood = foodRepo.saveAndFlush(food);
+
+        HttpEntity<Picture> entity = new HttpEntity<>(null, headers);
+        ResponseEntity<Picture> responseEntity = testRestTemplate.exchange(
+                createURLWithPort("/api/v1/restaurant/{restaurantId}/food/{foodId}/picture"),
+                HttpMethod.DELETE,
+                entity,
+                Picture.class,
+                savedRestaurant.getRestaurantId(),
+                savedFood.getFoodId()
+                );
+       
+        assertEquals(404, responseEntity.getStatusCode().value());
+    }
+
+    @Test
+    public void deleteFoodPicture_FoodNotFound_Failure() {
+        AuthRequestDTO loginRequest = new AuthRequestDTO();
+        loginRequest.setEmail("bobby@gmail.com");
+        loginRequest.setPassword("SuperSecurePassw0rd");
+        AuthResponseDTO loginResponse = testRestTemplate.postForObject(createURLWithPort("/api/v1/auth/login"), loginRequest, AuthResponseDTO.class);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.add("Authorization", "Bearer " + loginResponse.getToken());
+        headers.add("Content-Type", "application/json");
+
+        List<String> restaurantCategories = new ArrayList<>();
+        restaurantCategories.add("Japanese");
+        restaurantCategories.add("Rice");
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+        var savedRestaurant = restaurants.saveAndFlush(restaurant);
+        Food food = new Food("sashimi", 10.0, 0.0);
+        food.setRestaurant(restaurant);
+        var savedFood = foodRepo.saveAndFlush(food);
+        Long foodId = savedFood.getFoodId();
+        foodRepo.delete(food);
+
+        HttpEntity<Picture> entity = new HttpEntity<>(null, headers);
+        ResponseEntity<Picture> responseEntity = testRestTemplate.exchange(
+                createURLWithPort("/api/v1/restaurant/{restaurantId}/food/{foodId}/picture"),
+                HttpMethod.DELETE,
+                entity,
+                Picture.class,
+                savedRestaurant.getRestaurantId(),
+                foodId
+                );
+       
+        assertEquals(404, responseEntity.getStatusCode().value());
+    }
+
+    @Test
+    public void deleteFoodPicture_FoodFoundInWrongRestaurant_Failure() {
+        AuthRequestDTO loginRequest = new AuthRequestDTO();
+        loginRequest.setEmail("bobby@gmail.com");
+        loginRequest.setPassword("SuperSecurePassw0rd");
+        AuthResponseDTO loginResponse = testRestTemplate.postForObject(createURLWithPort("/api/v1/auth/login"), loginRequest, AuthResponseDTO.class);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.add("Authorization", "Bearer " + loginResponse.getToken());
+        headers.add("Content-Type", "application/json");
+
+        List<String> restaurantCategories = new ArrayList<>();
+        restaurantCategories.add("Japanese");
+        restaurantCategories.add("Rice");
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+        Restaurant anotherRestaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+        var savedRestaurant = restaurants.saveAndFlush(restaurant);
+        restaurants.saveAndFlush(anotherRestaurant);
+        Food food = new Food("sashimi", 10.0, 0.0);
+        food.setRestaurant(anotherRestaurant);
+        var savedFood = foodRepo.saveAndFlush(food);
+        
+
+        HttpEntity<Picture> entity = new HttpEntity<>(null, headers);
+        ResponseEntity<Picture> responseEntity = testRestTemplate.exchange(
+                createURLWithPort("/api/v1/restaurant/{restaurantId}/food/{foodId}/picture"),
+                HttpMethod.DELETE,
+                entity,
+                Picture.class,
+                savedRestaurant.getRestaurantId(),
+                savedFood.getFoodId()
+                );
+       
+        assertEquals(404, responseEntity.getStatusCode().value());
+  }
+    
     private String createURLWithPort(String uri)
     {
         return baseUrl + port + uri;
