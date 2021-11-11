@@ -247,9 +247,7 @@ public class RestaurantController {
     @Operation(summary = "Deletes an existing discount")
     public ResponseEntity<Discount> deleteDiscount(@PathVariable("restaurantId") Long restaurantId) {
         service.deleteDiscount(restaurantId);
-        try {
-            service.get(restaurantId).getDiscount();
-        } catch (NotFoundException ex) {
+        if (service.get(restaurantId).getDiscount() == null) {
             return new ResponseEntity<>(HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

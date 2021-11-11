@@ -32,7 +32,7 @@ public class PictureServiceTest {
     @Mock
     PictureRepo pictureRepo;
 
-    @InjectMocks
+    @Mock
     FileStore fileStore;
 
     @InjectMocks
@@ -64,12 +64,14 @@ public class PictureServiceTest {
     void getPicture_PictureNotFound_ReturnError() {
         when(pictureRepo.findById(any(Long.class))).thenReturn(Optional.empty());
 
+        String errorMsg = "";
         try {
             pictureService.get(pictureId);
         } catch(NotFoundException e) {
-            assertEquals("Picture not found", e.getMessage());
+            errorMsg = e.getMessage();
         }
         
+        assertEquals("Picture not found", errorMsg);
         verify(pictureRepo).findById(pictureId);
     }
 
@@ -88,12 +90,14 @@ public class PictureServiceTest {
     void getPictureById_PictureNotFound_ReturnError() {
         when(pictureRepo.findById(any(Long.class))).thenReturn(Optional.empty());
 
+        String errorMsg = "";
         try {
             pictureService.getPictureById(pictureId);
         } catch(NotFoundException e) {
-            assertEquals("Picture not found.", e.getMessage());
+            errorMsg = e.getMessage();
         }
 
+        assertEquals("Picture not found.", errorMsg);
         verify(pictureRepo).findById(pictureId);
     }
 
@@ -105,7 +109,14 @@ public class PictureServiceTest {
         when(pictureRepo.findById(any(Long.class))).thenReturn(Optional.of(picture)).thenReturn(Optional.empty());
         
         pictureRepo.saveAndFlush(picture);
-        pictureService.deletePicture(pictureId);
+        String errorMsg = "";
+        try {
+            pictureService.deletePicture(pictureId);
+        } catch (Exception e) {
+            errorMsg = e.getMessage();
+        }
+
+        assertEquals("", errorMsg);
         verify(pictureRepo).delete(picture);
         verify(pictureRepo, times(2)).findById(pictureId);
     }
@@ -114,12 +125,14 @@ public class PictureServiceTest {
     void deletePicture_PictureNotFound_ReturnError() {
         when(pictureRepo.findById(any(Long.class))).thenReturn(Optional.empty());
 
+        String errorMsg = "";
         try {
             pictureService.deletePicture(pictureId);
         } catch(NotFoundException e) {
-            assertEquals("Picture not found", e.getMessage());
+            errorMsg = e.getMessage();
         }
 
+        assertEquals("Picture not found", errorMsg);
         verify(pictureRepo).findById(pictureId);
     }
 
@@ -129,12 +142,14 @@ public class PictureServiceTest {
         doNothing().when(pictureRepo).delete(any(Picture.class));
 
         pictureRepo.saveAndFlush(picture);
+        String errorMsg = "";
         try {
             pictureService.deletePicture(pictureId);
         } catch(DeleteFailedException e) {
-            assertEquals("Picture could not be deleted", e.getMessage());
+            errorMsg = e.getMessage();
         }
 
+        assertEquals("Picture could not be deleted", errorMsg);
         verify(pictureRepo, times(2)).findById(pictureId);
         verify(pictureRepo).delete(picture);
     }
@@ -157,12 +172,14 @@ public class PictureServiceTest {
     void updatePicture_PictureNotFound_ReturnError() {
         when(pictureRepo.findById(any(Long.class))).thenReturn(Optional.empty());
 
+        String errorMsg = "";
         try {
             pictureService.updatedPicture(pictureId, newPicture);
         } catch(NotFoundException e) {
-            assertEquals("Picture not found", e.getMessage());
+            errorMsg = e.getMessage();
         }
 
+        assertEquals("Picture not found", errorMsg);
         verify(pictureRepo).findById(pictureId);
     }
 }
