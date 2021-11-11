@@ -119,10 +119,6 @@ public class AuthenticationService {
             throw new RegistrationException("Invalid token");
         }
 
-        if (requestor == null) {
-            throw new RegistrationException("Requestor not found");
-        }
-
         requestor.setRoles("FP_USER");
         token.setUsed(true);
         userRepo.saveAndFlush(requestor);
