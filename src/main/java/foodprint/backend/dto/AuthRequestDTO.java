@@ -11,7 +11,7 @@ public class AuthRequestDTO {
     @Email
     private String email;
 
-    @Schema(defaultValue="SuperSecurePassw0rd")
+    @Schema(defaultValue="Hello123")
     @NotEmpty(message = "Password should not be empty")
     private String password;
 

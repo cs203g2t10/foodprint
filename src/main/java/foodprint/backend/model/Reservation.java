@@ -78,7 +78,8 @@ public class Reservation implements Serializable {
         price = price * 100;
         Discount discount = restaurant.getDiscount();
         if (discount != null) {
-            price = price * ((double)discount.getDiscountPercentage() / 100);
+            Double discountPercentage = 100 - (double)discount.getDiscountPercentage();
+            price = price * ( discountPercentage / 100);
         }
         return price;
     }
