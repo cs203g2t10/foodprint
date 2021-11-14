@@ -2,7 +2,9 @@ package foodprint.backend;
 
 import static org.junit.Assert.assertEquals;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -367,7 +369,7 @@ public class ReservationIntegrationTest {
         List<String> restaurantCategories = new ArrayList<>();
         restaurantCategories.add("Japanese");
         restaurantCategories.add("Rice");
-        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 9, 10, 12, 12, 9, 10, 12, 12, restaurantCategories);
         restaurant.setPicture(picture);
         var savedRestaurant = restaurantRepo.saveAndFlush(restaurant);
 
@@ -380,7 +382,7 @@ public class ReservationIntegrationTest {
         LineItemDTO lineItemDTO = new LineItemDTO(savedFood.getFoodId(), 1);
         lineItemDTOList.add(lineItemDTO);
         CreateReservationDTO createReservationDTO = new CreateReservationDTO();
-        createReservationDTO.setDate(LocalDateTime.now().plusDays(1));
+        createReservationDTO.setDate(LocalDateTime.of(LocalDate.now().plusDays(14), LocalTime.NOON.minusHours(2)));
         createReservationDTO.setIsVaccinated(true);
         createReservationDTO.setLineItems(lineItemDTOList);
         createReservationDTO.setPax(1);
@@ -394,8 +396,53 @@ public class ReservationIntegrationTest {
             entity,
             ReservationDTO.class
             );
-
         assertEquals(201, responseEntity.getStatusCode().value());
+    }
+
+    @Test
+    public void createReservationDTO_DateOfReservationNotAllowed_Failure() {
+        AuthRequestDTO loginRequest = new AuthRequestDTO();
+        loginRequest.setEmail("bobby@gmail.com");
+        loginRequest.setPassword("SuperSecurePassw0rd");
+        AuthResponseDTO loginResponse = testRestTemplate.postForObject(createURLWithPort("/api/v1/auth/login"), loginRequest, AuthResponseDTO.class);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.add("Authorization", "Bearer " + loginResponse.getToken());
+        headers.add("Content-Type", "application/json");
+
+        Picture picture = new Picture("title", "description", "imagePath", "imageFileName", "url");
+        List<String> restaurantCategories = new ArrayList<>();
+        restaurantCategories.add("Japanese");
+        restaurantCategories.add("Rice");
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 9, 10, 12, 12, 9, 10, 12, 12, restaurantCategories);
+        restaurant.setPicture(picture);
+        var savedRestaurant = restaurantRepo.saveAndFlush(restaurant);
+
+        Food food = new Food("Salmon", 10.0, 0.0);
+        food.setFoodDesc("foodDesc");
+        food.setRestaurant(restaurant);
+        var savedFood = foodRepo.saveAndFlush(food);
+
+        List<LineItemDTO> lineItemDTOList = new ArrayList<>();
+        LineItemDTO lineItemDTO = new LineItemDTO(savedFood.getFoodId(), 1);
+        lineItemDTOList.add(lineItemDTO);
+        CreateReservationDTO createReservationDTO = new CreateReservationDTO();
+        createReservationDTO.setDate(LocalDateTime.now());
+        createReservationDTO.setIsVaccinated(true);
+        createReservationDTO.setLineItems(lineItemDTOList);
+        createReservationDTO.setPax(1);
+        createReservationDTO.setRestaurantId(savedRestaurant.getRestaurantId());
+        createReservationDTO.setStatus(ReservationStatus.PAID);
+
+        HttpEntity<CreateReservationDTO> entity = new HttpEntity<>(createReservationDTO, headers);
+        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
+            createURLWithPort("/api/v1/reservation"),
+            HttpMethod.POST,
+            entity,
+            Void.class
+            );
+        assertEquals(406, responseEntity.getStatusCode().value());
     }
 
     @Test
@@ -544,12 +591,11 @@ public class ReservationIntegrationTest {
         var savedRestaurant = restaurantRepo.saveAndFlush(restaurant);
 
         ResponseEntity<LocalDateTime[]> responseEntity = testRestTemplate.exchange(
-                createURLWithPort("/api/v1/reservation/slots/{restaurantId}/{date}"),
+                createURLWithPort("/api/v1/reservation/slots/{restaurantId}"),
                 HttpMethod.GET,
                 new HttpEntity<Object>(headers),
                 LocalDateTime[].class,
-                savedRestaurant.getRestaurantId(),
-                "2021-11-14"
+                savedRestaurant.getRestaurantId()
                 );
 
         assertEquals(200, responseEntity.getStatusCode().value());
