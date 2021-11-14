@@ -10,7 +10,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -20,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import foodprint.backend.config.AuthHelper;
 import foodprint.backend.exceptions.AlreadyExistsException;
 import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.Restaurant;
@@ -53,6 +58,7 @@ public class UserServiceTest {
 
     @BeforeEach
     void init() {
+        //Authentication a = SecurityContextHolder.getContext().getAuthentication();
         user = new User("bobbytan@gmail.com", "SuperSecurePassw0rd", "Bobby Tan");
         userId = 1L;
         ReflectionTestUtils.setField(user, "id", userId);
@@ -249,6 +255,11 @@ public class UserServiceTest {
 
     @Test
     void addFavouriteRestaurant_RestaurantAdded_Return() {
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(AuthHelper.getCurrentUser()).thenReturn(user);
         when(restaurants.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
         when(users.saveAndFlush(any(User.class))).thenReturn(user);
 
@@ -266,6 +277,11 @@ public class UserServiceTest {
 
     @Test
     void addFavouriteRestaurant_RestaurantNotFound_ReturnError() {
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(AuthHelper.getCurrentUser()).thenReturn(user);
         when(restaurants.findById(any(Long.class))).thenReturn(Optional.empty());
 
         String errorMsg = "";
@@ -282,7 +298,11 @@ public class UserServiceTest {
     @Test
     void addFavouriteRestaurant_FavouriteRestaurantAlreadyExist_ReturnError() {
         favouriteRestaurants.add(restaurant);
-
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(AuthHelper.getCurrentUser()).thenReturn(user);
         when(restaurants.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
         
         String errorMsg = "";
@@ -299,7 +319,11 @@ public class UserServiceTest {
     @Test
     void deleteFavouriteRestaurant_FavouriteRestaurantFoundAndDeleted_Return() {
         favouriteRestaurants.add(restaurant);
-
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(AuthHelper.getCurrentUser()).thenReturn(user);
         when(restaurants.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
         when(users.saveAndFlush(any(User.class))).thenReturn(user);
 
@@ -317,6 +341,11 @@ public class UserServiceTest {
 
     @Test
     void deleteFavouriteRestaurant_RestaurantNotFound_ReturnError() {
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(AuthHelper.getCurrentUser()).thenReturn(user);
         when(restaurants.findById(any(Long.class))).thenReturn(Optional.empty());
 
         String errorMsg = "";
@@ -332,6 +361,11 @@ public class UserServiceTest {
 
     @Test
     void deleteFavouriteRestaurant_RestaurantNotFoundInFavourites_ReturnError() {
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(AuthHelper.getCurrentUser()).thenReturn(user);
         when(restaurants.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
 
         String errorMsg = "";
