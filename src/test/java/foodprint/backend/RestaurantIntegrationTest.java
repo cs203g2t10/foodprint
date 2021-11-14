@@ -447,6 +447,7 @@ public class RestaurantIntegrationTest {
         restaurantCategories.add("Rice");
         Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
         Food food = new Food("sashimi", 10.0, 0.0);
+        food.setFoodDesc("some food");
         food.setRestaurant(restaurant);
         var savedRestaurant = restaurants.saveAndFlush(restaurant);
         foodRepo.saveAndFlush(food);
@@ -475,6 +476,7 @@ public class RestaurantIntegrationTest {
         restaurantCategories.add("Rice");
         Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
         Food food = new Food("sashimi", 10.0, 0.0);
+        food.setFoodDesc("some food");
         food.setRestaurant(restaurant);
         var savedRestaurant = restaurants.saveAndFlush(restaurant);
         var savedFood = foodRepo.saveAndFlush(food);
@@ -508,6 +510,7 @@ public class RestaurantIntegrationTest {
         restaurantCategories.add("Rice");
         Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
         Food food = new Food("sashimi", 10.0, 0.0);
+        food.setFoodDesc("some food");
         food.setRestaurant(restaurant);
         var savedRestaurant = restaurants.saveAndFlush(restaurant);
         var savedFood = foodRepo.saveAndFlush(food);
@@ -544,6 +547,7 @@ public class RestaurantIntegrationTest {
         Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
         Restaurant anotherRestaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
         Food food = new Food("sashimi", 10.0, 0.0);
+        food.setFoodDesc("some food");
         restaurants.saveAndFlush(anotherRestaurant);
         food.setRestaurant(anotherRestaurant);
         var savedRestaurant = restaurants.saveAndFlush(restaurant);
@@ -578,6 +582,7 @@ public class RestaurantIntegrationTest {
         restaurantCategories.add("Rice");
         Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
         Food food = new Food("sashimi", 10.0, 0.0);
+        food.setFoodDesc("some food");
         food.setRestaurant(restaurant);
         var savedRestaurant = restaurants.saveAndFlush(restaurant);
         var savedFood = foodRepo.saveAndFlush(food);
@@ -609,6 +614,7 @@ public class RestaurantIntegrationTest {
         restaurantCategories.add("Rice");
         Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
         Food food = new Food("sashimi", 10.0, 0.0);
+        food.setFoodDesc("some food");
         var savedFood = foodRepo.saveAndFlush(food);
         var savedRestaurant = restaurants.saveAndFlush(restaurant);
 
@@ -641,6 +647,7 @@ public class RestaurantIntegrationTest {
         Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
         var savedRestaurant = restaurants.saveAndFlush(restaurant);
         Food food = new Food("sashimi", 10.0, 0.0);
+        food.setFoodDesc("some food");
         var savedFood = foodRepo.saveAndFlush(food);
 
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
@@ -671,6 +678,7 @@ public class RestaurantIntegrationTest {
         restaurantCategories.add("Rice");
         Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
         Food food = new Food("sashimi", 10.0, 0.0);
+        food.setFoodDesc("some food");
         food.setRestaurant(restaurant);
         var savedRestaurant = restaurants.saveAndFlush(restaurant);
         var savedFood = foodRepo.saveAndFlush(food);
@@ -708,11 +716,13 @@ public class RestaurantIntegrationTest {
         restaurantCategories.add("Rice");
         Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
         Food food = new Food("sashimi", 10.0, 0.0);
+        food.setFoodDesc("some food");
         food.setRestaurant(restaurant);
         var savedRestaurant = restaurants.saveAndFlush(restaurant);
         Restaurant anotherRestaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
         Food anotherFood = new Food("sashimi", 10.0, 0.0);
         anotherFood.setRestaurant(anotherRestaurant);
+        anotherFood.setFoodDesc("another food");
         restaurants.saveAndFlush(anotherRestaurant);
         var savedAnotherFood = foodRepo.saveAndFlush(anotherFood);
         EditFoodDTO editFoodDTO = new EditFoodDTO();
@@ -748,6 +758,7 @@ public class RestaurantIntegrationTest {
         restaurantCategories.add("Rice");
         Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
         Food food = new Food("sashimi", 10.0, 0.0);
+        food.setFoodDesc("some food");
         food.setRestaurant(restaurant);
         restaurants.saveAndFlush(restaurant);
         var savedFood = foodRepo.saveAndFlush(food);
@@ -1086,6 +1097,7 @@ public class RestaurantIntegrationTest {
         List<Ingredient> ingredientsList = new ArrayList<>();
         Ingredient ingredient = new Ingredient("ingredientName");
         ingredient.setIngredientDesc("ingredientDesc");
+        ingredient.setUnits("1");
         ingredientsList.add(ingredient);
         restaurant.setIngredients(ingredientsList);
         var savedRestaurant = restaurants.saveAndFlush(restaurant);
@@ -1155,6 +1167,7 @@ public class RestaurantIntegrationTest {
         Ingredient ingredient = new Ingredient("ingredientName");
         ingredient.setIngredientDesc("ingredientDesc");
         ingredient.setRestaurant(restaurant);
+        ingredient.setUnits("1");
         var savedRestaurant = restaurants.saveAndFlush(restaurant);
         var savedIngredient = ingredientRepo.saveAndFlush(ingredient);
 
@@ -1195,6 +1208,7 @@ public class RestaurantIntegrationTest {
         Ingredient ingredient = new Ingredient("ingredientName");
         ingredient.setIngredientDesc("ingredientDesc");
         ingredient.setRestaurant(restaurant);
+        ingredient.setUnits("1");
         var savedRestaurant = restaurants.saveAndFlush(restaurant);
         var savedIngredient = ingredientRepo.saveAndFlush(ingredient);
         Long savedIngredientId = savedIngredient.getIngredientId();
@@ -1236,6 +1250,7 @@ public class RestaurantIntegrationTest {
         Ingredient ingredient = new Ingredient("ingredientName");
         ingredient.setIngredientDesc("ingredientDesc");
         ingredient.setRestaurant(restaurant);
+        ingredient.setUnits("1");
         restaurants.saveAndFlush(restaurant);
         var anotherSavedRestaurant = restaurants.saveAndFlush(new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories));
         var savedIngredient = ingredientRepo.saveAndFlush(ingredient);
@@ -1276,6 +1291,7 @@ public class RestaurantIntegrationTest {
         Ingredient ingredient = new Ingredient("ingredientName");
         ingredient.setIngredientDesc("ingredientDesc");
         ingredient.setRestaurant(restaurant);
+        ingredient.setUnits("1");
         var savedRestaurant = restaurants.saveAndFlush(restaurant);
         var savedIngredient = ingredientRepo.saveAndFlush(ingredient);
 
@@ -1313,6 +1329,7 @@ public class RestaurantIntegrationTest {
         Ingredient ingredient = new Ingredient("ingredientName");
         ingredient.setIngredientDesc("ingredientDesc");
         ingredient.setRestaurant(restaurant);
+        ingredient.setUnits("1");
         var savedRestaurant = restaurants.saveAndFlush(restaurant);
         var savedIngredient = ingredientRepo.saveAndFlush(ingredient);
         Long savedIngredientId = savedIngredient.getIngredientId();
@@ -1352,6 +1369,7 @@ public class RestaurantIntegrationTest {
         Ingredient ingredient = new Ingredient("ingredientName");
         ingredient.setIngredientDesc("ingredientDesc");
         ingredient.setRestaurant(restaurant);
+        ingredient.setUnits("1");
         restaurants.saveAndFlush(restaurant);
         var savedIngredient = ingredientRepo.saveAndFlush(ingredient);
         var anotherSavedRestaurant = restaurants.saveAndFlush(new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories));
@@ -1485,6 +1503,7 @@ public class RestaurantIntegrationTest {
         Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
         var savedRestaurant = restaurants.saveAndFlush(restaurant);
         Food food = new Food("sashimi", 10.0, 0.0);
+        food.setFoodDesc("some food");
         Picture picture = new Picture("title", "description", "imagePath", "imageFileName", "url");
         pictureRepo.saveAndFlush(picture);
         food.setPicture(picture);
@@ -1521,6 +1540,7 @@ public class RestaurantIntegrationTest {
         Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
         var savedRestaurant = restaurants.saveAndFlush(restaurant);
         Food food = new Food("sashimi", 10.0, 0.0);
+        food.setFoodDesc("some food");
         food.setRestaurant(restaurant);
         var savedFood = foodRepo.saveAndFlush(food);
 
@@ -1554,6 +1574,7 @@ public class RestaurantIntegrationTest {
         Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
         var savedRestaurant = restaurants.saveAndFlush(restaurant);
         Food food = new Food("sashimi", 10.0, 0.0);
+        food.setFoodDesc("some food");
         food.setRestaurant(restaurant);
         var savedFood = foodRepo.saveAndFlush(food);
         Long foodId = savedFood.getFoodId();
@@ -1591,6 +1612,8 @@ public class RestaurantIntegrationTest {
         var savedRestaurant = restaurants.saveAndFlush(restaurant);
         restaurants.saveAndFlush(anotherRestaurant);
         Food food = new Food("sashimi", 10.0, 0.0);
+        food.setFoodDesc("some food");
+        food.setFoodDesc("some food");
         food.setRestaurant(anotherRestaurant);
         var savedFood = foodRepo.saveAndFlush(food);
         
