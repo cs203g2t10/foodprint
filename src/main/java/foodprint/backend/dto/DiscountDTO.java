@@ -12,7 +12,7 @@ public class DiscountDTO {
     private Long restaurantId;
 
     @Schema(defaultValue="1 for 1")
-    @NotEmpty
+    @NotEmpty(message = "Discount description should not be empty")
     @Length(min = 1)
     private String discountDescription;
 

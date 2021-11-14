@@ -185,7 +185,7 @@ public class ReservationService {
         return reservationRepo.saveAndFlush(reservation);
     }
     
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    @PreAuthorize("hasAnyAuthority('FP_USER', 'FP_ADMIN')")
     public Reservation update(Long id, Reservation reservation) {
 
         Reservation currentReservation = reservationRepo.getById(id);

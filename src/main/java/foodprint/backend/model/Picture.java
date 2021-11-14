@@ -9,6 +9,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotEmpty;
 
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -22,9 +23,11 @@ public class Picture implements Serializable {
     private Long pictureId;
 
     @Column(name = "title" )
+    @NotEmpty(message = "Picture title should not be empty")
     private String title;
 
     @Column(name = "description" )
+    @NotEmpty(message = "Picture description should not be empty")
     private String description;
 
     @Column(name = "imagePath" )

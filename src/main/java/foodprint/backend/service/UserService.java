@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import foodprint.backend.config.AuthHelper;
 import foodprint.backend.exceptions.AlreadyExistsException;
 import foodprint.backend.exceptions.BadRequestException;
+import foodprint.backend.exceptions.InsufficientPermissionsException;
 import foodprint.backend.exceptions.InvalidException;
 import foodprint.backend.exceptions.MailException;
 import foodprint.backend.exceptions.NotFoundException;
@@ -227,7 +228,15 @@ public class UserService {
         userRepo.save(user);
     }
 
+    // --------------------------- FAVOURITE RESTAURANTS ---------------------------------
+
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public void addFavouriteRestaurant(User user, Long restaurantId) {
+        User currentUser = AuthHelper.getCurrentUser();
+        if (!currentUser.equals(user)) {
+            throw new InsufficientPermissionsException("Not allowed!");
+        }
+
         Restaurant restaurant = getRestaurantById(restaurantId);
         Set<Restaurant> favouriteRestaurants = new HashSet<>();
         if (user.getFavouriteRestaurants() != null) {
@@ -240,7 +249,13 @@ public class UserService {
         userRepo.saveAndFlush(user);
     }
 
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public void deleteFavouriteRestaurant(User user, Long restaurantId) {
+        User currentUser = AuthHelper.getCurrentUser();
+        if (!currentUser.equals(user)) {
+            throw new InsufficientPermissionsException("Not allowed!");
+        }
+        
         Restaurant restaurant = getRestaurantById(restaurantId);
         Set<Restaurant> favouriteRestaurants = user.getFavouriteRestaurants();
         if (favouriteRestaurants == null || !favouriteRestaurants.contains(restaurant)) {

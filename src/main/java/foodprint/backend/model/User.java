@@ -43,26 +43,27 @@ public class User implements UserDetails {
     @Column(name = "email", nullable=false, unique=true)
     @Schema(defaultValue="bobbytan@gmail.com")
     @Email
+    @NotEmpty(message = "Email should not be empty")
     private String email;
 
     @Column(name = "fName", nullable = false)
     @Schema(defaultValue="Bobby")
-    @NotEmpty
+    @NotEmpty(message = "First name should not be empty")
     private String firstName;
 
     @Column(name = "lName", nullable = true)
     @Schema(defaultValue="Tan")
-    @NotEmpty
+    @NotEmpty(message = "Last name should not be empty")
     private String lastName;
 
     @Column(name = "password", nullable = false)
     @Schema(defaultValue="SuperSecurePassw0rd")
-    @NotEmpty
+    @NotEmpty(message = "Password should not be empty")
     private String password;
 
     @Column(name = "role", nullable = false)
     @Schema(defaultValue="FP_USER")
-    @NotEmpty
+    @NotEmpty(message = "Roles should not be empty")
     private String roles;
 
     @Column(name = "lastLogin", nullable = true)

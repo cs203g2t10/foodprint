@@ -34,13 +34,13 @@ public class Ingredient implements Serializable {
 
     @Column(name = "ingredientName")
     @Schema(defaultValue = "Salmon")
-    @NotEmpty
+    @NotEmpty(message = "Ingredient name should not be empty")
     @Length(min = 1, max = 40)
     private String ingredientName;
 
     @Column(name = "ingredientDesc")
     @Schema(defaultValue = "Sashimi grade salmon")
-    @NotEmpty
+    @NotEmpty(message = "Ingredient description should not be empty")
     @Length(min = 1)
     private String ingredientDesc;
 
@@ -51,6 +51,7 @@ public class Ingredient implements Serializable {
 
     @Column(name = "units")
     @Schema(defaultValue = "1")
+    @NotEmpty(message = "Unit should not be empty")
     private String units;
 
     @OneToMany(mappedBy = "ingredient")

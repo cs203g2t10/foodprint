@@ -16,6 +16,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -23,7 +24,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table
@@ -38,7 +38,7 @@ public class Food implements Serializable {
 
     @Column(name = "foodName")
     @Schema(defaultValue="Sashimi")
-    @NotNull(message = "Food name may not be null")
+    @NotEmpty(message = "Food name should not be empty")
     @Size(min = 1, max = 40, message = "The food name has to be between 1 to 40 letters.")
     private String foodName;
 
@@ -49,7 +49,7 @@ public class Food implements Serializable {
 
     @Column(name = "foodDesc")
     @Schema(defaultValue = "Salmon slices")
-    @NotNull(message = "The food description cannot be empty.")
+    @NotEmpty(message = "The food description cannot be empty.")
     @Size(min = 1)
     private String foodDesc;
 
