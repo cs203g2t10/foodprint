@@ -210,14 +210,11 @@ public class ReservationController {
 
     // Get all available reservation slots by date (should return a list of date
     // objects (with the same date but different hour slots))
-    @GetMapping({ "/slots/{restaurantId}/{date}" })
+    @GetMapping({ "/slots/{restaurantId}" })
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Gets all available reservation slots by date")
-    public ResponseEntity<List<LocalDateTime>> getAllAvailableSlotsByDateAndRestaurant(
-            @PathVariable("restaurantId") Long id, @PathVariable("date") String date) {
-        // Assume string date is in ISO format - 2021-19-14
-        return new ResponseEntity<>(reservationService.getAllAvailableSlotsByDateAndRestaurant(id, date),
-                HttpStatus.OK);
+    public ResponseEntity<List<LocalDateTime>> getUpcomingSlots(@PathVariable("restaurantId") Long id) {
+        return new ResponseEntity<>(reservationService.getUpcomingSlots(id), HttpStatus.OK);
     }
 
 
