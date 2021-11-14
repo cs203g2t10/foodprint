@@ -158,6 +158,54 @@ public class UserServiceTest {
     }
 
     @Test
+    void protectedGetUser_CorrectUserAndFound_ReturnUser() {
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(AuthHelper.getCurrentUser()).thenReturn(user);
+        when(users.findById(any(Long.class))).thenReturn(Optional.of(user));
+
+        User getUserProtected = userService.protectedGetUser(userId);
+
+        assertEquals(user, getUserProtected);
+        verify(users).findById(userId);
+    }
+
+    @Test
+    void protectedGetUser_UserNotFound_ReturnError() {
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(AuthHelper.getCurrentUser()).thenReturn(user);
+        when(users.findById(any(Long.class))).thenReturn(Optional.empty());
+
+        String errorMsg = "";
+        try {
+            userService.protectedGetUser(userId);
+        } catch (NotFoundException e) {
+            errorMsg = e.getMessage();
+        }
+
+        assertEquals("User not found", errorMsg);
+        verify(users).findById(userId);
+    }
+
+    @Test
+    void protectedGetUser_CurrentUserAccessingOtherUser_ReturnError() {
+        Long anotherUserId = 2L;
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(AuthHelper.getCurrentUser()).thenReturn(user);
+
+        String errorMsg = "";
+        try {
+            userService.protectedGetUser(anotherUserId);
+        } catch (NotFoundException e) {
+            errorMsg = e.getMessage();
+        }
+
+        assertEquals("Unable to retrieve user.", errorMsg);
+    }
+
+    @Test
     void unprotectedGetUser_ExistingId_ReturnUser() {
         when(users.findById(any(Long.class))).thenReturn(Optional.of(user));
 
