@@ -147,10 +147,9 @@ public class ReservationService {
         Restaurant restaurant = restaurantService.get(req.getRestaurantId());
         LocalDateTime dateOfReservation = req.getDate();
         LocalDateTime startTime = dateOfReservation.truncatedTo(ChronoUnit.HOURS);
-        String date = dateOfReservation.getYear() + "-" + dateOfReservation.getMonthValue() + "-" + dateOfReservation.getDayOfMonth();
-        List<LocalDateTime> availableSlots = getAllAvailableSlotsByDateAndRestaurant(restaurant.getRestaurantId(), date);
+        List<LocalDateTime> upcomingSlots = getUpcomingSlots(restaurant.getRestaurantId());
 
-        if (!availableSlots.contains(startTime)) {
+        if (!upcomingSlots.contains(startTime)) {
             String msg = String.format("Slot not available for %s on %d %s %d at %d:%dHr", restaurant.getRestaurantName(), dateOfReservation.getDayOfMonth(), dateOfReservation.getMonth(), dateOfReservation.getYear(), dateOfReservation.getHour(), dateOfReservation.getMinute());
             throw new NotFoundException(msg);
         }
