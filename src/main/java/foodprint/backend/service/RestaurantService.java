@@ -311,6 +311,9 @@ public class RestaurantService {
     public Food getFood(Long restaurantId, Long foodId) {
         Optional<Food> foodOpt = foodRepo.findById(foodId);
         Food food = foodOpt.orElseThrow(() -> new NotFoundException("Food not found"));
+        if (food.getRestaurant() == null) {
+            throw new NotFoundException("Food's restaurant not found");
+        }
         if (food.getRestaurant().getRestaurantId().longValue() != restaurantId) {
             throw new NotFoundException("Food found but in incorrect restaurant");
         }
