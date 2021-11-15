@@ -29,6 +29,8 @@ import foodprint.backend.dto.ManagerRequestDTO;
 import foodprint.backend.dto.UpdateUserDTO;
 import foodprint.backend.model.Restaurant;
 import foodprint.backend.model.RestaurantRepo;
+import foodprint.backend.model.Token;
+import foodprint.backend.model.TokenRepo;
 import foodprint.backend.model.User;
 import foodprint.backend.model.UserRepo;
 
@@ -64,6 +66,9 @@ public class UserIntegrationTest {
     @Autowired
     private RestaurantRepo restaurantRepo;
 
+    @Autowired
+    private TokenRepo tokenRepo;
+
     private User newUser;
     private User anotherUser;
     
@@ -89,6 +94,7 @@ public class UserIntegrationTest {
     @AfterEach
     void tearDown() {
         userRepo.deleteAll();
+        tokenRepo.deleteAll();
         restaurantRepo.deleteAll();
     }
 
@@ -417,6 +423,87 @@ public class UserIntegrationTest {
                 );
 
         assertEquals(404, responseEntity.getStatusCode().value());
+    }
+
+    @Test
+    public void resetPassword_Successful() {
+        userRepo.saveAndFlush(anotherUser);
+        AuthRequestDTO loginRequest = new AuthRequestDTO();
+        loginRequest.setEmail("bobby@user.com");
+        loginRequest.setPassword("SuperSecurePassw0rd");
+        AuthResponseDTO loginResponse = testRestTemplate.postForObject(createURLWithPort("/api/v1/auth/login"), loginRequest, AuthResponseDTO.class);
+    
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.add("Authorization", "Bearer " + loginResponse.getToken());
+        headers.add("Content-Type", "application/json");
+
+        Token token = new Token(2, anotherUser);
+        var savedToken = tokenRepo.saveAndFlush(token);
+        
+        ResponseEntity<String> responseEntity = testRestTemplate.exchange(
+            createURLWithPort("/api/v1/user/auth/resetpwd/{token}"),
+            HttpMethod.GET,
+            new HttpEntity<Object>(headers),
+            String.class,
+            savedToken.getToken()
+            );
+        
+        assertEquals(200, responseEntity.getStatusCode().value());
+    }
+
+    @Test
+    public void resetPassword_TokenNotFound_Failure() {
+        userRepo.saveAndFlush(anotherUser);
+        AuthRequestDTO loginRequest = new AuthRequestDTO();
+        loginRequest.setEmail("bobby@user.com");
+        loginRequest.setPassword("SuperSecurePassw0rd");
+        AuthResponseDTO loginResponse = testRestTemplate.postForObject(createURLWithPort("/api/v1/auth/login"), loginRequest, AuthResponseDTO.class);
+    
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.add("Authorization", "Bearer " + loginResponse.getToken());
+        headers.add("Content-Type", "application/json");
+
+        Token token = new Token(2, anotherUser);
+        var savedToken = tokenRepo.saveAndFlush(token);
+        tokenRepo.delete(token);
+        
+        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
+            createURLWithPort("/api/v1/user/auth/resetpwd/{token}"),
+            HttpMethod.GET,
+            new HttpEntity<Object>(headers),
+            Void.class,
+            savedToken.getToken()
+            );
+        
+        assertEquals(404, responseEntity.getStatusCode().value());
+    }
+
+    @Test
+    public void resetPassword_InvalidTokenType_Failure() {
+        userRepo.saveAndFlush(anotherUser);
+        AuthRequestDTO loginRequest = new AuthRequestDTO();
+        loginRequest.setEmail("bobby@user.com");
+        loginRequest.setPassword("SuperSecurePassw0rd");
+        AuthResponseDTO loginResponse = testRestTemplate.postForObject(createURLWithPort("/api/v1/auth/login"), loginRequest, AuthResponseDTO.class);
+    
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.add("Authorization", "Bearer " + loginResponse.getToken());
+        headers.add("Content-Type", "application/json");
+
+        Token token = new Token(1, anotherUser);
+        var savedToken = tokenRepo.saveAndFlush(token);
+        
+        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
+            createURLWithPort("/api/v1/user/auth/resetpwd/{token}"),
+            HttpMethod.GET,
+            new HttpEntity<Object>(headers),
+            Void.class,
+            savedToken.getToken()
+            );
+        assertEquals(400, responseEntity.getStatusCode().value());
     }
 
     @Test
