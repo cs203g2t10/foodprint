@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import foodprint.backend.exceptions.DeleteFailedException;
@@ -183,4 +184,46 @@ public class PictureServiceTest {
         assertEquals("Picture not found", errorMsg);
         verify(pictureRepo).findById(pictureId);
     }
+
+    @Test
+    void savePicture_FileEmpty_ReturnError() {
+        MockMultipartFile file = new MockMultipartFile("newPicture", "newPicture.png", "image", "".getBytes());
+        String errorMsg = "";
+        try {
+            pictureService.savePicture("title", "description", file);
+        } catch (Exception e) {
+            errorMsg = e.getMessage();
+        }
+        assertEquals("Cannot upload empty file", errorMsg);
+    }
+
+    @Test
+    void savePicture_FileNotImage_ReturnError() {
+        MockMultipartFile file = new MockMultipartFile("newPicture", "newPicture.txt", "text/plain", "content".getBytes());
+        String errorMsg = "";
+        try {
+            pictureService.savePicture("title", "description", file);
+        } catch (Exception e) {
+            errorMsg = e.getMessage();
+        }
+        assertEquals("File uploaded is not an image", errorMsg);
+    }
+
+    @Test
+    void savePicture_FileValid_Success() {
+        MockMultipartFile file = new MockMultipartFile("newPicture", "newPicture.png", "image/png", "content".getBytes());
+        Picture picture = new Picture("title", "description", "path", "fileName", "url");
+        when(pictureRepo.saveAndFlush(any(Picture.class))).thenReturn(picture);
+
+        String errorMsg = "";
+        try {
+            pictureService.savePicture("title", "description", file);
+        } catch (Exception e) {
+            errorMsg = e.getMessage();
+        }
+
+        assertEquals("", errorMsg);
+        verify(pictureRepo).saveAndFlush(any(Picture.class));
+    }
+
 }
