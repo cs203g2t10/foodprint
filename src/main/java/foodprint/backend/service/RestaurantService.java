@@ -198,6 +198,7 @@ public class RestaurantService {
             this.get(id);
             throw new DeleteFailedException("Restaurant could not be deleted");
         } catch (NotFoundException ex) {
+            throw new NotFoundException(RESTAURANT_DOES_NOT_EXIST_MESSAGE);
         }
     }
 
@@ -366,10 +367,10 @@ public class RestaurantService {
             for (FoodIngredientQuantityDTO dto : foodIngredientQuantityDTOs) {
                 FoodIngredientQuantityKey key = new FoodIngredientQuantityKey(foodId, dto.getIngredientId());
 
-                FoodIngredientQuantity fiq = foodIngredientQuantityRepo.findById(key).orElseGet(() -> {
-                    return new FoodIngredientQuantity(originalFood, ingredientRepo.getById(dto.getIngredientId()),
-                            dto.getQuantity());
-                });
+                FoodIngredientQuantity fiq = foodIngredientQuantityRepo.findById(key).orElseGet(() -> 
+                    new FoodIngredientQuantity(originalFood, ingredientRepo.getById(dto.getIngredientId()),
+                            dto.getQuantity())
+                );
                 fiq.setQuantity(dto.getQuantity());
 
                 foodIngredientQuantities.add(fiq);

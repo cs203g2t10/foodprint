@@ -96,6 +96,7 @@ public class PictureService  {
             this.get(id);
             throw new DeleteFailedException("Picture could not be deleted");
         } catch (NotFoundException e) {
+            throw new NotFoundException("Picture not found");
         }
     }
 
