@@ -629,10 +629,9 @@ public class RestaurantService {
 
         ingredientRepo.delete(originalIngredient);
 
-        try {
-            ingredientRepo.findById(ingredientId).orElseThrow(() -> new NotFoundException("Ingredient requested could not be found"));
+        Optional<Ingredient> optIngredient = ingredientRepo.findById(ingredientId);
+        if (optIngredient.isPresent()) {
             throw new DeleteFailedException("Ingredient could not be deleted");
-        } catch (NotFoundException e) {
         }
     }
 
