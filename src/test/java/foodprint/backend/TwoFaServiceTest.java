@@ -66,6 +66,17 @@ public class TwoFaServiceTest {
     }
 
     @Test
+    void checkEmailHas2FA_EmailHasEmptySecret_ReturnFalse() {
+        user.setTwoFaSecret("");
+        when(users.findByEmail(any(String.class))).thenReturn(Optional.of(user));
+
+        boolean rslt = twoFaService.checkEmailHas2FA(user.getEmail());
+
+        assertFalse(rslt);
+        verify(users).findByEmail(user.getEmail());
+    }
+
+    @Test
     void checkEmailHas2FA_EmailDoesNotExist_ReturnFalse() {
         when(users.findByEmail(any(String.class))).thenReturn(Optional.empty());
 
@@ -240,6 +251,28 @@ public class TwoFaServiceTest {
     }
 
     @Test
+    void confirm_SecretEmpty_ReturnException() {
+        String email = user.getEmail();
+        String secret = "";
+        String token = "123456";
+        user.setTwoFaSet(false);
+        user.setTwoFaSecret(secret);
+        when(principal.getName()).thenReturn(email);
+        when(users.findByEmail(any(String.class))).thenReturn(Optional.of(user));
+        
+        String errorMsg ="";
+        try {
+            twoFaService.confirm(token, principal);
+        } catch (InvalidException e) {
+            errorMsg = e.getMessage();
+        }
+
+        assertEquals("Something went wrong, please try again.", errorMsg);
+        verify(principal).getName();
+        verify(users).findByEmail(user.getEmail());
+    }
+
+    @Test
     void disable_ValidToken_Return() {
         String email = user.getEmail();
         String secret = "6jm7n6xwitpjooh7ihewyyzeux7aqmw2";
@@ -329,5 +362,32 @@ public class TwoFaServiceTest {
         assertEquals("Incorrect OTP entered, please restart the disabling process.", errorMsg);
         verify(principal).getName();
         verify(users).findByEmail(user.getEmail());
+    }
+
+    @Test 
+    void validToken_correctFormat_returnTrue() {
+        String token = "123456";
+
+        Boolean validToken = twoFaService.validToken(token);
+
+        assertTrue(validToken);
+    }
+
+    @Test 
+    void validToken_WrongLength_returnFalse() {
+        String token = "12345";
+
+        Boolean validToken = twoFaService.validToken(token);
+
+        assertFalse(validToken);
+    }
+
+    @Test
+    void validToken_NotValid_returnFalse() {
+        String token = "123s45";
+
+        Boolean validToken = twoFaService.validToken(token);
+
+        assertFalse(validToken);
     }
 }
