@@ -63,12 +63,11 @@ public class ReservationService {
      */
     @PreAuthorize("hasAnyAuthority('FP_USER', 'FP_MANAGER', 'FP_ADMIN')")
     public Reservation getReservationByIdAndUser(Long id, Long userId) {
-        Reservation reservation = reservationRepo
+        return reservationRepo
             .findByReservationIdAndUserId(id, userId)
             .orElseThrow(
                 () -> new NotFoundException("Reservation not found")
             );
-        return reservation;
     }
 
     /**

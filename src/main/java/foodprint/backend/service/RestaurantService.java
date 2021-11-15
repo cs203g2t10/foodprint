@@ -198,7 +198,7 @@ public class RestaurantService {
             this.get(id);
             throw new DeleteFailedException("Restaurant could not be deleted");
         } catch (NotFoundException ex) {
-            return;
+            throw new NotFoundException(RESTAURANT_DOES_NOT_EXIST_MESSAGE);
         }
     }
 
@@ -266,7 +266,7 @@ public class RestaurantService {
      */
     @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
     public Food addFood(Long restaurantId, FoodDTO foodDTO) {
-        if (foodDTO.getIngredientQuantityList().size() == 0) {
+        if (foodDTO.getIngredientQuantityList().isEmpty()) {
             throw new BadRequestException("Food should have at least 1 ingredient");
         }
 
@@ -367,10 +367,10 @@ public class RestaurantService {
             for (FoodIngredientQuantityDTO dto : foodIngredientQuantityDTOs) {
                 FoodIngredientQuantityKey key = new FoodIngredientQuantityKey(foodId, dto.getIngredientId());
 
-                FoodIngredientQuantity fiq = foodIngredientQuantityRepo.findById(key).orElseGet(() -> {
-                    return new FoodIngredientQuantity(originalFood, ingredientRepo.getById(dto.getIngredientId()),
-                            dto.getQuantity());
-                });
+                FoodIngredientQuantity fiq = foodIngredientQuantityRepo.findById(key).orElseGet(() -> 
+                    new FoodIngredientQuantity(originalFood, ingredientRepo.getById(dto.getIngredientId()),
+                            dto.getQuantity())
+                );
                 fiq.setQuantity(dto.getQuantity());
 
                 foodIngredientQuantities.add(fiq);
