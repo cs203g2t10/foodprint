@@ -29,19 +29,27 @@ import foodprint.backend.model.User;
 public class VaccinationService {
     
     private UserService userService;
+
     private JwtTokenUtil jwtUtil;
+
+    private HttpClient client;
+
+    private ObjectMapper mapper;
+    
     private static Logger loggr = LoggerFactory.getLogger(VaccinationService.class);
+
     private static final String URL = "https://oa.foodprint.works/";
 
     @Autowired
-    public VaccinationService(UserService userService, JwtTokenUtil jwtUtil) {
+    public VaccinationService(UserService userService, JwtTokenUtil jwtUtil, HttpClient client, ObjectMapper objectMapper) {
         this.userService = userService;
         this.jwtUtil = jwtUtil;
+        this.client = client;
+        this.mapper = objectMapper;
     }
 
     @PreAuthorize("hasAnyAuthority('FP_ADMIN') OR #usrParam.email == authentication.name")
     public String validateVaccination(@Param("usrParam") User user, String oaFileString) {
-        var client = HttpClient.newHttpClient();
         
         var request = HttpRequest.newBuilder(URI.create(URL))
             .header("accept", "application/json")
@@ -63,7 +71,6 @@ public class VaccinationService {
             throw new VaccinationValidationException("Unable to validate vaccination status due to server error.");
         }
 
-        ObjectMapper mapper = new ObjectMapper();
         JsonNode responseObject = null;
 
         try {
