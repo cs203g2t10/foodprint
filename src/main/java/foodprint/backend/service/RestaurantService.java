@@ -198,7 +198,6 @@ public class RestaurantService {
             this.get(id);
             throw new DeleteFailedException("Restaurant could not be deleted");
         } catch (NotFoundException ex) {
-            return;
         }
     }
 
@@ -266,7 +265,7 @@ public class RestaurantService {
      */
     @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
     public Food addFood(Long restaurantId, FoodDTO foodDTO) {
-        if (foodDTO.getIngredientQuantityList().size() == 0) {
+        if (foodDTO.getIngredientQuantityList().isEmpty()) {
             throw new BadRequestException("Food should have at least 1 ingredient");
         }
 
