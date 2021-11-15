@@ -109,7 +109,6 @@ public class PictureServiceTest {
         doNothing().when(pictureRepo).delete(picture);
         when(pictureRepo.findById(any(Long.class))).thenReturn(Optional.of(picture)).thenReturn(Optional.empty());
         
-        pictureRepo.saveAndFlush(picture);
         String errorMsg = "";
         try {
             pictureService.deletePicture(pictureId);
