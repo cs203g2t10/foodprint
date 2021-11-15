@@ -17,7 +17,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 public class CustomAuthorityDeserializer extends JsonDeserializer<Object> {
 
     @Override
-    public Object deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+    public Object deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         ObjectMapper mapper = (ObjectMapper) p.getCodec();
         JsonNode jsonNode = mapper.readTree(p);
         LinkedList<GrantedAuthority> grantedAuthorities = new LinkedList<>();
