@@ -19,6 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.Food;
@@ -282,5 +283,41 @@ public class ReservationServiceTest {
         
         assertEquals("", errorMsg);
         verify(reservations).deleteById(reservationId);
+    }
+
+    @Test
+    void setPaid_ReservationFound_Success() {
+        when(reservations.findByReservationIdAndUserId(any(Long.class), any(Long.class))).thenReturn(Optional.of(reservation));
+        when(reservations.saveAndFlush(any(Reservation.class))).thenReturn(reservation);
+
+        Long userId = 2L;
+        ReflectionTestUtils.setField(user, "id", userId);
+        String errorMsg = "";
+        try {
+            reservationService.setPaid(reservationId, userId);
+        } catch (Exception e) {
+            errorMsg = e.getMessage();
+        }
+
+        assertEquals("", errorMsg);
+        verify(reservations).findByReservationIdAndUserId(reservationId, userId);
+        verify(reservations).saveAndFlush(reservation);
+    }
+
+    @Test
+    void setPaid_ReservationNotFound_ReturnError() {
+        when(reservations.findByReservationIdAndUserId(any(Long.class), any(Long.class))).thenReturn(Optional.empty());
+
+        Long userId = 2L;
+        ReflectionTestUtils.setField(user, "id", userId);
+        String errorMsg = "";
+        try {
+            reservationService.setPaid(reservationId, userId);
+        } catch (NotFoundException e) {
+            errorMsg = e.getMessage();
+        }
+
+        assertEquals("Reservation not found", errorMsg);
+        verify(reservations).findByReservationIdAndUserId(reservationId, userId);
     }
 }
