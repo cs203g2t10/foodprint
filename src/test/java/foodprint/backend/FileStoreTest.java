@@ -1,5 +1,6 @@
 package foodprint.backend;
 
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -8,9 +9,11 @@ import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 
@@ -36,7 +39,7 @@ public class FileStoreTest {
     }
 
     @Test
-    void amazonS3_upload_success() {
+    void upload_success_noError() {
 
         when(amazonS3.putObject(any(PutObjectRequest.class))).thenReturn(null);
         var optMetadata = Optional.of(Map.of("", ""));
@@ -49,5 +52,34 @@ public class FileStoreTest {
 
         verify(amazonS3).putObject(any(PutObjectRequest.class));
 
+    }
+
+    @Test
+    void upload_failure_error() {
+
+        when(amazonS3.putObject(any(PutObjectRequest.class))).thenThrow(AmazonServiceException.class);
+        var optMetadata = Optional.of(Map.of("", ""));
+        InputStream anyInputStream = new ByteArrayInputStream("".getBytes());
+
+
+        assertThrows(IllegalStateException.class, () -> {
+            fileStore.upload("fakePath", "fakeFilename", optMetadata, anyInputStream);
+        });
+
+        verify(amazonS3).putObject(any(PutObjectRequest.class));
+    }
+
+    @Test
+    void upload_emptyMap_success() {
+
+        when(amazonS3.putObject(any(PutObjectRequest.class))).thenReturn(null);
+        var optMetadata = Optional.of((Map<String, String>) new HashMap<String, String>());
+        InputStream anyInputStream = new ByteArrayInputStream("".getBytes());
+
+        assertDoesNotThrow(() -> {
+            fileStore.upload("fakePath", "fakeFilename", optMetadata, anyInputStream);
+        });
+
+        verify(amazonS3).putObject(any(PutObjectRequest.class));
     }
 }

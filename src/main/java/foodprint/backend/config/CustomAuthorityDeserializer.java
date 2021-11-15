@@ -1,4 +1,4 @@
-package foodprint.backend.model;
+package foodprint.backend.config;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -14,7 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-public class CustomAuthorityDeserializer extends JsonDeserializer {
+public class CustomAuthorityDeserializer extends JsonDeserializer<Object> {
 
     @Override
     public Object deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
