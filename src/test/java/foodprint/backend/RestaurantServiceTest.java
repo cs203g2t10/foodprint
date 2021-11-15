@@ -415,8 +415,9 @@ public class RestaurantServiceTest {
 
     @Test
     void deleteFood_FoodExist_Return() {
-        when(foodRepo.findByFoodIdAndRestaurantRestaurantId(any(Long.class), any(Long.class)))
-                .thenReturn(Optional.of(food));
+        when(foodRepo.findById(any(Long.class)))
+                .thenReturn(Optional.of(food))
+                .thenReturn(Optional.empty());
 
         doNothing().when(foodRepo).delete(food);
         String errorMsg = "";
@@ -427,7 +428,7 @@ public class RestaurantServiceTest {
         }
         
         assertEquals("", errorMsg);
-        verify(foodRepo).findByFoodIdAndRestaurantRestaurantId(foodId, restaurantId);
+        verify(foodRepo, times(2)).findById(foodId);
         verify(foodRepo).delete(food);
     }
 
@@ -435,8 +436,7 @@ public class RestaurantServiceTest {
     void deleteFood_FoodDoNotExist_ReturnError() {
         Long anotherFoodId = 2L;
 
-        when(foodRepo.findByFoodIdAndRestaurantRestaurantId(any(Long.class), any(Long.class)))
-                .thenReturn(Optional.empty());
+        when(foodRepo.findById(any(Long.class))).thenReturn(Optional.empty());
 
         String errorMsg = "";
         try {
@@ -446,7 +446,7 @@ public class RestaurantServiceTest {
         }
 
         assertEquals("Food not found", errorMsg);
-        verify(foodRepo).findByFoodIdAndRestaurantRestaurantId(anotherFoodId, restaurantId);
+        verify(foodRepo).findById(anotherFoodId);
     }
 
     @Test
@@ -709,19 +709,19 @@ public class RestaurantServiceTest {
 
     @Test
     void deleteRestaurantIngredient_IngredientFoundInCorrectRestaurantAndDeleted_Return() {
-        when(ingredientRepo.findById(any(Long.class))).thenReturn(Optional.of(ingredient));
+        ingredient.setRestaurant(restaurant);
+        when(ingredientRepo.findById(any(Long.class))).thenReturn(Optional.of(ingredient)).thenReturn(Optional.empty());
         doNothing().when(ingredientRepo).delete(any(Ingredient.class));
-
+        
         String errorMsg = "";
         try {
-            ingredient.setRestaurant(restaurant);
             restaurantService.deleteRestaurantIngredient(restaurantId, ingredientId);
         } catch (Exception e) {
             errorMsg = e.getMessage();
         }
 
         assertEquals("", errorMsg);
-        verify(ingredientRepo).findById(ingredientId);
+        verify(ingredientRepo, times(2)).findById(ingredientId);
         verify(ingredientRepo).delete(ingredient);
     }
 

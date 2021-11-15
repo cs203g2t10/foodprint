@@ -63,12 +63,11 @@ public class ReservationService {
      */
     @PreAuthorize("hasAnyAuthority('FP_USER', 'FP_MANAGER', 'FP_ADMIN')")
     public Reservation getReservationByIdAndUser(Long id, Long userId) {
-        Reservation reservation = reservationRepo
+        return reservationRepo
             .findByReservationIdAndUserId(id, userId)
             .orElseThrow(
                 () -> new NotFoundException("Reservation not found")
             );
-        return reservation;
     }
 
     /**
@@ -251,8 +250,8 @@ public class ReservationService {
         );
 
         while (currentDate.isBefore(endDate)) {
-            LocalDateTime startTime = currentDate.atStartOfDay();
-            LocalDateTime endTime = currentDate.atTime(23, 30);
+            LocalDateTime startTime;
+            LocalDateTime endTime;
 
             Integer openingHour = restaurant.getRestaurantWeekdayOpeningHour();
             Integer openingMinutes = restaurant.getRestaurantWeekdayOpeningMinutes();
@@ -279,7 +278,7 @@ public class ReservationService {
             // As long as there is time left, then insert slot
             while (!startTime.equals(endTime) && startTime.isBefore(endTime)) {
                 final LocalDateTime startDateTime = startTime;
-                long currentReservations = reservations.stream().filter((res) -> 
+                long currentReservations = reservations.stream().filter(res -> 
                     res.getDate().equals(startDateTime)
                 ).count();
                 long capacity = restaurant.getRestaurantTableCapacity();

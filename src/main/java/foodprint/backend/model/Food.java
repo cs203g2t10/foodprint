@@ -61,7 +61,7 @@ public class Food implements Serializable {
     private Double foodDiscount;
 
     @OneToMany(mappedBy = "food", cascade = CascadeType.ALL)
-    private Set<FoodIngredientQuantity> foodIngredientQuantity = new HashSet<FoodIngredientQuantity>();
+    private Set<FoodIngredientQuantity> foodIngredientQuantity = new HashSet<>();
 
     @JsonIgnore
     @OneToMany(mappedBy = "food", cascade = CascadeType.ALL, orphanRemoval = true)

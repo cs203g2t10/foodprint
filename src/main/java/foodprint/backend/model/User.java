@@ -246,11 +246,10 @@ public class User implements UserDetails {
     @Schema(hidden=true)
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<String> userRoles = Arrays.asList(this.roles.split(","));
-        List<SimpleGrantedAuthority> authorities = userRoles
+        return userRoles
             .stream()
             .map(role -> new SimpleGrantedAuthority(role.trim()))
             .collect(Collectors.toList());
-        return authorities;
     }
 
     @Override
