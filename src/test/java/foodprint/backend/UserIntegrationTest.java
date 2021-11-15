@@ -81,7 +81,7 @@ public class UserIntegrationTest {
         newUser.setRoles("FP_ADMIN");
         newUser.setRegisteredOn(LocalDateTime.now());
         userRepo.saveAndFlush(newUser);
-        anotherUser = new User("bobby@user.com", encodedPassword, "bobby");
+        anotherUser = new User("bobby@user.com", encodedPassword, "bobby tan");
         // anotherUser.setRoles("FP_USER");
         anotherUser.setRegisteredOn(LocalDateTime.now());
     }
@@ -187,6 +187,32 @@ public class UserIntegrationTest {
                 userId
                 );
         assertEquals(404, responseEntity.getStatusCode().value());
+    }
+
+    @Test
+    public void updateUser_Successful() {
+        var savedUser = userRepo.saveAndFlush(anotherUser);
+        AuthRequestDTO loginRequest = new AuthRequestDTO();
+        loginRequest.setEmail("bobby@user.com");
+        loginRequest.setPassword("SuperSecurePassw0rd");
+        AuthResponseDTO loginResponse = testRestTemplate.postForObject(createURLWithPort("/api/v1/auth/login"), loginRequest, AuthResponseDTO.class);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.add("Authorization", "Bearer " + loginResponse.getToken());
+        headers.add("Content-Type", "application/json");
+
+        UpdateUserDTO updateUser = new UpdateUserDTO("bobby", "tan", "bobby@user.com", "SuperSecurePassw0rd", "SuperSecurePassw0r");
+        HttpEntity<UpdateUserDTO> entity = new HttpEntity<>(updateUser, headers);
+
+        ResponseEntity<UpdateUserDTO> responseEntity = testRestTemplate.exchange(
+                createURLWithPort("/api/v1/user/{id}"),
+                HttpMethod.PATCH,
+                entity,
+                UpdateUserDTO.class,
+                savedUser.getId()
+                );
+        assertEquals(200, responseEntity.getStatusCode().value());
     }
 
     @Test
