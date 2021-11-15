@@ -187,6 +187,7 @@
 						<exclude>foodprint/backend/config/*</exclude>
 						<exclude>foodprint/backend/exceptions/*</exclude>
 						<exclude>foodprint/backend/model/*</exclude>
+						<exclude>foodprint/backend/service/VaccinationService.*</exclude>
 						<exclude>foodprint/backend/BackendApplication.*</exclude>
 					</excludes>
 				</configuration>
