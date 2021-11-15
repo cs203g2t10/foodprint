@@ -163,9 +163,7 @@ public class AuthenticationService {
             throw new InvalidException("Invalid token format.");
         }
         String twoFaSecret = user.getTwoFaSecret();
-        boolean OtpOk = twoFaService.validate(twoFaSecret, token);
-
-        if (!OtpOk) {
+        if (!twoFaService.validate(twoFaSecret, token)) {
             throw new InvalidException("Incorrect OTP entered.");
         }
     }
