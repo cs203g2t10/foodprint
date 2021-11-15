@@ -198,7 +198,6 @@ public class RestaurantService {
             this.get(id);
             throw new DeleteFailedException("Restaurant could not be deleted");
         } catch (NotFoundException ex) {
-            throw new NotFoundException(RESTAURANT_DOES_NOT_EXIST_MESSAGE);
         }
     }
 
@@ -312,6 +311,9 @@ public class RestaurantService {
     public Food getFood(Long restaurantId, Long foodId) {
         Optional<Food> foodOpt = foodRepo.findById(foodId);
         Food food = foodOpt.orElseThrow(() -> new NotFoundException("Food not found"));
+        if (food.getRestaurant() == null) {
+            throw new NotFoundException("Food's restaurant not found");
+        }
         if (food.getRestaurant().getRestaurantId().longValue() != restaurantId) {
             throw new NotFoundException("Food found but in incorrect restaurant");
         }
@@ -326,9 +328,13 @@ public class RestaurantService {
      */
     @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
     public void deleteFood(Long restaurantId, Long foodId) {
-        Food food = foodRepo.findByFoodIdAndRestaurantRestaurantId(foodId, restaurantId)
-                .orElseThrow(() -> new NotFoundException("Food not found"));
+        Food food = this.getFood(restaurantId, foodId);
         foodRepo.delete(food);
+        try {
+            this.getFood(restaurantId, foodId);
+            throw new DeleteFailedException("Food could not be deleted");
+        } catch (NotFoundException e) {
+        }
     }
 
     /**
@@ -463,8 +469,15 @@ public class RestaurantService {
         if (dis == null) {
             throw new NotFoundException(DISCOUNT_NOT_FOUND_MESSAGE);
         }
+        Long disId = dis.getDiscountId();
         res.setDiscount(null);
         discountRepo.delete(dis);
+
+        try {
+            this.getDiscount(disId);
+            throw new DeleteFailedException("Discount could not be deleted");
+        } catch (NotFoundException e) {
+        }
     }
 
     /**
@@ -615,6 +628,11 @@ public class RestaurantService {
         }
 
         ingredientRepo.delete(originalIngredient);
+
+        Optional<Ingredient> optIngredient = ingredientRepo.findById(ingredientId);
+        if (optIngredient.isPresent()) {
+            throw new DeleteFailedException("Ingredient could not be deleted");
+        }
     }
 
     /**
@@ -723,12 +741,17 @@ public class RestaurantService {
     public void deleteRestaurantPicture(Long restaurantId) {
         Restaurant restaurant = get(restaurantId);
         Picture picture = restaurant.getPicture();
-        if (picture != null) {
-            restaurant.setPicture(null);
-            repo.saveAndFlush(restaurant);
-            pictureService.deletePicture(picture.getId());
-        } else {
+        if (picture == null) {
             throw new NotFoundException(PICTURE_NOT_FOUND_MESSAGE);
+        }
+        restaurant.setPicture(null);
+        repo.saveAndFlush(restaurant);
+        Long picId = picture.getId();
+        pictureService.deletePicture(picId);
+        try {
+            pictureService.get(picId);
+            throw new DeleteFailedException("Picture could not be deleted");
+        } catch (NotFoundException e) {
         }
     }
 
@@ -736,12 +759,17 @@ public class RestaurantService {
     public void deleteFoodPicture(Long restaurantId, Long foodId) {
         Food food = getFood(restaurantId, foodId);
         Picture picture = food.getPicture();
-        if (picture != null) {
-            food.setPicture(null);
-            foodRepo.saveAndFlush(food);
-            pictureService.deletePicture(picture.getId());
-        } else {
+        if (picture == null) {
             throw new NotFoundException(PICTURE_NOT_FOUND_MESSAGE);
+        }
+        food.setPicture(null);
+        foodRepo.saveAndFlush(food);
+        Long picId = picture.getId();
+        pictureService.deletePicture(picId);
+        try {
+            pictureService.get(picId);
+            throw new DeleteFailedException("Picture could not be deleted");
+        } catch (NotFoundException e) {
         }
     }
 

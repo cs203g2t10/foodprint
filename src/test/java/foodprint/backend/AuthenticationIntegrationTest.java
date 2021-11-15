@@ -42,10 +42,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @SpringBootTest(
     webEnvironment = WebEnvironment.RANDOM_PORT,
     properties = {
-            "foodprint.email.server=smtp.ethereal.email",
+            "foodprint.email.server=smtp.mailtrap.io",
             "foodprint.email.port=587",
-            "foodprint.email.address=kianna.larson20@ethereal.email",
-            "FOODPRINT_EMAIL_PASSWORD=vZzzeNPqxvDpZfKp9z"
+            "foodprint.email.address=d50679dc6cc279",
+            "FOODPRINT_EMAIL_PASSWORD=eb29812e6ead51"
         })
 @ActiveProfiles("test")
 @DiscriminatorValue( "null" )
@@ -178,7 +178,6 @@ public class AuthenticationIntegrationTest {
                 HttpMethod.POST, entity, AuthResponseDTO.class
             );
 
-        System.out.println(responseEntity.toString());
         assertEquals("USER_UNVERIFIED", responseEntity.getBody().getStatus());
         assertEquals(401, responseEntity.getStatusCode().value());
     }

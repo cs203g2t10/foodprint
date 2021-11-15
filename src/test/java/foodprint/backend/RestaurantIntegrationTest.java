@@ -98,7 +98,7 @@ public class RestaurantIntegrationTest {
         String encodedPassword = new BCryptPasswordEncoder().encode("SuperSecurePassw0rd");
         User newUser = new User("bobby@gmail.com", encodedPassword, "bobby");
         //newUser.setRoles("FP_MANAGER");
-        newUser.setRoles("FP_ADMIN");
+        newUser.setRoles("FP_USER, FP_ADMIN");
         newUser.setRegisteredOn(LocalDateTime.now());
         userRepo.saveAndFlush(newUser);
     }
