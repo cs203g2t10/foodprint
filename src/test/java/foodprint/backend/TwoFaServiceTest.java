@@ -15,7 +15,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.util.Optional;
 
@@ -33,9 +32,6 @@ public class TwoFaServiceTest {
 
     @Mock
     private Principal principal;
-
-    @Mock
-    private Totp totp;
 
     @InjectMocks
     private TwoFaService twoFaService;
@@ -79,14 +75,13 @@ public class TwoFaServiceTest {
         verify(users).findByEmail(user.getEmail());
     }
 
-        
     @Test
     void generateQRUrl_Success_ReturnURL() {
         String email = "valid@email.com";
         String secret = "secret";
 
         String url = twoFaService.generateQRUrl(email, secret);
-       
+
         assertNotNull(url);
     }
 
@@ -97,8 +92,8 @@ public class TwoFaServiceTest {
         when(principal.getName()).thenReturn(email);
         when(users.findByEmail(any(String.class))).thenReturn(Optional.of(user));
         when(users.saveAndFlush(any(User.class))).thenReturn(user);
-        
-        String errorMsg ="";
+
+        String errorMsg = "";
         try {
             twoFaService.setup(principal);
         } catch (InvalidException e) {
@@ -117,8 +112,8 @@ public class TwoFaServiceTest {
         user.setTwoFaSet(true);
         when(principal.getName()).thenReturn(email);
         when(users.findByEmail(any(String.class))).thenReturn(Optional.of(user));
-        
-        String errorMsg ="";
+
+        String errorMsg = "";
         try {
             twoFaService.setup(principal);
         } catch (InvalidException e) {
@@ -130,4 +125,119 @@ public class TwoFaServiceTest {
         verify(users).findByEmail(user.getEmail());
     }
 
+    @Test
+    void confirm_ValidToken_Return() {
+        String email = user.getEmail();
+        String secret = "6jm7n6xwitpjooh7ihewyyzeux7aqmw2";
+        Totp totp = new Totp(secret);
+        String token = totp.now();
+        user.setTwoFaSet(false);
+        user.setTwoFaSecret(secret);
+        when(principal.getName()).thenReturn(email);
+        when(users.findByEmail(any(String.class))).thenReturn(Optional.of(user));
+        when(users.saveAndFlush(any(User.class))).thenReturn(user);
+        
+        String errorMsg ="";
+        try {
+            twoFaService.confirm(token, principal);
+        } catch (InvalidException e) {
+            errorMsg = e.getMessage();
+        }
+
+        assertEquals("", errorMsg);
+        verify(principal).getName();
+        verify(users).findByEmail(user.getEmail());
+        verify(users).saveAndFlush(user);
+    }
+
+    @Test
+    void confirm_IncorrectTokenFormat_ReturnException() {
+        String email = user.getEmail();
+        String secret = "6jm7n6xwitpjooh7ihewyyzeux7aqmw2";
+        String token = "invalidToken";
+        user.setTwoFaSet(false);
+        user.setTwoFaSecret(secret);
+        when(principal.getName()).thenReturn(email);
+        when(users.findByEmail(any(String.class))).thenReturn(Optional.of(user));
+        
+        String errorMsg ="";
+        try {
+            twoFaService.confirm(token, principal);
+        } catch (InvalidException e) {
+            errorMsg = e.getMessage();
+        }
+
+        assertEquals("Incorrect token format.", errorMsg);
+        verify(principal).getName();
+        verify(users).findByEmail(user.getEmail());
+    }
+
+    @Test
+    void confirm_TwoFaEnabledAlready_ReturnException() {
+        String email = user.getEmail();
+        String secret = "6jm7n6xwitpjooh7ihewyyzeux7aqmw2";
+        Totp totp = new Totp(secret);
+        String token = totp.now();
+        user.setTwoFaSet(true);
+        user.setTwoFaSecret(secret);
+        when(principal.getName()).thenReturn(email);
+        when(users.findByEmail(any(String.class))).thenReturn(Optional.of(user));
+        
+        String errorMsg ="";
+        try {
+            twoFaService.confirm(token, principal);
+        } catch (InvalidException e) {
+            errorMsg = e.getMessage();
+        }
+
+        assertEquals("2FA already enabled.", errorMsg);
+        verify(principal).getName();
+        verify(users).findByEmail(user.getEmail());
+    }
+
+    @Test
+    void confirm_WrongToken_ReturnException() {
+        String email = user.getEmail();
+        String secret = "6jm7n6xwitpjooh7ihewyyzeux7aqmw2";
+        String token = "123456";
+        user.setTwoFaSet(false);
+        user.setTwoFaSecret(secret);
+        when(principal.getName()).thenReturn(email);
+        when(users.findByEmail(any(String.class))).thenReturn(Optional.of(user));
+        
+        String errorMsg ="";
+        try {
+            twoFaService.confirm(token, principal);
+        } catch (InvalidException e) {
+            errorMsg = e.getMessage();
+        }
+
+        assertEquals("Incorrect OTP entered, please restart the setup.", errorMsg);
+        verify(principal).getName();
+        verify(users).findByEmail(user.getEmail());
+    }
+
+    @Test
+    void confirm_SecretNull_ReturnException() {
+        String email = user.getEmail();
+        String secret = null;
+        String token = "123456";
+        user.setTwoFaSet(false);
+        user.setTwoFaSecret(secret);
+        when(principal.getName()).thenReturn(email);
+        when(users.findByEmail(any(String.class))).thenReturn(Optional.of(user));
+        
+        String errorMsg ="";
+        try {
+            twoFaService.confirm(token, principal);
+        } catch (InvalidException e) {
+            errorMsg = e.getMessage();
+        }
+
+        assertEquals("Something went wrong, please try again.", errorMsg);
+        verify(principal).getName();
+        verify(users).findByEmail(user.getEmail());
+    }
+
+    
 }
