@@ -20,7 +20,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import foodprint.backend.dto.LineItemDTO;
 import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.Food;
 import foodprint.backend.model.LineItem;
@@ -46,14 +45,11 @@ public class ReservationServiceTest {
 
     private User user;
     private Restaurant restaurant;
-    private Long restaurantId;
     private List<LineItem> lineItems;
     private Reservation reservation;
     private Long reservationId;
     private Food food;
-    private Long foodId;
     private LineItem lineItem;
-    private LineItemDTO lineItemDTO;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private List<Reservation> reservationList;
@@ -66,15 +62,12 @@ public class ReservationServiceTest {
         restaurantCategories.add("Japanese");
         restaurantCategories.add("Rice");
         restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
-        restaurantId = 1L;
         lineItems = new ArrayList<LineItem>();
         reservation = new Reservation(user, LocalDateTime.now(), 5, true, LocalDateTime.now(), ReservationStatus.UNPAID, lineItems, restaurant);
         reservationId = 1L;
         food = new Food("sashimi", 10.0, 0.0);
-        foodId = 1L;
         lineItem = new LineItem(food, reservation, 1);
         lineItems.add(lineItem);
-        lineItemDTO = new LineItemDTO(foodId, 1);
         startTime = reservation.getDate();
         endTime = startTime.plusHours(1);
         reservationList = new ArrayList<>();
