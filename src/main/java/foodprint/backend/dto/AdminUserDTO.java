@@ -22,15 +22,14 @@ public class AdminUserDTO {
     }
 
     public AdminUserDTO(String firstName, String lastName, String email, String password, String roles, LocalDateTime lastLogin, LocalDateTime registeredOn) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.password = password;
-        this.roles = roles;
-        this.lastLogin = lastLogin;
-        this.registeredOn = registeredOn;
+        setFirstName(firstName);
+        setLastName(lastName);
+        setEmail(email);
+        setPassword(password);
+        setRoles(roles);
+        setLastLogin(lastLogin);
+        setRegisteredOn(registeredOn);
     }
-
 
     public String getFirstName() {
         return this.firstName;

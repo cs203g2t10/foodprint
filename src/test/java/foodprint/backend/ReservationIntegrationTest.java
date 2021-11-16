@@ -281,7 +281,7 @@ public class ReservationIntegrationTest {
                 new HttpEntity<Object>(headers),
                 ReservationDTO[].class
                 );
-        assertEquals(responseEntity.getBody().length, 1);
+        assertEquals(1, responseEntity.getBody().length);
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
@@ -316,7 +316,7 @@ public class ReservationIntegrationTest {
                 new HttpEntity<Object>(headers),
                 ReservationDTO[].class
                 );
-        assertEquals(responseEntity.getBody().length, 1);
+        assertEquals(1, responseEntity.getBody().length);
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 

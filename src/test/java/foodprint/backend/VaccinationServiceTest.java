@@ -101,7 +101,7 @@ public class VaccinationServiceTest {
         when(objectMapper.readTree(any(String.class))).thenThrow(JsonParseException.class);
 
         var ex = assertThrows(VaccinationValidationException.class, () -> vaccinationService.validateVaccination(user, oaFileContent));
-        assertEquals(ex.getMessage(), "Unable to process vaccination validation response");
+        assertEquals("Unable to process vaccination validation response", ex.getMessage());
 
         verify(httpResponse).body();
         verify(objectMapper).readTree(json);
@@ -127,7 +127,7 @@ public class VaccinationServiceTest {
         when(objectMapper.readTree(any(String.class))).thenReturn(node);
 
         var ex = assertThrows(VaccinationValidationException.class, () -> vaccinationService.validateVaccination(user, oaFileContent));
-        assertEquals(ex.getMessage(), "Obtaining malformed responses from upstream service");
+        assertEquals("Obtaining malformed responses from upstream service", ex.getMessage());
 
         verify(httpResponse).body();
         verify(objectMapper).readTree(json);
@@ -153,7 +153,7 @@ public class VaccinationServiceTest {
         when(objectMapper.readTree(any(String.class))).thenReturn(node);
 
         var ex = assertThrows(VaccinationValidationException.class, () -> vaccinationService.validateVaccination(user, oaFileContent));
-        assertEquals(ex.getMessage(), "Vaccination certificate invalid: Bad Certificate");
+        assertEquals("Vaccination certificate invalid: Bad Certificate", ex.getMessage());
 
         verify(httpResponse).body();
         verify(objectMapper).readTree(json);
@@ -171,7 +171,7 @@ public class VaccinationServiceTest {
         when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class))).thenThrow(IOException.class);
 
         var ex = assertThrows(VaccinationValidationException.class, () -> vaccinationService.validateVaccination(user, oaFileContent));
-        assertEquals(ex.getMessage(), "Unable to validate vaccination status.");
+        assertEquals("Unable to validate vaccination status.", ex.getMessage());
 
     }
 
@@ -186,7 +186,7 @@ public class VaccinationServiceTest {
         when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class))).thenThrow(InterruptedException.class);
 
         var ex = assertThrows(VaccinationValidationException.class, () -> vaccinationService.validateVaccination(user, oaFileContent));
-        assertEquals(ex.getMessage(), "Unable to validate vaccination status due to server error.");
+        assertEquals("Unable to validate vaccination status due to server error.", ex.getMessage());
 
     }
 

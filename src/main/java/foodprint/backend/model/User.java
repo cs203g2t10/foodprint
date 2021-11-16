@@ -219,7 +219,7 @@ public class User implements UserDetails {
     }
 
     public Boolean isTwoFaSet() {
-        return (twoFaSet == null) ? false : twoFaSet;
+        return twoFaSet;
     }
 
     public void setTwoFaSet(Boolean twoFaSet) {
