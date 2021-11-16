@@ -143,7 +143,7 @@ public class RestaurantIntegrationTest {
     }
 
     @Test
-    public void getAllRestaurant_Successful() throws Exception {
+    public void getAllRestaurant_Success() throws Exception {
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -167,7 +167,7 @@ public class RestaurantIntegrationTest {
     }
 
     @Test
-    public void getRestaurant_Successful() throws Exception{
+    public void getRestaurant_Success() throws Exception{
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -212,7 +212,7 @@ public class RestaurantIntegrationTest {
     }
 
     @Test
-    public void updateRestaurant_Successful() throws Exception {
+    public void updateRestaurant_Success() throws Exception {
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -270,7 +270,7 @@ public class RestaurantIntegrationTest {
     }
 
     @Test
-    public void deleteRestaurant_Successful() throws Exception {
+    public void deleteRestaurant_Success() throws Exception {
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -326,7 +326,7 @@ public class RestaurantIntegrationTest {
     }
 
     @Test
-    public void getRestaurantCategories_Successful() {
+    public void getRestaurantCategories_Success() {
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -350,7 +350,7 @@ public class RestaurantIntegrationTest {
     }
 
     @Test
-    public void getRestaurantRelatedToCategory_Successful() {
+    public void getRestaurantRelatedToCategory_Success() {
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -431,7 +431,7 @@ public class RestaurantIntegrationTest {
     }
 
     @Test
-    public void getAllFood_Successful() throws Exception{
+    public void getAllFood_Success() throws Exception{
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -460,7 +460,7 @@ public class RestaurantIntegrationTest {
     }
 
     @Test
-    public void getFood_Successful() {
+    public void getFood_Success() {
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -566,7 +566,7 @@ public class RestaurantIntegrationTest {
     }
 
     @Test
-    public void deleteFood_Successful() throws Exception{
+    public void deleteFood_Success() throws Exception{
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -787,7 +787,7 @@ public class RestaurantIntegrationTest {
      */
 
     @Test
-    public void createDiscount_Successful() throws Exception{
+    public void createDiscount_Success() throws Exception{
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -850,7 +850,7 @@ public class RestaurantIntegrationTest {
     }
 
     @Test
-    public void deleteDiscount_DiscountExist_Successful() throws Exception{
+    public void deleteDiscount_DiscountExist_Success() throws Exception{
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -942,7 +942,7 @@ public class RestaurantIntegrationTest {
     }
 
     @Test
-    public void updateDiscount_DiscountExist_Successful() throws Exception{
+    public void updateDiscount_DiscountExist_Success() throws Exception{
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -1010,7 +1010,7 @@ public class RestaurantIntegrationTest {
      */
 
      @Test
-     public void createIngredient_Successful() throws Exception{
+     public void createIngredient_Success() throws Exception{
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -1079,7 +1079,7 @@ public class RestaurantIntegrationTest {
    }
 
     @Test
-    public void getAllIngredients_Successful() throws Exception{
+    public void getAllIngredients_Success() throws Exception{
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -1114,7 +1114,7 @@ public class RestaurantIntegrationTest {
     }
 
     @Test
-    public void getAllIngredients_RestaurantDoNotExist_Failure() throws Exception{
+    public void getAllIngredients_RestaurantDoesNotExist_Failure() throws Exception{
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -1145,7 +1145,7 @@ public class RestaurantIntegrationTest {
     }
 
     @Test
-    public void modifyIngredient_Successful() throws Exception{
+    public void modifyIngredient_Success() throws Exception{
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -1269,7 +1269,7 @@ public class RestaurantIntegrationTest {
     }
 
     @Test
-    public void deleteIngredient_Successful() throws Exception{
+    public void deleteIngredient_Success() throws Exception{
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -1393,7 +1393,7 @@ public class RestaurantIntegrationTest {
      */
 
     @Test
-    public void deleteRestaurantPicture_Successful() {
+    public void deleteRestaurantPicture_Success() {
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -1486,7 +1486,7 @@ public class RestaurantIntegrationTest {
   }
 
     @Test
-    public void deleteFoodPicture_Successful() {
+    public void deleteFoodPicture_Success() {
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");

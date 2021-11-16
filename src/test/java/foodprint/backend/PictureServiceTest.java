@@ -63,17 +63,17 @@ public class PictureServiceTest {
     }
 
     @Test
-    void getPicture_PictureNotFound_ReturnError() {
+    void getPicture_PictureNotFound_ReturnException() {
         when(pictureRepo.findById(any(Long.class))).thenReturn(Optional.empty());
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             pictureService.get(pictureId);
         } catch(NotFoundException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
         
-        assertEquals("Picture not found", errorMsg);
+        assertEquals("Picture not found", exceptionMsg);
         verify(pictureRepo).findById(pictureId);
     }
 
@@ -89,68 +89,68 @@ public class PictureServiceTest {
     }
 
     @Test
-    void getPictureById_PictureNotFound_ReturnError() {
+    void getPictureById_PictureNotFound_ReturnException() {
         when(pictureRepo.findById(any(Long.class))).thenReturn(Optional.empty());
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             pictureService.getPictureById(pictureId);
         } catch(NotFoundException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("Picture not found.", errorMsg);
+        assertEquals("Picture not found.", exceptionMsg);
         verify(pictureRepo).findById(pictureId);
     }
 
     @Test
-    void deletePicture_PictureFoundAndDeleted_Return() {
+    void deletePicture_PictureFoundAndDeleted_Success() {
         ReflectionTestUtils.setField(picture, "pictureId", pictureId);
 
         doNothing().when(pictureRepo).delete(picture);
         when(pictureRepo.findById(any(Long.class))).thenReturn(Optional.of(picture)).thenReturn(Optional.empty());
         
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             pictureService.deletePicture(pictureId);
         } catch (Exception e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("", errorMsg);
+        assertEquals("", exceptionMsg);
         verify(pictureRepo).delete(picture);
         verify(pictureRepo, times(2)).findById(pictureId);
     }
 
     @Test
-    void deletePicture_PictureNotFound_ReturnError() {
+    void deletePicture_PictureNotFound_ReturnException() {
         when(pictureRepo.findById(any(Long.class))).thenReturn(Optional.empty());
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             pictureService.deletePicture(pictureId);
         } catch(NotFoundException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("Picture not found", errorMsg);
+        assertEquals("Picture not found", exceptionMsg);
         verify(pictureRepo).findById(pictureId);
     }
 
     @Test
-    void deletePicture_PictureFoundButNotDeleted_ReturnError() {
+    void deletePicture_PictureFoundButNotDeleted_ReturnException() {
         when(pictureRepo.findById(any(Long.class))).thenReturn(Optional.of(picture));
         doNothing().when(pictureRepo).delete(any(Picture.class));
 
         pictureRepo.saveAndFlush(picture);
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             pictureService.deletePicture(pictureId);
         } catch(DeleteFailedException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("Picture could not be deleted", errorMsg);
+        assertEquals("Picture could not be deleted", exceptionMsg);
         verify(pictureRepo, times(2)).findById(pictureId);
         verify(pictureRepo).delete(picture);
     }
@@ -171,42 +171,42 @@ public class PictureServiceTest {
     }
 
     @Test
-    void updatePicture_PictureNotFound_ReturnError() {
+    void updatePicture_PictureNotFound_ReturnException() {
         when(pictureRepo.findById(any(Long.class))).thenReturn(Optional.empty());
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             pictureService.updatedPicture(pictureId, newPicture);
         } catch(NotFoundException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("Picture not found", errorMsg);
+        assertEquals("Picture not found", exceptionMsg);
         verify(pictureRepo).findById(pictureId);
     }
 
     @Test
-    void savePicture_FileEmpty_ReturnError() {
+    void savePicture_FileEmpty_ReturnException() {
         MockMultipartFile file = new MockMultipartFile("newPicture", "newPicture.png", "image", "".getBytes());
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             pictureService.savePicture("title", "description", file);
         } catch (Exception e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
-        assertEquals("Cannot upload empty file", errorMsg);
+        assertEquals("Cannot upload empty file", exceptionMsg);
     }
 
     @Test
-    void savePicture_FileNotImage_ReturnError() {
+    void savePicture_FileNotImage_ReturnException() {
         MockMultipartFile file = new MockMultipartFile("newPicture", "newPicture.txt", "text/plain", "content".getBytes());
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             pictureService.savePicture("title", "description", file);
         } catch (Exception e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
-        assertEquals("File uploaded is not an image", errorMsg);
+        assertEquals("File uploaded is not an image", exceptionMsg);
     }
 
     @Test
@@ -215,14 +215,14 @@ public class PictureServiceTest {
         Picture picture = new Picture("title", "description", "path", "fileName", "url");
         when(pictureRepo.saveAndFlush(any(Picture.class))).thenReturn(picture);
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             pictureService.savePicture("title", "description", file);
         } catch (Exception e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("", errorMsg);
+        assertEquals("", exceptionMsg);
         verify(pictureRepo).saveAndFlush(any(Picture.class));
     }
 

@@ -111,7 +111,7 @@ public class ReservationIntegrationTest {
     }
 
     @Test
-    public void getReservation_Successful() throws Exception{
+    public void getReservation_Success() throws Exception{
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -247,7 +247,7 @@ public class ReservationIntegrationTest {
     }
 
     @Test
-    public void getUserUpcomingReservations_Successful() throws Exception{
+    public void getUserUpcomingReservations_Success() throws Exception{
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -280,7 +280,7 @@ public class ReservationIntegrationTest {
     }
 
     @Test
-    public void getUserPastReservations_Successful() throws Exception{
+    public void getUserPastReservations_Success() throws Exception{
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -313,7 +313,7 @@ public class ReservationIntegrationTest {
     }
 
     @Test
-    public void getAllReservation_Successful() {
+    public void getAllReservation_Success() {
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@admin.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -354,7 +354,7 @@ public class ReservationIntegrationTest {
     }
 
     @Test
-    public void createReservationDTO_Successful() {
+    public void createReservationDTO_Success() {
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -446,7 +446,7 @@ public class ReservationIntegrationTest {
     }
 
     @Test
-    public void updateReservationDTO_Successful() {
+    public void updateReservationDTO_Success() {
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -496,7 +496,7 @@ public class ReservationIntegrationTest {
     }
 
     @Test
-    public void getAllReservationByRestaurant_Successful() {
+    public void getAllReservationByRestaurant_Success() {
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@admin.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -571,7 +571,7 @@ public class ReservationIntegrationTest {
     }
 
     @Test
-    void getAllAvailableSlotsByDateAndRestaurant_Successful(){
+    void getAllAvailableSlotsByDateAndRestaurant_Success(){
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");

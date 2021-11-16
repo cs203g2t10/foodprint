@@ -1,7 +1,6 @@
 package foodprint.backend;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
@@ -19,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.Food;
@@ -111,14 +111,14 @@ public class ReservationServiceTest {
     void getReservation_IdDoesNotExist_ReturnException() {
         when(reservations.findByReservationIdAndUserId(any(Long.class), any(Long.class))).thenReturn(Optional.empty());
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             reservationService.getReservationByIdAndUser(reservationId, 0L);
         } catch (NotFoundException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("Reservation not found", errorMsg);
+        assertEquals("Reservation not found", exceptionMsg);
         verify(reservations).findByReservationIdAndUserId(reservationId, 0L);
     }
 
@@ -210,14 +210,14 @@ public class ReservationServiceTest {
     //     when(restaurantService.get(any(Long.class))).thenReturn(restaurant);
     //     when(reservations.findByRestaurantAndDateBetween(any(Restaurant.class), any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(reservationList);
 
-    //     String errorMsg = "";
+    //     String exceptionMsg = "";
     //     try {
     //         reservationService.create(user, req);
     //     } catch (Exception e) {
-    //         errorMsg = e.getMessage();
+    //         exceptionMsg = e.getMessage();
     //     }
 
-    //     assertNotEquals("", errorMsg);
+    //     assertNotEquals("", exceptionMsg);
     //     verify(restaurantService, times(2)).get(restaurantId);
     //     verify(reservations).findByRestaurantAndDateBetween(restaurant, startTime.truncatedTo(ChronoUnit.HOURS), endTime.truncatedTo(ChronoUnit.HOURS));
     // }
@@ -246,41 +246,77 @@ public class ReservationServiceTest {
         }
         when(reservations.findByRestaurantAndDateBetween(any(Restaurant.class), any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(reservationList);
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             reservationService.update(reservationId, updatedReservation);
         } catch (NotFoundException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("Slot not found", errorMsg);
+        assertEquals("Slot not found", exceptionMsg);
         verify(reservations).findByRestaurantAndDateBetween(restaurant, startTime.truncatedTo(ChronoUnit.HOURS), endTime.truncatedTo(ChronoUnit.HOURS));
     }
 
     @Test
     void deleteReservation_ReservationIsNull_ReturnException() {
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             reservationService.deleteReservationById(null);
         } catch (Exception e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertNotEquals("", errorMsg);
+        assertEquals("reservationId cannot be null", exceptionMsg);
     }
 
     @Test
     void deleteReservation_ReservationNotNull_Success() {
         doNothing().when(reservations).deleteById(any(Long.class));
-        String errorMsg = "";
+        String exceptionMsg = "";
 
         try {
             reservationService.deleteReservationById(reservationId);
         } catch (Exception e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
         
-        assertEquals("", errorMsg);
+        assertEquals("", exceptionMsg);
         verify(reservations).deleteById(reservationId);
+    }
+
+    @Test
+    void setPaid_ReservationFound_Success() {
+        when(reservations.findByReservationIdAndUserId(any(Long.class), any(Long.class))).thenReturn(Optional.of(reservation));
+        when(reservations.saveAndFlush(any(Reservation.class))).thenReturn(reservation);
+
+        Long userId = 2L;
+        ReflectionTestUtils.setField(user, "id", userId);
+        String errorMsg = "";
+        try {
+            reservationService.setPaid(reservationId, userId);
+        } catch (Exception e) {
+            errorMsg = e.getMessage();
+        }
+
+        assertEquals("", errorMsg);
+        verify(reservations).findByReservationIdAndUserId(reservationId, userId);
+        verify(reservations).saveAndFlush(reservation);
+    }
+
+    @Test
+    void setPaid_ReservationNotFound_ReturnError() {
+        when(reservations.findByReservationIdAndUserId(any(Long.class), any(Long.class))).thenReturn(Optional.empty());
+
+        Long userId = 2L;
+        ReflectionTestUtils.setField(user, "id", userId);
+        String errorMsg = "";
+        try {
+            reservationService.setPaid(reservationId, userId);
+        } catch (NotFoundException e) {
+            errorMsg = e.getMessage();
+        }
+
+        assertEquals("Reservation not found", errorMsg);
+        verify(reservations).findByReservationIdAndUserId(reservationId, userId);
     }
 }

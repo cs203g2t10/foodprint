@@ -100,7 +100,7 @@ public class UserIntegrationTest {
     }
 
     @Test
-    public void createUser_Successful() {
+    public void createUser_Success() {
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@admin.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -149,7 +149,7 @@ public class UserIntegrationTest {
     }
 
     @Test
-    public void getUser_Successful() {
+    public void getUser_Success() {
         var savedUser = userRepo.saveAndFlush(anotherUser);
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@admin.com");
@@ -197,7 +197,7 @@ public class UserIntegrationTest {
     }
 
     @Test
-    public void updateUser_Successful() {
+    public void updateUser_Success() {
         var savedUser = userRepo.saveAndFlush(anotherUser);
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@user.com");
@@ -251,7 +251,7 @@ public class UserIntegrationTest {
     }
 
     @Test
-    public void updateUserAdmin_Successful() {
+    public void updateUserAdmin_Success() {
         var savedUser = userRepo.saveAndFlush(anotherUser);
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@admin.com");
@@ -276,7 +276,7 @@ public class UserIntegrationTest {
     }
 
     @Test
-    public void deleteUser_Successful() {
+    public void deleteUser_Success() {
         var savedUser = userRepo.saveAndFlush(anotherUser);
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@admin.com");
@@ -324,7 +324,7 @@ public class UserIntegrationTest {
     }
 
     @Test
-    public void makeManager_Successful() {
+    public void makeManager_Success() {
         var savedUser = userRepo.saveAndFlush(anotherUser);
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@admin.com");
@@ -427,7 +427,7 @@ public class UserIntegrationTest {
     }
 
     @Test
-    public void resetPassword_Successful() {
+    public void resetPassword_Success() {
         userRepo.saveAndFlush(anotherUser);
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@user.com");
@@ -599,7 +599,7 @@ public class UserIntegrationTest {
     }
 
     @Test
-    public void favouriteRestaurant_Successful() {
+    public void favouriteRestaurant_Success() {
         userRepo.saveAndFlush(anotherUser);
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@user.com");
@@ -695,7 +695,7 @@ public class UserIntegrationTest {
     }
 
     @Test
-    public void getAllFavouriteRestaurantsOfCurrectUser_Successful() {
+    public void getAllFavouriteRestaurantsOfCurrectUser_Success() {
         userRepo.saveAndFlush(anotherUser);
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@user.com");
@@ -727,7 +727,7 @@ public class UserIntegrationTest {
     }
 
     @Test
-    public void deleteFavouriteRestaurant_Successful() {
+    public void deleteFavouriteRestaurant_Success() {
         userRepo.saveAndFlush(anotherUser);
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@user.com");
