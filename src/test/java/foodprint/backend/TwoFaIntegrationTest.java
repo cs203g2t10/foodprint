@@ -73,7 +73,10 @@ public class TwoFaIntegrationTest {
     void tearDown() {
         userRepo.deleteAll();
     }
-
+     /**
+     * Testing for when users are setting up 2FA.
+     * Returns url of QR code
+     */
     @Test
     public void twoFactorEnable_Successful() {
         AuthRequestDTO loginRequest = new AuthRequestDTO();
@@ -100,6 +103,10 @@ public class TwoFaIntegrationTest {
         assertTrue(responseEntity.getBody().contains("otpauth"));
     }
 
+     /**
+     * Testing for when users try to set up 2FA when they already have 2FA enabled.
+     * Throws 500
+     */
     @Test
     public void twoFactorEnable_TwoFaAlreadyEnabled_Failure() {
         AuthRequestDTO loginRequest = new AuthRequestDTO();
@@ -128,6 +135,9 @@ public class TwoFaIntegrationTest {
         assertEquals("2FA already enabled.", responseEntity.getBody());
     }
 
+     /**
+     * Testing for when users try to confirm 2FA using a OTP.
+     */
     @Test
     public void twoFactorConfirm_Successful() {
         AuthRequestDTO loginRequest = new AuthRequestDTO();
@@ -158,6 +168,9 @@ public class TwoFaIntegrationTest {
 
     }
 
+     /**
+     * Testing for when users try to confirm 2FA using an invalid OTP.
+     */
     @Test
     public void twoFactorConfirm_InvalidToken_Failure() {
         AuthRequestDTO loginRequest = new AuthRequestDTO();
@@ -185,7 +198,10 @@ public class TwoFaIntegrationTest {
         assertEquals(500, responseEntity.getStatusCode().value());
         assertEquals("Incorrect token format.", responseEntity.getBody());
     }
-
+    
+    /**
+     * Testing for when users try to disable 2FA using an OTP.
+     */
     @Test
     public void twoFactorDisable_Success() {
         AuthRequestDTO loginRequest = new AuthRequestDTO();
@@ -217,7 +233,9 @@ public class TwoFaIntegrationTest {
         assertEquals("2FA successfully disabled.", responseEntity.getBody());
 
     }
-
+    /**
+     * Testing for when users try to disable 2FA using an invalid OTP.
+     */
     @Test
     public void twoFactorDisable_Failure() {
         AuthRequestDTO loginRequest = new AuthRequestDTO();
