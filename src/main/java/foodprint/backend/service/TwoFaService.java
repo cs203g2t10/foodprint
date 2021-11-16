@@ -3,7 +3,6 @@ package foodprint.backend.service;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.Principal;
-import java.util.Optional;
 
 import org.jboss.aerogear.security.otp.Totp;
 import org.jboss.aerogear.security.otp.api.Base32;
@@ -28,18 +27,6 @@ public class TwoFaService {
     public static final int TOKEN_LENGTH = 6;
 
     private static final String USER_NOT_FOUND_MESSAGE = "User not found";
-
-    public boolean checkEmailHas2FA(String email) {
-
-        Optional<User> optUser = userRepo.findByEmail(email);
-
-        if (optUser.isEmpty()) {
-            return false;
-        }
-        User user = optUser.get();
-
-        return !(user.getTwoFaSecret() == null || user.getTwoFaSecret().equals(""));
-    }
 
     public String generateQRUrl(String userEmail, String twoFaSecret) {
         try {

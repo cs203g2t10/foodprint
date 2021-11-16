@@ -247,13 +247,13 @@ public class AuthenticationServiceTest {
         when(userRepo.saveAndFlush(any(User.class))).thenReturn(user);
         when(tokenRepo.saveAndFlush(any(Token.class))).thenReturn(emailToken);
 
-        RegistrationException exception = null;
+        String errorMsg = "";
         try {
             authenticationService.confirmRegistration(tokenString);
         } catch (RegistrationException e) {
-            exception = e;
+            errorMsg = e.getMessage();
         }
-        assertNull(exception);
+        assertEquals("", errorMsg);
         verify(tokenRepo).findByToken(tokenString);
         verify(userRepo).saveAndFlush(user);
         verify(tokenRepo).saveAndFlush(emailToken);

@@ -2,6 +2,7 @@ package foodprint.backend;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -48,10 +49,6 @@ public class TwoFaIntegrationTest {
 
     @Autowired
     private UserRepo userRepo;
-
-    @Autowired
-    private UserDetailsService userDetailsService;
-
 
     private User newUser;
     
@@ -100,11 +97,11 @@ public class TwoFaIntegrationTest {
                 token.getPrincipal());
         
         assertEquals(200, responseEntity.getStatusCode().value());
-        
+        assertTrue(responseEntity.getBody().contains("otpauth"));
     }
 
     @Test
-    public void twoFactorEnable_Fail() {
+    public void twoFactorEnable_TwoFaAlreadyEnabled_Failure() {
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@user.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -128,7 +125,7 @@ public class TwoFaIntegrationTest {
                 token.getPrincipal());
         
         assertEquals(500, responseEntity.getStatusCode().value());
-        
+        assertEquals("2FA already enabled.", responseEntity.getBody());
     }
 
     @Test
@@ -157,10 +154,12 @@ public class TwoFaIntegrationTest {
                 token.getPrincipal());
         
         assertEquals(200, responseEntity.getStatusCode().value());
+        assertEquals("2FA successfully enabled.", responseEntity.getBody());
+
     }
 
     @Test
-    public void twoFactorConfirm_Failure() {
+    public void twoFactorConfirm_InvalidToken_Failure() {
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@user.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -184,6 +183,7 @@ public class TwoFaIntegrationTest {
                 token.getPrincipal());
         
         assertEquals(500, responseEntity.getStatusCode().value());
+        assertEquals("Incorrect token format.", responseEntity.getBody());
     }
 
     @Test
@@ -214,6 +214,8 @@ public class TwoFaIntegrationTest {
                 token.getPrincipal());
         
         assertEquals(200, responseEntity.getStatusCode().value());
+        assertEquals("2FA successfully disabled.", responseEntity.getBody());
+
     }
 
     @Test
@@ -241,6 +243,7 @@ public class TwoFaIntegrationTest {
                 token.getPrincipal());
         
         assertEquals(500, responseEntity.getStatusCode().value());
+        assertEquals("Incorrect token format.", responseEntity.getBody());
     }
 
     private String createURLWithPort(String uri) {

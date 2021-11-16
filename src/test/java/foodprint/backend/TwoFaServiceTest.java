@@ -11,6 +11,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -42,48 +43,6 @@ public class TwoFaServiceTest {
     void init() {
         user = new User("bobbytan@gmail.com", "SuperSecurePassw0rd", "Bobby Tan");
         user.setRoles("FP_USER");
-    }
-
-    @Test
-    void checkEmailHas2FA_EmailHas2FA_ReturnTrue() {
-        user.setTwoFaSecret("validSecret");
-        when(users.findByEmail(any(String.class))).thenReturn(Optional.of(user));
-
-        boolean rslt = twoFaService.checkEmailHas2FA(user.getEmail());
-
-        assertTrue(rslt);
-        verify(users).findByEmail(user.getEmail());
-    }
-
-    @Test
-    void checkEmailHas2FA_EmailHasNo2FA_ReturnFalse() {
-        when(users.findByEmail(any(String.class))).thenReturn(Optional.of(user));
-
-        boolean rslt = twoFaService.checkEmailHas2FA(user.getEmail());
-
-        assertFalse(rslt);
-        verify(users).findByEmail(user.getEmail());
-    }
-
-    @Test
-    void checkEmailHas2FA_EmailHasEmptySecret_ReturnFalse() {
-        user.setTwoFaSecret("");
-        when(users.findByEmail(any(String.class))).thenReturn(Optional.of(user));
-
-        boolean rslt = twoFaService.checkEmailHas2FA(user.getEmail());
-
-        assertFalse(rslt);
-        verify(users).findByEmail(user.getEmail());
-    }
-
-    @Test
-    void checkEmailHas2FA_EmailDoesNotExist_ReturnFalse() {
-        when(users.findByEmail(any(String.class))).thenReturn(Optional.empty());
-
-        boolean rslt = twoFaService.checkEmailHas2FA(user.getEmail());
-
-        assertFalse(rslt);
-        verify(users).findByEmail(user.getEmail());
     }
 
     @Test
@@ -292,6 +251,7 @@ public class TwoFaServiceTest {
         }
 
         assertEquals("", errorMsg);
+        assertNull(user.getTwoFaSecret());
         verify(principal).getName();
         verify(users).findByEmail(user.getEmail());
         verify(users).saveAndFlush(user);
