@@ -164,7 +164,7 @@ public class RestaurantServiceTest {
         ReflectionTestUtils.setField(discount, "discountId", discountId);
         ReflectionTestUtils.setField(pic, "pictureId", pictureId);
     }
-    // -------Restaurant-related Testing---------
+    // --------Restaurant-related Testing--------
 
     @Test
     void getAllRestaurants_RestaurantsExist_ReturnAllRestaurants() {
@@ -310,7 +310,7 @@ public class RestaurantServiceTest {
         verify(repo).findAll();
     }
 
-    // ------------Food-related Testing---------------
+    // -----------Food-related Testing-----------
 
     @Test
     void addFood_NewFoodMoreThanOneIngredient_ReturnFood() {
@@ -502,7 +502,7 @@ public class RestaurantServiceTest {
         verify(reservationRepo).findByRestaurantAndDateBetween(restaurant, start, end);
     }
 
-    // ----------Discount-related Testing-----------
+    // ---------Discount-related Testing---------
     @Test
     void createDiscount_NewDiscount_ReturnSavedDiscount() {
         Restaurant newRes = new Restaurant("New Restaurant", "Bencoolen");
@@ -600,7 +600,7 @@ public class RestaurantServiceTest {
         verify(repo).findByRestaurantId(restaurantId);
     }
 
-    // -------Ingredient-related testing---------
+    // --------Ingredient-related testing--------
     @Test
     void getAllRestaurantIngredients_RestaurantExistAndIngredientsExist_ReturnIngredients() {
         when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant));

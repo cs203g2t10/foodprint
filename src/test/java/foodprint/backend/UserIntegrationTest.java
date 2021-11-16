@@ -88,7 +88,6 @@ public class UserIntegrationTest {
         newUser.setRegisteredOn(LocalDateTime.now());
         userRepo.saveAndFlush(newUser);
         anotherUser = new User("bobby@user.com", encodedPassword, "bobby tan");
-        // anotherUser.setRoles("FP_USER");
         anotherUser.setRegisteredOn(LocalDateTime.now());
     }
 
