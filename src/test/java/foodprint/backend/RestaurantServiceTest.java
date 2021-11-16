@@ -167,7 +167,7 @@ public class RestaurantServiceTest {
     // -------Restaurant-related Testing---------
 
     @Test
-    void getAllRestaurant_RestaurantsExist_ReturnAllRestaurant() {
+    void getAllRestaurants_RestaurantsExist_ReturnAllRestaurants() {
         allRestaurants.add(restaurant);
 
         when(repo.findAll()).thenReturn(allRestaurants);
@@ -201,70 +201,70 @@ public class RestaurantServiceTest {
     }
 
     @Test
-    void updateRestaurant_RestaurantNotFound_ReturnError() {
+    void updateRestaurant_RestaurantNotFound_ReturnException() {
         when(repo.findById(any(Long.class))).thenReturn(Optional.empty());
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             restaurantService.update(restaurantId, restaurant);
         } catch (NotFoundException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
-        assertEquals("Restaurant not found", errorMsg);
+        assertEquals("Restaurant not found", exceptionMsg);
         verify(repo).findById(restaurantId);
     }
 
     @Test
-    void deleteRestaurant_RestaurantFound_Return() {
+    void deleteRestaurant_RestaurantFound_Success() {
         doNothing().when(repo).delete(any(Restaurant.class));
         when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant)).thenReturn(Optional.empty());
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             restaurantService.delete(restaurantId);
         } catch (Exception e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("", errorMsg);
+        assertEquals("", exceptionMsg);
         verify(repo, times(2)).findById(restaurantId);
         verify(repo).delete(restaurant);
     }
 
     @Test
-    void deleteRestaurant_RestaurantNotFound_ReturnError() {
+    void deleteRestaurant_RestaurantNotFound_ReturnException() {
         when(repo.findById(any(Long.class))).thenReturn(Optional.empty());
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             restaurantService.delete(restaurantId);
         } catch (NotFoundException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("Restaurant not found", errorMsg);
+        assertEquals("Restaurant not found", exceptionMsg);
         verify(repo).findById(restaurantId);
     }
 
     @Test
-    void deleteRestaurant_RestaurantFoundButUnableToDelete_ReturnError() {
+    void deleteRestaurant_RestaurantFoundButUnableToDelete_ReturnException() {
         when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
         doNothing().when(repo).delete(any(Restaurant.class));
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             restaurantService.delete(restaurantId);
         } catch (DeleteFailedException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("Restaurant could not be deleted", errorMsg);
+        assertEquals("Restaurant could not be deleted", exceptionMsg);
         verify(repo, times(2)).findById(restaurantId);
         verify(repo).delete(restaurant);
     }
 
     @Test
-    void getRestaurant_ExistingRestaurant_ReturnRestaurant() {
+    void getRestaurant_RestaurantExists_ReturnRestaurant() {
         when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
 
         Restaurant getRestaurant = restaurantService.get(restaurantId);
@@ -274,17 +274,17 @@ public class RestaurantServiceTest {
     }
 
     @Test
-    void getRestaurant_RestaurantDoesNotExist_ReturnError() {
+    void getRestaurant_RestaurantDoesNotExist_ReturnException() {
         when(repo.findById(any(Long.class))).thenReturn(Optional.empty());
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             restaurantService.get(restaurantId);
         } catch (NotFoundException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("Restaurant not found", errorMsg);
+        assertEquals("Restaurant not found", exceptionMsg);
         verify(repo).findById(restaurantId);
     }
 
@@ -313,7 +313,7 @@ public class RestaurantServiceTest {
     // ------------Food-related Testing---------------
 
     @Test
-    void addFood_newFoodMoreThanOneIngredient_ReturnFood() {
+    void addFood_NewFoodMoreThanOneIngredient_ReturnFood() {
         FoodDTO newFoodDTO = new FoodDTO();
         newFoodDTO.setFoodDesc("desc");
         newFoodDTO.setFoodName("Sushi");
@@ -342,7 +342,7 @@ public class RestaurantServiceTest {
     }
 
     @Test
-    void addFood_newFoodNoIngredient_BadRequest() {
+    void addFood_NewFoodNoIngredient_ReturnBadRequest() {
         FoodDTO newFoodDTO = new FoodDTO();
         newFoodDTO.setFoodDesc("desc");
         newFoodDTO.setFoodName("Sushi");
@@ -353,18 +353,18 @@ public class RestaurantServiceTest {
         allFood.add(newFood);
 
         restaurantService.create(restaurant);
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             restaurantService.addFood(restaurantId, newFoodDTO);
         } catch(BadRequestException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("Food should have at least 1 ingredient", errorMsg);
+        assertEquals("Food should have at least 1 ingredient", exceptionMsg);
     }
 
     @Test
-    void updateFood_FoodExist_ReturnUpdatedFood() {
+    void updateFood_FoodExists_ReturnUpdatedFood() {
         when(foodRepo.findById(any(Long.class))).thenReturn(Optional.of(food));
         when(foodRepo.saveAndFlush(any(Food.class))).thenReturn(food);
 
@@ -377,80 +377,80 @@ public class RestaurantServiceTest {
     }
 
     @Test
-    void updateFood_FoodDoNotExist_Return() {
+    void updateFood_FoodDoesNotExist_ReturnException() {
         EditFoodDTO anotherEditedFood = new EditFoodDTO();
         Long anotherFoodId = 2L;
 
         when(foodRepo.findById(any(Long.class))).thenReturn(Optional.empty());
 
         restaurantService.create(restaurant);
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             restaurantService.editFood(restaurantId, anotherFoodId, anotherEditedFood);
         } catch (NotFoundException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("Food requested could not be found", errorMsg);
+        assertEquals("Food requested could not be found", exceptionMsg);
         verify(foodRepo).findById(anotherFoodId);
     }
 
     @Test
-    void updateFood_FoodExistButInWrongRestaurant_ReturnError() {
+    void updateFood_FoodExistButInWrongRestaurant_ReturnException() {
         Long anotherRestaurantId = 2L;
 
         when(foodRepo.findById(any(Long.class))).thenReturn(Optional.of(food));
 
         restaurantService.create(restaurant);
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             restaurantService.editFood(anotherRestaurantId, foodId, editFoodDTO);
         } catch (NotFoundException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("Food requested could not be found at this restaurant", errorMsg);
+        assertEquals("Food requested could not be found at this restaurant", exceptionMsg);
         verify(foodRepo).findById(foodId);
     }
 
     @Test
-    void deleteFood_FoodExist_Return() {
+    void deleteFood_FoodExist_Success() {
         when(foodRepo.findById(any(Long.class)))
                 .thenReturn(Optional.of(food))
                 .thenReturn(Optional.empty());
 
         doNothing().when(foodRepo).delete(food);
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             restaurantService.deleteFood(restaurantId, foodId);
         } catch (NotFoundException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
         
-        assertEquals("", errorMsg);
+        assertEquals("", exceptionMsg);
         verify(foodRepo, times(2)).findById(foodId);
         verify(foodRepo).delete(food);
     }
 
     @Test
-    void deleteFood_FoodDoNotExist_ReturnError() {
+    void deleteFood_FoodDoNotExist_ReturnException() {
         Long anotherFoodId = 2L;
 
         when(foodRepo.findById(any(Long.class))).thenReturn(Optional.empty());
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             restaurantService.deleteFood(restaurantId, anotherFoodId);
         } catch (NotFoundException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("Food not found", errorMsg);
+        assertEquals("Food not found", exceptionMsg);
         verify(foodRepo).findById(anotherFoodId);
     }
 
     @Test
-    void getFood_FoodExist_ReturnFood() {
+    void getFood_FoodExists_ReturnFood() {
         when(foodRepo.findById(any(Long.class))).thenReturn(Optional.of(food));
 
         restaurantService.create(restaurant);
@@ -461,38 +461,38 @@ public class RestaurantServiceTest {
     }
 
     @Test
-    void getFood_FoodDoNotExist_ReturnError() {
+    void getFood_FoodDoesNotExist_ReturnException() {
         when(foodRepo.findById(any(Long.class))).thenReturn(Optional.empty());
 
         restaurantService.create(restaurant);
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             restaurantService.getFood(restaurantId, foodId);
         } catch (NotFoundException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("Food not found", errorMsg);
+        assertEquals("Food not found", exceptionMsg);
         verify(foodRepo).findById(foodId);
     }
 
     @Test
-    void getFood_FoodExistInWrongRestaurant_ReturnError() {
+    void getFood_FoodExistsInWrongRestaurant_ReturnException() {
         when(foodRepo.findById(any(Long.class))).thenReturn(Optional.of(food));
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             restaurantService.getFood(2L, foodId);
         } catch (NotFoundException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("Food found but in incorrect restaurant", errorMsg);
+        assertEquals("Food found but in incorrect restaurant", exceptionMsg);
         verify(foodRepo).findById(foodId);
     }
 
     @Test
-    void calculateFoodNeededBetween_Successful_ReturnMap() {
+    void calculateFoodNeededBetween_Success_ReturnMap() {
         when(reservationRepo.findByRestaurantAndDateBetween(any(Restaurant.class), any(LocalDateTime.class),
                 any(LocalDateTime.class))).thenReturn(reservationList);
 
@@ -504,7 +504,7 @@ public class RestaurantServiceTest {
 
     // ----------Discount-related Testing-----------
     @Test
-    void createDiscount_newDiscount_ReturnSavedDiscount() {
+    void createDiscount_NewDiscount_ReturnSavedDiscount() {
         Restaurant newRes = new Restaurant("New Restaurant", "Bencoolen");
         when(repo.findByRestaurantId(any(Long.class))).thenReturn(newRes);
         when(discountRepo.saveAndFlush(any(Discount.class))).thenReturn(discount);
@@ -517,22 +517,22 @@ public class RestaurantServiceTest {
     }
 
     @Test
-    void createDiscount_DiscountAlreadyExist_ReturnError() {
+    void createDiscount_DiscountAlreadyExist_ReturnException() {
         when(repo.findByRestaurantId(any(Long.class))).thenReturn(restaurant);
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             restaurantService.createDiscount(restaurantId, discount);
         } catch (AlreadyExistsException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("Discount already exist", errorMsg);
+        assertEquals("Discount already exist", exceptionMsg);
         verify(repo).findByRestaurantId(restaurantId);
     }
 
     @Test
-    void updateDiscount_DiscountExist_ReturnUpdatedDiscount() {
+    void updateDiscount_DiscountExists_ReturnUpdatedDiscount() {
         when(repo.findByRestaurantId(any(Long.class))).thenReturn(restaurant);
         when(discountRepo.saveAndFlush(any(Discount.class))).thenReturn(discount);
 
@@ -544,23 +544,23 @@ public class RestaurantServiceTest {
     }
 
     @Test
-    void updateDiscount_DiscountDoNotExist_ReturnError() {
+    void updateDiscount_DiscountDoesNotExist_ReturnException() {
         Restaurant newRes = new Restaurant("New Restaurant", "Bencoolen");
         when(repo.findByRestaurantId(any(Long.class))).thenReturn(newRes);
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             restaurantService.updateDiscount(restaurantId, discount);
         } catch (NotFoundException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("Discount not found", errorMsg);
+        assertEquals("Discount not found", exceptionMsg);
         verify(repo).findByRestaurantId(restaurantId);
     }
 
     @Test
-    void getDiscount_DiscountExist_ReturnDiscount() {
+    void getDiscount_DiscountExistse_ReturnDiscount() {
         when(discountRepo.findById(any(Long.class))).thenReturn(Optional.of(discount));
 
         Discount getDiscount = restaurantService.getDiscount(discountId);
@@ -570,33 +570,33 @@ public class RestaurantServiceTest {
     }
 
     @Test
-    void getDiscount_DiscountDoNotExist_ReturnError() {
+    void getDiscount_DiscountDoesNotExist_ReturnException() {
         when(discountRepo.findById(any(Long.class))).thenReturn(Optional.empty());
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             restaurantService.getDiscount(discountId);
         } catch (NotFoundException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("Discount not found", errorMsg);
+        assertEquals("Discount not found", exceptionMsg);
         verify(discountRepo).findById(discountId);
     }
 
     @Test
-    void deleteDiscount_DiscountDoNotExist_ReturnError() {
+    void deleteDiscount_DiscountDoesNotExist_ReturnException() {
         Restaurant newRes = new Restaurant("New Restaurant", "Bencoolen");
         when(repo.findByRestaurantId(any(Long.class))).thenReturn(newRes);
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             restaurantService.deleteDiscount(restaurantId);
         } catch (NotFoundException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("Discount not found", errorMsg);
+        assertEquals("Discount not found", exceptionMsg);
         verify(repo).findByRestaurantId(restaurantId);
     }
 
@@ -612,17 +612,17 @@ public class RestaurantServiceTest {
     }
 
     @Test
-    void getAllRestaurantIngredients_RestaurantDoNotExist_ReturnError() {
+    void getAllRestaurantIngredients_RestaurantDoesNotExist_ReturnException() {
         when(repo.findById(any(Long.class))).thenReturn(Optional.empty());
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             restaurantService.getAllRestaurantIngredients(restaurantId);
         } catch (NotFoundException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("Restaurant not found", errorMsg);
+        assertEquals("Restaurant not found", exceptionMsg);
         verify(repo).findById(restaurantId);
     }
 
@@ -642,23 +642,23 @@ public class RestaurantServiceTest {
     }
 
     @Test
-    void updateRestaurantIngredient_IngredientNotFound_ReturnError() {
+    void updateRestaurantIngredient_IngredientNotFound_ReturnException() {
         when(ingredientRepo.findById(any(Long.class))).thenReturn(Optional.empty());
 
         restaurantService.create(restaurant);
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             restaurantService.updateIngredient(restaurantId, ingredientId, ingredient);
         } catch (NotFoundException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("Ingredient requested could not be found", errorMsg);
+        assertEquals("Ingredient requested could not be found", exceptionMsg);
         verify(ingredientRepo).findById(ingredientId);
     }
 
     @Test
-    void updateRestaurantIngredient_IngredientFoundInWrongRestaurant_ReturnError() {
+    void updateRestaurantIngredient_IngredientFoundInWrongRestaurant_ReturnException() {
         when(ingredientRepo.findById(any(Long.class))).thenReturn(Optional.of(ingredient));
         Restaurant anotherRestaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10,
                 10, restaurantCategories);
@@ -667,14 +667,14 @@ public class RestaurantServiceTest {
 
         restaurantService.create(restaurant);
         ingredient.setRestaurant(restaurant);
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             restaurantService.updateIngredient(anotherRestaurantId, ingredientId, ingredient);
         } catch (NotFoundException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("Ingredient requested could not be found at this restaurant", errorMsg);
+        assertEquals("Ingredient requested could not be found at this restaurant", exceptionMsg);
         verify(ingredientRepo).findById(ingredientId);
     }
 
@@ -693,55 +693,55 @@ public class RestaurantServiceTest {
     }
 
     @Test
-    void addRestaurantIngredient_RestaurantDoNotExist_ReturnError() {
+    void addRestaurantIngredient_RestaurantDoesNotExist_ReturnException() {
         when(repo.findById(any(Long.class))).thenReturn(Optional.empty());
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             restaurantService.addRestaurantIngredient(restaurantId, ingredient);
         } catch (NotFoundException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("Restaurant not found", errorMsg);
+        assertEquals("Restaurant not found", exceptionMsg);
         verify(repo).findById(restaurantId);
     }
 
     @Test
-    void deleteRestaurantIngredient_IngredientFoundInCorrectRestaurantAndDeleted_Return() {
+    void deleteRestaurantIngredient_IngredientFoundInCorrectRestaurantAndDeleted_Success() {
         ingredient.setRestaurant(restaurant);
         when(ingredientRepo.findById(any(Long.class))).thenReturn(Optional.of(ingredient)).thenReturn(Optional.empty());
         doNothing().when(ingredientRepo).delete(any(Ingredient.class));
         
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             restaurantService.deleteRestaurantIngredient(restaurantId, ingredientId);
         } catch (Exception e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("", errorMsg);
+        assertEquals("", exceptionMsg);
         verify(ingredientRepo, times(2)).findById(ingredientId);
         verify(ingredientRepo).delete(ingredient);
     }
 
     @Test
-    void deleteRestaurantIngredient_IngredientNotFound_ReturnError() {
+    void deleteRestaurantIngredient_IngredientNotFound_ReturnException() {
         when(ingredientRepo.findById(any(Long.class))).thenReturn(Optional.empty());
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             restaurantService.deleteRestaurantIngredient(restaurantId, ingredientId);
         } catch (NotFoundException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("Ingredient requested could not be found", errorMsg);
+        assertEquals("Ingredient requested could not be found", exceptionMsg);
         verify(ingredientRepo).findById(ingredientId);
     }
 
     @Test
-    void deleteRestaurantIngredient_IngredientNotFoundInCorrectRestaurant_ReturnError() {
+    void deleteRestaurantIngredient_IngredientNotFoundInCorrectRestaurant_ReturnException() {
         when(ingredientRepo.findById(any(Long.class))).thenReturn(Optional.of(ingredient));
 
         Restaurant anotherRestaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10,
@@ -750,19 +750,19 @@ public class RestaurantServiceTest {
         ReflectionTestUtils.setField(anotherRestaurant, "restaurantId", anotherRestaurantId);
         ingredient.setRestaurant(restaurant);
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             restaurantService.deleteRestaurantIngredient(anotherRestaurantId, ingredientId);
         } catch (NotFoundException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("Ingredient requested could not be found at this restaurant", errorMsg);
+        assertEquals("Ingredient requested could not be found at this restaurant", exceptionMsg);
         verify(ingredientRepo).findById(ingredientId);
     }
 
     @Test
-    void calculateIngredientsNeededBetween_Successful_ReturnMap() {
+    void calculateIngredientsNeededBetween_Success_ReturnMap() {
         when(reservationRepo.findByRestaurantAndDateBetween(any(Restaurant.class), any(LocalDateTime.class),
                 any(LocalDateTime.class))).thenReturn(reservationList);
 
