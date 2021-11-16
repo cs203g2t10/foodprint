@@ -1,7 +1,6 @@
 package foodprint.backend;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
@@ -112,14 +111,14 @@ public class ReservationServiceTest {
     void getReservation_IdDoesNotExist_ReturnException() {
         when(reservations.findByReservationIdAndUserId(any(Long.class), any(Long.class))).thenReturn(Optional.empty());
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             reservationService.getReservationByIdAndUser(reservationId, 0L);
         } catch (NotFoundException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("Reservation not found", errorMsg);
+        assertEquals("Reservation not found", exceptionMsg);
         verify(reservations).findByReservationIdAndUserId(reservationId, 0L);
     }
 
@@ -182,48 +181,6 @@ public class ReservationServiceTest {
         verify(reservations).findByUserAndDateBefore(any(User.class), any(LocalDateTime.class));
     }
 
-    // @Test
-    // void createReservation_SlotAvailable_ReturnReservation() {
-    //     List<LineItemDTO> lineItemDTOs = new ArrayList<>();
-    //     lineItemDTOs.add(lineItemDTO);
-    //     CreateReservationDTO req = new CreateReservationDTO(LocalDateTime.now(), 5, true, lineItemDTOs, restaurantId, ReservationStatus.UNPAID);
-
-    //     when(restaurantService.get(any(Long.class))).thenReturn(restaurant);
-    //     when(reservations.findByRestaurantAndDateBetween(any(Restaurant.class), any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(reservationList);
-    //     when(reservations.saveAndFlush(any(Reservation.class))).thenReturn(reservation);
-
-    //     Reservation result = reservationService.create(user, req);
-
-    //     assertEquals(reservation, result);
-    //     verify(restaurantService, times(2)).get(restaurantId);
-    //     verify(reservations).findByRestaurantAndDateBetween(restaurant, startTime.truncatedTo(ChronoUnit.HOURS), endTime.truncatedTo(ChronoUnit.HOURS));
-    //     verify(reservations).saveAndFlush(any(Reservation.class));
-    // }
-
-    // @Test
-    // void createReservation_SlotNotAvailable_ReturnException() {
-    //     List<LineItemDTO> lineItemDTOs = new ArrayList<>();
-    //     lineItemDTOs.add(lineItemDTO);
-    //     CreateReservationDTO req = new CreateReservationDTO(LocalDateTime.now(), 5, true, lineItemDTOs, restaurantId, ReservationStatus.UNPAID);
-    //     for (int i = 0; i < 15; i++) {
-    //         reservationList.add(reservation);
-    //     }
-
-    //     when(restaurantService.get(any(Long.class))).thenReturn(restaurant);
-    //     when(reservations.findByRestaurantAndDateBetween(any(Restaurant.class), any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(reservationList);
-
-    //     String errorMsg = "";
-    //     try {
-    //         reservationService.create(user, req);
-    //     } catch (Exception e) {
-    //         errorMsg = e.getMessage();
-    //     }
-
-    //     assertNotEquals("", errorMsg);
-    //     verify(restaurantService, times(2)).get(restaurantId);
-    //     verify(reservations).findByRestaurantAndDateBetween(restaurant, startTime.truncatedTo(ChronoUnit.HOURS), endTime.truncatedTo(ChronoUnit.HOURS));
-    // }
-
     @Test
     void updateReservation_SlotAvailable_ReturnReservation() {
         Reservation updatedReservation = new Reservation(user, LocalDateTime.now(), 3, true, LocalDateTime.now(), ReservationStatus.UNPAID, lineItems, restaurant);
@@ -248,41 +205,41 @@ public class ReservationServiceTest {
         }
         when(reservations.findByRestaurantAndDateBetween(any(Restaurant.class), any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(reservationList);
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             reservationService.update(reservationId, updatedReservation);
         } catch (NotFoundException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("Slot not found", errorMsg);
+        assertEquals("Slot not found", exceptionMsg);
         verify(reservations).findByRestaurantAndDateBetween(restaurant, startTime.truncatedTo(ChronoUnit.HOURS), endTime.truncatedTo(ChronoUnit.HOURS));
     }
 
     @Test
     void deleteReservation_ReservationIsNull_ReturnException() {
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             reservationService.deleteReservationById(null);
         } catch (Exception e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertNotEquals("", errorMsg);
+        assertEquals("reservationId cannot be null", exceptionMsg);
     }
 
     @Test
     void deleteReservation_ReservationNotNull_Success() {
         doNothing().when(reservations).deleteById(any(Long.class));
-        String errorMsg = "";
+        String exceptionMsg = "";
 
         try {
             reservationService.deleteReservationById(reservationId);
         } catch (Exception e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
         
-        assertEquals("", errorMsg);
+        assertEquals("", exceptionMsg);
         verify(reservations).deleteById(reservationId);
     }
 

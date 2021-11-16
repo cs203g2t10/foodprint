@@ -39,7 +39,7 @@ public class FileStoreTest {
     }
 
     @Test
-    void upload_success_noError() {
+    void upload_Success() {
 
         when(amazonS3.putObject(any(PutObjectRequest.class))).thenReturn(null);
         var optMetadata = Optional.of(Map.of("", ""));
@@ -55,7 +55,7 @@ public class FileStoreTest {
     }
 
     @Test
-    void upload_failure_error() {
+    void upload_Failure_ReturnException() {
 
         when(amazonS3.putObject(any(PutObjectRequest.class))).thenThrow(AmazonServiceException.class);
         var optMetadata = Optional.of(Map.of("", ""));
@@ -70,7 +70,7 @@ public class FileStoreTest {
     }
 
     @Test
-    void upload_emptyMap_success() {
+    void upload_EmptyMap_Success() {
 
         when(amazonS3.putObject(any(PutObjectRequest.class))).thenReturn(null);
         var optMetadata = Optional.of((Map<String, String>) new HashMap<String, String>());
