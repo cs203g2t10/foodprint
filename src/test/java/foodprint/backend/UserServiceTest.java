@@ -159,8 +159,8 @@ public class UserServiceTest {
 
     @Test
     void protectedGetUser_CorrectUserAndFound_ReturnUser() {
-        when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
         when(AuthHelper.getCurrentUser()).thenReturn(user);
         when(users.findById(any(Long.class))).thenReturn(Optional.of(user));
 
@@ -172,8 +172,8 @@ public class UserServiceTest {
 
     @Test
     void protectedGetUser_UserNotFound_ReturnError() {
-        when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
         when(AuthHelper.getCurrentUser()).thenReturn(user);
         when(users.findById(any(Long.class))).thenReturn(Optional.empty());
 

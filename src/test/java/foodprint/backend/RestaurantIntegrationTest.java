@@ -139,6 +139,7 @@ public class RestaurantIntegrationTest {
                 entity,
                 Restaurant.class
             );
+        assertEquals(responseEntity.getBody().getRestaurantName(), restaurant.getRestaurantName());
         assertEquals(201, responseEntity.getStatusCode().value());
     }
 
@@ -163,6 +164,7 @@ public class RestaurantIntegrationTest {
         ResponseEntity<Restaurant[]> responseEntity = testRestTemplate.getForEntity(
                 createURLWithPort("/api/v1/restaurant"),
                 Restaurant[].class);
+        assertEquals(responseEntity.getBody().length, restaurants.count());
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
@@ -188,7 +190,7 @@ public class RestaurantIntegrationTest {
                 createURLWithPort("/api/v1/restaurant/{restaurantId}"),
                 RestaurantDTO.class, 
                 savedRestaurant.getRestaurantId());
-        
+        assertEquals(responseEntity.getBody().getRestaurantName(), restaurant.getRestaurantName());
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
@@ -236,6 +238,7 @@ public class RestaurantIntegrationTest {
                 entity, 
                 Restaurant.class, 
                 updatedRestaurant.getRestaurantId());
+        assertEquals(responseEntity.getBody().getRestaurantName(), restaurant.getRestaurantName());
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
@@ -346,6 +349,7 @@ public class RestaurantIntegrationTest {
         ResponseEntity<String[]> responseEntity = testRestTemplate.getForEntity(
                 createURLWithPort("/api/v1/restaurant/categories"),
                 String[].class);
+        assertEquals(responseEntity.getBody().length, restaurant.getRestaurantCategory().size());
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
@@ -365,13 +369,14 @@ public class RestaurantIntegrationTest {
         restaurantCategories.add("Japanese");
         restaurantCategories.add("Rice");
         Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
-        var savedRestaurant = restaurants.saveAndFlush(restaurant);
+        restaurants.saveAndFlush(restaurant);
 
         ResponseEntity<RestaurantDTO[]> responseEntity = testRestTemplate.getForEntity(
                 createURLWithPort("/api/v1/restaurant/categories/{category}"),
                 RestaurantDTO[].class,
-                savedRestaurant.getRestaurantCategory()
+                "Rice"
                 );
+        assertEquals(responseEntity.getBody().length, restaurants.count());
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
@@ -456,6 +461,7 @@ public class RestaurantIntegrationTest {
                 createURLWithPort("/api/v1/restaurant/{restaurantId}/food"), 
                 Food[].class, 
                 savedRestaurant.getRestaurantId());
+        assertEquals(responseEntity.getBody().length, foodRepo.count());
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
@@ -489,7 +495,7 @@ public class RestaurantIntegrationTest {
                 savedRestaurant.getRestaurantId(),
                 savedFood.getFoodId()
                 );
-
+        assertEquals(responseEntity.getBody().getFoodName(), food.getFoodName());
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
@@ -695,7 +701,7 @@ public class RestaurantIntegrationTest {
                 savedRestaurant.getRestaurantId(), 
                 savedFood.getFoodId()
                 );
-        System.out.println(responseEntity.getStatusCode());
+        assertEquals(responseEntity.getBody().getFoodName(), editFoodDTO.getFoodName());
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
@@ -813,6 +819,7 @@ public class RestaurantIntegrationTest {
                 Discount.class,
                 savedRestaurant.getRestaurantId()
                 );
+        assertEquals(responseEntity.getBody().getDiscountDescription(), discount.getDiscountDescription());
         assertEquals(201, responseEntity.getStatusCode().value());
     }
 
@@ -846,7 +853,7 @@ public class RestaurantIntegrationTest {
                 savedRestaurant.getRestaurantId()
                 );
 
-        assertEquals(400, responseEntity.getStatusCode().value());
+        assertEquals(409, responseEntity.getStatusCode().value());
     }
 
     @Test
@@ -970,6 +977,7 @@ public class RestaurantIntegrationTest {
                 Discount.class,
                 savedRestaurant.getRestaurantId()
                 );
+        assertEquals(responseEntity.getBody().getDiscountDescription(), discount.getDiscountDescription());
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
@@ -1039,6 +1047,7 @@ public class RestaurantIntegrationTest {
                 Ingredient.class,
                 savedRestaurant.getRestaurantId()
                 );
+        assertEquals(responseEntity.getBody().getIngredientDesc(), ingredientDTO.getIngredientDesc());
         assertEquals(201, responseEntity.getStatusCode().value());
     }
 
@@ -1110,6 +1119,7 @@ public class RestaurantIntegrationTest {
                 Ingredient[].class,
                 savedRestaurant.getRestaurantId()
                 );
+
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
@@ -1181,7 +1191,7 @@ public class RestaurantIntegrationTest {
                 savedRestaurant.getRestaurantId(), 
                 savedIngredient.getIngredientId()
                 );
-
+        assertEquals(ingredientDTO.getIngredientDesc(),responseEntity.getBody().getIngredientDesc());
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
@@ -1414,14 +1424,13 @@ public class RestaurantIntegrationTest {
         pictureRepo.saveAndFlush(picture);
 
         HttpEntity<Picture> entity = new HttpEntity<>(null, headers);
-        ResponseEntity<Picture> responseEntity = testRestTemplate.exchange(
+        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
                 createURLWithPort("/api/v1/restaurant/{restaurantId}/picture"),
                 HttpMethod.DELETE,
                 entity,
-                Picture.class,
+                Void.class,
                 savedRestaurant.getRestaurantId()
                 );
-        
         assertEquals(200, responseEntity.getStatusCode().value());
    }
 
@@ -1510,15 +1519,15 @@ public class RestaurantIntegrationTest {
         food.setRestaurant(restaurant);
         var savedFood = foodRepo.saveAndFlush(food);
 
-        ResponseEntity<Picture> responseEntity = testRestTemplate.exchange(
+        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
                 createURLWithPort("/api/v1/restaurant/{restaurantId}/food/{foodId}/picture"),
                 HttpMethod.DELETE,
                 new HttpEntity<Object>(headers),
-                Picture.class,
+                Void.class,
                 savedRestaurant.getRestaurantId(),
                 savedFood.getFoodId()
                 );
-       
+
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 

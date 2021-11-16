@@ -1,6 +1,7 @@
 package foodprint.backend;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -111,7 +112,7 @@ public class ReservationIntegrationTest {
     }
 
     @Test
-    public void getReservation_Successful() throws Exception{
+    public void getReservation_UserAndReservationFound_Successful() throws Exception{
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -134,13 +135,14 @@ public class ReservationIntegrationTest {
         Reservation reservation = new Reservation(newUser, LocalDateTime.now(), 1, true, LocalDateTime.now().plusDays(1), ReservationStatus.PAID, restaurant);
         var savedReservation = reservationRepo.saveAndFlush(reservation);
 
-        ResponseEntity<Reservation> responseEntity = testRestTemplate.exchange(
+        ResponseEntity<ReservationDTO> responseEntity = testRestTemplate.exchange(
                 createURLWithPort("/api/v1/reservation/{reservationId}"),
                 HttpMethod.GET,
                 new HttpEntity<Object>(headers),
-                Reservation.class,
+                ReservationDTO.class,
                 savedReservation.getReservationId()
                 );
+        assertEquals(responseEntity.getBody().getReservationId(), savedReservation.getReservationId());
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
@@ -180,7 +182,7 @@ public class ReservationIntegrationTest {
     }
 
     @Test
-    public void getAllReservationByUser_Success() throws Exception{
+    public void getAllReservationByUser_UserAndReservationFound_Success() throws Exception{
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -209,16 +211,51 @@ public class ReservationIntegrationTest {
                 new HttpEntity<Object>(headers),
                 ReservationDTO[].class
                 );
+                //check size
+        assertEquals(responseEntity.getBody().length, reservationRepo.count());
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
+    // @Test
+    // public void getAllReservationByUser_Failure() throws Exception{
+    //     AuthRequestDTO loginRequest = new AuthRequestDTO();
+    //     loginRequest.setEmail("bobby@gmail.com");
+    //     loginRequest.setPassword("SuperSecurePassw0rd");
+    //     AuthResponseDTO loginResponse = testRestTemplate.postForObject(createURLWithPort("/api/v1/auth/login"), loginRequest, AuthResponseDTO.class);
+    //     System.out.println(loginResponse.getToken());
+
+    //     HttpHeaders headers = new HttpHeaders();
+    //     headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+    //     headers.add("Authorization", "Bearer " + loginResponse.getToken());
+    //     headers.add("Content-Type", "application/json");
+
+    //     Picture picture = new Picture("title", "description", "imagePath", "imageFileName", "url");
+    //     List<String> restaurantCategories = new ArrayList<>();
+    //     restaurantCategories.add("Japanese");
+    //     restaurantCategories.add("Rice");
+    //     Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+    //     restaurant.setPicture(picture);
+    //     restaurantRepo.saveAndFlush(restaurant);
+
+    //     Reservation reservation = new Reservation(newUser, LocalDateTime.now(), 1, true, LocalDateTime.now().plusDays(1), ReservationStatus.PAID, restaurant);
+    //     reservationRepo.saveAndFlush(reservation);
+
+    //     ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
+    //             createURLWithPort("/api/v1/reservation/all"),
+    //             HttpMethod.GET,
+    //             new HttpEntity<Object>(headers),
+    //             Void.class
+    //             );
+
+    //     assertEquals(200, responseEntity.getStatusCode().value());
+    // }
+
     @Test
-    public void getAllReservationByUser_Failure() throws Exception{
+    public void getUserUpcomingReservations_UserFound_Successful() throws Exception{
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
         AuthResponseDTO loginResponse = testRestTemplate.postForObject(createURLWithPort("/api/v1/auth/login"), loginRequest, AuthResponseDTO.class);
-        System.out.println(loginResponse.getToken());
 
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
@@ -233,41 +270,10 @@ public class ReservationIntegrationTest {
         restaurant.setPicture(picture);
         restaurantRepo.saveAndFlush(restaurant);
 
-        Reservation reservation = new Reservation(newUser, LocalDateTime.now(), 1, true, LocalDateTime.now().plusDays(1), ReservationStatus.PAID, restaurant);
+        Reservation reservation = new Reservation(newUser, LocalDateTime.now().plusDays(5), 1, true, LocalDateTime.now(), ReservationStatus.PAID, restaurant);
+        Reservation reservation2 = new Reservation(newUser, LocalDateTime.now().minusDays(5), 1, true, LocalDateTime.now().minusDays(15), ReservationStatus.PAID, restaurant);
         reservationRepo.saveAndFlush(reservation);
-
-        ResponseEntity<ReservationDTO[]> responseEntity = testRestTemplate.exchange(
-                createURLWithPort("/api/v1/reservation/all"),
-                HttpMethod.GET,
-                new HttpEntity<Object>(headers),
-                ReservationDTO[].class
-                );
-
-        assertEquals(200, responseEntity.getStatusCode().value());
-    }
-
-    @Test
-    public void getUserUpcomingReservations_Successful() throws Exception{
-        AuthRequestDTO loginRequest = new AuthRequestDTO();
-        loginRequest.setEmail("bobby@gmail.com");
-        loginRequest.setPassword("SuperSecurePassw0rd");
-        AuthResponseDTO loginResponse = testRestTemplate.postForObject(createURLWithPort("/api/v1/auth/login"), loginRequest, AuthResponseDTO.class);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-        headers.add("Authorization", "Bearer " + loginResponse.getToken());
-        headers.add("Content-Type", "application/json");
-
-        Picture picture = new Picture("title", "description", "imagePath", "imageFileName", "url");
-        List<String> restaurantCategories = new ArrayList<>();
-        restaurantCategories.add("Japanese");
-        restaurantCategories.add("Rice");
-        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
-        restaurant.setPicture(picture);
-        restaurantRepo.saveAndFlush(restaurant);
-
-        Reservation reservation = new Reservation(newUser, LocalDateTime.now(), 1, true, LocalDateTime.now().plusDays(1), ReservationStatus.PAID, restaurant);
-        reservationRepo.saveAndFlush(reservation);
+        reservationRepo.saveAndFlush(reservation2);
 
         ResponseEntity<ReservationDTO[]> responseEntity = testRestTemplate.exchange(
                 createURLWithPort("/api/v1/reservation/upcoming"),
@@ -275,12 +281,12 @@ public class ReservationIntegrationTest {
                 new HttpEntity<Object>(headers),
                 ReservationDTO[].class
                 );
-
+        assertEquals(responseEntity.getBody().length, 1);
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
     @Test
-    public void getUserPastReservations_Successful() throws Exception{
+    public void getUserPastReservations_UserFound_Successful() throws Exception{
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -299,8 +305,10 @@ public class ReservationIntegrationTest {
         restaurant.setPicture(picture);
         restaurantRepo.saveAndFlush(restaurant);
 
-        Reservation reservation = new Reservation(newUser, LocalDateTime.now(), 1, true, LocalDateTime.now().plusDays(1), ReservationStatus.PAID, restaurant);
+        Reservation reservation = new Reservation(newUser, LocalDateTime.now().plusDays(5), 1, true, LocalDateTime.now(), ReservationStatus.PAID, restaurant);
+        Reservation reservation2 = new Reservation(newUser, LocalDateTime.now().minusDays(5), 1, true, LocalDateTime.now().minusDays(15), ReservationStatus.PAID, restaurant);
         reservationRepo.saveAndFlush(reservation);
+        reservationRepo.saveAndFlush(reservation2);
 
         ResponseEntity<ReservationDTO[]> responseEntity = testRestTemplate.exchange(
                 createURLWithPort("/api/v1/reservation/past"),
@@ -308,12 +316,12 @@ public class ReservationIntegrationTest {
                 new HttpEntity<Object>(headers),
                 ReservationDTO[].class
                 );
-
+        assertEquals(responseEntity.getBody().length, 1);
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
     @Test
-    public void getAllReservation_Successful() {
+    public void getAllReservation_ReservationSlotsFound_Successful() {
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@admin.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -349,12 +357,12 @@ public class ReservationIntegrationTest {
             new HttpEntity<Object>(headers),
             Reservation[].class
             );
-
+        assertEquals(responseEntity.getBody().length, reservationRepo.count());
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
     @Test
-    public void createReservationDTO_Successful() {
+    public void createReservationDTO_UserFoundAndReservationCreated_Successful() {
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -379,7 +387,7 @@ public class ReservationIntegrationTest {
         var savedFood = foodRepo.saveAndFlush(food);
 
         List<LineItemDTO> lineItemDTOList = new ArrayList<>();
-        LineItemDTO lineItemDTO = new LineItemDTO(savedFood.getFoodId(), 1);
+        LineItemDTO lineItemDTO = new LineItemDTO(savedFood.getFoodId(), 1000);
         lineItemDTOList.add(lineItemDTO);
         CreateReservationDTO createReservationDTO = new CreateReservationDTO();
         createReservationDTO.setDate(LocalDateTime.of(LocalDate.now().plusDays(14), LocalTime.NOON.minusHours(2)));
@@ -396,6 +404,7 @@ public class ReservationIntegrationTest {
             entity,
             ReservationDTO.class
             );
+        assertEquals(responseEntity.getBody().getLineItems().get(0).getQuantity(), lineItemDTOList.get(0).getQuantity());
         assertEquals(201, responseEntity.getStatusCode().value());
     }
 
@@ -446,7 +455,7 @@ public class ReservationIntegrationTest {
     }
 
     @Test
-    public void updateReservationDTO_Successful() {
+    public void updateReservationDTO_ReservationFound_Successful() {
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -491,12 +500,63 @@ public class ReservationIntegrationTest {
             ReservationDTO.class,
             savedReservation.getReservationId()
             );
-
+        assertEquals(responseEntity.getBody().getReservationId(), savedReservation.getReservationId());
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
     @Test
-    public void getAllReservationByRestaurant_Successful() {
+    public void updateReservationDTO_ReservationNotFound_Failure() {
+        AuthRequestDTO loginRequest = new AuthRequestDTO();
+        loginRequest.setEmail("bobby@gmail.com");
+        loginRequest.setPassword("SuperSecurePassw0rd");
+        AuthResponseDTO loginResponse = testRestTemplate.postForObject(createURLWithPort("/api/v1/auth/login"), loginRequest, AuthResponseDTO.class);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.add("Authorization", "Bearer " + loginResponse.getToken());
+        headers.add("Content-Type", "application/json");
+
+        Picture picture = new Picture("title", "description", "imagePath", "imageFileName", "url");
+        List<String> restaurantCategories = new ArrayList<>();
+        restaurantCategories.add("Japanese");
+        restaurantCategories.add("Rice");
+        Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+        restaurant.setPicture(picture);
+        var savedRestaurant = restaurantRepo.saveAndFlush(restaurant);
+
+        Food food = new Food("Salmon", 10.0, 0.0);
+        food.setFoodDesc("foodDesc");
+        food.setRestaurant(restaurant);
+        var savedFood = foodRepo.saveAndFlush(food);
+        Reservation reservation = new Reservation(newUser, LocalDateTime.now(), 1, true, LocalDateTime.now().plusDays(1), ReservationStatus.PAID, restaurant);
+        var savedReservation = reservationRepo.saveAndFlush(reservation);
+        reservationRepo.delete(reservation);
+
+        List<LineItemDTO> lineItemDTOList = new ArrayList<>();
+        LineItemDTO lineItemDTO = new LineItemDTO(savedFood.getFoodId(), 1);
+        lineItemDTOList.add(lineItemDTO);
+        CreateReservationDTO createReservationDTO = new CreateReservationDTO();
+        createReservationDTO.setDate(LocalDateTime.now().plusDays(1));
+        createReservationDTO.setIsVaccinated(true);
+        createReservationDTO.setLineItems(lineItemDTOList);
+        createReservationDTO.setPax(1);
+        createReservationDTO.setRestaurantId(savedRestaurant.getRestaurantId());
+        createReservationDTO.setStatus(ReservationStatus.PAID);
+        HttpEntity<CreateReservationDTO> entity = new HttpEntity<>(createReservationDTO, headers);
+
+        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
+            createURLWithPort("/api/v1/reservation/{reservationId}"),
+            HttpMethod.PATCH,
+            entity,
+            Void.class,
+            savedReservation.getReservationId()
+            );
+
+        assertEquals(404, responseEntity.getStatusCode().value());
+    }
+
+    @Test
+    public void getAllReservationByRestaurant_RestaurantAndReservationsFound_Successful() {
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@admin.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -533,7 +593,7 @@ public class ReservationIntegrationTest {
             Reservation[].class,
             savedRestaurant.getRestaurantId()
             );
-
+            assertEquals(responseEntity.getBody().length, reservationRepo.count());
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
@@ -571,7 +631,7 @@ public class ReservationIntegrationTest {
     }
 
     @Test
-    void getAllAvailableSlotsByDateAndRestaurant_Successful(){
+    void getAllAvailableSlotsByDateAndRestaurant_SlotsFound_Successful(){
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -597,7 +657,7 @@ public class ReservationIntegrationTest {
                 LocalDateTime[].class,
                 savedRestaurant.getRestaurantId()
                 );
-
+        assertTrue(LocalDateTime.now().isBefore(responseEntity.getBody()[0]));
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
