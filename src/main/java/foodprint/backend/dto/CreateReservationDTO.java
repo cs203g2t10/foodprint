@@ -26,12 +26,12 @@ public class CreateReservationDTO {
     private ReservationStatus status = ReservationStatus.UNPAID;
 
     public CreateReservationDTO(LocalDateTime date, Integer pax, Boolean isVaccinated, List<LineItemDTO> lineItems, Long restaurantId, ReservationStatus status) {
-        this.date = date;
-        this.pax = pax;
-        this.isVaccinated = isVaccinated;
-        this.lineItems = lineItems;
-        this.restaurantId = restaurantId;
-        this.status = status;
+        setDate(date);
+        setPax(pax);
+        setIsVaccinated(isVaccinated);
+        setLineItems(lineItems);
+        setRestaurantId(restaurantId);
+        setStatus(status);
     }
 
     public CreateReservationDTO() {}

@@ -114,7 +114,7 @@ public class RestaurantIntegrationTest {
     }
     
     @Test
-    public void createRestaurant_Success() throws Exception{
+    public void createRestaurant_NewRestaurant_Success() throws Exception{
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -138,11 +138,12 @@ public class RestaurantIntegrationTest {
                 entity,
                 Restaurant.class
             );
+        assertEquals(responseEntity.getBody().getRestaurantName(), restaurant.getRestaurantName());
         assertEquals(201, responseEntity.getStatusCode().value());
     }
 
     @Test
-    public void getAllRestaurant_Success() throws Exception {
+    public void getAllRestaurant_RestaurantsFound_Success() throws Exception {
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -162,11 +163,12 @@ public class RestaurantIntegrationTest {
         ResponseEntity<Restaurant[]> responseEntity = testRestTemplate.getForEntity(
                 createURLWithPort("/api/v1/restaurant"),
                 Restaurant[].class);
+        assertEquals(responseEntity.getBody().length, restaurants.count());
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
     @Test
-    public void getRestaurant_Success() throws Exception{
+    public void getRestaurant_RestaurantFound_Success() throws Exception{
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -187,7 +189,7 @@ public class RestaurantIntegrationTest {
                 createURLWithPort("/api/v1/restaurant/{restaurantId}"),
                 RestaurantDTO.class, 
                 savedRestaurant.getRestaurantId());
-        
+        assertEquals(responseEntity.getBody().getRestaurantName(), restaurant.getRestaurantName());
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
@@ -211,7 +213,7 @@ public class RestaurantIntegrationTest {
     }
 
     @Test
-    public void updateRestaurant_Success() throws Exception {
+    public void updateRestaurant_RestaurantFound_Success() throws Exception {
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -235,6 +237,7 @@ public class RestaurantIntegrationTest {
                 entity, 
                 Restaurant.class, 
                 updatedRestaurant.getRestaurantId());
+        assertEquals(responseEntity.getBody().getRestaurantName(), restaurant.getRestaurantName());
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
@@ -269,7 +272,7 @@ public class RestaurantIntegrationTest {
     }
 
     @Test
-    public void deleteRestaurant_Success() throws Exception {
+    public void deleteRestaurant_RestaurantFound_Success() throws Exception {
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -325,7 +328,7 @@ public class RestaurantIntegrationTest {
     }
 
     @Test
-    public void getRestaurantCategories_Success() {
+    public void getRestaurantCategories_CategoriesFound_Success() {
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -345,11 +348,12 @@ public class RestaurantIntegrationTest {
         ResponseEntity<String[]> responseEntity = testRestTemplate.getForEntity(
                 createURLWithPort("/api/v1/restaurant/categories"),
                 String[].class);
+        assertEquals(responseEntity.getBody().length, restaurant.getRestaurantCategory().size());
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
     @Test
-    public void getRestaurantRelatedToCategory_Success() {
+    public void getRestaurantRelatedToCategory_RestaurantsFound_Success() {
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -364,13 +368,14 @@ public class RestaurantIntegrationTest {
         restaurantCategories.add("Japanese");
         restaurantCategories.add("Rice");
         Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
-        var savedRestaurant = restaurants.saveAndFlush(restaurant);
+        restaurants.saveAndFlush(restaurant);
 
         ResponseEntity<RestaurantDTO[]> responseEntity = testRestTemplate.getForEntity(
                 createURLWithPort("/api/v1/restaurant/categories/{category}"),
                 RestaurantDTO[].class,
-                savedRestaurant.getRestaurantCategory()
+                "Rice"
                 );
+        assertEquals(responseEntity.getBody().length, restaurants.count());
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
@@ -430,7 +435,7 @@ public class RestaurantIntegrationTest {
     }
 
     @Test
-    public void getAllFood_Success() throws Exception{
+    public void getAllFoodInRestaurant_RestaurantAndFoodFound_Success() throws Exception{
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -455,11 +460,12 @@ public class RestaurantIntegrationTest {
                 createURLWithPort("/api/v1/restaurant/{restaurantId}/food"), 
                 Food[].class, 
                 savedRestaurant.getRestaurantId());
+        assertEquals(responseEntity.getBody().length, foodRepo.count());
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
     @Test
-    public void getFood_Success() {
+    public void getFood_CorrectRestaurantAndFoodFound_Success() {
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -488,7 +494,7 @@ public class RestaurantIntegrationTest {
                 savedRestaurant.getRestaurantId(),
                 savedFood.getFoodId()
                 );
-
+        assertEquals(responseEntity.getBody().getFoodName(), food.getFoodName());
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
@@ -565,7 +571,7 @@ public class RestaurantIntegrationTest {
     }
 
     @Test
-    public void deleteFood_Success() throws Exception{
+    public void deleteFood_CorrectRestaurantAndFoodFound_Success() throws Exception{
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -661,7 +667,7 @@ public class RestaurantIntegrationTest {
     }
 
     @Test
-    public void updateFood_Success() throws Exception{
+    public void updateFood_CorrectRestaurantAndFoodFoundSuccess() throws Exception{
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -694,7 +700,7 @@ public class RestaurantIntegrationTest {
                 savedRestaurant.getRestaurantId(), 
                 savedFood.getFoodId()
                 );
-        System.out.println(responseEntity.getStatusCode());
+        assertEquals(responseEntity.getBody().getFoodName(), editFoodDTO.getFoodName());
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
@@ -786,7 +792,7 @@ public class RestaurantIntegrationTest {
      */
 
     @Test
-    public void createDiscount_Success() throws Exception{
+    public void createDiscount_CorrectRestaurantAndFoodFound_Success() throws Exception{
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -812,6 +818,7 @@ public class RestaurantIntegrationTest {
                 Discount.class,
                 savedRestaurant.getRestaurantId()
                 );
+        assertEquals(responseEntity.getBody().getDiscountDescription(), discount.getDiscountDescription());
         assertEquals(201, responseEntity.getStatusCode().value());
     }
 
@@ -845,11 +852,11 @@ public class RestaurantIntegrationTest {
                 savedRestaurant.getRestaurantId()
                 );
 
-        assertEquals(400, responseEntity.getStatusCode().value());
+        assertEquals(409, responseEntity.getStatusCode().value());
     }
 
     @Test
-    public void deleteDiscount_DiscountExist_Success() throws Exception{
+    public void deleteDiscount_CorrectRestaurantAndDiscountExist_Success() throws Exception{
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -941,7 +948,7 @@ public class RestaurantIntegrationTest {
     }
 
     @Test
-    public void updateDiscount_DiscountExist_Success() throws Exception{
+    public void updateDiscount_CorrectRestaurantAndDiscountExist_Success() throws Exception{
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -969,6 +976,7 @@ public class RestaurantIntegrationTest {
                 Discount.class,
                 savedRestaurant.getRestaurantId()
                 );
+        assertEquals(responseEntity.getBody().getDiscountDescription(), discount.getDiscountDescription());
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
@@ -1038,6 +1046,7 @@ public class RestaurantIntegrationTest {
                 Ingredient.class,
                 savedRestaurant.getRestaurantId()
                 );
+        assertEquals(responseEntity.getBody().getIngredientDesc(), ingredientDTO.getIngredientDesc());
         assertEquals(201, responseEntity.getStatusCode().value());
     }
 
@@ -1078,7 +1087,7 @@ public class RestaurantIntegrationTest {
    }
 
     @Test
-    public void getAllIngredients_Success() throws Exception{
+    public void getAllIngredients_CorrectRestaurantAndIngredientsFound_Success() throws Exception{
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -1109,6 +1118,7 @@ public class RestaurantIntegrationTest {
                 Ingredient[].class,
                 savedRestaurant.getRestaurantId()
                 );
+
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
@@ -1144,7 +1154,7 @@ public class RestaurantIntegrationTest {
     }
 
     @Test
-    public void modifyIngredient_Success() throws Exception{
+    public void modifyIngredient_CorrectRestaurantAndIngredientFound_Success() throws Exception{
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -1180,7 +1190,7 @@ public class RestaurantIntegrationTest {
                 savedRestaurant.getRestaurantId(), 
                 savedIngredient.getIngredientId()
                 );
-
+        assertEquals(ingredientDTO.getIngredientDesc(),responseEntity.getBody().getIngredientDesc());
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 
@@ -1268,7 +1278,7 @@ public class RestaurantIntegrationTest {
     }
 
     @Test
-    public void deleteIngredient_Success() throws Exception{
+    public void deleteIngredient_CorrectRestaurantAndIngredientFoundAndDeleted_Success() throws Exception{
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -1392,7 +1402,7 @@ public class RestaurantIntegrationTest {
      */
 
     @Test
-    public void deleteRestaurantPicture_Success() {
+    public void deleteRestaurantPicture_CorrectRestaurantAndPictureFoundAndDeleted_Success() {
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -1413,14 +1423,13 @@ public class RestaurantIntegrationTest {
         pictureRepo.saveAndFlush(picture);
 
         HttpEntity<Picture> entity = new HttpEntity<>(null, headers);
-        ResponseEntity<Picture> responseEntity = testRestTemplate.exchange(
+        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
                 createURLWithPort("/api/v1/restaurant/{restaurantId}/picture"),
                 HttpMethod.DELETE,
                 entity,
-                Picture.class,
+                Void.class,
                 savedRestaurant.getRestaurantId()
                 );
-        
         assertEquals(200, responseEntity.getStatusCode().value());
    }
 
@@ -1485,7 +1494,7 @@ public class RestaurantIntegrationTest {
   }
 
     @Test
-    public void deleteFoodPicture_Success() {
+    public void deleteFoodPicture_CorrectRestaurantAndFoodPictureFoundAndDeleted_Success() {
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@gmail.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -1509,15 +1518,15 @@ public class RestaurantIntegrationTest {
         food.setRestaurant(restaurant);
         var savedFood = foodRepo.saveAndFlush(food);
 
-        ResponseEntity<Picture> responseEntity = testRestTemplate.exchange(
+        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
                 createURLWithPort("/api/v1/restaurant/{restaurantId}/food/{foodId}/picture"),
                 HttpMethod.DELETE,
                 new HttpEntity<Object>(headers),
-                Picture.class,
+                Void.class,
                 savedRestaurant.getRestaurantId(),
                 savedFood.getFoodId()
                 );
-       
+
         assertEquals(200, responseEntity.getStatusCode().value());
     }
 

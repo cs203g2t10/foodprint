@@ -26,8 +26,8 @@ import foodprint.backend.service.RestaurantService;
 import foodprint.backend.model.Reservation.ReservationStatus;
 import foodprint.backend.model.LineItem;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -147,7 +147,7 @@ public class RestaurantServiceTest {
         restaurant.setAllFood(allFood);
         restaurant.setPicture(pic);
         reservationList = new ArrayList<>();
-        reservation = new Reservation(user, LocalDateTime.now(), 5, true, LocalDateTime.now(),
+        reservation = new Reservation(user, LocalDateTime.now().plusDays(1), 5, true, LocalDateTime.now(),
                 ReservationStatus.UNPAID, lineItems, restaurant);
         reservationList.add(reservation);
         startDate = LocalDate.now();
@@ -157,6 +157,7 @@ public class RestaurantServiceTest {
         foodIngreQuantitySet = new HashSet<>();
         foodIngredientQuantity = new FoodIngredientQuantity(food, ingredient, 1);
         foodIngreQuantitySet.add(foodIngredientQuantity);
+        food.setFoodIngredientQuantity(foodIngreQuantitySet);
         editFoodDTO = new EditFoodDTO();
         ReflectionTestUtils.setField(restaurant, "restaurantId", restaurantId);
         ReflectionTestUtils.setField(ingredient, "ingredientId", ingredientId);
@@ -313,7 +314,7 @@ public class RestaurantServiceTest {
     // -----------Food-related Testing-----------
 
     @Test
-    void addFood_NewFoodMoreThanOneIngredient_ReturnFood() {
+    void addFood_newFoodHasIngredient_ReturnFood() {
         FoodDTO newFoodDTO = new FoodDTO();
         newFoodDTO.setFoodDesc("desc");
         newFoodDTO.setFoodName("Sushi");
@@ -371,7 +372,7 @@ public class RestaurantServiceTest {
         restaurantService.create(restaurant);
         Food rslt = restaurantService.editFood(restaurantId, foodId, editFoodDTO);
 
-        assertNotNull(rslt);
+        assertEquals(food,rslt);
         verify(foodRepo).findById(foodId);
         verify(foodRepo).saveAndFlush(food);
     }
@@ -498,7 +499,7 @@ public class RestaurantServiceTest {
 
         Map<String, Integer> foodMap = restaurantService.calculateFoodNeededBetween(restaurant, startDate, endDate);
 
-        assertNotNull(foodMap);
+        assertTrue(foodMap.size() > 0);
         verify(reservationRepo).findByRestaurantAndDateBetween(restaurant, start, end);
     }
 
@@ -769,7 +770,7 @@ public class RestaurantServiceTest {
         Map<Ingredient, Integer> ingredientMap = restaurantService.calculateIngredientsNeededBetween(restaurant,
                 startDate, endDate);
 
-        assertNotNull(ingredientMap);
+        assertTrue(ingredientMap.size() > 0);
         verify(reservationRepo).findByRestaurantAndDateBetween(restaurant, start, end);
     }
 

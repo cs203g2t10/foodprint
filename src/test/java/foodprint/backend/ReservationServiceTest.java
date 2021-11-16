@@ -159,12 +159,13 @@ public class ReservationServiceTest {
     void getUserUpcomingReservations_UserFound_ReturnList() {
         reservation.setDate(LocalDateTime.now().plusDays(10));
         reservationList.add(reservation);
-        when(reservations.findByUser(any(User.class))).thenReturn(reservationList);
+        user.setReservations(reservationList);
+        when(reservations.findByUserAndDateAfter(any(User.class), any(LocalDateTime.class))).thenReturn(reservationList);
 
         List<Reservation> result = reservationService.getUserUpcomingReservations(user);
 
         assertEquals(reservationList, result);
-        verify(reservations).findByUser(user);
+        verify(reservations).findByUserAndDateAfter(any(User.class), any(LocalDateTime.class));
     }
 
     @Test
@@ -172,12 +173,12 @@ public class ReservationServiceTest {
         reservationList.add(reservation);
         user.setReservations(reservationList);
         reservation.setDate(LocalDateTime.now().minusDays(10));
-        when(reservations.findByUser(any(User.class))).thenReturn(reservationList);
+        when(reservations.findByUserAndDateBefore(any(User.class), any(LocalDateTime.class))).thenReturn(reservationList);
 
         List<Reservation> result = reservationService.getUserPastReservations(user);
 
         assertEquals(reservationList, result);
-        verify(reservations).findByUser(user);
+        verify(reservations).findByUserAndDateBefore(any(User.class), any(LocalDateTime.class));
     }
 
     @Test

@@ -230,7 +230,7 @@ public class RestaurantController {
             Discount savedDiscount = service.createDiscount(restaurantId, newDiscount);
             return new ResponseEntity<>(savedDiscount, HttpStatus.CREATED);
         } catch (AlreadyExistsException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
         
     }
