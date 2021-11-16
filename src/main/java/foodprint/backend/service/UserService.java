@@ -13,8 +13,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import foodprint.backend.config.AuthHelper;
 import foodprint.backend.exceptions.AlreadyExistsException;
 import foodprint.backend.exceptions.BadRequestException;
+import foodprint.backend.exceptions.InsufficientPermissionsException;
 import foodprint.backend.exceptions.InvalidException;
 import foodprint.backend.exceptions.MailException;
 import foodprint.backend.exceptions.NotFoundException;
@@ -37,6 +39,10 @@ public class UserService {
     private EmailService emailService;
 
     private RestaurantRepo restaurantRepo;
+
+    private static final Set<String> VALID_ROLES_SET = Set.of("FP_ADMIN", "FP_MANAGER", "FP_USER", "FP_UNVERIFIED");
+
+    private static final String USER_NOT_FOUND = "User not found";
 
     @Autowired
     UserService(UserRepo repo, PasswordEncoder passwordEncoder, TokenRepo tokenRepo, EmailService emailService,
@@ -73,7 +79,16 @@ public class UserService {
 
     @PreAuthorize("hasAnyAuthority('FP_ADMIN')")
     public User getUser(Long id) {
-        return this.userRepo.findById(id).orElseThrow(() -> new NotFoundException("User not found"));
+        return this.userRepo.findById(id).orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
+    }
+
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER', 'FP_USER')")
+    public User protectedGetUser(Long id) {
+        User currentUser = AuthHelper.getCurrentUser();
+        if (!currentUser.getId().equals(id)) {
+            throw new NotFoundException("Unable to retrieve user.");
+        }
+        return this.userRepo.findById(id).orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
     }
 
     public User unprotectedGetUser(Long id) {
@@ -108,14 +123,16 @@ public class UserService {
             String encodedPassword = passwordEncoder.encode(plaintextPassword);
             existingUser.setPassword(encodedPassword);
         }
+        if (updatedUser.getRestaurant() != null) {
+            existingUser.setRestaurant(updatedUser.getRestaurant());
+        }
         if (updatedUser.getRoles() != null) {
             String[] roles = updatedUser.getRoles().split(",");
             Set<String> filteredRoles = new HashSet<>();
 
             for (String role : roles) {
-                role = role.strip();
-                if (role.equals("FP_ADMIN") || role.equals("FP_MANAGER") || role.equals("FP_USER")
-                        || role.equals("FP_UNVERIFIED")) {
+                role = role.strip().toUpperCase();
+                if (VALID_ROLES_SET.contains(role)) {
                     filteredRoles.add(role);
                 }
             }
@@ -127,16 +144,20 @@ public class UserService {
             existingUser.setRoles(String.join(",", filteredRoles));
         }
 
+        if (updatedUser.getLastLogin() != null) {
+            existingUser.setLastLogin(updatedUser.getLastLogin());
+        }
+
+        if (updatedUser.getRegisteredOn() != null) {
+            existingUser.setRegisteredOn(updatedUser.getRegisteredOn());
+        }
+
         if (updatedUser.getVaccinationDob() != null) {
             existingUser.setVaccinationDob(updatedUser.getVaccinationDob());
         }
 
         if (updatedUser.getVaccinationName() != null) {
             existingUser.setVaccinationName(updatedUser.getVaccinationName());
-        }
-
-        if (updatedUser.getRestaurant() != null) {
-            existingUser.setRestaurant(updatedUser.getRestaurant());
         }
 
         return this.userRepo.saveAndFlush(existingUser);
@@ -154,20 +175,20 @@ public class UserService {
             return userRepo.findAll(page);
         }
 
-        return userRepo.findByEmail(page, emailSearch);
+        return userRepo.findByEmailContains(page, emailSearch);
     }
 
     // --------------------------- PASSWORD RESET ---------------------------------
 
     public void requestPasswordReset(String email) {
-        User user = userRepo.findByEmail(email).orElseThrow(() -> new NotFoundException("User not found"));
+        User user = userRepo.findByEmail(email).orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
 
         Token token = new Token(Token.PASSWORD_RESET_REQUEST_TOKEN, user);
         tokenRepo.save(token);
 
         // Craft and send the email
         String emailBody = String.format("Hi %s, \n\n"
-                + "You have requested for a password reset! Please use this link to set a new password http://foodprint.works/resetpassword?token=%s \n\n"
+                + "You have requested for a password reset! Please use this link to set a new password http://ui.foodprint.works/resetpassword?token=%s \n\n"
                 + "This verification token will expire in 48 hours. You can safely ignore this email if you did not request for it. \n\n"
                 + "Regards,\nFoodprint Support", user.getFirstName(), token.getToken());
 
@@ -207,7 +228,15 @@ public class UserService {
         userRepo.save(user);
     }
 
+    // --------------------------- FAVOURITE RESTAURANTS ---------------------------------
+
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public void addFavouriteRestaurant(User user, Long restaurantId) {
+        User currentUser = AuthHelper.getCurrentUser();
+        if (!currentUser.equals(user)) {
+            throw new InsufficientPermissionsException("Not allowed!");
+        }
+
         Restaurant restaurant = getRestaurantById(restaurantId);
         Set<Restaurant> favouriteRestaurants = new HashSet<>();
         if (user.getFavouriteRestaurants() != null) {
@@ -220,7 +249,13 @@ public class UserService {
         userRepo.saveAndFlush(user);
     }
 
+    @PreAuthorize("hasAnyAuthority('FP_USER')")
     public void deleteFavouriteRestaurant(User user, Long restaurantId) {
+        User currentUser = AuthHelper.getCurrentUser();
+        if (!currentUser.equals(user)) {
+            throw new InsufficientPermissionsException("Not allowed!");
+        }
+        
         Restaurant restaurant = getRestaurantById(restaurantId);
         Set<Restaurant> favouriteRestaurants = user.getFavouriteRestaurants();
         if (favouriteRestaurants == null || !favouriteRestaurants.contains(restaurant)) {

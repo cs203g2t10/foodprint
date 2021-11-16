@@ -1,5 +1,6 @@
 package foodprint.backend.model;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 import javax.persistence.Column;
@@ -8,22 +9,25 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotEmpty;
 
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Entity
 @Table
 @EnableTransactionManagement
-public class Picture {
+public class Picture implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "pictureId" )
     private Long pictureId;
 
     @Column(name = "title" )
+    @NotEmpty(message = "Picture title should not be empty")
     private String title;
 
     @Column(name = "description" )
+    @NotEmpty(message = "Picture description should not be empty")
     private String description;
 
     @Column(name = "imagePath" )

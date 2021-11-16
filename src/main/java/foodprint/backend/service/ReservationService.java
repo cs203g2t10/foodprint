@@ -1,7 +1,5 @@
 package foodprint.backend.service;
 
-import java.util.Optional;
-
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
@@ -23,6 +21,7 @@ import foodprint.backend.model.Reservation;
 import foodprint.backend.model.ReservationRepo;
 import foodprint.backend.model.User;
 import foodprint.backend.model.Reservation.ReservationStatus;
+import foodprint.backend.exceptions.InvalidException;
 import foodprint.backend.exceptions.NotFoundException;
 
 import java.time.DayOfWeek;
@@ -62,10 +61,13 @@ public class ReservationService {
      * @param id
      * @return
      */
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
-    public Reservation getReservationById(Long id) {
-        Optional<Reservation> reservation = reservationRepo.findById(id);
-        return reservation.orElseThrow(() -> new NotFoundException("Reservation not found"));
+    @PreAuthorize("hasAnyAuthority('FP_USER', 'FP_MANAGER', 'FP_ADMIN')")
+    public Reservation getReservationByIdAndUser(Long id, Long userId) {
+        return reservationRepo
+            .findByReservationIdAndUserId(id, userId)
+            .orElseThrow(
+                () -> new NotFoundException("Reservation not found")
+            );
     }
 
     /**
@@ -122,9 +124,9 @@ public class ReservationService {
      * @param pageNumber
      * @return
      */
-    @PreAuthorize("hasAnyAuthority('FP_ADMIN', 'FP_MANAGER')")
-    public Page<Reservation> getRestaurantUpcomingReservations(Restaurant restaurant, LocalDateTime after, LocalDateTime before, int pageNumber) {
-        Pageable pageReq = PageRequest.of(pageNumber, 10);
+    @PreAuthorize("hasAnyAuthority('FP_ADMIN') or (hasAnyAuthority('FP_MANAGER') and #restaurant.restaurantId == #requestorRestaurant.restaurantId)")
+    public Page<Reservation> getRestaurantUpcomingReservations(Restaurant restaurant, Restaurant requestorRestaurant, LocalDateTime after, LocalDateTime before, int pageNumber) {
+        Pageable pageReq = PageRequest.of(pageNumber, 6);
         return reservationRepo.findByRestaurantAndDateBetween(pageReq, restaurant, after, before);
     }
 
@@ -144,8 +146,9 @@ public class ReservationService {
         Restaurant restaurant = restaurantService.get(req.getRestaurantId());
         LocalDateTime dateOfReservation = req.getDate();
         LocalDateTime startTime = dateOfReservation.truncatedTo(ChronoUnit.HOURS);
+        List<LocalDateTime> upcomingSlots = getUpcomingSlots(restaurant.getRestaurantId());
 
-        if (!this.slotAvailable(restaurant, startTime)) {
+        if (!upcomingSlots.contains(startTime)) {
             String msg = String.format("Slot not available for %s on %d %s %d at %d:%dHr", restaurant.getRestaurantName(), dateOfReservation.getDayOfMonth(), dateOfReservation.getMonth(), dateOfReservation.getYear(), dateOfReservation.getHour(), dateOfReservation.getMinute());
             throw new NotFoundException(msg);
         }
@@ -156,7 +159,7 @@ public class ReservationService {
                     .pax(req.getPax())
                     .isVaccinated(req.getIsVaccinated())
                     .reservedOn(LocalDateTime.now())
-                    .status(ReservationStatus.ONGOING)
+                    .status(ReservationStatus.UNPAID)
                     .restaurant(restaurant);
 
         HashMap<Food, Integer> lineItemsHashMap = new HashMap<>();
@@ -182,22 +185,21 @@ public class ReservationService {
         return reservationRepo.saveAndFlush(reservation);
     }
     
-    @PreAuthorize("hasAnyAuthority('FP_USER')")
+    @PreAuthorize("hasAnyAuthority('FP_USER', 'FP_ADMIN')")
     public Reservation update(Long id, Reservation reservation) {
-
-        LocalDateTime startTime = reservation.getDate().truncatedTo(ChronoUnit.HOURS);
-        if (!this.slotAvailable(reservation.getRestaurant(), startTime)) {
-            throw new NotFoundException("Slot not found");
-        }
 
         Reservation currentReservation = reservationRepo.getById(id);
 
-        if (reservation.getIsVaccinated() != null) {
-            currentReservation.setIsVaccinated(reservation.getIsVaccinated());
+        if (reservation.getDate() != null) {
+            LocalDateTime startTime = reservation.getDate().truncatedTo(ChronoUnit.HOURS);
+            if (!this.slotAvailable(reservation.getRestaurant(), startTime)) {
+                throw new NotFoundException("Slot not found");
+            }
+            currentReservation.setDate(reservation.getDate());
         }
 
-        if (reservation.getDate() != null) {
-            currentReservation.setDate(reservation.getDate());
+        if (reservation.getIsVaccinated() != null) {
+            currentReservation.setIsVaccinated(reservation.getIsVaccinated());
         }
 
         if (reservation.getLineItems() != null) {
@@ -227,54 +229,74 @@ public class ReservationService {
     }
 
     @PreAuthorize("hasAnyAuthority('FP_ADMIN')")
-    public void delete(Reservation reservation) {
-        reservationRepo.delete(reservation);
+    public void deleteReservationById(Long reservationId) {
+        if (reservationId == null) {
+            throw new InvalidException("reservationId cannot be null");
+        }
+        reservationRepo.deleteById(reservationId);
     }
 
-    public List<LocalDateTime> getAllAvailableSlotsByDateAndRestaurant(Long restaurantId, String date) {
+    public List<LocalDateTime> getUpcomingSlots(Long restaurantId) {
         List<LocalDateTime> availableSlots = new ArrayList<>();
         Restaurant restaurant = restaurantService.get(restaurantId);
 
-        LocalDate localDate = LocalDate.parse(date);
-        LocalDateTime startTime;
-        LocalDateTime endTime;
+        LocalDate currentDate = LocalDate.now().plusDays(7);
+        LocalDate endDate = LocalDate.now().plusDays(30);
 
-        Integer openingHour = restaurant.getRestaurantWeekdayOpeningHour();
-        Integer openingMinutes = restaurant.getRestaurantWeekdayOpeningMinutes();
-        Integer closingHour = restaurant.getRestaurantWeekdayClosingHour();
-        Integer closingMinutes = restaurant.getRestaurantWeekdayClosingMinutes();
-        
-        if (localDate.getDayOfWeek() == DayOfWeek.SATURDAY || localDate.getDayOfWeek() == DayOfWeek.SUNDAY) {
-            openingHour = restaurant.getRestaurantWeekendOpeningHour();
-            openingMinutes = restaurant.getRestaurantWeekendOpeningMinutes();
-            closingHour = restaurant.getRestaurantWeekendClosingHour();
-            closingMinutes = restaurant.getRestaurantWeekendClosingMinutes();
-        }
+        List<Reservation> reservations = reservationRepo.findByRestaurantAndDateBetween(
+            restaurant, 
+            currentDate.atStartOfDay(), 
+            endDate.atStartOfDay()
+        );
 
-        if (openingMinutes == 0) {
-            startTime = localDate.atTime(openingHour, 0);
-        } else if (openingMinutes <= 30) {
-            startTime = localDate.atTime(openingHour, 30);
-        } else {
-            startTime = localDate.atTime(openingHour + 1, 0);
-        }
+        while (currentDate.isBefore(endDate)) {
+            LocalDateTime startTime;
+            LocalDateTime endTime;
 
-        endTime = localDate.atTime(closingHour, closingMinutes);
-
-        // As long as there is time left, then insert slot
-        while (!startTime.equals(endTime) && startTime.isBefore(endTime)) {
-            if (this.slotAvailable(restaurant, startTime)) {
-                availableSlots.add(startTime);
+            Integer openingHour = restaurant.getRestaurantWeekdayOpeningHour();
+            Integer openingMinutes = restaurant.getRestaurantWeekdayOpeningMinutes();
+            Integer closingHour = restaurant.getRestaurantWeekdayClosingHour();
+            Integer closingMinutes = restaurant.getRestaurantWeekdayClosingMinutes();
+            
+            if (currentDate.getDayOfWeek() == DayOfWeek.SATURDAY || currentDate.getDayOfWeek() == DayOfWeek.SUNDAY) {
+                openingHour = restaurant.getRestaurantWeekendOpeningHour();
+                openingMinutes = restaurant.getRestaurantWeekendOpeningMinutes();
+                closingHour = restaurant.getRestaurantWeekendClosingHour();
+                closingMinutes = restaurant.getRestaurantWeekendClosingMinutes();
             }
-            startTime = startTime.plusMinutes(30);
+
+            if (openingMinutes == 0) {
+                startTime = currentDate.atTime(openingHour, 0);
+            } else if (openingMinutes <= 30) {
+                startTime = currentDate.atTime(openingHour, 30);
+            } else {
+                startTime = currentDate.atTime(openingHour + 1, 0);
+            }
+
+            endTime = currentDate.atTime(closingHour, closingMinutes);
+
+            // As long as there is time left, then insert slot
+            while (!startTime.equals(endTime) && startTime.isBefore(endTime)) {
+                final LocalDateTime startDateTime = startTime;
+                long currentReservations = reservations.stream().filter(res -> 
+                    res.getDate().equals(startDateTime)
+                ).count();
+                long capacity = restaurant.getRestaurantTableCapacity();
+                if (currentReservations < capacity) {
+                    availableSlots.add(startTime);
+                }
+                startTime = startTime.plusMinutes(30);
+            }
+
+            currentDate = currentDate.plusDays(1);
         }
 
         return availableSlots;
     }
 
     @PreAuthorize("hasAnyAuthority('FP_USER')")
-    public void setPaid(Long reservationId) {
-        Reservation reservation = getReservationById(reservationId);
+    public void setPaid(Long reservationId, Long userId) {
+        Reservation reservation = getReservationByIdAndUser(reservationId, userId);
         reservation.setStatus(ReservationStatus.PAID);
         reservationRepo.saveAndFlush(reservation);
     }

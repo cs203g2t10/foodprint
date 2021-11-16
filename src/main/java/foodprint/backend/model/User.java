@@ -7,10 +7,12 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
@@ -21,6 +23,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import foodprint.backend.config.CustomAuthorityDeserializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
@@ -29,7 +32,6 @@ import jakarta.validation.constraints.NotNull;
 @Entity
 @Table
 @EnableTransactionManagement
-@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 public class User implements UserDetails {
 
     // Properties
@@ -43,26 +45,27 @@ public class User implements UserDetails {
     @Column(name = "email", nullable=false, unique=true)
     @Schema(defaultValue="bobbytan@gmail.com")
     @Email
+    @NotEmpty(message = "Email should not be empty")
     private String email;
 
     @Column(name = "fName", nullable = false)
     @Schema(defaultValue="Bobby")
-    @NotEmpty
+    @NotEmpty(message = "First name should not be empty")
     private String firstName;
 
     @Column(name = "lName", nullable = true)
     @Schema(defaultValue="Tan")
-    @NotEmpty
+    @NotEmpty(message = "Last name should not be empty")
     private String lastName;
 
     @Column(name = "password", nullable = false)
-    @Schema(defaultValue="SuperSecurePassw0rd")
-    @NotEmpty
+    @Schema(defaultValue="Hello123")
+    @NotEmpty(message = "Password should not be empty")
     private String password;
 
     @Column(name = "role", nullable = false)
     @Schema(defaultValue="FP_USER")
-    @NotEmpty
+    @NotEmpty(message = "Roles should not be empty")
     private String roles;
 
     @Column(name = "lastLogin", nullable = true)
@@ -239,18 +242,15 @@ public class User implements UserDetails {
         this.favouriteRestaurants = favouriteRestaurants;
     }
 
-
-
-
     @Override
+    @JsonDeserialize(using = CustomAuthorityDeserializer.class)
     @Schema(hidden=true)
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<String> roles = Arrays.asList(this.roles.split(","));
-        Set<GrantedAuthority> authorities = new HashSet<>();
-        roles.forEach(role ->
-            authorities.add(new SimpleGrantedAuthority(role.trim()))
-        );
-        return authorities;
+        List<String> userRoles = Arrays.asList(this.roles.split(","));
+        return userRoles
+            .stream()
+            .map(role -> new SimpleGrantedAuthority(role.trim()))
+            .collect(Collectors.toList());
     }
 
     @Override

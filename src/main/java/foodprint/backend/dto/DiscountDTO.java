@@ -12,17 +12,25 @@ public class DiscountDTO {
     private Long restaurantId;
 
     @Schema(defaultValue="1 for 1")
-    @NotEmpty
+    @NotEmpty(message = "Discount description should not be empty")
     @Length(min = 1)
     private String discountDescription;
 
     @Schema(defaultValue="50")
     private Integer discountPercentage;
 
+    public DiscountDTO(String discountDescription, Integer discountPercentage) {
+        this.discountDescription = discountDescription;
+        this.discountPercentage = discountPercentage;
+    }
+
     public DiscountDTO(Long restaurantId, String discountDescription, Integer discountPercentage) {
         this.restaurantId = restaurantId;
         this.discountDescription = discountDescription;
         this.discountPercentage = discountPercentage;
+    }
+
+    public DiscountDTO() {
     }
 
     public Long getRestaurantId() {

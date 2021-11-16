@@ -2,24 +2,30 @@ package foodprint.backend.dto;
 
 import java.util.Objects;
 
+import javax.validation.constraints.Email;
+
 public class UpdateUserDTO {
 
     private String firstName;
 
     private String lastName;
-    
+
+    @Email
     private String email;
 
-    private String password;
+    private String oldPassword;
+
+    private String newPassword;
 
     public UpdateUserDTO() {
     }
 
-    public UpdateUserDTO(String firstName, String lastName, String email, String password) {
+    public UpdateUserDTO(String firstName, String lastName, String email, String oldPassword, String newPassword) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
-        this.password = password;
+        this.oldPassword = oldPassword;
+        this.newPassword = newPassword;
     }
 
     public String getFirstName() {
@@ -46,12 +52,20 @@ public class UpdateUserDTO {
         this.email = email;
     }
 
-    public String getPassword() {
-        return this.password;
+    public String getNewPassword() {
+        return newPassword;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setNewPassword(String newPassword) {
+        this.newPassword = newPassword;
+    }
+
+    public String getOldPassword() {
+        return oldPassword;
+    }
+
+    public void setOldPassword(String oldPassword) {
+        this.oldPassword = oldPassword;
     }
 
     public UpdateUserDTO firstName(String firstName) {
@@ -69,8 +83,13 @@ public class UpdateUserDTO {
         return this;
     }
 
-    public UpdateUserDTO password(String password) {
-        setPassword(password);
+    public UpdateUserDTO newPassword(String newPassword) {
+        setNewPassword(newPassword);
+        return this;
+    }
+
+    public UpdateUserDTO oldPassword(String oldPassword) {
+        setOldPassword(oldPassword);
         return this;
     }
 
@@ -82,12 +101,12 @@ public class UpdateUserDTO {
             return false;
         }
         UpdateUserDTO updateUserDTO = (UpdateUserDTO) o;
-        return Objects.equals(firstName, updateUserDTO.firstName) && Objects.equals(lastName, updateUserDTO.lastName) && Objects.equals(email, updateUserDTO.email) && Objects.equals(password, updateUserDTO.password);
+        return Objects.equals(firstName, updateUserDTO.firstName) && Objects.equals(lastName, updateUserDTO.lastName) && Objects.equals(email, updateUserDTO.email) && Objects.equals(oldPassword, updateUserDTO.oldPassword) && Objects.equals(newPassword, updateUserDTO.newPassword);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(firstName, lastName, email, password);
+        return Objects.hash(firstName, lastName, email, oldPassword, newPassword);
     }
 
     @Override
@@ -96,9 +115,9 @@ public class UpdateUserDTO {
             " firstName='" + getFirstName() + "'" +
             ", lastName='" + getLastName() + "'" +
             ", email='" + getEmail() + "'" +
-            ", password='" + getPassword() + "'" +
+            ", oldPassword='" + getOldPassword() + "'" +
+            ", newPassword='" + getNewPassword() + "'" +
             "}";
     }
-    
     
 }

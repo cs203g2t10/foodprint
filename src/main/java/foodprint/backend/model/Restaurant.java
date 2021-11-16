@@ -1,5 +1,6 @@
 package foodprint.backend.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -36,7 +37,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @EnableTransactionManagement
 @JsonIgnoreProperties("food")
 
-public class Restaurant {
+public class Restaurant implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "restaurantId")
@@ -46,18 +47,19 @@ public class Restaurant {
 
     @Column(name = "restaurantName")
     @Schema(defaultValue="Sushi Tei")
-    @NotEmpty
+    @NotEmpty(message = "Restaurant name should not be empty")
     @Length(min = 1, max = 40)
     private String restaurantName;
 
     @Column(name = "restaurantDesc")
     @Schema(defaultValue="Japanese restaurant")
-    @NotEmpty
+    @NotEmpty(message = "Restaurant description should not be empty")
     @Length(min = 1)
     private String restaurantDesc;
 
     @Column(name = "restaurantLocation")
     @Schema(defaultValue="Serangoon")
+    @NotEmpty(message = "Restaurant location should not be empty")
     private String restaurantLocation;
 
     @Column(name = "priceRange")
@@ -120,7 +122,7 @@ public class Restaurant {
     @Max(59)
     private Integer restaurantWeekendClosingMinutes;
 
-    @OneToOne(optional = true)/* (mappedBy = "restaurant") */
+    @OneToOne(optional = true, cascade = CascadeType.ALL)/* (mappedBy = "restaurant") */
     private Picture picture;
 
     @ElementCollection

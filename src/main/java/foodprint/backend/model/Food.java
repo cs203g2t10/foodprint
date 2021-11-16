@@ -1,5 +1,6 @@
 package foodprint.backend.model;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,7 +28,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Entity
 @Table
 @EnableTransactionManagement
-public class Food {
+public class Food implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,7 +38,7 @@ public class Food {
 
     @Column(name = "foodName")
     @Schema(defaultValue="Sashimi")
-    @NotEmpty(message = "The food description cannot be empty.")
+    @NotEmpty(message = "Food name should not be empty")
     @Size(min = 1, max = 40, message = "The food name has to be between 1 to 40 letters.")
     private String foodName;
 
@@ -60,7 +61,7 @@ public class Food {
     private Double foodDiscount;
 
     @OneToMany(mappedBy = "food", cascade = CascadeType.ALL)
-    private Set<FoodIngredientQuantity> foodIngredientQuantity = new HashSet<FoodIngredientQuantity>();
+    private Set<FoodIngredientQuantity> foodIngredientQuantity = new HashSet<>();
 
     @JsonIgnore
     @OneToMany(mappedBy = "food", cascade = CascadeType.ALL, orphanRemoval = true)

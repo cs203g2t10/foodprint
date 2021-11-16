@@ -20,13 +20,13 @@ public class JwtTokenUtil {
     @Value("${FOODPRINT_JWT_KEY}")
     private String jwtSecret;
 
-    private static final String jwtIssuer = "foodprint.io";
+    private static final String JWT_ISSUER = "foodprint.io";
     private final Logger loggr = LoggerFactory.getLogger(this.getClass());
 
     public String generateAccessToken(User user) {
          JwtBuilder token = Jwts.builder()
                 .setSubject(user.getUsername())
-                .setIssuer(jwtIssuer)
+                .setIssuer(JWT_ISSUER)
                 .setIssuedAt(new Date())
                 .setHeaderParam("userId", user.getId())
                 .setHeaderParam("userFname", user.getFirstName())

@@ -6,6 +6,7 @@ import foodprint.backend.dto.FoodIngredientQuantityDTO;
 import foodprint.backend.exceptions.DeleteFailedException;
 import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.exceptions.AlreadyExistsException;
+import foodprint.backend.exceptions.BadRequestException;
 import foodprint.backend.model.Discount;
 import foodprint.backend.model.DiscountRepo;
 import foodprint.backend.model.Food;
@@ -38,7 +39,6 @@ import java.util.Map;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -54,7 +54,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 public class RestaurantServiceTest {
-    
+
     @Mock
     private RestaurantRepo repo;
 
@@ -67,7 +67,7 @@ public class RestaurantServiceTest {
     @Mock
     private IngredientRepo ingredientRepo;
 
-    @Mock 
+    @Mock
     private PictureRepo pictureRepo;
 
     @Mock
@@ -86,15 +86,11 @@ public class RestaurantServiceTest {
     private Long foodId;
     private Ingredient ingredient;
     private List<String> restaurantCategories;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
     private List<Reservation> reservationList;
     private List<LineItem> lineItems;
     private LineItem lineItem;
     private Reservation reservation;
-    private Long reservationId;
     private List<Restaurant> allRestaurants;
-    private List<String> pictures;
     private List<Food> allFood;
     private Discount discount;
     private Long discountId;
@@ -108,7 +104,6 @@ public class RestaurantServiceTest {
     private LocalDate startDate;
     private LocalDateTime end;
     private LocalDate endDate;
-    private HashMap<String, Integer> map;
     private EditFoodDTO editFoodDTO;
     private Set<FoodIngredientQuantity> foodIngreQuantitySet;
     private FoodIngredientQuantity foodIngredientQuantity;
@@ -118,28 +113,25 @@ public class RestaurantServiceTest {
         restaurantCategories = new ArrayList<>();
         restaurantCategories.add("Japanese");
         restaurantCategories.add("Rice");
-        restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+        restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10,
+                restaurantCategories);
         restaurantId = 1L;
         lineItems = new ArrayList<LineItem>();
-        reservation = new Reservation(user, LocalDateTime.now(), 5, true, LocalDateTime.now(), ReservationStatus.ONGOING, lineItems, restaurant);
-        reservationId = 1L;
+        reservation = new Reservation(user, LocalDateTime.now(), 5, true, LocalDateTime.now(),
+                ReservationStatus.UNPAID, lineItems, restaurant);
         ingredientsDTOList = new ArrayList<>();
         food = new Food("sashimi", 10.0, 0.0);
         foodId = 1L;
         lineItem = new LineItem(food, reservation, 1);
         lineItems.add(lineItem);
-        startTime = reservation.getDate();
-        endTime = startTime.plusHours(1);
         reservationList = new ArrayList<>();
         allRestaurants = new ArrayList<>();
         allRestaurants.add(restaurant);
-        pictures = new ArrayList<>();
         allFood = new ArrayList<>();
         allFood.add(food);
         ingredient = new Ingredient("Salmon");
         ingredients = new ArrayList<>();
         ingredients.add(ingredient);
-        ingredientsDTOList = new ArrayList<>();
         ingredientId = 1L;
         discount = new Discount("1 For 1", 30);
         discountId = 1L;
@@ -154,14 +146,14 @@ public class RestaurantServiceTest {
         discount.setRestaurant(restaurant);
         restaurant.setAllFood(allFood);
         restaurant.setPicture(pic);
-        map = new HashMap<>();
         reservationList = new ArrayList<>();
-        reservation = new Reservation(user, LocalDateTime.now(), 5, true, LocalDateTime.now(), ReservationStatus.ONGOING, lineItems, restaurant);
+        reservation = new Reservation(user, LocalDateTime.now(), 5, true, LocalDateTime.now(),
+                ReservationStatus.UNPAID, lineItems, restaurant);
         reservationList.add(reservation);
         startDate = LocalDate.now();
         endDate = LocalDate.now().plusDays(2);
         start = startDate.minusDays(1).atTime(0, 0);
-        end = endDate.plusDays(1).atTime(0,0);
+        end = endDate.plusDays(1).atTime(0, 0);
         foodIngreQuantitySet = new HashSet<>();
         foodIngredientQuantity = new FoodIngredientQuantity(food, ingredient, 1);
         foodIngreQuantitySet.add(foodIngredientQuantity);
@@ -172,17 +164,17 @@ public class RestaurantServiceTest {
         ReflectionTestUtils.setField(discount, "discountId", discountId);
         ReflectionTestUtils.setField(pic, "pictureId", pictureId);
     }
-    //-------Restaurant-related Testing---------\
+    // --------Restaurant-related Testing--------
 
     @Test
-    void getAllRestaurant_RestaurantsExist_ReturnAllRestaurant() {
+    void getAllRestaurants_RestaurantsExist_ReturnAllRestaurants() {
         allRestaurants.add(restaurant);
 
         when(repo.findAll()).thenReturn(allRestaurants);
 
         List<Restaurant> restaurants = restaurantService.getAllRestaurants();
 
-        assertNotNull(restaurants);
+        assertEquals(allRestaurants, restaurants);
         verify(repo).findAll();
     }
 
@@ -192,7 +184,7 @@ public class RestaurantServiceTest {
 
         Restaurant createdRestaurant = restaurantService.create(restaurant);
 
-        assertNotNull(createdRestaurant);
+        assertEquals(restaurant, createdRestaurant);
         verify(repo).saveAndFlush(restaurant);
     }
 
@@ -203,85 +195,96 @@ public class RestaurantServiceTest {
 
         Restaurant updatedRestaurant = restaurantService.update(restaurantId, restaurant);
 
-        assertNotNull(updatedRestaurant);
+        assertEquals(restaurant, updatedRestaurant);
         verify(repo).findById(restaurantId);
         verify(repo).saveAndFlush(restaurant);
     }
 
     @Test
-    void updateRestaurant_RestaurantNotFound_ReturnError() {
-        when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
+    void updateRestaurant_RestaurantNotFound_ReturnException() {
+        when(repo.findById(any(Long.class))).thenReturn(Optional.empty());
 
+        String exceptionMsg = "";
         try {
             restaurantService.update(restaurantId, restaurant);
         } catch (NotFoundException e) {
-            assertEquals("Restaurant not found", e.getMessage());
+            exceptionMsg = e.getMessage();
         }
-
+        assertEquals("Restaurant not found", exceptionMsg);
         verify(repo).findById(restaurantId);
     }
 
     @Test
-    void deleteRestaurant_RestaurantFound_Return() {
+    void deleteRestaurant_RestaurantFound_Success() {
         doNothing().when(repo).delete(any(Restaurant.class));
         when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant)).thenReturn(Optional.empty());
 
-        restaurantService.create(restaurant);
-        restaurantService.delete(restaurantId);
+        String exceptionMsg = "";
+        try {
+            restaurantService.delete(restaurantId);
+        } catch (Exception e) {
+            exceptionMsg = e.getMessage();
+        }
 
-        assertNotNull(restaurant);
+        assertEquals("", exceptionMsg);
         verify(repo, times(2)).findById(restaurantId);
         verify(repo).delete(restaurant);
     }
 
     @Test
-    void deleteRestaurant_RestaurantNotFound_ReturnError() {
+    void deleteRestaurant_RestaurantNotFound_ReturnException() {
         when(repo.findById(any(Long.class))).thenReturn(Optional.empty());
 
+        String exceptionMsg = "";
         try {
             restaurantService.delete(restaurantId);
         } catch (NotFoundException e) {
-            assertEquals("Restaurant not found", e.getMessage());
+            exceptionMsg = e.getMessage();
         }
 
+        assertEquals("Restaurant not found", exceptionMsg);
         verify(repo).findById(restaurantId);
     }
 
     @Test
-    void deleteRestaurant_RestaurantFoundButUnableToDelete_ReturnError() {
+    void deleteRestaurant_RestaurantFoundButUnableToDelete_ReturnException() {
         when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
         doNothing().when(repo).delete(any(Restaurant.class));
 
+        String exceptionMsg = "";
         try {
             restaurantService.delete(restaurantId);
-        } catch(DeleteFailedException e) {
-            assertEquals("Restaurant could not be deleted", e.getMessage());
+        } catch (DeleteFailedException e) {
+            exceptionMsg = e.getMessage();
         }
 
+        assertEquals("Restaurant could not be deleted", exceptionMsg);
         verify(repo, times(2)).findById(restaurantId);
         verify(repo).delete(restaurant);
     }
 
     @Test
-    void getRestaurant_ExistingRestaurant_ReturnRestaurant() {
-        when (repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
+    void getRestaurant_RestaurantExists_ReturnRestaurant() {
+        when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
 
         Restaurant getRestaurant = restaurantService.get(restaurantId);
 
-        assertNotNull(getRestaurant);
+        assertEquals(restaurant, getRestaurant);
         verify(repo).findById(restaurantId);
     }
 
     @Test
-    void getRestaurant_RestaurantDoesNotExist_ReturnError() {
+    void getRestaurant_RestaurantDoesNotExist_ReturnException() {
         when(repo.findById(any(Long.class))).thenReturn(Optional.empty());
 
+        String exceptionMsg = "";
         try {
             restaurantService.get(restaurantId);
         } catch (NotFoundException e) {
-            assertEquals("Restaurant not found", e.getMessage());
+            exceptionMsg = e.getMessage();
         }
 
+        assertEquals("Restaurant not found", exceptionMsg);
         verify(repo).findById(restaurantId);
     }
 
@@ -290,7 +293,8 @@ public class RestaurantServiceTest {
         when(repo.findAll()).thenReturn(allRestaurants);
 
         List<String> getCategories = restaurantService.getCategories();
-        assertNotNull(getCategories);
+
+        assertEquals(restaurantCategories, getCategories);
         verify(repo).findAll();
     }
 
@@ -299,264 +303,326 @@ public class RestaurantServiceTest {
         String category = "Japanese";
 
         when(repo.findAll()).thenReturn(allRestaurants);
-        
+
         List<Restaurant> getRestaurantsRelatedToCategory = restaurantService.getRestaurantsRelatedToCategory(category);
-        assertNotNull(getRestaurantsRelatedToCategory);
+
+        assertEquals(allRestaurants, getRestaurantsRelatedToCategory);
         verify(repo).findAll();
     }
 
-    //------------Food-related Testing---------------
+    // -----------Food-related Testing-----------
 
     @Test
-    void addFood_newFood_ReturnSavedFood() {
-        Food newFood = new Food("Sushi", 30.0, 10.0);
+    void addFood_NewFoodMoreThanOneIngredient_ReturnFood() {
         FoodDTO newFoodDTO = new FoodDTO();
+        newFoodDTO.setFoodDesc("desc");
+        newFoodDTO.setFoodName("Sushi");
+        newFoodDTO.setFoodPrice(10.0);
+        Food newFood = new Food(newFoodDTO.getFoodName(), newFoodDTO.getFoodDesc(), newFoodDTO.getFoodPrice(), 10.0);
+
+        FoodIngredientQuantityDTO foodIngredientQuantityDTO = new FoodIngredientQuantityDTO();
+        foodIngredientQuantityDTO.setIngredientId(ingredient.getIngredientId());
+        foodIngredientQuantityDTO.setQuantity(2);
+        ingredientsDTOList.add(foodIngredientQuantityDTO);
         newFoodDTO.setIngredientQuantityList(ingredientsDTOList);
+
         allFood.add(newFood);
-        
+
         when(repo.findByRestaurantId(any(Long.class))).thenReturn(restaurant);
         when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
-        when(foodRepo.saveAndFlush(any(Food.class))).thenReturn(food);
+        when(foodRepo.saveAndFlush(any(Food.class))).thenReturn(newFood);
 
         restaurantService.create(restaurant);
         Food savedFood = restaurantService.addFood(restaurantId, newFoodDTO);
 
-        assertNotNull(savedFood);
+        assertEquals(newFood, savedFood);
         verify(repo).findById(restaurantId);
         verify(repo).findByRestaurantId(restaurantId);
         verify(foodRepo).saveAndFlush(any(Food.class));
     }
 
     @Test
-    void updateFood_FoodExist_ReturnUpdatedFood() {
+    void addFood_NewFoodNoIngredient_ReturnBadRequest() {
+        FoodDTO newFoodDTO = new FoodDTO();
+        newFoodDTO.setFoodDesc("desc");
+        newFoodDTO.setFoodName("Sushi");
+        newFoodDTO.setFoodPrice(10.0);
+        Food newFood = new Food(newFoodDTO.getFoodName(), newFoodDTO.getFoodDesc(), newFoodDTO.getFoodPrice(), 10.0);
+        newFoodDTO.setIngredientQuantityList(ingredientsDTOList);
+
+        allFood.add(newFood);
+
+        restaurantService.create(restaurant);
+        String exceptionMsg = "";
+        try {
+            restaurantService.addFood(restaurantId, newFoodDTO);
+        } catch(BadRequestException e) {
+            exceptionMsg = e.getMessage();
+        }
+
+        assertEquals("Food should have at least 1 ingredient", exceptionMsg);
+    }
+
+    @Test
+    void updateFood_FoodExists_ReturnUpdatedFood() {
         when(foodRepo.findById(any(Long.class))).thenReturn(Optional.of(food));
         when(foodRepo.saveAndFlush(any(Food.class))).thenReturn(food);
 
         restaurantService.create(restaurant);
-        restaurantService.editFood(restaurantId, foodId, editFoodDTO);
+        Food rslt = restaurantService.editFood(restaurantId, foodId, editFoodDTO);
 
+        assertNotNull(rslt);
         verify(foodRepo).findById(foodId);
         verify(foodRepo).saveAndFlush(food);
     }
 
     @Test
-    void updateFood_FoodDoNotExist_Return() {
+    void updateFood_FoodDoesNotExist_ReturnException() {
         EditFoodDTO anotherEditedFood = new EditFoodDTO();
         Long anotherFoodId = 2L;
 
         when(foodRepo.findById(any(Long.class))).thenReturn(Optional.empty());
 
         restaurantService.create(restaurant);
+        String exceptionMsg = "";
         try {
             restaurantService.editFood(restaurantId, anotherFoodId, anotherEditedFood);
-        } catch(NotFoundException e) {
-            assertEquals("Food requested could not be found", e.getMessage());
+        } catch (NotFoundException e) {
+            exceptionMsg = e.getMessage();
         }
 
+        assertEquals("Food requested could not be found", exceptionMsg);
         verify(foodRepo).findById(anotherFoodId);
     }
 
     @Test
-    void updateFood_FoodExistButInWrongRestaurant_ReturnError() {
+    void updateFood_FoodExistButInWrongRestaurant_ReturnException() {
         Long anotherRestaurantId = 2L;
 
         when(foodRepo.findById(any(Long.class))).thenReturn(Optional.of(food));
 
         restaurantService.create(restaurant);
+        String exceptionMsg = "";
         try {
             restaurantService.editFood(anotherRestaurantId, foodId, editFoodDTO);
         } catch (NotFoundException e) {
-            assertEquals("Food requested could not be found at this restaurant", e.getMessage());
+            exceptionMsg = e.getMessage();
         }
 
+        assertEquals("Food requested could not be found at this restaurant", exceptionMsg);
         verify(foodRepo).findById(foodId);
     }
 
     @Test
-    void deleteFood_FoodExist_Return() {
-        when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
+    void deleteFood_FoodExist_Success() {
+        when(foodRepo.findById(any(Long.class)))
+                .thenReturn(Optional.of(food))
+                .thenReturn(Optional.empty());
 
-        restaurantService.create(restaurant);
-        restaurantService.deleteFood(restaurantId, foodId);
-
-        verify(repo).findById(restaurantId);
+        doNothing().when(foodRepo).delete(food);
+        String exceptionMsg = "";
+        try {
+            restaurantService.deleteFood(restaurantId, foodId);
+        } catch (NotFoundException e) {
+            exceptionMsg = e.getMessage();
+        }
+        
+        assertEquals("", exceptionMsg);
+        verify(foodRepo, times(2)).findById(foodId);
+        verify(foodRepo).delete(food);
     }
 
     @Test
-    void deleteFood_FoodDoNotExist_ReturnError() {
+    void deleteFood_FoodDoNotExist_ReturnException() {
         Long anotherFoodId = 2L;
 
-        when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
+        when(foodRepo.findById(any(Long.class))).thenReturn(Optional.empty());
 
-        restaurantService.create(restaurant);
-        restaurant.setAllFood(allFood);
+        String exceptionMsg = "";
         try {
             restaurantService.deleteFood(restaurantId, anotherFoodId);
         } catch (NotFoundException e) {
-            assertEquals("Food not found", e.getMessage());
+            exceptionMsg = e.getMessage();
         }
 
-        verify(repo).findById(restaurantId);
+        assertEquals("Food not found", exceptionMsg);
+        verify(foodRepo).findById(anotherFoodId);
     }
 
     @Test
-    void getFood_FoodExist_ReturnFood() {
+    void getFood_FoodExists_ReturnFood() {
         when(foodRepo.findById(any(Long.class))).thenReturn(Optional.of(food));
 
         restaurantService.create(restaurant);
         Food getFood = restaurantService.getFood(restaurantId, foodId);
 
-        assertNotNull(getFood);
+        assertEquals(food, getFood);
         verify(foodRepo).findById(foodId);
     }
 
     @Test
-    void getFood_FoodDoNotExist_ReturnError() {
+    void getFood_FoodDoesNotExist_ReturnException() {
         when(foodRepo.findById(any(Long.class))).thenReturn(Optional.empty());
 
         restaurantService.create(restaurant);
+        String exceptionMsg = "";
         try {
             restaurantService.getFood(restaurantId, foodId);
-        } catch(NotFoundException e) {
-            assertEquals("Food not found", e.getMessage());
+        } catch (NotFoundException e) {
+            exceptionMsg = e.getMessage();
         }
 
+        assertEquals("Food not found", exceptionMsg);
         verify(foodRepo).findById(foodId);
     }
 
     @Test
-    void getFood_FoodExistInWrongRestaurant_ReturnError() {
+    void getFood_FoodExistsInWrongRestaurant_ReturnException() {
         when(foodRepo.findById(any(Long.class))).thenReturn(Optional.of(food));
 
+        String exceptionMsg = "";
         try {
             restaurantService.getFood(2L, foodId);
-        } catch(NotFoundException e) {
-            assertEquals("Food found but in incorrect restaurant", e.getMessage());
+        } catch (NotFoundException e) {
+            exceptionMsg = e.getMessage();
         }
+
+        assertEquals("Food found but in incorrect restaurant", exceptionMsg);
         verify(foodRepo).findById(foodId);
     }
 
     @Test
-    void calculateFoodNeededBetween_Successful_ReturnMap() {
-        when(reservationRepo.findByRestaurantAndDateBetween(any(Restaurant.class), any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(reservationList);
+    void calculateFoodNeededBetween_Success_ReturnMap() {
+        when(reservationRepo.findByRestaurantAndDateBetween(any(Restaurant.class), any(LocalDateTime.class),
+                any(LocalDateTime.class))).thenReturn(reservationList);
 
         Map<String, Integer> foodMap = restaurantService.calculateFoodNeededBetween(restaurant, startDate, endDate);
-        
+
         assertNotNull(foodMap);
         verify(reservationRepo).findByRestaurantAndDateBetween(restaurant, start, end);
     }
 
-    //----------Discount-related Testing-----------
+    // ---------Discount-related Testing---------
     @Test
-    void createDiscount_newDiscount_ReturnSavedDiscount() {
+    void createDiscount_NewDiscount_ReturnSavedDiscount() {
         Restaurant newRes = new Restaurant("New Restaurant", "Bencoolen");
-        when (repo.findByRestaurantId(any(Long.class))).thenReturn(newRes);
-        when (discountRepo.saveAndFlush(any(Discount.class))).thenReturn(discount);
+        when(repo.findByRestaurantId(any(Long.class))).thenReturn(newRes);
+        when(discountRepo.saveAndFlush(any(Discount.class))).thenReturn(discount);
 
         Discount savedDiscount = restaurantService.createDiscount(restaurantId, discount);
 
-        assertNotNull(savedDiscount);
+        assertEquals(discount, savedDiscount);
         verify(repo).findByRestaurantId(restaurantId);
         verify(discountRepo).saveAndFlush(any(Discount.class));
     }
 
     @Test
-    void createDiscount_DiscountAlreadyExist_ReturnError() {
+    void createDiscount_DiscountAlreadyExist_ReturnException() {
         when(repo.findByRestaurantId(any(Long.class))).thenReturn(restaurant);
 
+        String exceptionMsg = "";
         try {
             restaurantService.createDiscount(restaurantId, discount);
         } catch (AlreadyExistsException e) {
-            assertEquals("Discount already exist", e.getMessage());
+            exceptionMsg = e.getMessage();
         }
 
+        assertEquals("Discount already exist", exceptionMsg);
         verify(repo).findByRestaurantId(restaurantId);
     }
 
     @Test
-    void updateDiscount_DiscountExist_ReturnUpdatedDiscount() {
+    void updateDiscount_DiscountExists_ReturnUpdatedDiscount() {
         when(repo.findByRestaurantId(any(Long.class))).thenReturn(restaurant);
         when(discountRepo.saveAndFlush(any(Discount.class))).thenReturn(discount);
 
         Discount updatedDiscount = restaurantService.updateDiscount(restaurantId, discount);
 
-        assertNotNull(updatedDiscount);
+        assertEquals(discount, updatedDiscount);
         verify(repo).findByRestaurantId(restaurantId);
         verify(discountRepo).saveAndFlush(discount);
     }
 
     @Test
-    void updateDiscount_DiscountDoNotExist_ReturnError() {
+    void updateDiscount_DiscountDoesNotExist_ReturnException() {
         Restaurant newRes = new Restaurant("New Restaurant", "Bencoolen");
         when(repo.findByRestaurantId(any(Long.class))).thenReturn(newRes);
 
+        String exceptionMsg = "";
         try {
             restaurantService.updateDiscount(restaurantId, discount);
         } catch (NotFoundException e) {
-            assertEquals("Discount not found", e.getMessage());
+            exceptionMsg = e.getMessage();
         }
 
+        assertEquals("Discount not found", exceptionMsg);
         verify(repo).findByRestaurantId(restaurantId);
     }
 
     @Test
-    void getDiscount_DiscountExist_ReturnDiscount() {
+    void getDiscount_DiscountExistse_ReturnDiscount() {
         when(discountRepo.findById(any(Long.class))).thenReturn(Optional.of(discount));
 
         Discount getDiscount = restaurantService.getDiscount(discountId);
 
-        assertNotNull(getDiscount);
+        assertEquals(discount, getDiscount);
         verify(discountRepo).findById(discountId);
     }
 
     @Test
-    void getDiscount_DiscountDoNotExist_ReturnError() {
+    void getDiscount_DiscountDoesNotExist_ReturnException() {
         when(discountRepo.findById(any(Long.class))).thenReturn(Optional.empty());
 
+        String exceptionMsg = "";
         try {
             restaurantService.getDiscount(discountId);
-        } catch (NotFoundException e){
-            assertEquals("Discount not found", e.getMessage());
-        }    
+        } catch (NotFoundException e) {
+            exceptionMsg = e.getMessage();
+        }
 
+        assertEquals("Discount not found", exceptionMsg);
         verify(discountRepo).findById(discountId);
     }
 
     @Test
-    void deleteDiscount_DiscountDoNotExist_ReturnError() {
+    void deleteDiscount_DiscountDoesNotExist_ReturnException() {
         Restaurant newRes = new Restaurant("New Restaurant", "Bencoolen");
         when(repo.findByRestaurantId(any(Long.class))).thenReturn(newRes);
 
+        String exceptionMsg = "";
         try {
             restaurantService.deleteDiscount(restaurantId);
         } catch (NotFoundException e) {
-            assertEquals("Discount not found", e.getMessage());
+            exceptionMsg = e.getMessage();
         }
 
+        assertEquals("Discount not found", exceptionMsg);
         verify(repo).findByRestaurantId(restaurantId);
     }
 
-    //-------Ingredient-related testing---------
+    // --------Ingredient-related testing--------
     @Test
     void getAllRestaurantIngredients_RestaurantExistAndIngredientsExist_ReturnIngredients() {
         when(repo.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
 
-        List<Ingredient> getIngredients  = restaurantService.getAllRestaurantIngredients(restaurantId);
+        List<Ingredient> getIngredients = restaurantService.getAllRestaurantIngredients(restaurantId);
 
-        assertNotNull(getIngredients);
+        assertEquals(ingredients, getIngredients);
         verify(repo).findById(restaurantId);
     }
 
     @Test
-    void getAllRestaurantIngredients_RestaurantDoNotExist_ReturnError() {
+    void getAllRestaurantIngredients_RestaurantDoesNotExist_ReturnException() {
         when(repo.findById(any(Long.class))).thenReturn(Optional.empty());
 
+        String exceptionMsg = "";
         try {
             restaurantService.getAllRestaurantIngredients(restaurantId);
-        } catch(NotFoundException e) {
-            assertEquals("Restaurant not found", e.getMessage());
+        } catch (NotFoundException e) {
+            exceptionMsg = e.getMessage();
         }
 
+        assertEquals("Restaurant not found", exceptionMsg);
         verify(repo).findById(restaurantId);
     }
 
@@ -570,40 +636,45 @@ public class RestaurantServiceTest {
 
         Ingredient updateIngredient = restaurantService.updateIngredient(restaurantId, ingredientId, ingredient);
 
-        assertNotNull(updateIngredient);
+        assertEquals(ingredient, updateIngredient);
         verify(ingredientRepo).findById(ingredientId);
         verify(ingredientRepo).saveAndFlush(ingredient);
     }
 
     @Test
-    void updateRestaurantIngredient_IngredientNotFound_ReturnError() {
+    void updateRestaurantIngredient_IngredientNotFound_ReturnException() {
         when(ingredientRepo.findById(any(Long.class))).thenReturn(Optional.empty());
-        
+
         restaurantService.create(restaurant);
+        String exceptionMsg = "";
         try {
             restaurantService.updateIngredient(restaurantId, ingredientId, ingredient);
         } catch (NotFoundException e) {
-            assertEquals("Ingredient requested could not be found", e.getMessage());
+            exceptionMsg = e.getMessage();
         }
 
+        assertEquals("Ingredient requested could not be found", exceptionMsg);
         verify(ingredientRepo).findById(ingredientId);
     }
 
     @Test
-    void updateRestaurantIngredient_IngredientFoundInWrongRestaurant_ReturnError() {
+    void updateRestaurantIngredient_IngredientFoundInWrongRestaurant_ReturnException() {
         when(ingredientRepo.findById(any(Long.class))).thenReturn(Optional.of(ingredient));
-        Restaurant anotherRestaurant = new Restaurant("Sushi Tei", "Desc","Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+        Restaurant anotherRestaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10,
+                10, restaurantCategories);
         Long anotherRestaurantId = 2L;
         ReflectionTestUtils.setField(anotherRestaurant, "restaurantId", anotherRestaurantId);
-        
+
         restaurantService.create(restaurant);
         ingredient.setRestaurant(restaurant);
+        String exceptionMsg = "";
         try {
             restaurantService.updateIngredient(anotherRestaurantId, ingredientId, ingredient);
         } catch (NotFoundException e) {
-            assertEquals("Ingredient requested could not be found at this restaurant", e.getMessage());
+            exceptionMsg = e.getMessage();
         }
 
+        assertEquals("Ingredient requested could not be found at this restaurant", exceptionMsg);
         verify(ingredientRepo).findById(ingredientId);
     }
 
@@ -614,74 +685,89 @@ public class RestaurantServiceTest {
         when(repo.saveAndFlush(any(Restaurant.class))).thenReturn(restaurant);
 
         Ingredient addIngredient = restaurantService.addRestaurantIngredient(restaurantId, ingredient);
-        
-        assertNotNull(addIngredient);
+
+        assertEquals(ingredient, addIngredient);
         verify(repo).findById(restaurantId);
         verify(ingredientRepo).saveAndFlush(ingredient);
         verify(repo).saveAndFlush(restaurant);
     }
 
     @Test
-    void addRestaurantIngredient_RestaurantDoNotExist_ReturnError() {
+    void addRestaurantIngredient_RestaurantDoesNotExist_ReturnException() {
         when(repo.findById(any(Long.class))).thenReturn(Optional.empty());
 
+        String exceptionMsg = "";
         try {
             restaurantService.addRestaurantIngredient(restaurantId, ingredient);
-        } catch(NotFoundException e) {
-            assertEquals("Restaurant not found", e.getMessage());
+        } catch (NotFoundException e) {
+            exceptionMsg = e.getMessage();
         }
 
+        assertEquals("Restaurant not found", exceptionMsg);
         verify(repo).findById(restaurantId);
     }
 
     @Test
-    void deleteRestaurantIngredient_IngredientFoundInCorrectRestaurantAndDeleted_Return() {
-        when(ingredientRepo.findById(any(Long.class))).thenReturn(Optional.of(ingredient));
-        doNothing().when(ingredientRepo).delete(any(Ingredient.class));
-
+    void deleteRestaurantIngredient_IngredientFoundInCorrectRestaurantAndDeleted_Success() {
         ingredient.setRestaurant(restaurant);
-        restaurantService.deleteRestaurantIngredient(restaurantId, ingredientId);
+        when(ingredientRepo.findById(any(Long.class))).thenReturn(Optional.of(ingredient)).thenReturn(Optional.empty());
+        doNothing().when(ingredientRepo).delete(any(Ingredient.class));
+        
+        String exceptionMsg = "";
+        try {
+            restaurantService.deleteRestaurantIngredient(restaurantId, ingredientId);
+        } catch (Exception e) {
+            exceptionMsg = e.getMessage();
+        }
 
-        verify(ingredientRepo).findById(ingredientId);
+        assertEquals("", exceptionMsg);
+        verify(ingredientRepo, times(2)).findById(ingredientId);
         verify(ingredientRepo).delete(ingredient);
     }
 
     @Test
-    void deleteRestaurantIngredient_IngredientNotFound_ReturnError() {
+    void deleteRestaurantIngredient_IngredientNotFound_ReturnException() {
         when(ingredientRepo.findById(any(Long.class))).thenReturn(Optional.empty());
 
+        String exceptionMsg = "";
         try {
             restaurantService.deleteRestaurantIngredient(restaurantId, ingredientId);
         } catch (NotFoundException e) {
-            assertEquals("Ingredient requested could not be found", e.getMessage());
+            exceptionMsg = e.getMessage();
         }
 
+        assertEquals("Ingredient requested could not be found", exceptionMsg);
         verify(ingredientRepo).findById(ingredientId);
     }
 
     @Test
-    void deleteRestaurantIngredient_IngredientNotFoundInCorrectRestaurant_ReturnError() {
+    void deleteRestaurantIngredient_IngredientNotFoundInCorrectRestaurant_ReturnException() {
         when(ingredientRepo.findById(any(Long.class))).thenReturn(Optional.of(ingredient));
 
-        Restaurant anotherRestaurant = new Restaurant("Sushi Tei", "Desc","Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
+        Restaurant anotherRestaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10,
+                10, restaurantCategories);
         Long anotherRestaurantId = 2L;
-        ReflectionTestUtils.setField(anotherRestaurant,"restaurantId", anotherRestaurantId);
+        ReflectionTestUtils.setField(anotherRestaurant, "restaurantId", anotherRestaurantId);
         ingredient.setRestaurant(restaurant);
-        
+
+        String exceptionMsg = "";
         try {
             restaurantService.deleteRestaurantIngredient(anotherRestaurantId, ingredientId);
         } catch (NotFoundException e) {
-            assertEquals("Ingredient requested could not be found at this restaurant", e.getMessage());
+            exceptionMsg = e.getMessage();
         }
 
+        assertEquals("Ingredient requested could not be found at this restaurant", exceptionMsg);
         verify(ingredientRepo).findById(ingredientId);
     }
 
     @Test
-    void calculateIngredientsNeededBetween_Successful_ReturnMap() {
-        when(reservationRepo.findByRestaurantAndDateBetween(any(Restaurant.class), any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(reservationList);
+    void calculateIngredientsNeededBetween_Success_ReturnMap() {
+        when(reservationRepo.findByRestaurantAndDateBetween(any(Restaurant.class), any(LocalDateTime.class),
+                any(LocalDateTime.class))).thenReturn(reservationList);
 
-        Map<Ingredient, Integer> ingredientMap = restaurantService.calculateIngredientsNeededBetween(restaurant, startDate, endDate);
+        Map<Ingredient, Integer> ingredientMap = restaurantService.calculateIngredientsNeededBetween(restaurant,
+                startDate, endDate);
 
         assertNotNull(ingredientMap);
         verify(reservationRepo).findByRestaurantAndDateBetween(restaurant, start, end);

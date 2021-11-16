@@ -10,13 +10,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 public class FoodDTO {
     @Schema(defaultValue = "sushi")
-    @NotEmpty
+    @NotEmpty(message = "Food name should not be empty")
     @Length(min = 1, max = 40)
     private String foodName;
 
     @Schema(defaultValue = "sashimi")
     @Length(min = 1)
-    @NotEmpty
+    @NotEmpty(message = "Food description should not be empty")
     private String foodDesc;
 
     @Schema(defaultValue = "10")

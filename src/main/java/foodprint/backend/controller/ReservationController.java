@@ -3,6 +3,7 @@ package foodprint.backend.controller;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,8 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,12 +25,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import foodprint.backend.config.AuthHelper;
 import foodprint.backend.dto.CreateReservationDTO;
 import foodprint.backend.dto.LineItemDTO;
 import foodprint.backend.dto.ReservationDTO;
 import foodprint.backend.dto.NamedLineItemDTO;
 import foodprint.backend.exceptions.BadRequestException;
-import foodprint.backend.exceptions.InsufficientPermissionsException;
 import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.Food;
 import foodprint.backend.model.LineItem;
@@ -59,9 +58,10 @@ public class ReservationController {
     // GET: Get reservation by id (DTO)
     @GetMapping({ "/{reservationId}" })
     @ResponseStatus(code = HttpStatus.OK)
-    @Operation(summary = "Gets a reservation slot of a user")
+    @Operation(summary = "Gets a reservation slot of a user, returns not found if logged in as wrong user")
     public ResponseEntity<ReservationDTO> getReservation(@PathVariable("reservationId") Long id) {
-        Reservation reservation = reservationService.getReservationById(id);
+        User requestor = AuthHelper.getCurrentUser();
+        Reservation reservation = reservationService.getReservationByIdAndUser(id, requestor.getId());
         ReservationDTO reservationDTO = this.convertToDTO(reservation);
         return new ResponseEntity<>(reservationDTO, HttpStatus.OK);
     }
@@ -71,7 +71,7 @@ public class ReservationController {
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Gets all the reservation(s) of a user")
     public ResponseEntity<List<ReservationDTO>> getAllReservationByUser() {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = AuthHelper.getCurrentUser();
         List<Reservation> reservations = reservationService.getAllReservationByUser(user);
         List<ReservationDTO> reservationDTOs = new ArrayList<>();
         for (Reservation reservation : reservations) {
@@ -84,30 +84,33 @@ public class ReservationController {
     // GET: Get upcoming reservation by user
     @GetMapping({ "/upcoming" })
     @ResponseStatus(code = HttpStatus.OK)
-    @Operation(summary = "Gets all the reservation(s) of a user")
+    @Operation(summary = "Gets all the upcoming reservation(s) of a user")
     public ResponseEntity<List<ReservationDTO>> getUserUpcomingReservations() {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = AuthHelper.getCurrentUser();
+        
         List<Reservation> reservations = reservationService.getUserUpcomingReservations(user);
         List<ReservationDTO> reservationDTOs = new ArrayList<>();
         for (Reservation reservation : reservations) {
             ReservationDTO reservationDTO = this.convertToDTO(reservation);
             reservationDTOs.add(reservationDTO);
         }
+        Collections.reverse(reservationDTOs);
         return new ResponseEntity<>(reservationDTOs, HttpStatus.OK);
     }
 
     // GET: Get past reservation by user
     @GetMapping({ "/past" })
     @ResponseStatus(code = HttpStatus.OK)
-    @Operation(summary = "Gets all the reservation(s) of a user")
+    @Operation(summary = "Gets all the past reservation(s) of a user")
     public ResponseEntity<List<ReservationDTO>> getUserPastReservations() {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = AuthHelper.getCurrentUser();
         List<Reservation> reservations = reservationService.getUserPastReservations(user);
         List<ReservationDTO> reservationDTOs = new ArrayList<>();
         for (Reservation reservation : reservations) {
             ReservationDTO reservationDTO = this.convertToDTO(reservation);
             reservationDTOs.add(reservationDTO);
         }
+        Collections.reverse(reservationDTOs);
         return new ResponseEntity<>(reservationDTOs, HttpStatus.OK);
     }
 
@@ -115,12 +118,11 @@ public class ReservationController {
     @GetMapping({ "/order/{reservationId}" })
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Gets all line item for reservation")
-    public ResponseEntity<List<LineItemDTO>> getReservationOrder(@PathVariable("reservationId") Long id) {
-        Reservation reservation = reservationService.getReservationById(id);
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!user.equals(reservation.getUser())) {
-            throw new InsufficientPermissionsException("Not authorised to view line items of another user");
-        }
+    public ResponseEntity<List<LineItemDTO>> getReservationOrder(
+        @PathVariable("reservationId") Long id
+    ) {
+        User user = AuthHelper.getCurrentUser();
+        Reservation reservation = reservationService.getReservationByIdAndUser(id, user.getId());
         List<LineItem> lineItems = reservation.getLineItems();
         List<LineItemDTO> result = new ArrayList<>();
         for(LineItem lineItem : lineItems) {
@@ -146,7 +148,9 @@ public class ReservationController {
         if (after.isAfter(before)) {
             throw new BadRequestException("Start date should be before end date");
         }
-        Page<Reservation> reservations = reservationService.getRestaurantUpcomingReservations(restaurant, after, before, page);
+        User requestor = AuthHelper.getCurrentUser();
+        Restaurant requestorRestaurant = requestor.getRestaurant();
+        Page<Reservation> reservations = reservationService.getRestaurantUpcomingReservations(restaurant, requestorRestaurant, after, before, page);
         Page<ReservationDTO> reservationDTOs = reservations.map(this::convertToDTO);
         return new ResponseEntity<>(reservationDTOs,HttpStatus.OK);
     }
@@ -164,23 +168,25 @@ public class ReservationController {
     @PostMapping
     @Operation(summary = "For users to create a new reservation slot")
     public ResponseEntity<ReservationDTO> createReservationDTO(@RequestBody @Nullable CreateReservationDTO req) {
-        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User currentUser = AuthHelper.getCurrentUser();
         try {
             var reservation = reservationService.create(currentUser, req);
             var reservationDTO = this.convertToDTO(reservation);
             return new ResponseEntity<>(reservationDTO, HttpStatus.CREATED);
         } catch (NotFoundException e) {
-            return new ResponseEntity<>(null, HttpStatus.NOT_ACCEPTABLE);
+            return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
         }
     }
 
     // PUT: Update reservation (DTO)
     @PatchMapping({ "/{reservationId}" })
     @Operation(summary = "For users to update an existing reservation slot")
-    public ResponseEntity<ReservationDTO> updateReservationDTO(@PathVariable("reservationId") Long id,
+    public ResponseEntity<ReservationDTO> updateReservationDTO(
+            @PathVariable("reservationId") Long id,
             @RequestBody CreateReservationDTO pendingReservationDTO) {
 
-        var currentReservation = reservationService.getReservationById(id);
+        User requestor = AuthHelper.getCurrentUser();
+        var currentReservation = reservationService.getReservationByIdAndUser(id, requestor.getId());
         var restaurant = currentReservation.getRestaurant();
 
         // Dont allow users to change the restaurant of their reservation
@@ -190,23 +196,6 @@ public class ReservationController {
         var updatedReservation = reservationService.update(id, reservation);
         var updatedReservationDTO = this.convertToDTO(updatedReservation);
         return new ResponseEntity<>(updatedReservationDTO, HttpStatus.OK);
-    }
-
-    // DELETE: Delete reservation
-    @DeleteMapping({ "/admin/{reservationId}" })
-    @ResponseStatus(code = HttpStatus.OK)
-    @Operation(summary = "Delete an existing reservation slot")
-    public ResponseEntity<Reservation> deleteReservation(@PathVariable("reservationId") Long id) {
-        Reservation reservation = reservationService.getReservationById(id);
-        reservationService.delete(reservation);
-
-        try {
-            reservationService.getReservationById(id);
-        } catch (NotFoundException ex) {
-            return new ResponseEntity<>(HttpStatus.OK);
-        }
-
-        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     // Get all reservations by a restaurant
@@ -221,14 +210,11 @@ public class ReservationController {
 
     // Get all available reservation slots by date (should return a list of date
     // objects (with the same date but different hour slots))
-    @GetMapping({ "/slots/{restaurantId}/{date}" })
+    @GetMapping({ "/slots/{restaurantId}" })
     @ResponseStatus(code = HttpStatus.OK)
     @Operation(summary = "Gets all available reservation slots by date")
-    public ResponseEntity<List<LocalDateTime>> getAllAvailableSlotsByDateAndRestaurant(
-            @PathVariable("restaurantId") Long id, @PathVariable("date") String date) {
-        // Assume string date is in ISO format - 2021-19-14
-        return new ResponseEntity<>(reservationService.getAllAvailableSlotsByDateAndRestaurant(id, date),
-                HttpStatus.OK);
+    public ResponseEntity<List<LocalDateTime>> getUpcomingSlots(@PathVariable("restaurantId") Long id) {
+        return new ResponseEntity<>(reservationService.getUpcomingSlots(id), HttpStatus.OK);
     }
 
 
@@ -237,6 +223,7 @@ public class ReservationController {
         
         ReservationDTO dto = mapper.map(reservation, ReservationDTO.class);
         dto.setImageUrl(reservation.getRestaurant().getPicture().getUrl());
+        
 
         List<NamedLineItemDTO> lineItemDtos = new ArrayList<>();
         for (LineItem lineItem : reservation.getLineItems()) {
@@ -257,13 +244,19 @@ public class ReservationController {
         Restaurant restaurant = restaurantService.get(dto.getRestaurantId());
         Long restaurantId = restaurant.getRestaurantId();
 
-        reservation.setDate(dto.getDate());
-        reservation.setPax(dto.getPax());
-        reservation.setIsVaccinated(dto.getIsVaccinated());
-        reservation.setStatus(dto.getStatus());
-
+        if (dto.getDate() != null) {
+            reservation.setDate(dto.getDate());
+        }
+        if (dto.getPax() != null) {
+            reservation.setPax(dto.getPax());
+        }
+        if (dto.getIsVaccinated() != null) {
+            reservation.setIsVaccinated(dto.getIsVaccinated());
+        }
+        if (dto.getStatus() != null) {
+            reservation.setStatus(dto.getStatus());
+        }
         if (dto.getLineItems() != null) {
-
             Map<Food, Integer> lineItemsHashMap = new HashMap<>();
 
             for (LineItemDTO lineItemDTO : dto.getLineItems()) {
@@ -273,14 +266,11 @@ public class ReservationController {
             }
 
             List<LineItem> savedLineItems = new ArrayList<>();
-
             for (Map.Entry<Food, Integer> entry : lineItemsHashMap.entrySet()) {
                 LineItem savedLineItem = new LineItem(entry.getKey(), reservation, entry.getValue());
                 savedLineItems.add(savedLineItem);
             }
-
             reservation.setLineItems(savedLineItems);
-
         } else {
             reservation.setLineItems(null);
         }

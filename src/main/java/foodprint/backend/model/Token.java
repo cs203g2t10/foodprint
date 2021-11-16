@@ -1,5 +1,6 @@
 package foodprint.backend.model;
 
+import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
@@ -13,6 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -24,7 +26,7 @@ and password resetting purposes
 @Entity
 @Table
 @EnableTransactionManagement
-public class Token {
+public class Token implements Serializable {
 
     public static final int EMAIL_CONFIRMATION_TOKEN = 1;
     public static final int PASSWORD_RESET_REQUEST_TOKEN = 2;
@@ -44,6 +46,7 @@ public class Token {
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name="requestor")
+    @NotNull
     private User requestor;
 
     @Column(name="created")
@@ -65,10 +68,11 @@ public class Token {
         this.token = generateRandomToken();
         this.used = false;
         
-        this.created = new Date();
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(created);
-        calendar.add(Calendar.HOUR_OF_DAY, 48);
+        calendar.setTime(new Date());
+        calendar.add(Calendar.HOUR_OF_DAY, -24);
+        this.created = calendar.getTime();
+        calendar.add(Calendar.HOUR_OF_DAY, 72);
         this.expiry = calendar.getTime();
     }
 

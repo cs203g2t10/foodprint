@@ -52,7 +52,7 @@ public class PictureService  {
                 IMAGE_BMP.getMimeType(),
                 IMAGE_GIF.getMimeType(),
                 IMAGE_JPEG.getMimeType()).contains(file.getContentType())) {
-            throw new IllegalStateException("FIle uploaded is not an image");
+            throw new IllegalStateException("File uploaded is not an image");
         }
 
         // Get file metadata
@@ -78,11 +78,6 @@ public class PictureService  {
         return picture;
     }
 
-    public byte[] downloadPictureImage(Long id) {
-        Picture picture = repository.findById(id).orElseThrow(() -> new NotFoundException("Image with this ID was not found"));
-        return fileStore.download(picture.getImagePath(), picture.getImageFileName());
-    }
-
     @PreAuthorize("hasAnyAuthority('FP_USER')")
     public String getPictureById(Long id) {
         Optional<Picture> picture = repository.findById(id);
@@ -101,7 +96,6 @@ public class PictureService  {
             this.get(id);
             throw new DeleteFailedException("Picture could not be deleted");
         } catch (NotFoundException e) {
-            return;
         }
     }
 

@@ -1,6 +1,10 @@
 package foodprint.backend.config;
 
 import com.stripe.exception.StripeException;
+
+import org.hibernate.exception.ConstraintViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +36,8 @@ import java.util.List;
 
 @RestControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
+
+    private static final Logger loggr = LoggerFactory.getLogger(RestExceptionHandler.class);
     
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
@@ -112,6 +118,12 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(RegistrationException.class)
     public void handleRegistrationException(RegistrationException ex, HttpServletResponse response) throws IOException {
-        response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage());
+        response.sendError(HttpStatus.NOT_FOUND.value(), ex.getMessage());
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public void handleConstraintViolationException(ConstraintViolationException ex, HttpServletResponse response) throws IOException {
+        loggr.error("Constraint violation exception", ex);
+        response.sendError(HttpStatus.CONFLICT.value(), "Unable to perform action to prevent inconsistency");
     }
 }

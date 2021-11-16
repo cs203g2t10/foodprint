@@ -96,7 +96,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                     "/api/v1/restaurant/*/food",
                     "/api/v1/restaurant/*",
                     "/api/v1/restaurant",
-                    "/api/v1/restaurant/categories/**")
+                    "/api/v1/restaurant/categories/**",
+                    "/api/v1/reservation/slots/*")
             .permitAll()
 
             .antMatchers("/api/v1/auth/login/**",
@@ -126,8 +127,18 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     public CorsConfigurationSource corsConfigurationSource() {
         final CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(
-                List.of("http://localhost:3000", "https://foodprint.works", "https://api.foodprint.works"));
+                List.of(
+                    "http://localhost:3000",
+                    "https://foodprint.works",
+                    "https://ui.foodprint.works/",
+                    "https://rest.foodprint.works/"
+                )
+            );
         configuration.setAllowedMethods(List.of("HEAD", "GET", "POST", "PUT", "DELETE", "PATCH"));
+        // This allow us to expose the headers
+        configuration.setExposedHeaders(List.of("Access-Control-Allow-Headers", 
+            "Authorization, x-xsrf-token, Access-Control-Allow-Headers, Origin, Accept, X-Requested-With, " +
+            "Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers"));
         configuration.setAllowCredentials(true);
         configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
