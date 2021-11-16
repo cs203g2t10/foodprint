@@ -71,6 +71,7 @@ public class TwoFaServiceTest {
         }
 
         assertEquals("", errorMsg);
+        assertNotNull(user.getTwoFaSecret());
         verify(principal).getName();
         verify(users).findByEmail(user.getEmail());
         verify(users).saveAndFlush(user);
@@ -115,6 +116,7 @@ public class TwoFaServiceTest {
         }
 
         assertEquals("", errorMsg);
+        assertTrue(user.isTwoFaSet());
         verify(principal).getName();
         verify(users).findByEmail(user.getEmail());
         verify(users).saveAndFlush(user);
