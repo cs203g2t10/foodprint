@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
@@ -22,6 +23,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import foodprint.backend.config.CustomAuthorityDeserializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
@@ -43,26 +45,27 @@ public class User implements UserDetails {
     @Column(name = "email", nullable=false, unique=true)
     @Schema(defaultValue="bobbytan@gmail.com")
     @Email
+    @NotEmpty(message = "Email should not be empty")
     private String email;
 
     @Column(name = "fName", nullable = false)
     @Schema(defaultValue="Bobby")
-    @NotEmpty
+    @NotEmpty(message = "First name should not be empty")
     private String firstName;
 
     @Column(name = "lName", nullable = true)
     @Schema(defaultValue="Tan")
-    @NotEmpty
+    @NotEmpty(message = "Last name should not be empty")
     private String lastName;
 
     @Column(name = "password", nullable = false)
     @Schema(defaultValue="Hello123")
-    @NotEmpty
+    @NotEmpty(message = "Password should not be empty")
     private String password;
 
     @Column(name = "role", nullable = false)
     @Schema(defaultValue="FP_USER")
-    @NotEmpty
+    @NotEmpty(message = "Roles should not be empty")
     private String roles;
 
     @Column(name = "lastLogin", nullable = true)
@@ -216,7 +219,7 @@ public class User implements UserDetails {
     }
 
     public Boolean isTwoFaSet() {
-        return (twoFaSet == null) ? false : twoFaSet;
+        return twoFaSet;
     }
 
     public void setTwoFaSet(Boolean twoFaSet) {
@@ -240,14 +243,14 @@ public class User implements UserDetails {
     }
 
     @Override
+    @JsonDeserialize(using = CustomAuthorityDeserializer.class)
     @Schema(hidden=true)
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<String> userRoles = Arrays.asList(this.roles.split(","));
-        List<SimpleGrantedAuthority> authorities = userRoles
+        return userRoles
             .stream()
             .map(role -> new SimpleGrantedAuthority(role.trim()))
             .collect(Collectors.toList());
-        return authorities;
     }
 
     @Override

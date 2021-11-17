@@ -122,21 +122,21 @@ public class AuthenticationServiceTest {
     }
 
     @Test
-    void checkValidToken_validToken_Success() {
+    void checkValidToken_ValidToken_Success() {
         String token = "validToken";
         user.setTwoFaSecret("secret");
         user.setTwoFaSet(true);
         when(twoFaService.validToken(any(String.class))).thenReturn(true);
         when(twoFaService.validate(any(String.class), any(String.class))).thenReturn(true);
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             authenticationService.checkValidToken(token, user);
         } catch (InvalidException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("", errorMsg);
+        assertEquals("", exceptionMsg);
         verify(twoFaService).validToken(token);
         verify(twoFaService).validate("secret", token);
 
@@ -148,30 +148,30 @@ public class AuthenticationServiceTest {
         user.setTwoFaSet(true);
         when(twoFaService.validToken(any(String.class))).thenReturn(false);
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             authenticationService.checkValidToken(token, user);
         } catch (InvalidException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("Invalid token format.", errorMsg);
+        assertEquals("Invalid token format.", exceptionMsg);
         verify(twoFaService).validToken(token);
     }
 
     @Test
-    void checkValidToken_userNo2fa_Return() {
+    void checkValidToken_UserNo2FA_Success() {
         String token = "token";
         user.setTwoFaSet(false);
 
-        InvalidException exception = null;
+        String exceptionMsg = "";
         try {
             authenticationService.checkValidToken(token, user);
         } catch (InvalidException e) {
-            exception = e;
+            exceptionMsg = e.getMessage();
         }
 
-        assertNull(exception);
+        assertEquals("", exceptionMsg);
     }
 
      @Test
@@ -182,21 +182,21 @@ public class AuthenticationServiceTest {
         when(twoFaService.validToken(any(String.class))).thenReturn(true);
         when(twoFaService.validate(any(String.class), any(String.class))).thenReturn(false);
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             authenticationService.checkValidToken(token, user);
         } catch (InvalidException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("Incorrect OTP entered.", errorMsg);
+        assertEquals("Incorrect OTP entered.", exceptionMsg);
         verify(twoFaService).validToken(token);
         verify(twoFaService).validate("secret", token);
 
     }
 
     @Test
-    void check2faSet_2faSet_ReturnTrue() {
+    void check2FASet_2FASet_ReturnTrue() {
         String email = "bobbytan@gmail.com";
         user.setTwoFaSet(true);
         when(userRepo.findByEmail(any(String.class))).thenReturn(Optional.of(user));
@@ -208,7 +208,7 @@ public class AuthenticationServiceTest {
     }
 
     @Test
-    void check2faSet_2faNotSet_ReturnFalse() {
+    void check2FASet_2FANotSet_ReturnFalse() {
         String email = "valid@email.com";
         user.setTwoFaSet(false);
         when(userRepo.findByEmail(any(String.class))).thenReturn(Optional.of(user));
@@ -220,7 +220,7 @@ public class AuthenticationServiceTest {
     }
 
     @Test
-    void check2faSet_InvalidUser_ReturnFalse() {
+    void check2FASet_InvalidUser_ReturnFalse() {
         String email = "valid@email.com";
         when(userRepo.findByEmail(any(String.class))).thenReturn(Optional.empty());
 
@@ -231,7 +231,7 @@ public class AuthenticationServiceTest {
     }
 
     @Test
-    void check2faSet_InvaliEmail_ReturnFalse() {
+    void check2FASet_InvaliEmail_ReturnFalse() {
         String email = "invalidcom";
 
         Boolean isTwoFaSet = authenticationService.check2faSet(email);
@@ -240,20 +240,20 @@ public class AuthenticationServiceTest {
     }
 
     @Test
-    void confirmRegistration_ValidToken_Return() {
+    void confirmRegistration_ValidToken_Success() {
         Token emailToken = new Token(1, user);
         String tokenString = "validToken";
         when(tokenRepo.findByToken(any(String.class))).thenReturn(Optional.of(emailToken));
         when(userRepo.saveAndFlush(any(User.class))).thenReturn(user);
         when(tokenRepo.saveAndFlush(any(Token.class))).thenReturn(emailToken);
 
-        RegistrationException exception = null;
+        String errorMsg = "";
         try {
             authenticationService.confirmRegistration(tokenString);
         } catch (RegistrationException e) {
-            exception = e;
+            errorMsg = e.getMessage();
         }
-        assertNull(exception);
+        assertEquals("", errorMsg);
         verify(tokenRepo).findByToken(tokenString);
         verify(userRepo).saveAndFlush(user);
         verify(tokenRepo).saveAndFlush(emailToken);
@@ -266,13 +266,13 @@ public class AuthenticationServiceTest {
         String tokenString = "usedToken";
         when(tokenRepo.findByToken(any(String.class))).thenReturn(Optional.of(emailToken));
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             authenticationService.confirmRegistration(tokenString);
         } catch (RegistrationException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
-        assertEquals("Invalid token", errorMsg);
+        assertEquals("Invalid token", exceptionMsg);
         verify(tokenRepo).findByToken(tokenString);
     }
 }

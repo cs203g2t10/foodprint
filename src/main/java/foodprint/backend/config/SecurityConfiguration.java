@@ -96,7 +96,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                     "/api/v1/restaurant/*/food",
                     "/api/v1/restaurant/*",
                     "/api/v1/restaurant",
-                    "/api/v1/restaurant/categories/**")
+                    "/api/v1/restaurant/categories/**",
+                    "/api/v1/reservation/slots/*")
             .permitAll()
 
             .antMatchers("/api/v1/auth/login/**",

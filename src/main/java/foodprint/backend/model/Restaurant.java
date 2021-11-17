@@ -47,18 +47,19 @@ public class Restaurant implements Serializable {
 
     @Column(name = "restaurantName")
     @Schema(defaultValue="Sushi Tei")
-    @NotEmpty
+    @NotEmpty(message = "Restaurant name should not be empty")
     @Length(min = 1, max = 40)
     private String restaurantName;
 
     @Column(name = "restaurantDesc")
     @Schema(defaultValue="Japanese restaurant")
-    @NotEmpty
+    @NotEmpty(message = "Restaurant description should not be empty")
     @Length(min = 1)
     private String restaurantDesc;
 
     @Column(name = "restaurantLocation")
     @Schema(defaultValue="Serangoon")
+    @NotEmpty(message = "Restaurant location should not be empty")
     private String restaurantLocation;
 
     @Column(name = "priceRange")

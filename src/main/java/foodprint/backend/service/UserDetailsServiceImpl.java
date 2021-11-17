@@ -6,7 +6,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import foodprint.backend.model.User;
 import foodprint.backend.model.UserRepo;
 
 @Service
@@ -20,13 +19,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username){
         
-        User user = repo.findByEmail(username).orElseThrow(
+        return repo.findByEmail(username).orElseThrow(
             () -> new UsernameNotFoundException("User not found")
         );
-
-        return user;
     }
     
 }

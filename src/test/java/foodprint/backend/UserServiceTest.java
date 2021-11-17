@@ -11,6 +11,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -20,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import foodprint.backend.config.AuthHelper;
 import foodprint.backend.exceptions.AlreadyExistsException;
 import foodprint.backend.exceptions.NotFoundException;
 import foodprint.backend.model.Restaurant;
@@ -39,6 +43,12 @@ public class UserServiceTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private SecurityContext securityContext;
+
+    @Mock
+    private Authentication authentication;
 
     @InjectMocks
     private UserService userService;
@@ -85,14 +95,14 @@ public class UserServiceTest {
     void addUser_SameEmail_ReturnException() {
         when(users.findByEmail(any(String.class))).thenReturn(Optional.of(user));
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             userService.createUser(user);
         } catch (AlreadyExistsException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("User with the same email already exists", errorMsg);
+        assertEquals("User with the same email already exists", exceptionMsg);
         verify(users).findByEmail(user.getEmail());
     }
 
@@ -101,14 +111,14 @@ public class UserServiceTest {
         when(users.findByEmail(any(String.class))).thenReturn(Optional.empty());
         when(users.findById(any(Long.class))).thenReturn(Optional.of(user));
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             userService.createUser(user);
         } catch (AlreadyExistsException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("User with the same ID already exists", errorMsg);
+        assertEquals("User with the same ID already exists", exceptionMsg);
         verify(users).findByEmail(user.getEmail());
         verify(users).findById(userId);
     }
@@ -118,22 +128,24 @@ public class UserServiceTest {
         userList.add(user);
         when(users.findAll()).thenReturn(userList);
 
-        List<User> retrievedUser = userService.getAllUsers();
-        assertEquals(userList, retrievedUser);
+        List<User> retrievedUsers = userService.getAllUsers();
+
+        verify(users).findAll();
+        assertEquals(userList, retrievedUsers);
     }
 
     @Test
     void getUser_NonExistentId_ReturnException() {
         when(users.findById(any(Long.class))).thenReturn(Optional.empty());
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             userService.getUser(userId);
         } catch (NotFoundException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("User not found", errorMsg);
+        assertEquals("User not found", exceptionMsg);
         verify(users).findById(userId);
     }
 
@@ -145,6 +157,55 @@ public class UserServiceTest {
 
         assertEquals(user, getUser);
         verify(users).findById(userId);
+    }
+
+    @Test
+    void protectedGetUser_CorrectUserAndFound_ReturnUser() {
+        SecurityContextHolder.setContext(securityContext);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(AuthHelper.getCurrentUser()).thenReturn(user);
+        when(users.findById(any(Long.class))).thenReturn(Optional.of(user));
+
+        User getUserProtected = userService.protectedGetUser(userId);
+
+        assertEquals(user, getUserProtected);
+        verify(users).findById(userId);
+    }
+
+    @Test
+    void protectedGetUser_UserNotFound_ReturnException() {
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(AuthHelper.getCurrentUser()).thenReturn(user);
+        when(users.findById(any(Long.class))).thenReturn(Optional.empty());
+
+        String exceptionMsg = "";
+        try {
+            userService.protectedGetUser(userId);
+        } catch (NotFoundException e) {
+            exceptionMsg = e.getMessage();
+        }
+
+        assertEquals("User not found", exceptionMsg);
+        verify(users).findById(userId);
+    }
+
+    @Test
+    void protectedGetUser_CurrentUserAccessingOtherUser_ReturnException() {
+        Long anotherUserId = 2L;
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(AuthHelper.getCurrentUser()).thenReturn(user);
+
+        String exceptionMsg = "";
+        try {
+            userService.protectedGetUser(anotherUserId);
+        } catch (NotFoundException e) {
+            exceptionMsg = e.getMessage();
+        }
+
+        assertEquals("Unable to retrieve user.", exceptionMsg);
     }
 
     @Test
@@ -161,34 +222,34 @@ public class UserServiceTest {
     void unprotectedGetUser_NonExistentId_ReturnUser() {
         when(users.findById(any(Long.class))).thenReturn(Optional.empty());
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             userService.unprotectedGetUser(userId);
         } catch (NotFoundException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("User not found", errorMsg);
+        assertEquals("User not found", exceptionMsg);
         verify(users).findById(userId);
     }
 
     @Test
-    void updateUser_NotFound_ReturnException(){
+    void updateUser_UserNotFound_ReturnException(){
         when(users.findById(any(Long.class))).thenReturn(Optional.empty());
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             userService.updateUser(userId, user);
         } catch (NotFoundException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("User not found", errorMsg);
+        assertEquals("User not found", exceptionMsg);
         verify(users).findById(userId);
     }
 
     @Test
-    void updateUser_SameEmail_ReturnUser() {
+    void updateUser_UserUpdatesToSameEmail_ReturnUser() {
         when(users.findById(any(Long.class))).thenReturn(Optional.of(user));
         when(users.findByEmail(any(String.class))).thenReturn(Optional.of(user));
         when(users.saveAndFlush(any(User.class))).thenReturn(user);
@@ -218,17 +279,36 @@ public class UserServiceTest {
     }
 
     @Test
+    void updateUser_EmailTaken_ReturnException() {
+        User anotherUser = new User("testing@gmail.com", "SuperSecurePassw0rd", "Testing Tan");
+
+        when(users.findByEmail(any(String.class))).thenReturn(Optional.of(anotherUser));
+        when(users.findById(any(Long.class))).thenReturn(Optional.of(user));
+
+        String exceptionMsg = "";
+        try {
+            userService.updateUser(userId, user);
+        } catch (AlreadyExistsException e) {
+            exceptionMsg = e.getMessage();
+        }
+
+        assertEquals("User with the same email already exists", exceptionMsg);
+        verify(users).findByEmail(user.getEmail());
+        verify(users).findById(userId);
+    }
+
+    @Test
     void deleteUser_UserDoesNotExist_ReturnException() {
         when(users.findById(any(Long.class))).thenReturn(Optional.empty());
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             userService.deleteUser(userId);
         } catch (NotFoundException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("User not found", errorMsg);
+        assertEquals("User not found", exceptionMsg);
         verify(users).findById(userId);
     }
 
@@ -236,112 +316,130 @@ public class UserServiceTest {
     void deleteUser_UserExists_Success() {
         when(users.findById(any(Long.class))).thenReturn(Optional.of(user));
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             userService.deleteUser(userId);
         } catch (Exception e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("", errorMsg);
+        assertEquals("", exceptionMsg);
         verify(users).findById(userId);
     }
 
     @Test
-    void addFavouriteRestaurant_RestaurantAdded_Return() {
+    void addFavouriteRestaurant_RestaurantAdded_Success() {
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(AuthHelper.getCurrentUser()).thenReturn(user);
         when(restaurants.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
         when(users.saveAndFlush(any(User.class))).thenReturn(user);
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             userService.addFavouriteRestaurant(user, restaurantId);
         } catch (Exception e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("", errorMsg);
+        assertEquals("", exceptionMsg);
         verify(restaurants).findById(restaurantId);
         verify(users).saveAndFlush(user);
     }
 
     @Test
-    void addFavouriteRestaurant_RestaurantNotFound_ReturnError() {
+    void addFavouriteRestaurant_RestaurantNotFound_ReturnException() {
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(AuthHelper.getCurrentUser()).thenReturn(user);
         when(restaurants.findById(any(Long.class))).thenReturn(Optional.empty());
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             userService.addFavouriteRestaurant(user, restaurantId);
         } catch (NotFoundException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("Restaurant not found", errorMsg);
+        assertEquals("Restaurant not found", exceptionMsg);
         verify(restaurants).findById(restaurantId);
     }
 
     @Test
-    void addFavouriteRestaurant_FavouriteRestaurantAlreadyExist_ReturnError() {
+    void addFavouriteRestaurant_FavouriteRestaurantAlreadyExist_ReturnException() {
         favouriteRestaurants.add(restaurant);
-
+        
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(AuthHelper.getCurrentUser()).thenReturn(user);
         when(restaurants.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
         
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             userService.addFavouriteRestaurant(user, restaurantId);
         } catch (AlreadyExistsException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("Favourite restaurant already exists.", errorMsg);
+        assertEquals("Favourite restaurant already exists.", exceptionMsg);
         verify(restaurants).findById(restaurantId);
     }
 
     @Test
-    void deleteFavouriteRestaurant_FavouriteRestaurantFoundAndDeleted_Return() {
+    void deleteFavouriteRestaurant_FavouriteRestaurantFoundAndDeleted_Success() {
         favouriteRestaurants.add(restaurant);
 
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(AuthHelper.getCurrentUser()).thenReturn(user);
         when(restaurants.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
         when(users.saveAndFlush(any(User.class))).thenReturn(user);
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             userService.deleteFavouriteRestaurant(user, restaurantId);
         } catch (Exception e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("", errorMsg);
+        assertEquals("", exceptionMsg);
         verify(restaurants).findById(restaurantId);
         verify(users).saveAndFlush(user);
     }
 
     @Test
-    void deleteFavouriteRestaurant_RestaurantNotFound_ReturnError() {
+    void deleteFavouriteRestaurant_RestaurantNotFound_ReturnException() {
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(AuthHelper.getCurrentUser()).thenReturn(user);
         when(restaurants.findById(any(Long.class))).thenReturn(Optional.empty());
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             userService.deleteFavouriteRestaurant(user, restaurantId);
         } catch (NotFoundException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("Restaurant not found", errorMsg);
+        assertEquals("Restaurant not found", exceptionMsg);
         verify(restaurants).findById(restaurantId);
     }
 
     @Test
-    void deleteFavouriteRestaurant_RestaurantNotFoundInFavourites_ReturnError() {
+    void deleteFavouriteRestaurant_RestaurantNotFoundInFavourites_ReturnException() {
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(AuthHelper.getCurrentUser()).thenReturn(user);
         when(restaurants.findById(any(Long.class))).thenReturn(Optional.of(restaurant));
 
-        String errorMsg = "";
+        String exceptionMsg = "";
         try {
             userService.deleteFavouriteRestaurant(user, restaurantId);
         } catch (NotFoundException e) {
-            errorMsg = e.getMessage();
+            exceptionMsg = e.getMessage();
         }
 
-        assertEquals("Favourite restaurant not found.", errorMsg);
+        assertEquals("Favourite restaurant not found.", exceptionMsg);
         verify(restaurants).findById(restaurantId);
     }
 }

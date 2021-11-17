@@ -16,7 +16,7 @@ public class RestaurantDTO {
     private Long restaurantId;
     
     @Schema(defaultValue="Sushi Tei")
-    @NotEmpty
+    @NotEmpty(message = "Restaurant name should not be empty")
     @Length(min = 1, max = 40)
     private String restaurantName;
 
@@ -25,7 +25,7 @@ public class RestaurantDTO {
 
     @Schema(defaultValue="Japanese restaurant")
     @Length(min = 1)
-    @NotEmpty
+    @NotEmpty(message = "Restaurant description should not be empty")
     private String restaurantDesc;
 
     @Schema(defaultValue="3")

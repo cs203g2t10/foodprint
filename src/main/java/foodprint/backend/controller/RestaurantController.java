@@ -199,13 +199,7 @@ public class RestaurantController {
     @Operation(summary = "Deletes an existing food item")
     public ResponseEntity<Food> deleteRestaurantFood(@PathVariable("restaurantId") Long restaurantId, @PathVariable("foodId") Long foodId) {
         service.deleteFood(restaurantId, foodId);
-        try {
-            service.getFood(restaurantId, foodId);
-        } catch (NotFoundException ex) {
-            return new ResponseEntity<>(HttpStatus.OK);
-        }
-
-        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PatchMapping({"/{restaurantId}/food/{foodId}"})
@@ -236,7 +230,7 @@ public class RestaurantController {
             Discount savedDiscount = service.createDiscount(restaurantId, newDiscount);
             return new ResponseEntity<>(savedDiscount, HttpStatus.CREATED);
         } catch (AlreadyExistsException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
         
     }
@@ -247,10 +241,7 @@ public class RestaurantController {
     @Operation(summary = "Deletes an existing discount")
     public ResponseEntity<Discount> deleteDiscount(@PathVariable("restaurantId") Long restaurantId) {
         service.deleteDiscount(restaurantId);
-        if (service.get(restaurantId).getDiscount() == null) {
-            return new ResponseEntity<>(HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PatchMapping({"/{restaurantId}/discount"})
@@ -387,12 +378,7 @@ public class RestaurantController {
     @Operation(summary = "Deletes a restaurant's picture")
     public ResponseEntity<Picture> deletePicture(@PathVariable("restaurantId") Long restaurantId) {
         service.deleteRestaurantPicture(restaurantId);
-        try {
-            service.getRestaurantPicture(restaurantId);
-        } catch (NotFoundException ex) {
-            return new ResponseEntity<>(HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PatchMapping(path = "/{restaurantId}/picture", 
@@ -424,12 +410,7 @@ public class RestaurantController {
     @Operation(summary = "Deletes a food's picture")
     public ResponseEntity<Picture> deleteFoodPicture(@PathVariable("restaurantId") Long restaurantId, @PathVariable("foodId") Long foodId) {
         service.deleteFoodPicture(restaurantId, foodId);
-        try {
-            service.getFoodPicture(restaurantId, foodId);
-        } catch (NotFoundException ex) {
-            return new ResponseEntity<>(HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PatchMapping(path = "/{restaurantId}/food/{foodId}/picture",

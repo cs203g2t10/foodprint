@@ -6,11 +6,11 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 
 public class EditFoodDTO {
-    @NotEmpty(message = "cannot be empty.")
+    @NotEmpty(message = "Food name should not be empty")
     @Size(min = 1, max = 40, message = "has to be between 1 to 40 letters.")
     private String foodName;
 
-    @NotEmpty(message = "cannot be empty.")
+    @NotEmpty(message = "Food description should not be empty")
     private String foodDesc;
 
     private Double foodPrice;

@@ -52,7 +52,7 @@ public class PictureService  {
                 IMAGE_BMP.getMimeType(),
                 IMAGE_GIF.getMimeType(),
                 IMAGE_JPEG.getMimeType()).contains(file.getContentType())) {
-            throw new IllegalStateException("FIle uploaded is not an image");
+            throw new IllegalStateException("File uploaded is not an image");
         }
 
         // Get file metadata
@@ -96,7 +96,6 @@ public class PictureService  {
             this.get(id);
             throw new DeleteFailedException("Picture could not be deleted");
         } catch (NotFoundException e) {
-            return;
         }
     }
 

@@ -42,10 +42,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @SpringBootTest(
     webEnvironment = WebEnvironment.RANDOM_PORT,
     properties = {
-            "foodprint.email.server=smtp.ethereal.email",
+            "foodprint.email.server=smtp.mailtrap.io",
             "foodprint.email.port=587",
-            "foodprint.email.address=kianna.larson20@ethereal.email",
-            "FOODPRINT_EMAIL_PASSWORD=vZzzeNPqxvDpZfKp9z"
+            "foodprint.email.address=d50679dc6cc279",
+            "FOODPRINT_EMAIL_PASSWORD=eb29812e6ead51"
         })
 @ActiveProfiles("test")
 @DiscriminatorValue( "null" )
@@ -178,13 +178,12 @@ public class AuthenticationIntegrationTest {
                 HttpMethod.POST, entity, AuthResponseDTO.class
             );
 
-        System.out.println(responseEntity.toString());
         assertEquals("USER_UNVERIFIED", responseEntity.getBody().getStatus());
         assertEquals(401, responseEntity.getStatusCode().value());
     }
 
     @Test
-    public void login_correctPasswordCorrectOtp_Success() throws Exception {
+    public void login_CorrectPasswordCorrectOTP_Success() throws Exception {
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@twofauser.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -207,7 +206,7 @@ public class AuthenticationIntegrationTest {
     }
 
     @Test
-    public void login_correctPasswordWrongOtp_IncorrectOtp() throws Exception {
+    public void login_CorrectPasswordWrongOTP_IncorrectOTP() throws Exception {
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@twofauser.com");
         loginRequest.setPassword("SuperSecurePassw0rd");
@@ -229,7 +228,7 @@ public class AuthenticationIntegrationTest {
     }
 
     @Test
-    public void register_valid_success() throws Exception {
+    public void register_Valid_Success() throws Exception {
         // Try signing up
         RegRequestDTO regRequest = new RegRequestDTO();
         regRequest.setFirstName("Bobby");
@@ -265,7 +264,7 @@ public class AuthenticationIntegrationTest {
     }
 
     @Test
-    public void register_invalidEmail_Error() throws Exception {
+    public void register_InvalidEmail_Error() throws Exception {
         // Try signing up
         RegRequestDTO regRequest = new RegRequestDTO();
         regRequest.setFirstName("Bobby");
@@ -287,7 +286,7 @@ public class AuthenticationIntegrationTest {
     }
 
     @Test
-    public void register_insecurePassword_error() throws Exception {
+    public void register_InsecurePassword_Error() throws Exception {
         // Try signing up
         RegRequestDTO regRequest = new RegRequestDTO();
         regRequest.setFirstName("Bobby");
@@ -309,7 +308,7 @@ public class AuthenticationIntegrationTest {
     }
 
     @Test
-    public void whoami_loggedIn_success() throws Exception {
+    public void whoAmI_LoggedIn_Success() throws Exception {
         // Use existing user to login
         AuthRequestDTO loginRequest = new AuthRequestDTO();
         loginRequest.setEmail("bobby@normaluser.com");
@@ -343,7 +342,7 @@ public class AuthenticationIntegrationTest {
 
     
     @Test
-    public void whoami_notLoggedIn_unauthorized() throws Exception {
+    public void whoAmI_NotLoggedIn_Unauthorized() throws Exception {
         
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
@@ -359,7 +358,7 @@ public class AuthenticationIntegrationTest {
     }
 
     @Test
-    public void checkUser2FA_yes_true() throws Exception {
+    public void checkUser2FA_UserHas2FA_ReturnTrue() throws Exception {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
@@ -377,7 +376,7 @@ public class AuthenticationIntegrationTest {
     }
 
     @Test
-    public void checkUser2FA_no_false() throws Exception {
+    public void checkUser2FA_UserDoesNotHave2FA_ReturnFalse() throws Exception {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
@@ -395,7 +394,7 @@ public class AuthenticationIntegrationTest {
     }
 
     @Test
-    public void confirmEmail_correct_success() throws Exception {
+    public void confirmEmail_TokenCorrect_Success() throws Exception {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
@@ -411,7 +410,7 @@ public class AuthenticationIntegrationTest {
     }
 
     @Test
-    public void confirmEmail_incorrect_failure() throws Exception {
+    public void confirmEmail_TokenIncorrect_Failure() throws Exception {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
@@ -425,30 +424,6 @@ public class AuthenticationIntegrationTest {
 
         assertEquals(404, responseEntity.getStatusCode().value());
     }
-
-    // @Test
-    // public void getAllRestaurant_Successful() throws Exception {
-    //     AuthRequestDTO loginRequest = new AuthRequestDTO();
-    //     loginRequest.setEmail("bobby@gmail.com");
-    //     loginRequest.setPassword("SuperSecurePassw0rd");
-    //     AuthResponseDTO loginResponse = testRestTemplate.postForObject(createURLWithPort("/api/v1/auth/login"), loginRequest, AuthResponseDTO.class);
-
-    //     HttpHeaders headers = new HttpHeaders();
-    //     headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-    //     headers.add("Authorization", "Bearer " + loginResponse.getToken());
-    //     headers.add("Content-Type", "application/json");
-
-    //     List<String> restaurantCategories = new ArrayList<>();
-    //     restaurantCategories.add("Japanese");
-    //     restaurantCategories.add("Rice");
-    //     Restaurant restaurant = new Restaurant("Sushi Tei", "Desc", "Serangoon", 15, 10, 10, 11, 11, 10, 10, 10, 10, restaurantCategories);
-    //     restaurants.saveAndFlush(restaurant);
-
-    //     ResponseEntity<Restaurant[]> responseEntity = testRestTemplate.getForEntity(
-    //             createURLWithPort("/api/v1/restaurant"),
-    //             Restaurant[].class);
-    //     assertEquals(200, responseEntity.getStatusCode().value());
-    // }
     
     private String createURLWithPort(String uri)
     {

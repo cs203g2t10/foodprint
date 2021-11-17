@@ -8,7 +8,8 @@ import javax.validation.constraints.NotEmpty;
 public class RequestResetPwdDTO {
     
     @Schema(defaultValue="bobbytan@gmail.com")
-    @NotEmpty @Email
+    @NotEmpty(message = "Email should not be empty")
+    @Email
     private String email;
 
     public RequestResetPwdDTO() {

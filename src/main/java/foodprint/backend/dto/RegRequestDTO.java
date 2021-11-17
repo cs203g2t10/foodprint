@@ -11,21 +11,22 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class RegRequestDTO {
 
     @Schema(defaultValue="bobbytan@gmail.com")
-    @NotEmpty @Email
+    @NotEmpty(message = "Email should not be empty")
+    @Email
     private String email;
 
     @Schema(defaultValue="Hello123")
-    @NotEmpty
+    @NotEmpty(message = "Password should not be empty")
     @Size(min = 8, max = 60)
     @Pattern(regexp = "(?=^.{8,}$)(?=.*\\d)(?=.*[a-zA-Z])(?!.*\\s)[0-9a-zA-Z*$-+?_&=!%{}/'.]*$", message = "must have 1 letter, 1 number and at least 8 characters")
     private String password;
 
     @Schema(defaultValue="Bobby")
-    @NotEmpty
+    @NotEmpty(message = "First name should not be empty")
     private String firstName;
 
     @Schema(defaultValue="Tan")
-    @NotEmpty
+    @NotEmpty(message = "Last name should not be empty")
     private String lastName;
 
     public String getEmail() {

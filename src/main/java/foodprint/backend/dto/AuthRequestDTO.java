@@ -7,11 +7,12 @@ import jakarta.validation.constraints.NotEmpty;
 public class AuthRequestDTO {
     
     @Schema(defaultValue="bobbytan@gmail.com")
-    @NotEmpty @Email
+    @NotEmpty(message = "Email should not be empty")
+    @Email
     private String email;
 
     @Schema(defaultValue="Hello123")
-    @NotEmpty
+    @NotEmpty(message = "Password should not be empty")
     private String password;
 
     private String token;
